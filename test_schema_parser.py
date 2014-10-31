@@ -114,3 +114,18 @@ class TestSubSheetParentID():
             'testA': ['ocid', 'testA_ID'],
             'testB': ['ocid', 'testA_ID', 'testC']
         }
+
+
+def test_references_sheet_names(tmpdir):
+    """The referenced name should be used for the sheet name"""
+    tmpfile = tmpdir.join('test_schema.json')
+    tmpfile.write('''{
+        "properties": { "testA": {
+            "type": "array",
+            "items": {"$ref": "#/testB"}
+        } },
+        "testB": { "properties": {"testC":{}} }
+    }''')
+    parser = SchemaParser(schema_filename=tmpfile.strpath)
+    parser.parse()
+    assert parser.sub_sheets == {'testB': ['ocid', 'testC']}

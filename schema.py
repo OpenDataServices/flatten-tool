@@ -36,10 +36,16 @@ class SchemaParser(object):
                     for field in self.parse_schema_dict(property_schema_dict):
                         yield property_name+'.'+field
                 elif property_schema_dict.get('type') == 'array':
-                    if property_name not in self.sub_sheets:
-                        self.sub_sheets[property_name] = ['ocid']
+                    if hasattr(property_schema_dict['items'], '__reference__'):
+                        sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
+                    else:
+                        sub_sheet_name = property_name
+
+                    if sub_sheet_name not in self.sub_sheets:
+                        self.sub_sheets[sub_sheet_name] = ['ocid']
+
                     for field in self.parse_schema_dict(property_schema_dict['items'], id_fields):
-                        if field not in self.sub_sheets[property_name]:
-                            self.sub_sheets[property_name].append(field)
+                        if field not in self.sub_sheets[sub_sheet_name]:
+                            self.sub_sheets[sub_sheet_name].append(field)
                 else:
                     yield property_name
