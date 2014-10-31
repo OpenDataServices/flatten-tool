@@ -24,8 +24,13 @@ class SchemaParser(object):
         for field in self.parse_schema_dict(self.root_schema_dict):
             self.main_sheet.append(field)
 
-    def parse_schema_dict(self, schema_dict):
+    def parse_schema_dict(self, schema_dict, parent_id_fields=[]):
         if 'properties' in schema_dict:
+            for id_field in parent_id_fields:
+                yield id_field
+            id_fields = [property_name for property_name in schema_dict['properties']
+                         if 'id' in property_name.lower()]
+
             for property_name, property_schema_dict in schema_dict['properties'].items():
                 if property_schema_dict.get('type') == 'object':
                     for field in self.parse_schema_dict(property_schema_dict):
@@ -34,7 +39,7 @@ class SchemaParser(object):
                     yield property_name
                     if property_name not in self.sub_sheets:
                         self.sub_sheets[property_name] = ['ocid']
-                    for field in self.parse_schema_dict(property_schema_dict['items']):
+                    for field in self.parse_schema_dict(property_schema_dict['items'], id_fields):
                         if field not in self.sub_sheets[property_name]:
                             self.sub_sheets[property_name].append(field)
                 else:
