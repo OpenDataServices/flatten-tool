@@ -12,7 +12,7 @@ class SchemaParser(object):
         self.sub_sheets = {}
         self.main_sheet = []
 
-        if root_schema_dict and schema_filename:
+        if root_schema_dict is not None and schema_filename is not None:
             raise ValueError('Only one of schema_file or root_schema_dict should be supplied')
         if schema_filename:
             with open(schema_filename) as schema_file:
