@@ -63,7 +63,7 @@ def test_sub_sheet():
         }
     })
     parser.parse()
-    assert set(parser.main_sheet) == set(['testA'])
+    assert set(parser.main_sheet) == set([])
     assert parser.sub_sheets == {'testA': ['ocid', 'testB']}
 
 
@@ -86,8 +86,7 @@ class TestSubSheetParentID():
             }
         })
         parser.parse()
-        print(parser.main_sheet)
-        assert set(parser.main_sheet) == set(['testA.testB', 'testA.testA_ID'])
+        assert set(parser.main_sheet) == set(['testA.testA_ID'])
         assert parser.sub_sheets == {'testB': ['ocid', 'testA_ID', 'testC']}
 
     def test_parent_is_array(self):
@@ -110,8 +109,8 @@ class TestSubSheetParentID():
             }
         })
         parser.parse()
-        assert set(parser.main_sheet) == set(['testA'])
-        assert {k: set(v) for k, v in parser.sub_sheets.items()} == {
-            'testA': set(['ocid', 'testA_ID', 'testB']),
-            'testB': set(['ocid', 'testA_ID', 'testC'])
+        assert set(parser.main_sheet) == set()
+        assert parser.sub_sheets == {
+            'testA': ['ocid', 'testA_ID'],
+            'testB': ['ocid', 'testA_ID', 'testC']
         }

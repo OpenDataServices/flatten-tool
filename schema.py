@@ -36,7 +36,6 @@ class SchemaParser(object):
                     for field in self.parse_schema_dict(property_schema_dict):
                         yield property_name+'.'+field
                 elif property_schema_dict.get('type') == 'array':
-                    yield property_name
                     if property_name not in self.sub_sheets:
                         self.sub_sheets[property_name] = ['ocid']
                     for field in self.parse_schema_dict(property_schema_dict['items'], id_fields):
