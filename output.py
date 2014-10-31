@@ -7,7 +7,7 @@ import csv
 import os
 
 
-class SpreadsheetOutput():
+class SpreadsheetOutput(object):
     def __init__(self, parser, main_sheet_name='main'):
         self.parser = parser
         self.main_sheet_name = main_sheet_name

@@ -24,7 +24,8 @@ class SchemaParser(object):
         for field in self.parse_schema_dict(self.root_schema_dict):
             self.main_sheet.append(field)
 
-    def parse_schema_dict(self, schema_dict, parent_id_fields=[]):
+    def parse_schema_dict(self, schema_dict, parent_id_fields=None):
+        parent_id_fields = parent_id_fields or []
         if 'properties' in schema_dict:
             for id_field in parent_id_fields:
                 yield id_field
