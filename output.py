@@ -48,7 +48,7 @@ class CSVDirectoryOutupt(SpreadsheetOutput):
     def open(self):
         try:
             os.makedirs('release')
-        except FileExistsError:
+        except OSError:
             pass
 
     def write_sheet(self, sheet_name, sheet_header):
