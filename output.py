@@ -12,7 +12,7 @@ class SpreadsheetOutput():
         self.parser = parser
         self.main_sheet_name = main_sheet_name
 
-    def open(self,):
+    def open(self):
         pass
 
     def write_sheet(self, sheet_name, sheet_header):
