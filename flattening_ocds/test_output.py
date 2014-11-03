@@ -1,5 +1,5 @@
 import pytest
-import output
+from flattening_ocds import output
 
 
 class MockParser(object):

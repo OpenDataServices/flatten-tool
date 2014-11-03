@@ -1,5 +1,5 @@
 import pytest
-from schema import SchemaParser
+from flattening_ocds.schema import SchemaParser
 
 
 def test_filename_and_dict_error(tmpdir):
