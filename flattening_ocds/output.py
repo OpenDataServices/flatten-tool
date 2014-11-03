@@ -1,7 +1,6 @@
 """Code to output a parsed flattened JSON schema in various spreadsheet
 formats."""
 
-from schema import SchemaParser
 import xlsxwriter
 import csv
 import os
@@ -61,17 +60,3 @@ FORMATS = {
     'xlsx': XlsxOutput,
     'csvdir': CSVDirectoryOutupt
 }
-
-
-def output_release_schema_all_formats():
-    parser = SchemaParser(schema_filename='release-schema.json')
-    parser.parse()
-    for spreadsheet_output_class in FORMATS.values():
-        spreadsheet_output = spreadsheet_output_class(
-            parser=parser,
-            main_sheet_name='release')
-        spreadsheet_output.write_sheets()
-
-
-if __name__ == '__main__':
-    output_release_schema_all_formats()

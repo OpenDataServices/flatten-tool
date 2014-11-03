@@ -1,6 +1,5 @@
 import pytest
 import output
-from collections import namedtuple
 
 
 class MockParser(object):
@@ -12,7 +11,7 @@ class MockParser(object):
 def test_spreadsheetouput_base_fails():
     """The base class should fail as it is missing functionality that child
     classes must implement"""
-    
+
     spreadsheet_output = output.SpreadsheetOutput(parser=MockParser([], {}))
     with pytest.raises(NotImplementedError):
         spreadsheet_output.write_sheets()

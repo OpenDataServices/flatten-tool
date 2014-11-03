@@ -1,0 +1,3 @@
+#!/usr/bin/env python
+import flattening_ocds.cli
+flattening_ocds.cli.main()

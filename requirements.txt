@@ -1,4 +1,1 @@
-jsonref
-pytest
-schema
-xlsxwriter
+-e .
