@@ -17,7 +17,7 @@ def test_spreadsheetouput_base_fails():
         spreadsheet_output.write_sheets()
 
 
-def test_blank_sheets(tmpdir):
+def test_blank_sheets():
     for spreadsheet_output_class in output.FORMATS.values():
         spreadsheet_output = spreadsheet_output_class(
             parser=MockParser([], {}),
@@ -26,7 +26,7 @@ def test_blank_sheets(tmpdir):
     # TODO Actually check the sheets are blank
 
 
-def test_populated_sheets(tmpdir):
+def test_populated_sheets():
     for spreadsheet_output_class in output.FORMATS.values():
         subsheet = schema.SubSheet()
         subsheet.add_field('c')

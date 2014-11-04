@@ -1,0 +1,22 @@
+pylint:
+  disable:
+    - W0201
+    - W0621
+    - W0704
+    - C0103
+    - R0201
+    - R0903
+    - R0912
+    - R0922
+  options:
+    max-line-length: 119
+    ignored-classes: pytest
+
+mccabe:
+  options:
+    max-complexity: 15
+
+pep8:
+  options:
+    max-line-length: 119
+

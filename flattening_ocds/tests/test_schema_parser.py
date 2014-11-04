@@ -69,7 +69,7 @@ def test_sub_sheet():
     assert list(parser.sub_sheets['testA']) == ['ocid', 'testB']
 
 
-class TestSubSheetParentID():
+class TestSubSheetParentID(object):
     def test_parent_is_object(self):
         parser = SchemaParser(root_schema_dict={
             'properties': {
