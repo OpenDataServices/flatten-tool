@@ -9,7 +9,7 @@ def create_template(schema, output_name='release', output_format='all', main_she
     but to also be called from elswhere in future
     """
 
-    parser = SchemaParser(schema_filename=schema)
+    parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class):

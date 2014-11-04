@@ -26,9 +26,10 @@ class SubSheet(object):
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None):
+    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main'):
         self.sub_sheets = {}
         self.main_sheet = []
+        self.main_sheet_name = main_sheet_name
 
         if root_schema_dict is not None and schema_filename is not None:
             raise ValueError('Only one of schema_file or root_schema_dict should be supplied')
@@ -39,13 +40,13 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
-        for field in self.parse_schema_dict(None, self.root_schema_dict):
+        for field in self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict):
             self.main_sheet.append(field)
 
     def parse_schema_dict(self, parent_name, schema_dict, parent_id_fields=None):
         parent_id_fields = parent_id_fields or []
         if 'properties' in schema_dict:
-            if parent_name and 'id' in schema_dict['properties']:
+            if 'id' in schema_dict['properties']:
                 id_fields = parent_id_fields + [parent_name+'.id']
             else:
                 id_fields = parent_id_fields
@@ -67,7 +68,8 @@ class SchemaParser(object):
 
                     for field in id_fields:
                         sub_sheet.add_field(field, id_field=True)
-                    for field in self.parse_schema_dict(property_name, property_schema_dict['items']):
+                    for field in self.parse_schema_dict(property_name, property_schema_dict['items'],
+                                                        parent_id_fields=id_fields):
                         sub_sheet.add_field(field)
                 else:
                     yield property_name

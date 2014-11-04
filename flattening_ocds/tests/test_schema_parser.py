@@ -69,21 +69,25 @@ def test_sub_sheet():
     assert list(parser.sub_sheets['testA']) == ['ocid', 'testB']
 
 
+def simple_array_properties(parent_name, child_name):
+    return {
+        'id': {},
+        parent_name: {
+            'type': 'array',
+            'items': {
+                'properties': {child_name: {}}
+            }
+        }
+    }
+
+
 class TestSubSheetParentID(object):
     def test_parent_is_object(self):
         parser = SchemaParser(root_schema_dict={
             'properties': {
                 'testA': {
                     'type': 'object',
-                    'properties': {
-                        'id': {},
-                        'testB': {
-                            'type': 'array',
-                            'items': {
-                                'properties': {'testC': {}}
-                            }
-                        }
-                    }
+                    'properties': simple_array_properties('testB', 'testC')
                 }
             }
         })
@@ -97,17 +101,7 @@ class TestSubSheetParentID(object):
             'properties': {
                 'testA': {
                     'type': 'array',
-                    'items': {
-                        'properties': {
-                            'id': {},
-                            'testB': {
-                                'type': 'array',
-                                'items': {
-                                    'properties': {'testC': {}}
-                                }
-                            }
-                        }
-                    }
+                    'items': {'properties': simple_array_properties('testB', 'testC')}
                 }
             }
         })
@@ -122,31 +116,11 @@ class TestSubSheetParentID(object):
             'properties': OrderedDict([
                 ('testA', {
                     'type': 'array',
-                    'items': {
-                        'properties': {
-                            'id': {},
-                            'testB': {
-                                'type': 'array',
-                                'items': {
-                                    'properties': {'testC': {}}
-                                }
-                            }
-                        }
-                    }
+                    'items': {'properties': simple_array_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
-                    'items': {
-                        'properties': {
-                            'id': {},
-                            'testB': {
-                                'type': 'array',
-                                'items': {
-                                    'properties': {'testE': {}}
-                                }
-                            }
-                        }
-                    }
+                    'items': {'properties': simple_array_properties('testB', 'testE')}
                 })
             ])
         })
@@ -156,6 +130,78 @@ class TestSubSheetParentID(object):
         assert list(parser.sub_sheets['testA']) == ['ocid', 'id']
         assert list(parser.sub_sheets['testD']) == ['ocid', 'id']
         assert list(parser.sub_sheets['testB']) == ['ocid', 'testA.id', 'testD.id', 'testC', 'testE']
+
+
+class TestSubSheetMainID(object):
+    def test_parent_is_object(self):
+        parser = SchemaParser(root_schema_dict={
+            'properties': {
+                'id': {},
+                'testA': {
+                    'type': 'object',
+                    'properties': simple_array_properties('testB', 'testC')
+                }
+            }
+        })
+        parser.parse()
+        assert set(parser.main_sheet) == set(['id', 'testA.id'])
+        assert set(parser.sub_sheets) == set(['testB'])
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'main.id', 'testA.id', 'testC']
+
+    def test_parent_is_array(self):
+        parser = SchemaParser(root_schema_dict={
+            'properties': {
+                'id': {},
+                'testA': {
+                    'type': 'array',
+                    'items': {'properties': simple_array_properties('testB', 'testC')}
+                }
+            }
+        })
+        parser.parse()
+        assert set(parser.main_sheet) == set(['id'])
+        assert set(parser.sub_sheets) == set(['testA', 'testB'])
+        assert list(parser.sub_sheets['testA']) == ['ocid', 'main.id', 'id']
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'main.id', 'testA.id', 'testC']
+
+    def test_two_parents(self):
+        parser = SchemaParser(root_schema_dict={
+            'properties': OrderedDict([
+                ('id', {}),
+                ('testA', {
+                    'type': 'array',
+                    'items': {'properties': simple_array_properties('testB', 'testC')}
+                }),
+                ('testD', {
+                    'type': 'array',
+                    'items': {'properties': simple_array_properties('testB', 'testE')}
+                })
+            ])
+        })
+        parser.parse()
+        assert set(parser.main_sheet) == set(['id'])
+        assert set(parser.sub_sheets) == set(['testA', 'testB', 'testD'])
+        assert list(parser.sub_sheets['testA']) == ['ocid', 'main.id', 'id']
+        assert list(parser.sub_sheets['testD']) == ['ocid', 'main.id', 'id']
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'main.id', 'testA.id', 'testD.id', 'testC', 'testE']
+
+    def custom_main_sheet_name(self):
+        parser = SchemaParser(
+            root_schema_dict={
+                'properties': {
+                    'id': {},
+                    'testA': {
+                        'type': 'object',
+                        'properties': simple_array_properties('testB', 'testC')
+                    }
+                }
+            },
+            main_sheet_name='custom_main_sheet_name'
+        )
+        parser.parse()
+        assert set(parser.main_sheet) == set(['id', 'testA.id'])
+        assert set(parser.sub_sheets) == set(['testB'])
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'custom_main_sheet_name.id', 'testA.id', 'testC']
 
 
 def test_references_sheet_names(tmpdir):
