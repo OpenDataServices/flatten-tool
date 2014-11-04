@@ -1,5 +1,5 @@
 import pytest
-from flattening_ocds import output
+from flattening_ocds import output, schema
 
 
 class MockParser(object):
@@ -28,8 +28,10 @@ def test_blank_sheets(tmpdir):
 
 def test_populated_sheets(tmpdir):
     for spreadsheet_output_class in output.FORMATS.values():
+        subsheet = schema.SubSheet()
+        subsheet.add_field('c')
         spreadsheet_output = spreadsheet_output_class(
-            parser=MockParser(['a'], {'b': 'c'}),
+            parser=MockParser(['a'], {'b': subsheet}),
             main_sheet_name='release')
         spreadsheet_output.write_sheets()
     # TODO Actually check the sheets are populated

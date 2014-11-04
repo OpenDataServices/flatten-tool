@@ -4,6 +4,22 @@ from __future__ import print_function
 from collections import OrderedDict
 import jsonref
 
+class SubSheet():
+    def __init__(self):
+        self.id_columns = []
+        self.columns = []
+
+    def add_field(self, field, id_field=False):
+        columns = self.id_columns if id_field else self.columns
+        if not field in columns:
+            columns.append(field)
+
+    def __iter__(self):
+        yield 'ocid'
+        for column in self.id_columns:
+            yield column
+        for column in self.columns:
+            yield column
 
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
@@ -27,8 +43,6 @@ class SchemaParser(object):
     def parse_schema_dict(self, schema_dict, parent_id_fields=None):
         parent_id_fields = parent_id_fields or []
         if 'properties' in schema_dict:
-            for id_field in parent_id_fields:
-                yield id_field
             id_fields = [property_name for property_name in schema_dict['properties']
                          if 'id' in property_name.lower()]
 
@@ -43,10 +57,12 @@ class SchemaParser(object):
                         sub_sheet_name = property_name
 
                     if sub_sheet_name not in self.sub_sheets:
-                        self.sub_sheets[sub_sheet_name] = ['ocid']
+                        self.sub_sheets[sub_sheet_name] = SubSheet()
+                    sub_sheet = self.sub_sheets[sub_sheet_name]
 
-                    for field in self.parse_schema_dict(property_schema_dict['items'], id_fields):
-                        if field not in self.sub_sheets[sub_sheet_name]:
-                            self.sub_sheets[sub_sheet_name].append(field)
+                    for field in id_fields:
+                        sub_sheet.add_field(field, id_field=True)
+                    for field in self.parse_schema_dict(property_schema_dict['items']):
+                        sub_sheet.add_field(field)
                 else:
                     yield property_name

@@ -22,7 +22,7 @@ class SpreadsheetOutput(object):
 
         self.write_sheet(self.main_sheet_name, self.parser.main_sheet)
         for sheet_name, sheet_header in sorted(self.parser.sub_sheets.items()):
-            self.write_sheet(sheet_name, sheet_header)
+            self.write_sheet(sheet_name, list(sheet_header))
 
         self.close()
 
