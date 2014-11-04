@@ -7,9 +7,12 @@ import os
 
 
 class SpreadsheetOutput(object):
-    def __init__(self, parser, main_sheet_name='main'):
+    # output_name is given a default here, partly to help with tests,
+    # but should have been defined by the time we get here.
+    def __init__(self, parser, main_sheet_name='main', output_name='release'):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
+        self.output_name = output_name
 
     def open(self):
         pass
@@ -32,7 +35,7 @@ class SpreadsheetOutput(object):
 
 class XlsxOutput(SpreadsheetOutput):
     def open(self):
-        self.workbook = xlsxwriter.Workbook('release.xlsx')
+        self.workbook = xlsxwriter.Workbook(self.output_name+'.xlsx')
 
     def write_sheet(self, sheet_name, sheet_header):
         worksheet = self.workbook.add_worksheet(sheet_name)
@@ -46,17 +49,17 @@ class XlsxOutput(SpreadsheetOutput):
 class CSVDirectoryOutupt(SpreadsheetOutput):
     def open(self):
         try:
-            os.makedirs('release')
+            os.makedirs(self.output_name)
         except OSError:
             pass
 
     def write_sheet(self, sheet_name, sheet_header):
-        with open(os.path.join('release', sheet_name+'.csv'), 'w') as csv_file:
+        with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
             csv_sheet = csv.writer(csv_file)
             csv_sheet.writerow(sheet_header)
 
 
 FORMATS = {
     'xlsx': XlsxOutput,
-    'csvdir': CSVDirectoryOutupt
+    'csv': CSVDirectoryOutupt
 }
