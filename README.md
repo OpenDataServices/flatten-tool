@@ -16,10 +16,10 @@ Installation
 Usage
 -----
 
-Paths are currently hardcoded.
-
 Download https://raw.githubusercontent.com/open-contracting/standard/master/standard/schema/release-schema.json to the current directory.
 
-    flatten-ocds
+    flatten-ocds --output-name release create-template --schema release-schema.json --main-sheet-name release
 
 This will create `release.xlsx` and a `release/` directory of csv files.
+
+See `flatten-ocds --help` for details of the commandline options.
