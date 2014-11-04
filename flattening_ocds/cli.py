@@ -14,7 +14,7 @@ def main():
     parser.add_argument(
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to release")
-    subparsers = parser.add_subparsers(help='sub-command help')
+    subparsers = parser.add_subparsers(dest='subparser_name')
 
     parser_create_template = subparsers.add_parser(
         'create-template',
@@ -33,14 +33,15 @@ def main():
     # Store the supplied arguments in args
     args = parser.parse_args()
 
-    # Pass the arguments to the create_template function
-    # If the schema file does not exist we catch it in this exception
-    try:
-        # Note: Ensures that empty arguments are not passed to the create_template function
-        create_template(**{k: v for k, v in vars(args).items() if v is not None})
-    except (OSError, IOError) as e:
-        print(str(e))
-        return
+    if args.subparser_name == 'create-template':
+        # Pass the arguments to the create_template function
+        # If the schema file does not exist we catch it in this exception
+        try:
+            # Note: Ensures that empty arguments are not passed to the create_template function
+            create_template(**{k: v for k, v in vars(args).items() if v is not None})
+        except (OSError, IOError) as e:
+            print(str(e))
+            return
 
 
 if __name__ == '__main__':
