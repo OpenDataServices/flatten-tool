@@ -4,6 +4,7 @@ from __future__ import print_function
 from collections import OrderedDict
 import jsonref
 
+
 class SubSheet(object):
     def __init__(self):
         self.id_columns = []
@@ -21,6 +22,7 @@ class SubSheet(object):
         for column in self.columns:
             yield column
 
+
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
@@ -37,18 +39,21 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
-        for field in self.parse_schema_dict(self.root_schema_dict):
+        for field in self.parse_schema_dict(None, self.root_schema_dict):
             self.main_sheet.append(field)
 
-    def parse_schema_dict(self, schema_dict, parent_id_fields=None):
+    def parse_schema_dict(self, parent_name, schema_dict, parent_id_fields=None):
         parent_id_fields = parent_id_fields or []
         if 'properties' in schema_dict:
-            id_fields = [property_name for property_name in schema_dict['properties']
-                         if 'id' in property_name.lower()]
+            if parent_name and 'id' in schema_dict['properties']:
+                id_fields = parent_id_fields + [parent_name+'.id']
+            else:
+                id_fields = parent_id_fields
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
                 if property_schema_dict.get('type') == 'object':
-                    for field in self.parse_schema_dict(property_schema_dict):
+                    for field in self.parse_schema_dict(property_name, property_schema_dict,
+                                                        parent_id_fields=id_fields):
                         yield property_name+'.'+field
                 elif property_schema_dict.get('type') == 'array':
                     if hasattr(property_schema_dict['items'], '__reference__'):
@@ -62,7 +67,7 @@ class SchemaParser(object):
 
                     for field in id_fields:
                         sub_sheet.add_field(field, id_field=True)
-                    for field in self.parse_schema_dict(property_schema_dict['items']):
+                    for field in self.parse_schema_dict(property_name, property_schema_dict['items']):
                         sub_sheet.add_field(field)
                 else:
                     yield property_name
