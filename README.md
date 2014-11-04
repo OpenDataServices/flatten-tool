@@ -8,6 +8,7 @@ Installation
 ------------
 
     git clone https://github.com/open-contracting/flattening-ocds.git
+    cd flattening-ocds
     virtualenv pyenv
     source pyenv/bin/activate
     pip install -r requirements_dev.txt
