@@ -4,14 +4,14 @@ from __future__ import print_function
 from collections import OrderedDict
 import jsonref
 
-class SubSheet():
+class SubSheet(object):
     def __init__(self):
         self.id_columns = []
         self.columns = []
 
     def add_field(self, field, id_field=False):
         columns = self.id_columns if id_field else self.columns
-        if not field in columns:
+        if field not in columns:
             columns.append(field)
 
     def __iter__(self):
