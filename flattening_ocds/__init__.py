@@ -2,12 +2,13 @@ from flattening_ocds.schema import SchemaParser
 from flattening_ocds.output import FORMATS
 
 
-def create_template(schema, output_name='release', output_format='all', main_sheet_name='main', **kwargs):
+def create_template(schema, output_name='release', output_format='all', main_sheet_name='main', **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
     but to also be called from elswhere in future
     """
+
     parser = SchemaParser(schema_filename=schema)
     parser.parse()
 

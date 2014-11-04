@@ -33,7 +33,7 @@ def main():
     # Store the supplied arguments in args
     args = parser.parse_args()
 
-    if args.subparser_name == None:
+    if args.subparser_name is None:
         parser.print_help()
     elif args.subparser_name == 'create-template':
         # Pass the arguments to the create_template function
