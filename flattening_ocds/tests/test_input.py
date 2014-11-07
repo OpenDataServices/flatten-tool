@@ -11,8 +11,8 @@ class ListInput(SpreadsheetInput):
         return self.sheets[sheet_name]
 
     def read_sheets(self):
-        self.sub_sheets_names = list(self.sheets.keys())
-        self.sub_sheets_names.remove(self.main_sheet_name)
+        self.sub_sheet_names = list(self.sheets.keys())
+        self.sub_sheet_names.remove(self.main_sheet_name)
 
 
 def test_unflatten_line():
@@ -77,7 +77,7 @@ class TestUnflatten(object):
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main/id': 2,
+                        'custom_main/id:subField': 2,
                         'testA': 3,
                     }
                 ]
@@ -85,7 +85,7 @@ class TestUnflatten(object):
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
-            {'ocid': 1, 'id': 2, 'sub': [{'testA': 3}]}
+            {'ocid': 1, 'id': 2, 'subField': [{'testA': 3}]}
         ]
 
     def test_nested_sub_sheet(self):
@@ -100,7 +100,7 @@ class TestUnflatten(object):
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main/testA/id': 2,
+                        'custom_main/testA/id:subField': 2,
                         'testB': 3,
                     }
                 ]
@@ -108,7 +108,7 @@ class TestUnflatten(object):
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
-            {'ocid': 1, 'id': 2, 'testA': {'sub': [{'testB': 3}]}}
+            {'ocid': 1, 'id': 2, 'testA': {'subField': [{'testB': 3}]}}
         ]
 
     def test_basic_two_sub_sheets(self):
@@ -123,7 +123,7 @@ class TestUnflatten(object):
                 'sub1': [
                     {
                         'ocid': 1,
-                        'custom_main/id': 2,
+                        'custom_main/id:sub1Field': 2,
                         'id': 3,
                         'testA': 4,
                     }
@@ -131,8 +131,8 @@ class TestUnflatten(object):
                 'sub2': [
                     {
                         'ocid': 1,
-                        'custom_main/id': 2,
-                        'custom_main/sub1[]/id': 3,
+                        'custom_main/id:sub1Field': 2,
+                        'custom_main/sub1Field[]/id:sub2Field': 3,
                         'testB': 5,
                     }
                 ]
@@ -141,14 +141,14 @@ class TestUnflatten(object):
         spreadsheet_input.read_sheets()
         unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
         assert len(unflattened) == 1
-        assert set(unflattened[0]) == set(['sub1', 'id', 'ocid'])
+        assert set(unflattened[0]) == set(['sub1Field', 'id', 'ocid'])
         assert unflattened[0]['ocid'] == 1
         assert unflattened[0]['id'] == 2
-        assert unflattened[0]['sub1'] == [
+        assert unflattened[0]['sub1Field'] == [
             {
                 'id': 3,
                 'testA': 4,
-                'sub2': [
+                'sub2Field': [
                     {
                         'testB': 5
                     }

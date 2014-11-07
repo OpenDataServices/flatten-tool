@@ -67,7 +67,7 @@ class SchemaParser(object):
                     sub_sheet = self.sub_sheets[sub_sheet_name]
 
                     for field in id_fields:
-                        sub_sheet.add_field(field, id_field=True)
+                        sub_sheet.add_field(field+':'+property_name, id_field=True)
                     for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]', property_schema_dict['items'],
                                                         parent_id_fields=id_fields):
                         sub_sheet.add_field(field)

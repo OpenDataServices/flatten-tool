@@ -11,13 +11,13 @@ class SpreadsheetInput(object):
     def __init__(self, input_name='', main_sheet_name=''):
         self.input_name = input_name
         self.main_sheet_name = main_sheet_name
-        self.sub_sheets_names = []
+        self.sub_sheet_names = []
 
     def get_main_sheet_lines(self):
         return self.get_sheet_lines(self.main_sheet_name)
 
     def get_sub_sheets_lines(self):
-        for sub_sheet_name in self.sub_sheets_names:
+        for sub_sheet_name in self.sub_sheet_names:
             yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
 
     def get_sheet_lines(self, sheet_name):
@@ -58,7 +58,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=''):
     if not path_list:
         return nested_dict
 
-    id_fields = id_fields or []
+    id_fields = id_fields or {}
     parent_field = path_list[0]
     path = path+'/'+parent_field
 
@@ -126,21 +126,23 @@ def unflatten_spreadsheet_input(spreadsheet_input):
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
-            id_fields = {k: v for k, v in line.items() if k.endswith('/id')}
+            id_fields = {k: v for k, v in line.items() if k.split(':')[0].endswith('/id')}
             line_without_id_fields = {k: v for k, v in line.items() if k not in id_fields and k != 'ocid'}
             if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
                 raise ValueError
-            id_field = find_deepest_id_field(id_fields)
-            if line[id_field]:
-                context = path_search(
-                    main_sheet_by_ocid[line['ocid']],
-                    id_field.split('/')[1:-1],
-                    id_fields=id_fields,
-                    path=spreadsheet_input.main_sheet_name
-                )
-                if sheet_name not in context:
-                    context[sheet_name] = TemporaryDict(keyfield='id')
-                context[sheet_name].append(unflatten_line(line_without_id_fields))
+            raw_id_fields_with_values = {k.split(':')[0]:v for k, v in id_fields.items() if v}
+            sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
+            id_field = find_deepest_id_field(raw_id_fields_with_values)
+            context = path_search(
+                main_sheet_by_ocid[line['ocid']],
+                id_field.split('/')[1:-1],
+                id_fields=raw_id_fields_with_values,
+                path=spreadsheet_input.main_sheet_name
+            )
+            sheet_context_name = sheet_context_names[id_field] or sheet_name
+            if sheet_context_name not in context:
+                context[sheet_context_name] = TemporaryDict(keyfield='id')
+            context[sheet_context_name].append(unflatten_line(line_without_id_fields))
     temporarydicts_to_lists(main_sheet_by_ocid)
 
     return main_sheet_by_ocid.values()
