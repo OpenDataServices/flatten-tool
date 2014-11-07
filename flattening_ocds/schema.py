@@ -47,7 +47,7 @@ class SchemaParser(object):
         parent_id_fields = parent_id_fields or []
         if 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
-                id_fields = parent_id_fields + [parent_name+'.id']
+                id_fields = parent_id_fields + [parent_name+'/id']
             else:
                 id_fields = parent_id_fields
 
@@ -55,7 +55,7 @@ class SchemaParser(object):
                 if property_schema_dict.get('type') == 'object':
                     for field in self.parse_schema_dict(property_name, property_schema_dict,
                                                         parent_id_fields=id_fields):
-                        yield property_name+'.'+field
+                        yield property_name+'/'+field
                 elif property_schema_dict.get('type') == 'array':
                     if hasattr(property_schema_dict['items'], '__reference__'):
                         sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
