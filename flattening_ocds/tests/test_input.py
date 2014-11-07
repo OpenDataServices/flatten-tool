@@ -1,4 +1,4 @@
-from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten
+from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten_spreadsheet_input
 
 
 class ListInput(SpreadsheetInput):
@@ -36,7 +36,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten(spreadsheet_input)) == [
+        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
             {'ocid': 1, 'id': 2, 'testA': 3}
         ]
 
@@ -54,6 +54,6 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten(spreadsheet_input)) == [
+        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
             {'ocid': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}
         ]

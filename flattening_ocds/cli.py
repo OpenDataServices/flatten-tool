@@ -1,6 +1,6 @@
 from __future__ import print_function
 import argparse
-from flattening_ocds import create_template
+from flattening_ocds import create_template, unflatten
 
 
 def create_parser():
@@ -23,8 +23,15 @@ def create_parser():
     parser_create_template.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
+
+    parser_create_template = subparsers.add_parser(
+        'unflatten',
+        help='Unflatten a spreadsheet')
+
     return parser
 
+def kwargs_from_parsed_args(args):
+    return {k: v for k, v in vars(args).items() if v is not None}
 
 def main():
     """
@@ -44,10 +51,12 @@ def main():
         # If the schema file does not exist we catch it in this exception
         try:
             # Note: Ensures that empty arguments are not passed to the create_template function
-            create_template(**{k: v for k, v in vars(args).items() if v is not None})
+            create_template(**kwargs_from_parsed_args(args))
         except (OSError, IOError) as e:
             print(str(e))
             return
+    elif args.subparser_name == 'unflatten':
+        unflatten(**kwargs_from_parsed_args(args))
 
 
 if __name__ == '__main__':

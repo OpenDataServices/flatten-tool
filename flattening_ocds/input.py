@@ -56,7 +56,7 @@ def unflatten_line(line):
     return unflattened
 
 
-def unflatten(spreadsheet_input):
+def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = {}
     for line in spreadsheet_input.get_main_sheet_lines():
         if line['ocid'] in main_sheet_by_ocid:
@@ -68,9 +68,3 @@ def unflatten(spreadsheet_input):
             main_sheet_by_ocid[line['ocid']][sheet_name] = unflatten_line(line)
 
     return main_sheet_by_ocid.values()
-
-
-if __name__ == '__main__':
-    spreadsheet_input = CSVInput(input_name='release_input', main_sheet_name='release')
-    spreadsheet_input.read_sheets()
-    print(json.dumps(list(unflatten(spreadsheet_input)), indent=2))

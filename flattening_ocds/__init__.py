@@ -1,5 +1,7 @@
 from flattening_ocds.schema import SchemaParser
 from flattening_ocds.output import FORMATS
+from flattening_ocds.input import CSVInput, unflatten_spreadsheet_input
+import json
 
 
 def create_template(schema, output_name='release', output_format='all', main_sheet_name='main', **_):
@@ -28,3 +30,10 @@ def create_template(schema, output_name='release', output_format='all', main_she
 
     else:
         raise Exception("The requested format is not available")
+
+
+def unflatten(**_):
+    spreadsheet_input = CSVInput(input_name='release_input', main_sheet_name='release')
+    spreadsheet_input.read_sheets()
+    print(json.dumps(list(unflatten_spreadsheet_input(spreadsheet_input)), indent=2))
+
