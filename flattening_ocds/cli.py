@@ -3,13 +3,7 @@ import argparse
 from flattening_ocds import create_template
 
 
-def main():
-    """
-    Takes any command line arguments and then passes them onto
-    create_template
-    Defaults are not set here, but rather given in the create_template
-    function incase that function is called from elsewhere in future.
-    """
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-o", "--output-name",
@@ -29,7 +23,17 @@ def main():
     parser_create_template.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
+    return parser
 
+
+def main():
+    """
+    Takes any command line arguments and then passes them onto
+    create_template
+    Defaults are not set here, but rather given in the create_template
+    function incase that function is called from elsewhere in future.
+    """
+    parser = create_parser()
     # Store the supplied arguments in args
     args = parser.parse_args()
 
