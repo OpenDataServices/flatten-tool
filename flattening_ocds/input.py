@@ -1,7 +1,10 @@
 from __future__ import print_function
 from csv import DictReader
 import os
-import json
+try:
+    from collections import UserDict
+except ImportError:
+    from UserDict import UserDict
 
 
 class SpreadsheetInput(object):
@@ -37,7 +40,7 @@ class CSVInput(SpreadsheetInput):
 
     def get_sheet_lines(self, sheet_name):
         with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-            for line in reader:
+            for line in DictReader(main_sheet_file):
                 yield line
 
 
@@ -51,13 +54,68 @@ def unflatten_line(line):
     return unflattened
 
 
-def path_search(nested_dict, path_list):
-    nested_dict = nested_dict
-    for parent_field in path_list:
+def path_search(nested_dict, path_list, id_fields=None, path=''):
+    if not path_list:
+        return nested_dict
+
+    id_fields = id_fields or []
+    parent_field = path_list[0]
+    path = path+'/'+parent_field
+
+    if parent_field.endswith('[]'):
+        parent_field = parent_field[:-2]
+        if parent_field not in nested_dict:
+            nested_dict[parent_field] = TemporaryDict(keyfield='id')
+        sub_sheet_id = id_fields[path+'/id']
+        if sub_sheet_id not in nested_dict[parent_field]:
+            nested_dict[parent_field][sub_sheet_id] = {}
+        return path_search(nested_dict[parent_field][sub_sheet_id],
+                           path_list[1:], path=path)
+    else:
         if parent_field not in nested_dict:
             nested_dict[parent_field] = {}
-        nested_dict = nested_dict[parent_field]
-    return nested_dict
+        return path_search(nested_dict[parent_field],
+                           path_list[1:], path=path)
+
+
+class TemporaryDict(UserDict):
+    def __init__(self, keyfield):
+        self.keyfield = keyfield
+        self.items_no_keyfield = []
+        UserDict.__init__(self)
+
+    def append(self, item):
+        if self.keyfield in item:
+            key = item[self.keyfield]
+            if key not in self.data:
+                self.data[key] = item
+            else:
+                self.data[key].update(item)
+        else:
+            self.items_no_keyfield.append(item)
+
+    def to_list(self):
+        return list(self.data.values()) + self.items_no_keyfield
+
+
+def temporarydicts_to_lists(nested_dict):
+    """ Recrusively transforms TemporaryDicts to lists inplace. """
+    for key, value in nested_dict.items():
+        if hasattr(value, 'to_list'):
+            temporarydicts_to_lists(value)
+            nested_dict[key] = value.to_list()
+        elif hasattr(value, 'items'):
+            temporarydicts_to_lists(value)
+
+
+def find_deepest_id_field(id_fields):
+    split_id_fields = [x.split('/') for x in id_fields]
+    deepest_id_field = max(split_id_fields, key=len)
+    for split_id_field in split_id_fields:
+        if not all(deepest_id_field[i] == x for i, x in enumerate(split_id_field[:-1])):
+            raise ValueError
+    return '/'.join(deepest_id_field)
+
 
 def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = {}
@@ -68,18 +126,21 @@ def unflatten_spreadsheet_input(spreadsheet_input):
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
-            id_fields = [ x for x in line.keys() if x.endswith('/id') ]
-            line_without_id_fields = {k: v for k, v in line.items() if k not in id_fields and k!='ocid'}
+            id_fields = {k: v for k, v in line.items() if k.endswith('/id')}
+            line_without_id_fields = {k: v for k, v in line.items() if k not in id_fields and k != 'ocid'}
             if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
                 raise ValueError
-            for id_field in id_fields:
-                if line[id_field]:
-                    context = path_search(
-                        main_sheet_by_ocid[line['ocid']],
-                        id_field.split('/')[1:-1]
-                    )
-                    if sheet_name not in context:
-                        context[sheet_name] = []
-                    context[sheet_name].append(unflatten_line(line_without_id_fields))
+            id_field = find_deepest_id_field(id_fields)
+            if line[id_field]:
+                context = path_search(
+                    main_sheet_by_ocid[line['ocid']],
+                    id_field.split('/')[1:-1],
+                    id_fields=id_fields,
+                    path=spreadsheet_input.main_sheet_name
+                )
+                if sheet_name not in context:
+                    context[sheet_name] = TemporaryDict(keyfield='id')
+                context[sheet_name].append(unflatten_line(line_without_id_fields))
+    temporarydicts_to_lists(main_sheet_by_ocid)
 
     return main_sheet_by_ocid.values()

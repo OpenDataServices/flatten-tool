@@ -1,4 +1,4 @@
-from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten_spreadsheet_input
+from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten_spreadsheet_input, find_deepest_id_field
 import pytest
 
 
@@ -21,6 +21,12 @@ def test_unflatten_line():
     assert unflatten_line({'a/b': 1, 'a/c': 2, 'd/e': 3}) == {'a': {'b': 1, 'c': 2}, 'd': {'e': 3}}
     # Check more than two levels of nesting, and that multicharacter fields aren't broken
     assert unflatten_line({'fieldA/b/c/d': 'value'}) == {'fieldA': {'b': {'c': {'d': 'value'}}}}
+
+
+def test_find_deepest_id_field():
+    assert find_deepest_id_field(['a/b/id', 'a/b/c/id']) == 'a/b/c/id'
+    with pytest.raises(ValueError):
+        find_deepest_id_field(['a/b/id', 'c/id'])
 
 
 class TestUnflatten(object):
@@ -105,8 +111,7 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'testA': {'sub': [{'testB': 3}]}}
         ]
 
-    @pytest.mark.xfail
-    def test_basic_sub_sheet(self):
+    def test_basic_two_sub_sheets(self):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
@@ -119,21 +124,34 @@ class TestUnflatten(object):
                     {
                         'ocid': 1,
                         'custom_main/id': 2,
-                        'testA': 3,
+                        'id': 3,
+                        'testA': 4,
                     }
                 ],
                 'sub2': [
                     {
                         'ocid': 1,
-                        'custom_main/sub1/id': 2,
-                        'testA': 3,
+                        'custom_main/id': 2,
+                        'custom_main/sub1[]/id': 3,
+                        'testB': 5,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
-            {'ocid': 1, 'id': 2, 'sub1':
-                [{'ocid':1, 'sub2': 
-                    [{'ocid':1, 'testA': 3}]}]}
+        unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
+        assert len(unflattened) == 1
+        assert set(unflattened[0]) == set(['sub1', 'id', 'ocid'])
+        assert unflattened[0]['ocid'] == 1
+        assert unflattened[0]['id'] == 2
+        assert unflattened[0]['sub1'] == [
+            {
+                'id': 3,
+                'testA': 4,
+                'sub2': [
+                    {
+                        'testB': 5
+                    }
+                ]
+            }
         ]
