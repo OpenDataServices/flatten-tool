@@ -35,5 +35,8 @@ def create_template(schema, output_name='release', output_format='all', main_she
 def unflatten(**_):
     spreadsheet_input = CSVInput(input_name='release_input', main_sheet_name='release')
     spreadsheet_input.read_sheets()
-    print(json.dumps(list(unflatten_spreadsheet_input(spreadsheet_input)), indent=2))
+    with open('base.json') as fp:
+        base = json.load(fp)
+    base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
+    print(json.dumps(base, indent=4))
 

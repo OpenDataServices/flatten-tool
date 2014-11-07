@@ -34,9 +34,7 @@ class CSVInput(SpreadsheetInput):
             raise ValueError
         sheet_file_names.remove(self.main_sheet_name+'.csv')
 
-        if not all([fname.endswith('.csv') for fname in sheet_file_names]):
-            raise ValueError
-        self.sub_sheet_names = [fname[:-4] for fname in sheet_file_names]
+        self.sub_sheet_names = [fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')]
 
     def get_sheet_lines(self, sheet_name):
         with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
