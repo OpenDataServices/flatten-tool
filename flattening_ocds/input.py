@@ -20,6 +20,9 @@ class SpreadsheetInput(object):
     def get_sheet_lines(self, sheet_name):
         raise NotImplementedError
 
+    def read_sheets(self):
+        raise NotImplementedError
+
 
 class CSVInput(SpreadsheetInput):
     def read_sheets(self):
@@ -43,7 +46,7 @@ def unflatten_line(line):
     for k, v in line.items():
         if v == '':
             continue
-        fields = k.split('.')
+        fields = k.split('/')
         unlattened_sub_dict = unflattened
         for parent_field in fields[:-1]:
             if parent_field not in unlattened_sub_dict:
