@@ -2,6 +2,7 @@ from flattening_ocds.schema import SchemaParser
 from flattening_ocds.output import FORMATS
 from flattening_ocds.input import CSVInput, unflatten_spreadsheet_input
 import json
+from decimal import Decimal
 
 
 def create_template(schema, output_name='release', output_format='all', main_sheet_name='main', **_):
@@ -32,11 +33,25 @@ def create_template(schema, output_name='release', output_format='all', main_she
         raise Exception("The requested format is not available")
 
 
+# From http://bugs.python.org/issue16535
+class number_str(float):
+    def __init__(self, o):
+        self.o = o
+    def __repr__(self):
+        return str(self.o)
+
+
+def decimal_default(o):
+    if isinstance(o, Decimal):
+        return number_str(o)
+    raise TypeError(repr(o) + " is not JSON serializable")
+
+
 def unflatten(**_):
     spreadsheet_input = CSVInput(input_name='release_input', main_sheet_name='release')
     spreadsheet_input.read_sheets()
     with open('base.json') as fp:
         base = json.load(fp)
     base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
-    print(json.dumps(base, indent=4))
+    print(json.dumps(base, indent=4, default=decimal_default))
 

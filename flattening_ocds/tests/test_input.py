@@ -1,4 +1,4 @@
-from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten_spreadsheet_input, find_deepest_id_field
+from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
 import pytest
 
 
@@ -155,3 +155,7 @@ class TestUnflatten(object):
                 ]
             }
         ]
+
+def test_convert_type():
+    assert convert_type('array', 'one;two') == ['one', 'two']
+    assert convert_type('array', 'one,two;three,four') == [ ['one', 'two'], ['three', 'four'] ]

@@ -1,5 +1,6 @@
 from __future__ import print_function
 from csv import DictReader
+from decimal import Decimal
 import os
 try:
     from collections import UserDict
@@ -115,12 +116,41 @@ def find_deepest_id_field(id_fields):
     return '/'.join(deepest_id_field)
 
 
+def convert_type(type_string, value):
+    if type_string == 'number':
+        return Decimal(value)
+    elif type_string == 'boolean':
+        if value.lower() in ['true','1']:
+            return True
+        elif value.lower() in ['false','0']:
+            return False
+        else:
+            raise ValueError
+    elif type_string == 'array':
+        if ',' in value:
+            return [ x.split(',') for x in value.split(';') ]
+        else:
+            return value.split(';')
+    else:
+        raise ValueError
+
+def convert_types(in_dict):
+    out_dict = {}
+    for key, value in in_dict.items():
+        parts = key.split(':')
+        if len(parts) > 1:
+            out_dict[parts[0]] = convert_type(parts[1], value)
+        else:
+            out_dict[parts[0]] = value
+    return out_dict
+
+
 def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = {}
     for line in spreadsheet_input.get_main_sheet_lines():
         if line['ocid'] in main_sheet_by_ocid:
             raise ValueError('Two lines in main spreadsheet with same ocid')
-        main_sheet_by_ocid[line['ocid']] = unflatten_line(line)
+        main_sheet_by_ocid[line['ocid']] = unflatten_line(convert_types(line))
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
@@ -140,7 +170,7 @@ def unflatten_spreadsheet_input(spreadsheet_input):
             sheet_context_name = sheet_context_names[id_field] or sheet_name
             if sheet_context_name not in context:
                 context[sheet_context_name] = TemporaryDict(keyfield='id')
-            context[sheet_context_name].append(unflatten_line(line_without_id_fields))
+            context[sheet_context_name].append(unflatten_line(convert_types(line_without_id_fields)))
     temporarydicts_to_lists(main_sheet_by_ocid)
 
     return main_sheet_by_ocid.values()
