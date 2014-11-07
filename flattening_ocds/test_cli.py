@@ -1,5 +1,6 @@
 import pytest
 from flattening_ocds import cli
+from test.test_argparse import stderr_to_parser_error, ArgumentParserError
 
 
 def test_create_parser():
@@ -7,9 +8,8 @@ def test_create_parser():
     Command line arguments that should be acceptable
     """
     parser = cli.create_parser()
-    #p.parse_args('cmd1 -b x three'.split())
     args = parser.parse_args('create-template -s schema.json'.split())
-    #assert set(args.schema) == set(['schema', 'schema.json'])
+    assert args.schema == 'schema.json'
 
 
 def test_create_parser_missing_required_options():
@@ -19,7 +19,6 @@ def test_create_parser_missing_required_options():
     """
 
     parser = cli.create_parser()
-    #args = parser.parse_args()
-    with pytest.raises(RuntimeError) as excinfo:
-        args = parser.parse_args()
-    assert 'invalid choice' in str(excinfo.value)
+    with pytest.raises(ArgumentParserError) as excinfo:
+        stderr_to_parser_error(parser.parse_args, 'create-template'.split())
+    assert 'required' in excinfo.value.stderr
