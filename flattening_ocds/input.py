@@ -37,7 +37,7 @@ class CSVInput(SpreadsheetInput):
 
     def get_sheet_lines(self, sheet_name):
         with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-            for line in DictReader(main_sheet_file):
+            for line in reader:
                 yield line
 
 
@@ -47,14 +47,17 @@ def unflatten_line(line):
         if v == '':
             continue
         fields = k.split('/')
-        unlattened_sub_dict = unflattened
-        for parent_field in fields[:-1]:
-            if parent_field not in unlattened_sub_dict:
-                unlattened_sub_dict[parent_field] = {}
-            unlattened_sub_dict = unlattened_sub_dict[parent_field]
-        unlattened_sub_dict[fields[-1]] = v
+        path_search(unflattened, fields[:-1])[fields[-1]] = v
     return unflattened
 
+
+def path_search(nested_dict, path_list):
+    nested_dict = nested_dict
+    for parent_field in path_list:
+        if parent_field not in nested_dict:
+            nested_dict[parent_field] = {}
+        nested_dict = nested_dict[parent_field]
+    return nested_dict
 
 def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = {}
@@ -65,6 +68,18 @@ def unflatten_spreadsheet_input(spreadsheet_input):
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
-            main_sheet_by_ocid[line['ocid']][sheet_name] = unflatten_line(line)
+            id_fields = [ x for x in line.keys() if x.endswith('/id') ]
+            line_without_id_fields = {k: v for k, v in line.items() if k not in id_fields and k!='ocid'}
+            if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
+                raise ValueError
+            for id_field in id_fields:
+                if line[id_field]:
+                    context = path_search(
+                        main_sheet_by_ocid[line['ocid']],
+                        id_field.split('/')[1:-1]
+                    )
+                    if sheet_name not in context:
+                        context[sheet_name] = []
+                    context[sheet_name].append(unflatten_line(line_without_id_fields))
 
     return main_sheet_by_ocid.values()

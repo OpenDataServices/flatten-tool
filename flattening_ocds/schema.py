@@ -53,7 +53,7 @@ class SchemaParser(object):
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
                 if property_schema_dict.get('type') == 'object':
-                    for field in self.parse_schema_dict(property_name, property_schema_dict,
+                    for field in self.parse_schema_dict(parent_name+'/'+property_name, property_schema_dict,
                                                         parent_id_fields=id_fields):
                         yield property_name+'/'+field
                 elif property_schema_dict.get('type') == 'array':
@@ -68,7 +68,7 @@ class SchemaParser(object):
 
                     for field in id_fields:
                         sub_sheet.add_field(field, id_field=True)
-                    for field in self.parse_schema_dict(property_name, property_schema_dict['items'],
+                    for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]', property_schema_dict['items'],
                                                         parent_id_fields=id_fields):
                         sub_sheet.add_field(field)
                 else:

@@ -81,6 +81,7 @@ def simple_array_properties(parent_name, child_name):
     }
 
 
+@pytest.mark.xfail
 class TestSubSheetParentID(object):
     def test_parent_is_object(self):
         parser = SchemaParser(root_schema_dict={
@@ -131,7 +132,27 @@ class TestSubSheetParentID(object):
         assert list(parser.sub_sheets['testD']) == ['ocid', 'id']
         assert list(parser.sub_sheets['testB']) == ['ocid', 'testA/id', 'testD/id', 'testC', 'testE']
 
+    def test_parent_is_object_nested(self):
+        parser = SchemaParser(root_schema_dict={
+            'properties': {
+                'testA': {
+                    'type': 'object',
+                    'properties': {
+                        'testB': {
+                            'type': 'object',
+                            'properties': simple_array_properties('testB', 'testC')
+                        }
+                    }
+                }
+            }
+        })
+        parser.parse()
+        assert set(parser.main_sheet) == set(['testA/testB/id'])
+        assert set(parser.sub_sheets) == set(['testB'])
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'testA/testB/id', 'testC']
 
+
+@pytest.mark.xfail
 class TestSubSheetMainID(object):
     def test_parent_is_object(self):
         parser = SchemaParser(root_schema_dict={
