@@ -61,6 +61,7 @@ def test_sub_sheet():
             'testA': {
                 'type': 'array',
                 'items': {
+                    'type': 'object',
                     'properties': {'testB': type_string}
                 }
             },
@@ -78,6 +79,7 @@ def simple_array_properties(parent_name, child_name):
         parent_name: {
             'type': 'array',
             'items': {
+                'type': 'object',
                 'properties': {child_name: type_string}
             }
         }
@@ -105,7 +107,7 @@ class TestSubSheetParentID(object):
             'properties': {
                 'testA': {
                     'type': 'array',
-                    'items': {'properties': simple_array_properties('testB', 'testC')}
+                    'items': {'type':'object', 'properties': simple_array_properties('testB', 'testC')}
                 }
             }
         })
@@ -120,11 +122,13 @@ class TestSubSheetParentID(object):
             'properties': OrderedDict([
                 ('testA', {
                     'type': 'array',
-                    'items': {'properties': simple_array_properties('testB', 'testC')}
+                    'items': {'type':'object',
+                        'properties': simple_array_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
-                    'items': {'properties': simple_array_properties('testB', 'testE')}
+                    'items': {'type':'object',
+                        'properties': simple_array_properties('testB', 'testE')}
                 })
             ])
         })
@@ -178,7 +182,8 @@ class TestSubSheetMainID(object):
                 'id': type_string,
                 'testA': {
                     'type': 'array',
-                    'items': {'properties': simple_array_properties('testB', 'testC')}
+                    'items': {'type': 'object',
+                        'properties': simple_array_properties('testB', 'testC')}
                 }
             }
         })
@@ -194,11 +199,13 @@ class TestSubSheetMainID(object):
                 ('id', type_string),
                 ('testA', {
                     'type': 'array',
-                    'items': {'properties': simple_array_properties('testB', 'testC')}
+                    'items': {'type': 'object',
+                        'properties': simple_array_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
-                    'items': {'properties': simple_array_properties('testB', 'testE')}
+                    'items': {'type':'object',
+                        'properties': simple_array_properties('testB', 'testE')}
                 })
             ])
         })
@@ -236,7 +243,7 @@ def test_references_sheet_names(tmpdir):
             "type": "array",
             "items": {"$ref": "#/testB"}
         } },
-        "testB": { "properties": {"testC":{"type": "string"}} }
+        "testB": { "type": "object", "properties": {"testC":{"type": "string"}} }
     }''')
     parser = SchemaParser(schema_filename=tmpfile.strpath)
     parser.parse()

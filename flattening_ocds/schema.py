@@ -24,6 +24,14 @@ class SubSheet(object):
             yield column
 
 
+def get_property_type_set(property_schema_dict):
+    property_type = property_schema_dict.get('type')
+    if not isinstance(property_type, list):
+        return set([property_type])
+    else:
+        return set(property_type)
+
+
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
@@ -53,16 +61,13 @@ class SchemaParser(object):
                 id_fields = parent_id_fields
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
-                property_type = property_schema_dict.get('type')
-                if not isinstance(property_type, list):
-                    property_type_set = set([property_type])
-                else:
-                    property_type_set = set(property_type)
+                property_type_set = get_property_type_set(property_schema_dict)
 
                 if 'object' in property_type_set:
                     for field in self.parse_schema_dict(parent_name+'/'+property_name, property_schema_dict,
                                                         parent_id_fields=id_fields):
                         yield property_name+'/'+field
+
                 elif 'array' in property_type_set:
                     if hasattr(property_schema_dict['items'], '__reference__'):
                         sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
@@ -75,10 +80,17 @@ class SchemaParser(object):
 
                     for field in id_fields:
                         sub_sheet.add_field(field+':'+property_name, id_field=True)
-                    for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]',
-                                                        property_schema_dict['items'],
-                                                        parent_id_fields=id_fields):
-                        sub_sheet.add_field(field)
+                    
+                    type_set = get_property_type_set(property_schema_dict['items'])
+                    if 'string' in type_set:
+                        yield property_name+':array'
+                    elif 'object' in type_set:
+                        for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]',
+                                                            property_schema_dict['items'],
+                                                            parent_id_fields=id_fields):
+                            sub_sheet.add_field(field)
+                    else:
+                        raise ValueError
                 elif 'string' in property_type_set:
                     yield property_name
                 elif 'number' in property_type_set:
@@ -89,9 +101,8 @@ class SchemaParser(object):
                     yield property_name+':boolean'
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}", so this property has been ignored.'.format(
-                        repr(property_type_set), 
+                        repr(property_type_set),
                         property_name,
                         parent_name))
         else:
-            pass
-            #print(parent_name)
+            warn('Skipping field "{}", because it has no properties.'.format(parent_name))
