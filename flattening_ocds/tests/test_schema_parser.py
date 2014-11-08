@@ -214,7 +214,7 @@ class TestSubSheetMainID(object):
         assert list(parser.sub_sheets['testD']) == ['ocid', 'main/id:testD', 'id']
         assert list(parser.sub_sheets['testB']) == ['ocid', 'main/id:testB', 'main/testA[]/id:testB', 'main/testD[]/id:testB', 'testC', 'testE']
 
-    def custom_main_sheet_name(self):
+    def test_custom_main_sheet_name(self):
         parser = SchemaParser(
             root_schema_dict={
                 'properties': {
