@@ -3,6 +3,9 @@ from collections import OrderedDict
 from flattening_ocds.schema import SchemaParser
 
 
+type_string = { 'type': 'string' }
+
+
 def test_filename_and_dict_error(tmpdir):
     """A value error should be raised if both schema_filename and
     root_schema_dict are supplied to SchemaParser"""
@@ -31,8 +34,8 @@ def test_order_preserved(tmpdir):
 def test_main_sheet_basic():
     parser = SchemaParser(root_schema_dict={
         'properties': {
-            'testA': {},
-            'testB': {}
+            'testA': type_string,
+            'testB': type_string
         }
     })
     parser.parse()
@@ -44,7 +47,7 @@ def test_main_sheet_nested():
         'properties': {
             'testA': {
                 'type': 'object',
-                'properties': {'testC': {}}
+                'properties': {'testC': type_string}
             }
         }
     })
@@ -58,7 +61,7 @@ def test_sub_sheet():
             'testA': {
                 'type': 'array',
                 'items': {
-                    'properties': {'testB': {}}
+                    'properties': {'testB': type_string}
                 }
             },
         }
@@ -71,11 +74,11 @@ def test_sub_sheet():
 
 def simple_array_properties(parent_name, child_name):
     return {
-        'id': {},
+        'id': type_string,
         parent_name: {
             'type': 'array',
             'items': {
-                'properties': {child_name: {}}
+                'properties': {child_name: type_string}
             }
         }
     }
@@ -157,7 +160,7 @@ class TestSubSheetMainID(object):
     def test_parent_is_object(self):
         parser = SchemaParser(root_schema_dict={
             'properties': {
-                'id': {},
+                'id': type_string,
                 'testA': {
                     'type': 'object',
                     'properties': simple_array_properties('testB', 'testC')
@@ -172,7 +175,7 @@ class TestSubSheetMainID(object):
     def test_parent_is_array(self):
         parser = SchemaParser(root_schema_dict={
             'properties': {
-                'id': {},
+                'id': type_string,
                 'testA': {
                     'type': 'array',
                     'items': {'properties': simple_array_properties('testB', 'testC')}
@@ -188,7 +191,7 @@ class TestSubSheetMainID(object):
     def test_two_parents(self):
         parser = SchemaParser(root_schema_dict={
             'properties': OrderedDict([
-                ('id', {}),
+                ('id', type_string),
                 ('testA', {
                     'type': 'array',
                     'items': {'properties': simple_array_properties('testB', 'testC')}
@@ -210,7 +213,7 @@ class TestSubSheetMainID(object):
         parser = SchemaParser(
             root_schema_dict={
                 'properties': {
-                    'id': {},
+                    'id': type_string,
                     'testA': {
                         'type': 'object',
                         'properties': simple_array_properties('testB', 'testC')
@@ -233,7 +236,7 @@ def test_references_sheet_names(tmpdir):
             "type": "array",
             "items": {"$ref": "#/testB"}
         } },
-        "testB": { "properties": {"testC":{}} }
+        "testB": { "properties": {"testC":{"type": "string"}} }
     }''')
     parser = SchemaParser(schema_filename=tmpfile.strpath)
     parser.parse()

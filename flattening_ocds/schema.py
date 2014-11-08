@@ -3,6 +3,7 @@
 from __future__ import print_function
 from collections import OrderedDict
 import jsonref
+from warnings import warn
 
 
 class SubSheet(object):
@@ -52,11 +53,17 @@ class SchemaParser(object):
                 id_fields = parent_id_fields
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
-                if property_schema_dict.get('type') == 'object':
+                property_type = property_schema_dict.get('type')
+                if not isinstance(property_type, list):
+                    property_type_set = set([property_type])
+                else:
+                    property_type_set = set(property_type)
+
+                if 'object' in property_type_set:
                     for field in self.parse_schema_dict(parent_name+'/'+property_name, property_schema_dict,
                                                         parent_id_fields=id_fields):
                         yield property_name+'/'+field
-                elif property_schema_dict.get('type') == 'array':
+                elif 'array' in property_type_set:
                     if hasattr(property_schema_dict['items'], '__reference__'):
                         sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
                     else:
@@ -68,8 +75,23 @@ class SchemaParser(object):
 
                     for field in id_fields:
                         sub_sheet.add_field(field+':'+property_name, id_field=True)
-                    for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]', property_schema_dict['items'],
+                    for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]',
+                                                        property_schema_dict['items'],
                                                         parent_id_fields=id_fields):
                         sub_sheet.add_field(field)
-                else:
+                elif 'string' in property_type_set:
                     yield property_name
+                elif 'number' in property_type_set:
+                    yield property_name+':number'
+                elif 'integer' in property_type_set:
+                    yield property_name+':integer'
+                elif 'boolean' in property_type_set:
+                    yield property_name+':boolean'
+                else:
+                    warn('Unrecognised types {} for property "{}" with context "{}", so this property has been ignored.'.format(
+                        repr(property_type_set), 
+                        property_name,
+                        parent_name))
+        else:
+            pass
+            #print(parent_name)

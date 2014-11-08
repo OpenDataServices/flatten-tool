@@ -119,20 +119,22 @@ def find_deepest_id_field(id_fields):
 def convert_type(type_string, value):
     if type_string == 'number':
         return Decimal(value)
+    elif type_string == 'integer':
+        return int(value)
     elif type_string == 'boolean':
         if value.lower() in ['true','1']:
             return True
         elif value.lower() in ['false','0']:
             return False
         else:
-            raise ValueError
+            raise ValueError('Unrecognised value for boolean: {}'.format(value))
     elif type_string == 'array':
         if ',' in value:
             return [ x.split(',') for x in value.split(';') ]
         else:
             return value.split(';')
     else:
-        raise ValueError
+        raise ValueError('Unrecognised type: {}'.format(type_string))
 
 def convert_types(in_dict):
     out_dict = {}
@@ -154,10 +156,13 @@ def unflatten_spreadsheet_input(spreadsheet_input):
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
-            id_fields = {k: v for k, v in line.items() if k.split(':')[0].endswith('/id')}
+            id_fields = {k: v for k, v in line.items() if
+                k.split(':')[0].endswith('/id') and
+                k.startswith(spreadsheet_input.main_sheet_name)}
             line_without_id_fields = {k: v for k, v in line.items() if k not in id_fields and k != 'ocid'}
-            if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
-                raise ValueError
+            # FIXME add test for why this is wrong
+            #if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
+            #    raise ValueError
             raw_id_fields_with_values = {k.split(':')[0]:v for k, v in id_fields.items() if v}
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
             id_field = find_deepest_id_field(raw_id_fields_with_values)

@@ -37,8 +37,13 @@ def create_template(schema, output_name='release', output_format='all', main_she
 class number_str(float):
     def __init__(self, o):
         self.o = o
+
     def __repr__(self):
         return str(self.o)
+
+    # This is needed for this trick to work in python 3.4
+    def __float__(self):
+        return self
 
 
 def decimal_default(o):
