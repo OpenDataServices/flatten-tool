@@ -69,22 +69,22 @@ class SchemaParser(object):
                         yield property_name+'/'+field
 
                 elif 'array' in property_type_set:
-                    if hasattr(property_schema_dict['items'], '__reference__'):
-                        sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
-                    else:
-                        sub_sheet_name = property_name
-
-                    if sub_sheet_name not in self.sub_sheets:
-                        self.sub_sheets[sub_sheet_name] = SubSheet()
-                    sub_sheet = self.sub_sheets[sub_sheet_name]
-
-                    for field in id_fields:
-                        sub_sheet.add_field(field+':'+property_name, id_field=True)
                     
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         yield property_name+':array'
                     elif 'object' in type_set:
+                        if hasattr(property_schema_dict['items'], '__reference__'):
+                            sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
+                        else:
+                            sub_sheet_name = property_name
+
+                        if sub_sheet_name not in self.sub_sheets:
+                            self.sub_sheets[sub_sheet_name] = SubSheet()
+                        sub_sheet = self.sub_sheets[sub_sheet_name]
+
+                        for field in id_fields:
+                            sub_sheet.add_field(field+':'+property_name, id_field=True)
                         for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]',
                                                             property_schema_dict['items'],
                                                             parent_id_fields=id_fields):
