@@ -2,6 +2,7 @@ from __future__ import print_function
 from csv import DictReader
 from decimal import Decimal
 import os
+import openpyxl
 try:
     from collections import UserDict
 except ImportError:
@@ -44,7 +45,21 @@ class CSVInput(SpreadsheetInput):
 
 
 class XLSXInput(SpreadsheetInput):
-    pass
+    def read_sheets(self):
+        self.workbook = openpyxl.load_workbook(self.input_name)
+        sheet_names = self.workbook.get_sheet_names()
+        if not self.main_sheet_name in sheet_names:
+            raise ValueError
+        sheet_names.remove(self.main_sheet_name)
+        self.sub_sheet_names = sheet_names
+
+    def get_sheet_lines(self, sheet_name):
+        worksheet = self.workbook[sheet_name]
+        header_row = worksheet.rows[0]
+        remaining_rows = worksheet.rows[1:]
+        coli_to_header = ({i:x.value for i, x in enumerate(header_row) if x.value is not None})
+        for row in remaining_rows:
+            yield {coli_to_header[i]:x.value for i, x in enumerate(row) if i in coli_to_header}
 
 
 def unflatten_line(line):

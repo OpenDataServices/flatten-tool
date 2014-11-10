@@ -29,7 +29,6 @@ def test_csv_input(tmpdir):
         [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
 
-@pytest.mark.xfail
 def test_xlsx_input(tmpdir):
     xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/basic.xlsx', main_sheet_name='main')
     assert xlsxinput.main_sheet_name == 'main'

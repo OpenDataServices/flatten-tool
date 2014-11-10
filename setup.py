@@ -10,5 +10,5 @@ setup(
     url='https://github.com/open-contracting/flattening-ocds',
     license='MIT',
     description='Tools for generating CSV and other flat versions of the structured data',
-    install_requires=['jsonref', 'schema', 'xlsxwriter'],
+    install_requires=['jsonref', 'schema', 'xlsxwriter', 'openpyxl'],
 )
