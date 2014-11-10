@@ -1,4 +1,4 @@
-from flattening_ocds.input import SpreadsheetInput, CSVInput
+from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
 from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
 import pytest
 
@@ -27,6 +27,21 @@ def test_csv_input(tmpdir):
     assert csvinput.sub_sheet_names == [ 'subsheet' ]
     assert list(csvinput.get_sheet_lines('subsheet')) == \
         [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
+
+@pytest.mark.xfail
+def test_xlsx_input(tmpdir):
+    xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/basic.xlsx', main_sheet_name='main')
+    assert xlsxinput.main_sheet_name == 'main'
+
+    xlsxinput.read_sheets()
+
+    assert list(xlsxinput.get_main_sheet_lines()) == \
+        [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+    assert xlsxinput.sub_sheet_names == [ 'subsheet' ]
+    assert list(xlsxinput.get_sheet_lines('subsheet')) == \
+        [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
     
 
 

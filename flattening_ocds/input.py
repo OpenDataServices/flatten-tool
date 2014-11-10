@@ -43,6 +43,10 @@ class CSVInput(SpreadsheetInput):
                 yield line
 
 
+class XLSXInput(SpreadsheetInput):
+    pass
+
+
 def unflatten_line(line):
     unflattened = {}
     for k, v in line.items():
