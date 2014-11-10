@@ -46,7 +46,7 @@ class CSVInput(SpreadsheetInput):
             raise ValueError
         sheet_file_names.remove(self.main_sheet_name+'.csv')
 
-        self.sub_sheet_names = [fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')]
+        self.sub_sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
 
     def get_sheet_lines(self, sheet_name):
         if sys.version > '3': # If Python 3 or greater
@@ -119,7 +119,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
                            path=path)
     else:
         if parent_field not in nested_dict:
-            nested_dict[parent_field] = {}
+            nested_dict[parent_field] = OrderedDict()
         return path_search(nested_dict[parent_field],
                            path_list[1:],
                            id_fields=id_fields,
