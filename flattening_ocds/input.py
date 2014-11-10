@@ -281,8 +281,8 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                 context[sheet_context_name.split('/')[-1]].append(unflatten_line(convert_types(line_without_id_fields)))
             except Exception as e:
                 print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
-                print(e)
                 traceback.print_exc()
+                sys.exit()
 
     temporarydicts_to_lists(main_sheet_by_ocid)
 
