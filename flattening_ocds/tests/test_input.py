@@ -90,6 +90,14 @@ def test_xlsx_input_integer(tmpdir):
     assert list(xlsxinput.get_main_sheet_lines()) == \
         [{'colA': 1}]
     assert xlsxinput.sub_sheet_names == []
+
+
+def test_xlsx_input_utf8(tmpdir):
+    """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
+    xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/unicode.xlsx', main_sheet_name='main')
+
+    xlsxinput.read_sheets()
+    assert list(xlsxinput.get_main_sheet_lines())[0]['id'] == 'éαГ😼𝒞人'
     
 
 

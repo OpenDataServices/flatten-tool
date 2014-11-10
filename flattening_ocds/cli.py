@@ -40,6 +40,9 @@ def create_parser():
     parser_unflatten.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet. Defaults to release")
+    parser_unflatten.add_argument(
+        "-e", "--encoding",
+        help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
 
 
     return parser

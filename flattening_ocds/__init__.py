@@ -54,7 +54,7 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='release', main_sheet_name='release', **_):
+def unflatten(input_name, base_json=None, input_format=None, output_name='release', main_sheet_name='release', encoding='utf8', **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
@@ -62,6 +62,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
 
     spreadsheet_input_class = INPUT_FORMATS[input_format]
     spreadsheet_input = spreadsheet_input_class(input_name=input_name, main_sheet_name=main_sheet_name)
+    spreadsheet_input.encoding = encoding
     spreadsheet_input.read_sheets()
     if base_json:
         with open(base_json) as fp:

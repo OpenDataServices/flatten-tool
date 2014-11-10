@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from flattening_ocds  import decimal_default, unflatten
 from decimal import Decimal
 import json
@@ -41,7 +43,8 @@ def test_unflatten(tmpdir):
         'ocid,main/id,main/sub[]/id:subsub,testG\n'
         '1,2,S1,23\n'
     )
-    unflatten(input_dir.strpath,
+    unflatten(
+        input_dir.strpath,
         input_format='csv',
         output_name=tmpdir.join('release').strpath,
         main_sheet_name='main')
@@ -138,3 +141,45 @@ def test_unflatten(tmpdir):
         }
     ]
 }''')
+
+
+def test_unflatten_csv_utf8(tmpdir):
+    input_dir = tmpdir.ensure('release_input', dir=True)
+    input_dir.join('main.csv').write_text(
+        'ocid,id\n1,éαГ😼𝒞人\n',
+        encoding='utf8'
+    )
+    unflatten(
+        input_dir.strpath,
+        input_format='csv',
+        # Should default to utf8
+        output_name=tmpdir.join('release').strpath,
+        main_sheet_name='main')
+    reloaded_json = json.load(tmpdir.join('release.json'))
+    assert reloaded_json == {'releases': [{'ocid': '1', 'id': 'éαГ😼𝒞人'}]}
+
+
+def test_unflatten_csv_latin1(tmpdir):
+    input_dir = tmpdir.ensure('release_input', dir=True)
+    input_dir.join('main.csv').write_text(
+        'ocid,id\n1,é\n',
+        encoding='latin1'
+    )
+    unflatten(
+        input_dir.strpath,
+        input_format='csv',
+        encoding='latin1',
+        output_name=tmpdir.join('release').strpath,
+        main_sheet_name='main')
+    reloaded_json = json.load(tmpdir.join('release.json'))
+    assert reloaded_json == {'releases': [{'ocid': '1', 'id': 'é'}]}
+
+
+def test_unflatten_xslx_unicode(tmpdir):
+    unflatten(
+        'flattening_ocds/tests/xlsx/unicode.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('release').strpath,
+        main_sheet_name='main')
+    reloaded_json = json.load(tmpdir.join('release.json'))
+    assert reloaded_json == {'releases': [{'ocid': 1, 'id': 'éαГ😼𝒞人'}]}
