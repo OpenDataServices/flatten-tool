@@ -6,6 +6,8 @@ from decimal import Decimal
 from collections import OrderedDict
 import sys
 import pytest
+import openpyxl
+from six import text_type
 
 
 def test_spreadsheetinput_base_fails():
@@ -16,88 +18,111 @@ def test_spreadsheetinput_base_fails():
         spreadsheet_input.get_sheet_lines('test')
 
 
-def test_csv_input(tmpdir):
-    main = tmpdir.join('main.csv')
-    main.write('colA,colB\ncell1,cell2\ncell3,cell4')
-    subsheet = tmpdir.join('subsheet.csv')
-    subsheet.write('colC,colD\ncell5,cell6\ncell7,cell8')
+class TestSuccessfulInput():
+    def test_csv_input(self, tmpdir):
+        main = tmpdir.join('main.csv')
+        main.write('colA,colB\ncell1,cell2\ncell3,cell4')
+        subsheet = tmpdir.join('subsheet.csv')
+        subsheet.write('colC,colD\ncell5,cell6\ncell7,cell8')
 
-    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
-    assert csvinput.main_sheet_name == 'main'
+        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        assert csvinput.main_sheet_name == 'main'
 
-    csvinput.read_sheets()
+        csvinput.read_sheets()
 
-    assert list(csvinput.get_main_sheet_lines()) == \
-        [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
-    assert csvinput.sub_sheet_names == [ 'subsheet' ]
-    assert list(csvinput.get_sheet_lines('subsheet')) == \
-        [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+        assert list(csvinput.get_main_sheet_lines()) == \
+            [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+        assert csvinput.sub_sheet_names == [ 'subsheet' ]
+        assert list(csvinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
+    def test_xlsx_input(self, tmpdir):
+        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/basic.xlsx', main_sheet_name='main')
+        assert xlsxinput.main_sheet_name == 'main'
 
-def test_csv_input_utf8(tmpdir):
-    main = tmpdir.join('main.csv')
-    main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
-    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main') # defaults to utf8
-    csvinput.read_sheets()
-    assert list(csvinput.get_main_sheet_lines()) == \
-        [{'colA':'éαГ😼𝒞人'}]
-    assert csvinput.sub_sheet_names == []
+        xlsxinput.read_sheets()
 
+        assert list(xlsxinput.get_main_sheet_lines()) == \
+            [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+        assert xlsxinput.sub_sheet_names == [ 'subsheet' ]
+        assert list(xlsxinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
-def test_csv_input_latin1(tmpdir):
-    main = tmpdir.join('main.csv')
-    main.write_text('colA\né', encoding='latin-1')
-    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
-    csvinput.encoding = 'latin-1'
-    csvinput.read_sheets()
-    assert list(csvinput.get_main_sheet_lines()) == \
-        [{'colA':'é'}]
-    assert csvinput.sub_sheet_names == []
+    def test_xlsx_input_integer(self, tmpdir):
+        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/integer.xlsx', main_sheet_name='main')
+        assert xlsxinput.main_sheet_name == 'main'
 
+        xlsxinput.read_sheets()
 
-@pytest.mark.xfail(sys.version_info < (3,0),
-    reason='Python 2 CSV readers does not support UTF-16 (or any encodings with null bytes')
-def test_csv_input_utf16(tmpdir):
-    main = tmpdir.join('main.csv')
-    main.write_text('colA\néαГ😼𝒞人', encoding='utf16')
-    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
-    csvinput.encoding = 'utf16'
-    csvinput.read_sheets()
-    assert list(csvinput.get_main_sheet_lines()) == \
-        [{'colA':'éαГ😼𝒞人'}]
-    assert csvinput.sub_sheet_names == []
+        assert list(xlsxinput.get_main_sheet_lines()) == \
+            [{'colA': 1}]
+        assert xlsxinput.sub_sheet_names == []
 
 
-def test_xlsx_input(tmpdir):
-    xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/basic.xlsx', main_sheet_name='main')
-    assert xlsxinput.main_sheet_name == 'main'
+class TestInputFailure():
+    def test_csv_no_directory(self, tmpdir):
+        csvinput = CSVInput(input_name='nonesensedirectory', main_sheet_name='main')
+        with pytest.raises(Exception) as e:
+            csvinput.read_sheets()
+        assert e.type in [OSError, FileNotFoundError]
 
-    xlsxinput.read_sheets()
+    def test_csv_no_files(self, tmpdir):
+        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        with pytest.raises(ValueError) as e:
+            csvinput.read_sheets()
+        assert 'Main sheet' in text_type(e) and 'not found' in text_type(e)
 
-    assert list(xlsxinput.get_main_sheet_lines()) == \
-        [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
-    assert xlsxinput.sub_sheet_names == [ 'subsheet' ]
-    assert list(xlsxinput.get_sheet_lines('subsheet')) == \
-        [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+    def test_xlsx_no_file(self, tmpdir):
+        xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'), main_sheet_name='main')
+        with pytest.raises(openpyxl.exceptions.InvalidFileException):
+            xlsxinput.read_sheets()
 
-
-def test_xlsx_input_integer(tmpdir):
-    xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/integer.xlsx', main_sheet_name='main')
-    assert xlsxinput.main_sheet_name == 'main'
-
-    xlsxinput.read_sheets()
-
-    assert list(xlsxinput.get_main_sheet_lines()) == \
-        [{'colA': 1}]
-    assert xlsxinput.sub_sheet_names == []
+    def test_xlsx_no_main_sheet(self):
+        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/basic.xlsx', main_sheet_name='notmain')
+        with pytest.raises(ValueError) as e:
+            xlsxinput.read_sheets()
+        assert 'Main sheet "notmain" not found in workbook.' in text_type(e)
 
 
-def test_xlsx_input_utf8(tmpdir):
-    """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
-    xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/unicode.xlsx', main_sheet_name='main')
+class UnicodeInputTest(object):
+    def test_csv_input_utf8(self, tmpdir):
+        main = tmpdir.join('main.csv')
+        main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
+        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main') # defaults to utf8
+        csvinput.read_sheets()
+        assert list(csvinput.get_main_sheet_lines()) == \
+            [{'colA':'éαГ😼𝒞人'}]
+        assert csvinput.sub_sheet_names == []
 
-    xlsxinput.read_sheets()
-    assert list(xlsxinput.get_main_sheet_lines())[0]['id'] == 'éαГ😼𝒞人'
+    def test_csv_input_latin1(self, tmpdir):
+        main = tmpdir.join('main.csv')
+        main.write_text('colA\né', encoding='latin-1')
+        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        csvinput.encoding = 'latin-1'
+        csvinput.read_sheets()
+        assert list(csvinput.get_main_sheet_lines()) == \
+            [{'colA':'é'}]
+        assert csvinput.sub_sheet_names == []
+
+    @pytest.mark.xfail(
+        sys.version_info < (3,0),
+        reason='Python 2 CSV readers does not support UTF-16 (or any encodings with null bytes')
+    def test_csv_input_utf16(self, tmpdir):
+        main = tmpdir.join('main.csv')
+        main.write_text('colA\néαГ😼𝒞人', encoding='utf16')
+        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        csvinput.encoding = 'utf16'
+        csvinput.read_sheets()
+        assert list(csvinput.get_main_sheet_lines()) == \
+            [{'colA':'éαГ😼𝒞人'}]
+        assert csvinput.sub_sheet_names == []
+
+    def test_xlsx_input_utf8(self, tmpdir):
+        """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
+        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/unicode.xlsx', main_sheet_name='main')
+
+        xlsxinput.read_sheets()
+        assert list(xlsxinput.get_main_sheet_lines())[0]['id'] == 'éαГ😼𝒞人'
     
 
 
@@ -321,6 +346,26 @@ class TestUnflattenEmpty(object):
         output = list(unflatten_spreadsheet_input(spreadsheet_input))
         assert len(output) == 0
 
+    def test_sub_sheet_empty(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [],
+                'subsheet': [
+                    {
+                        'ocid': '',
+                        'id:integer': '',
+                        'testA:number': '',
+                        'testB:boolean': '',
+                        'testC:array': '',
+                        'testD:string': '',
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        output = list(unflatten_spreadsheet_input(spreadsheet_input))
+        assert len(output) == 0
+
     def test_types_empty(self):
         spreadsheet_input = ListInput(
             sheets={
@@ -344,7 +389,7 @@ class TestUnflattenEmpty(object):
 
 
 
-def test_convert_type():
+def test_convert_type(recwarn):
     assert convert_type('', 'somestring') == 'somestring'
     # If not type is specified, ints are kept as ints...
     assert convert_type('', 3) == 3
@@ -371,10 +416,13 @@ def test_convert_type():
     assert convert_type('boolean', 'False') is False
     assert convert_type('boolean', 0) is False
     assert convert_type('boolean', '0') is False
-    with pytest.raises(ValueError):
-        convert_type('boolean', 2)
-    with pytest.raises(ValueError):
-        convert_type('boolean', 'test')
+    convert_type('boolean', 2)
+    assert 'Unrecognised value for boolean: "2"' in text_type(recwarn.pop(UserWarning).message)
+    convert_type('boolean', 'test')
+    assert 'Unrecognised value for boolean: "test"' in text_type(recwarn.pop(UserWarning).message)
+
+    convert_type('integer', 'test')
+    assert 'Non-integer value "test"' in text_type(recwarn.pop(UserWarning).message)
 
     assert convert_type('string', '') == None
     assert convert_type('number', '') == None
@@ -384,3 +432,7 @@ def test_convert_type():
 
     assert convert_type('array', 'one;two') == ['one', 'two']
     assert convert_type('array', 'one,two;three,four') == [ ['one', 'two'], ['three', 'four'] ]
+
+    with pytest.raises(ValueError) as e:
+        convert_type('notatype', 'test')
+    assert 'Unrecognised type: "notatype"' in text_type(e)

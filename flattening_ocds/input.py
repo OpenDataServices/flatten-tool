@@ -45,7 +45,7 @@ class CSVInput(SpreadsheetInput):
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
         if self.main_sheet_name+'.csv' not in sheet_file_names:
-            raise ValueError
+            raise ValueError('Main sheet "{}.csv" not found.'.format(self.main_sheet_name))
         sheet_file_names.remove(self.main_sheet_name+'.csv')
 
         self.sub_sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
@@ -70,7 +70,7 @@ class XLSXInput(SpreadsheetInput):
         self.workbook = openpyxl.load_workbook(self.input_name)
         sheet_names = self.workbook.get_sheet_names()
         if not self.main_sheet_name in sheet_names:
-            raise ValueError
+            raise ValueError('Main sheet "{}" not found in workbook.'.format(self.main_sheet_name))
         sheet_names.remove(self.main_sheet_name)
         self.sub_sheet_names = sheet_names
 
@@ -185,7 +185,8 @@ def convert_type(type_string, value):
         elif value.lower() in ['false','0']:
             return False
         else:
-            raise ValueError('Unrecognised value for boolean: {}'.format(value))
+            warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
+            return text_type(value)
     elif type_string == 'array':
         value = text_type(value)
         if ',' in value:
@@ -197,7 +198,7 @@ def convert_type(type_string, value):
     elif type_string == '':
         return value if type(value) in [int] else text_type(value)
     else:
-        raise ValueError('Unrecognised type: {}'.format(type_string))
+        raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
 def convert_types(in_dict):
     out_dict = OrderedDict()
