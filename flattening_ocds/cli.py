@@ -1,6 +1,7 @@
 from __future__ import print_function
 import argparse
 from flattening_ocds import create_template, unflatten
+from six import text_type
 
 
 def create_parser():
@@ -66,7 +67,7 @@ def main():
             # Note: Ensures that empty arguments are not passed to the create_template function
             create_template(**kwargs_from_parsed_args(args))
         except (OSError, IOError) as e:
-            print(str(e))
+            print(text_type(e))
             return
     elif args.subparser_name == 'unflatten':
         unflatten(**kwargs_from_parsed_args(args))

@@ -1,4 +1,10 @@
 from setuptools import setup
+import sys
+
+install_requires = ['jsonref', 'schema', 'xlsxwriter', 'openpyxl', 'six']
+
+if sys.version < '3':
+    install_requires.append('unicodecsv')
 
 setup(
     name='flattening_ocds',
@@ -10,5 +16,5 @@ setup(
     url='https://github.com/open-contracting/flattening-ocds',
     license='MIT',
     description='Tools for generating CSV and other flat versions of the structured data',
-    install_requires=['jsonref', 'schema', 'xlsxwriter', 'openpyxl'],
+    install_requires=install_requires,
 )

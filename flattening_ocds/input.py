@@ -1,8 +1,13 @@
 from __future__ import print_function
-from csv import DictReader
+import sys
+if sys.version > '3':
+    from csv import DictReader
+else:
+    from unicodecsv import DictReader
 from decimal import Decimal
 import os
 import openpyxl
+from six import text_type
 try:
     from collections import UserDict
 except ImportError:
@@ -30,6 +35,8 @@ class SpreadsheetInput(object):
 
 
 class CSVInput(SpreadsheetInput):
+    encoding = 'utf-8'
+
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
         if self.main_sheet_name+'.csv' not in sheet_file_names:
@@ -39,9 +46,16 @@ class CSVInput(SpreadsheetInput):
         self.sub_sheet_names = [fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')]
 
     def get_sheet_lines(self, sheet_name):
-        with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-            for line in DictReader(main_sheet_file):
-                yield line
+        if sys.version > '3': # If Python 3 or greater
+            # Pass the encoding to the open function
+            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+                for line in DictReader(main_sheet_file):
+                    yield line
+        else: # If Python 2
+            # Pass the encoding to DictReader
+            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
+                for line in DictReader(main_sheet_file, encoding=self.encoding):
+                    yield line
 
 
 class XLSXInput(SpreadsheetInput):
@@ -147,7 +161,7 @@ def convert_type(type_string, value):
     elif type_string == 'integer':
         return int(value)
     elif type_string == 'boolean':
-        value = str(value)
+        value = text_type(value)
         if value.lower() in ['true','1']:
             return True
         elif value.lower() in ['false','0']:
@@ -155,15 +169,15 @@ def convert_type(type_string, value):
         else:
             raise ValueError('Unrecognised value for boolean: {}'.format(value))
     elif type_string == 'array':
-        value = str(value)
+        value = text_type(value)
         if ',' in value:
             return [ x.split(',') for x in value.split(';') ]
         else:
             return value.split(';')
     elif type_string == 'string':
-        return str(value)
+        return text_type(value)
     elif type_string == '':
-        return value if type(value) in [int] else str(value)
+        return value if type(value) in [int] else text_type(value)
     else:
         raise ValueError('Unrecognised type: {}'.format(type_string))
 

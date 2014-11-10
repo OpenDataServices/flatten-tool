@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
 from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
 from decimal import Decimal
+import sys
 import pytest
 
 
@@ -28,6 +31,40 @@ def test_csv_input(tmpdir):
     assert csvinput.sub_sheet_names == [ 'subsheet' ]
     assert list(csvinput.get_sheet_lines('subsheet')) == \
         [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
+
+def test_csv_input_utf8(tmpdir):
+    main = tmpdir.join('main.csv')
+    main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
+    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+    csvinput.read_sheets()
+    assert list(csvinput.get_main_sheet_lines()) == \
+        [{'colA':'éαГ😼𝒞人'}]
+    assert csvinput.sub_sheet_names == []
+
+
+def test_csv_input_latin1(tmpdir):
+    main = tmpdir.join('main.csv')
+    main.write_text('colA\né', encoding='latin-1')
+    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+    csvinput.encoding = 'latin-1'
+    csvinput.read_sheets()
+    assert list(csvinput.get_main_sheet_lines()) == \
+        [{'colA':'é'}]
+    assert csvinput.sub_sheet_names == []
+
+
+@pytest.mark.xfail(sys.version_info < (3,0),
+    reason='Python 2 CSV readers does not support UTF-16 (or any encodings with null bytes')
+def test_csv_input_utf16(tmpdir):
+    main = tmpdir.join('main.csv')
+    main.write_text('colA\néαГ😼𝒞人', encoding='utf16')
+    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+    csvinput.encoding = 'utf16'
+    csvinput.read_sheets()
+    assert list(csvinput.get_main_sheet_lines()) == \
+        [{'colA':'éαГ😼𝒞人'}]
+    assert csvinput.sub_sheet_names == []
 
 
 def test_xlsx_input(tmpdir):
@@ -207,6 +244,23 @@ class TestUnflatten(object):
                     }
                 ]
             }
+        ]
+
+    def test_unicode(self):
+        unicode_string = 'éαГ😼𝒞人'
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': 1,
+                        'testA': unicode_string,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+            {'ocid': 1, 'testA': unicode_string}
         ]
 
 def test_convert_type():
