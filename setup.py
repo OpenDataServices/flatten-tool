@@ -1,7 +1,7 @@
 from setuptools import setup
 import sys
 
-install_requires = ['jsonref', 'schema', 'xlsxwriter', 'openpyxl', 'six']
+install_requires = ['jsonref', 'schema', 'openpyxl', 'six']
 
 if sys.version < '3':
     install_requires.append('unicodecsv')

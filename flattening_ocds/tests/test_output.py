@@ -1,6 +1,7 @@
 import pytest
 import os
 from flattening_ocds import output, schema
+import openpyxl
 
 
 class MockParser(object):
@@ -25,6 +26,10 @@ def test_blank_sheets(tmpdir):
             main_sheet_name='release',
             output_name=os.path.join(tmpdir.strpath, 'release'))
         spreadsheet_output.write_sheets()
+
+    wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
+    assert wb.get_sheet_names() == [ 'release' ]
+
     # TODO Actually check the sheets are blank
 
 

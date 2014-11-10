@@ -1,7 +1,7 @@
 """Code to output a parsed flattened JSON schema in various spreadsheet
 formats."""
 
-import xlsxwriter
+import openpyxl
 import csv
 import os
 
@@ -35,15 +35,16 @@ class SpreadsheetOutput(object):
 
 class XLSXOutput(SpreadsheetOutput):
     def open(self):
-        self.workbook = xlsxwriter.Workbook(self.output_name+'.xlsx')
+        self.workbook = openpyxl.Workbook()
 
     def write_sheet(self, sheet_name, sheet_header):
-        worksheet = self.workbook.add_worksheet(sheet_name)
-        for i, field in enumerate(sheet_header):
-            worksheet.write(0, i, field)
+        worksheet = self.workbook.create_sheet()
+        worksheet.title = sheet_name
+        worksheet.append(sheet_header)
 
     def close(self):
-        self.workbook.close()
+        self.workbook.remove_sheet(self.workbook.active)
+        self.workbook.save(self.output_name+'.xlsx')
 
 
 class CSVOutupt(SpreadsheetOutput):
