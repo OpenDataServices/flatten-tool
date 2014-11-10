@@ -52,11 +52,15 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(**_):
-    spreadsheet_input = CSVInput(input_name='release_input', main_sheet_name='release')
+def unflatten(input_name, base_json=None, output_name='release', main_sheet_name='release', **_):
+    spreadsheet_input = CSVInput(input_name=input_name, main_sheet_name=main_sheet_name)
     spreadsheet_input.read_sheets()
-    with open('base.json') as fp:
-        base = json.load(fp)
+    if base_json:
+        with open(base_json) as fp:
+            base = json.load(fp)
+    else:
+        base = {}
     base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
-    print(json.dumps(base, indent=4, default=decimal_default))
+    with open(output_name+'.json', 'w') as fp:
+        json.dump(base, fp, indent=4, default=decimal_default)
 

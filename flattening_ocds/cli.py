@@ -24,9 +24,18 @@ def create_parser():
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
 
-    parser_create_template = subparsers.add_parser(
+    parser_unflatten = subparsers.add_parser(
         'unflatten',
         help='Unflatten a spreadsheet')
+    parser_unflatten.add_argument('input_name',
+        help="Name of the input file or directory.")
+    parser_unflatten.add_argument(
+        "-b", "--base-json",
+        help="A base json file to populate the releases key in.")
+    parser_unflatten.add_argument(
+        "-m", "--main-sheet-name",
+        help="The name of the main sheet. Defaults to release")
+
 
     return parser
 
