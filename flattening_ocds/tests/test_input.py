@@ -1,5 +1,33 @@
-from flattening_ocds.input import unflatten_line, SpreadsheetInput, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
+from flattening_ocds.input import SpreadsheetInput, CSVInput
+from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
 import pytest
+
+
+def test_spreadsheetinput_base_fails():
+    spreadsheet_input = SpreadsheetInput()
+    with pytest.raises(NotImplementedError):
+        spreadsheet_input.read_sheets()
+    with pytest.raises(NotImplementedError):
+        spreadsheet_input.get_sheet_lines('test')
+
+
+def test_csv_input(tmpdir):
+    main = tmpdir.join('main.csv')
+    main.write('colA,colB\ncell1,cell2\ncell3,cell4')
+    subsheet = tmpdir.join('subsheet.csv')
+    subsheet.write('colC,colD\ncell5,cell6\ncell7,cell8')
+
+    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+    assert csvinput.main_sheet_name == 'main'
+
+    csvinput.read_sheets()
+
+    assert list(csvinput.get_main_sheet_lines()) == \
+        [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+    assert csvinput.sub_sheet_names == [ 'subsheet' ]
+    assert list(csvinput.get_sheet_lines('subsheet')) == \
+        [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+    
 
 
 class ListInput(SpreadsheetInput):
