@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from flattening_ocds  import decimal_default, unflatten
+from flattening_ocds import decimal_default, unflatten
 from decimal import Decimal
 import json
-import pytest
+
 
 def test_decimal_default():
     assert json.dumps(Decimal('1.2'), default=decimal_default) == '1.2'
@@ -21,7 +21,8 @@ def test_unflatten(tmpdir):
 
     Notable things we are checking for:
         Ordering is preseved - both the order of columns and rows
-        On an id column haeder, the information following a colon is the key for the array. If this is not provided, the sheet name is used.
+        On an id column haeder, the information following a colon is the key for the array.
+        If this is not provided, the sheet name is used.
     """
     input_dir = tmpdir.ensure('release_input', dir=True)
     input_dir.join('main.csv').write(

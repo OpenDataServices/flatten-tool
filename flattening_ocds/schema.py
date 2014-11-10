@@ -69,7 +69,6 @@ class SchemaParser(object):
                         yield property_name+'/'+field
 
                 elif 'array' in property_type_set:
-                    
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         yield property_name+':array'
@@ -105,9 +104,10 @@ class SchemaParser(object):
                 elif 'boolean' in property_type_set:
                     yield property_name+':boolean'
                 else:
-                    warn('Unrecognised types {} for property "{}" with context "{}", so this property has been ignored.'.format(
-                        repr(property_type_set),
-                        property_name,
-                        parent_name))
+                    warn('Unrecognised types {} for property "{}" with context "{}",'
+                         'so this property has been ignored.'.format(
+                             repr(property_type_set),
+                             property_name,
+                             parent_name))
         else:
             warn('Skipping field "{}", because it has no properties.'.format(parent_name))

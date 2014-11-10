@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
-from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, find_deepest_id_field, convert_type, path_search
+from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, \
+    find_deepest_id_field, convert_type, path_search
 from decimal import Decimal
 from collections import OrderedDict
 import sys
@@ -32,7 +33,7 @@ class TestSuccessfulInput():
 
         assert list(csvinput.get_main_sheet_lines()) == \
             [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
-        assert csvinput.sub_sheet_names == [ 'subsheet' ]
+        assert csvinput.sub_sheet_names == ['subsheet']
         assert list(csvinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
@@ -44,7 +45,7 @@ class TestSuccessfulInput():
 
         assert list(xlsxinput.get_main_sheet_lines()) == \
             [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
-        assert xlsxinput.sub_sheet_names == [ 'subsheet' ]
+        assert xlsxinput.sub_sheet_names == ['subsheet']
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
@@ -63,10 +64,10 @@ class TestInputFailure():
     def test_csv_no_directory(self, tmpdir):
         csvinput = CSVInput(input_name='nonesensedirectory', main_sheet_name='main')
         if sys.version > '3':
-            with pytest.raises(FileNotFoundError) as e:
+            with pytest.raises(FileNotFoundError):
                 csvinput.read_sheets()
         else:
-            with pytest.raises(OSError) as e:
+            with pytest.raises(OSError):
                 csvinput.read_sheets()
 
     def test_csv_no_files(self, tmpdir):
@@ -91,10 +92,10 @@ class UnicodeInputTest(object):
     def test_csv_input_utf8(self, tmpdir):
         main = tmpdir.join('main.csv')
         main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
-        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main') # defaults to utf8
+        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')  # defaults to utf8
         csvinput.read_sheets()
         assert list(csvinput.get_main_sheet_lines()) == \
-            [{'colA':'éαГ😼𝒞人'}]
+            [{'colA': 'éαГ😼𝒞人'}]
         assert csvinput.sub_sheet_names == []
 
     def test_csv_input_latin1(self, tmpdir):
@@ -104,11 +105,11 @@ class UnicodeInputTest(object):
         csvinput.encoding = 'latin-1'
         csvinput.read_sheets()
         assert list(csvinput.get_main_sheet_lines()) == \
-            [{'colA':'é'}]
+            [{'colA': 'é'}]
         assert csvinput.sub_sheet_names == []
 
     @pytest.mark.xfail(
-        sys.version_info < (3,0),
+        sys.version_info < (3, 0),
         reason='Python 2 CSV readers does not support UTF-16 (or any encodings with null bytes')
     def test_csv_input_utf16(self, tmpdir):
         main = tmpdir.join('main.csv')
@@ -117,7 +118,7 @@ class UnicodeInputTest(object):
         csvinput.encoding = 'utf16'
         csvinput.read_sheets()
         assert list(csvinput.get_main_sheet_lines()) == \
-            [{'colA':'éαГ😼𝒞人'}]
+            [{'colA': 'éαГ😼𝒞人'}]
         assert csvinput.sub_sheet_names == []
 
     def test_xlsx_input_utf8(self, tmpdir):
@@ -126,7 +127,6 @@ class UnicodeInputTest(object):
 
         xlsxinput.read_sheets()
         assert list(xlsxinput.get_main_sheet_lines())[0]['id'] == 'éαГ😼𝒞人'
-    
 
 
 class ListInput(SpreadsheetInput):
@@ -150,30 +150,29 @@ def test_unflatten_line():
     assert unflatten_line({'fieldA/b/c/d': 'value'}) == {'fieldA': {'b': {'c': {'d': 'value'}}}}
 
 
-
 def test_path_search():
     goal_dict = {}
-    assert goal_dict is not {} # following tests rely on this
+    assert goal_dict is not {}  # following tests rely on this
     assert path_search(goal_dict, []) is goal_dict
     assert path_search(
         {'testA': goal_dict},
         ['testA']) is goal_dict
     assert path_search(
         {'a1': {'b1': {'c1': goal_dict}}},
-        ['a1','b1', 'c1']) is goal_dict
+        ['a1', 'b1', 'c1']) is goal_dict
     assert path_search(
         {'a1': {'b1': {'c1': goal_dict}}},
-        ['a1','b1[]'],
-        id_fields={'a1/b1[]/id':'c1'}) is goal_dict
+        ['a1', 'b1[]'],
+        id_fields={'a1/b1[]/id': 'c1'}) is goal_dict
     assert path_search(
         {'a1': {'b1': {'c1': goal_dict}}},
-        ['a1[]','c1'],
-        id_fields={'a1[]/id':'b1'}) is goal_dict
+        ['a1[]', 'c1'],
+        id_fields={'a1[]/id': 'b1'}) is goal_dict
     # Top is always assumed to be an arary
     assert path_search(
         {'a1': {'b1': {'c1': goal_dict}}},
-        ['a1','c1'],
-        id_fields={'a1/id':'b1'},
+        ['a1', 'c1'],
+        id_fields={'a1/id': 'b1'},
         top=True) is goal_dict
 
 
@@ -200,7 +199,6 @@ class TestUnflatten(object):
         assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
             {'ocid': 1, 'id': 2, 'testA': 3}
         ]
-
 
     def test_main_sheet_nonflat(self):
         spreadsheet_input = ListInput(
@@ -413,7 +411,7 @@ class TestUnflatten(object):
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
-            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': { 'id': 4}}]}
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': {'id': 4}}]}
         ]
 
     def test_missing_columns(self, recwarn):
@@ -448,9 +446,10 @@ class TestUnflatten(object):
         assert 'no parent id fields populated' in text_type(w.message)
         assert 'Line 2 of sheet sub' in text_type(w.message)
         # Check that following lines are parsed correctly
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
-            {'ocid': 1, 'id': 2, 'subField': [{'id':3, 'testA': 5}]}
+        assert unflattened == [
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]}
         ]
+
 
 class TestUnflattenEmpty(object):
     def test_all_empty(self):
@@ -511,8 +510,7 @@ class TestUnflattenEmpty(object):
         spreadsheet_input.read_sheets()
         output = list(unflatten_spreadsheet_input(spreadsheet_input))
         assert len(output) == 1
-        assert output[0] == {'ocid':'1'}
-
+        assert output[0] == {'ocid': '1'}
 
 
 def test_convert_type(recwarn):
@@ -550,14 +548,14 @@ def test_convert_type(recwarn):
     convert_type('integer', 'test')
     assert 'Non-integer value "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    assert convert_type('string', '') == None
-    assert convert_type('number', '') == None
-    assert convert_type('integer', '') == None
-    assert convert_type('array', '') == None
-    assert convert_type('boolean', '') == None
+    assert convert_type('string', '') is None
+    assert convert_type('number', '') is None
+    assert convert_type('integer', '') is None
+    assert convert_type('array', '') is None
+    assert convert_type('boolean', '') is None
 
     assert convert_type('array', 'one;two') == ['one', 'two']
-    assert convert_type('array', 'one,two;three,four') == [ ['one', 'two'], ['three', 'four'] ]
+    assert convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
 
     with pytest.raises(ValueError) as e:
         convert_type('notatype', 'test')

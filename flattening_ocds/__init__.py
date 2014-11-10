@@ -36,8 +36,10 @@ def create_template(schema, output_name='release', output_format='all', main_she
 
 
 # From http://bugs.python.org/issue16535
-class number_str(float):
+class NumberStr(float):
     def __init__(self, o):
+        # We don't call the parent here, since we're deliberately altering it's functionality
+        # pylint: disable=W0231
         self.o = o
 
     def __repr__(self):
@@ -50,11 +52,12 @@ class number_str(float):
 
 def decimal_default(o):
     if isinstance(o, Decimal):
-        return number_str(o)
+        return NumberStr(o)
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='release', main_sheet_name='release', encoding='utf8', **_):
+def unflatten(input_name, base_json=None, input_format=None, output_name='release',
+              main_sheet_name='release', encoding='utf8', **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
@@ -72,4 +75,3 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
     with open(output_name+'.json', 'w') as fp:
         json.dump(base, fp, indent=4, default=decimal_default)
-

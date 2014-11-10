@@ -3,7 +3,7 @@ from collections import OrderedDict
 from flattening_ocds.schema import SchemaParser, get_property_type_set
 
 
-type_string = { 'type': 'string' }
+type_string = {'type': 'string'}
 
 
 def test_get_property_type_set():
@@ -112,7 +112,7 @@ class TestSubSheetParentID(object):
             'properties': {
                 'testA': {
                     'type': 'array',
-                    'items': {'type':'object', 'properties': object_in_array_example_properties('testB', 'testC')}
+                    'items': {'type': 'object', 'properties': object_in_array_example_properties('testB', 'testC')}
                 }
             }
         })
@@ -127,13 +127,13 @@ class TestSubSheetParentID(object):
             'properties': OrderedDict([
                 ('testA', {
                     'type': 'array',
-                    'items': {'type':'object',
-                        'properties': object_in_array_example_properties('testB', 'testC')}
+                    'items': {'type': 'object',
+                              'properties': object_in_array_example_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
-                    'items': {'type':'object',
-                        'properties': object_in_array_example_properties('testB', 'testE')}
+                    'items': {'type': 'object',
+                              'properties': object_in_array_example_properties('testB', 'testE')}
                 })
             ])
         })
@@ -142,7 +142,8 @@ class TestSubSheetParentID(object):
         assert set(parser.sub_sheets) == set(['testA', 'testB', 'testD'])
         assert list(parser.sub_sheets['testA']) == ['ocid', 'id']
         assert list(parser.sub_sheets['testD']) == ['ocid', 'id']
-        assert list(parser.sub_sheets['testB']) == ['ocid', 'main/testA[]/id:testB', 'main/testD[]/id:testB', 'testC', 'testE']
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'main/testA[]/id:testB',
+                                                    'main/testD[]/id:testB', 'testC', 'testE']
 
     def test_parent_is_object_nested(self):
         parser = SchemaParser(root_schema_dict={
@@ -187,7 +188,7 @@ class TestSubSheetMainID(object):
                 'testA': {
                     'type': 'array',
                     'items': {'type': 'object',
-                        'properties': object_in_array_example_properties('testB', 'testC')}
+                              'properties': object_in_array_example_properties('testB', 'testC')}
                 }
             }
         })
@@ -204,12 +205,12 @@ class TestSubSheetMainID(object):
                 ('testA', {
                     'type': 'array',
                     'items': {'type': 'object',
-                        'properties': object_in_array_example_properties('testB', 'testC')}
+                              'properties': object_in_array_example_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
-                    'items': {'type':'object',
-                        'properties': object_in_array_example_properties('testB', 'testE')}
+                    'items': {'type': 'object',
+                              'properties': object_in_array_example_properties('testB', 'testE')}
                 })
             ])
         })
@@ -218,7 +219,8 @@ class TestSubSheetMainID(object):
         assert set(parser.sub_sheets) == set(['testA', 'testB', 'testD'])
         assert list(parser.sub_sheets['testA']) == ['ocid', 'main/id:testA', 'id']
         assert list(parser.sub_sheets['testD']) == ['ocid', 'main/id:testD', 'id']
-        assert list(parser.sub_sheets['testB']) == ['ocid', 'main/id:testB', 'main/testA[]/id:testB', 'main/testD[]/id:testB', 'testC', 'testE']
+        assert list(parser.sub_sheets['testB']) == ['ocid', 'main/id:testB', 'main/testA[]/id:testB',
+                                                    'main/testD[]/id:testB', 'testC', 'testE']
 
     def test_custom_main_sheet_name(self):
         parser = SchemaParser(
@@ -236,7 +238,11 @@ class TestSubSheetMainID(object):
         parser.parse()
         assert set(parser.main_sheet) == set(['id', 'testA/id'])
         assert set(parser.sub_sheets) == set(['testB'])
-        assert list(parser.sub_sheets['testB']) == ['ocid', 'custom_main_sheet_name/id:testB', 'custom_main_sheet_name/testA/id:testB', 'testC']
+        assert list(parser.sub_sheets['testB']) == [
+            'ocid',
+            'custom_main_sheet_name/id:testB',
+            'custom_main_sheet_name/testA/id:testB',
+            'testC']
 
 
 def test_simple_array():

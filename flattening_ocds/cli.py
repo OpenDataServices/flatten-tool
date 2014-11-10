@@ -28,7 +28,8 @@ def create_parser():
     parser_unflatten = subparsers.add_parser(
         'unflatten',
         help='Unflatten a spreadsheet')
-    parser_unflatten.add_argument('input_name',
+    parser_unflatten.add_argument(
+        'input_name',
         help="Name of the input file or directory.")
     parser_unflatten.add_argument(
         "-f", "--input-format",
@@ -44,11 +45,12 @@ def create_parser():
         "-e", "--encoding",
         help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
 
-
     return parser
+
 
 def kwargs_from_parsed_args(args):
     return {k: v for k, v in vars(args).items() if v is not None}
+
 
 def main():
     """

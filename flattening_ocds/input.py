@@ -8,15 +8,17 @@ import openpyxl
 from six import text_type
 from warnings import warn
 
+# The "pylint: disable" lines exist to ignore warnings about the imports we expect not to work not working
+
 if sys.version > '3':
     from csv import DictReader
 else:
-    from unicodecsv import DictReader
+    from unicodecsv import DictReader  # pylint: disable=F0401
 
 try:
-    from collections import UserDict
+    from collections import UserDict  # pylint: disable=E0611
 except ImportError:
-    from UserDict import UserDict
+    from UserDict import UserDict  # pylint: disable=F0401
 
 
 class SpreadsheetInput(object):
@@ -51,13 +53,13 @@ class CSVInput(SpreadsheetInput):
         self.sub_sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
 
     def get_sheet_lines(self, sheet_name):
-        if sys.version > '3': # If Python 3 or greater
+        if sys.version > '3':  # If Python 3 or greater
             # Pass the encoding to the open function
             with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
                 dictreader = DictReader(main_sheet_file)
                 for line in dictreader:
                     yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
-        else: # If Python 2
+        else:  # If Python 2
             # Pass the encoding to DictReader
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 dictreader = DictReader(main_sheet_file, encoding=self.encoding)
@@ -69,7 +71,7 @@ class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         self.workbook = openpyxl.load_workbook(self.input_name)
         sheet_names = self.workbook.get_sheet_names()
-        if not self.main_sheet_name in sheet_names:
+        if self.main_sheet_name not in sheet_names:
             raise ValueError('Main sheet "{}" not found in workbook.'.format(self.main_sheet_name))
         sheet_names.remove(self.main_sheet_name)
         self.sub_sheet_names = sheet_names
@@ -78,7 +80,7 @@ class XLSXInput(SpreadsheetInput):
         worksheet = self.workbook[sheet_name]
         header_row = worksheet.rows[0]
         remaining_rows = worksheet.rows[1:]
-        coli_to_header = ({i:x.value for i, x in enumerate(header_row) if x.value is not None})
+        coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
         for row in remaining_rows:
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
@@ -184,9 +186,9 @@ def convert_type(type_string, value):
             return text_type(value)
     elif type_string == 'boolean':
         value = text_type(value)
-        if value.lower() in ['true','1']:
+        if value.lower() in ['true', '1']:
             return True
-        elif value.lower() in ['false','0']:
+        elif value.lower() in ['false', '0']:
             return False
         else:
             warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
@@ -194,7 +196,7 @@ def convert_type(type_string, value):
     elif type_string == 'array':
         value = text_type(value)
         if ',' in value:
-            return [ x.split(',') for x in value.split(';') ]
+            return [x.split(',') for x in value.split(';')]
         else:
             return value.split(';')
     elif type_string == 'string':
@@ -203,6 +205,7 @@ def convert_type(type_string, value):
         return value if type(value) in [int] else text_type(value)
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
+
 
 def convert_types(in_dict):
     out_dict = OrderedDict()
@@ -218,7 +221,7 @@ def convert_types(in_dict):
 def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = OrderedDict()
     for line in spreadsheet_input.get_main_sheet_lines():
-        if all(x=='' for x in line.values()):
+        if all(x == '' for x in line.values()):
             continue
         if line['ocid'] not in main_sheet_by_ocid:
             main_sheet_by_ocid[line['ocid']] = TemporaryDict('id')
@@ -227,24 +230,27 @@ def unflatten_spreadsheet_input(spreadsheet_input):
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for i, line in enumerate(lines):
             line_number = i+2
-            if all(x=='' for x in line.values()):
+            if all(x == '' for x in line.values()):
                 continue
             id_fields = {k: v for k, v in line.items() if
-                k.split(':')[0].endswith('/id') and
-                k.startswith(spreadsheet_input.main_sheet_name)}
+                         k.split(':')[0].endswith('/id') and
+                         k.startswith(spreadsheet_input.main_sheet_name)}
             line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
             raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
             if not raw_id_fields_with_values:
-                warn('Line {} of sheet {} has no parent id fields populated, skipping.'.format(line_number, sheet_name))
+                warn('Line {} of sheet {} has no parent id fields populated,'
+                     'skipping.'.format(line_number, sheet_name))
                 continue
-            sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
+            sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
+                                   for k, v in id_fields.items() if v}
             try:
                 id_field = find_deepest_id_field(raw_id_fields_with_values)
             except ConflictingIDFieldsError:
-                warn('Multiple conflicting ID fields have been filled in on line {} of sheet {}, skipping that line.'.format(line_number, sheet_name)) 
+                warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
+                     'skipping that line.'.format(line_number, sheet_name))
                 continue
             context = path_search(
-                {spreadsheet_input.main_sheet_name:main_sheet_by_ocid[line['ocid']]},
+                {spreadsheet_input.main_sheet_name: main_sheet_by_ocid[line['ocid']]},
                 id_field.split('/')[:-1],
                 id_fields=raw_id_fields_with_values,
                 top=True
