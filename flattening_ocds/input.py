@@ -226,6 +226,7 @@ def unflatten_spreadsheet_input(spreadsheet_input):
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for i, line in enumerate(lines):
+            line_number = i+2
             if all(x=='' for x in line.values()):
                 continue
             id_fields = {k: v for k, v in line.items() if
@@ -233,11 +234,14 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                 k.startswith(spreadsheet_input.main_sheet_name)}
             line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
             raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
+            if not raw_id_fields_with_values:
+                warn('Line {} of sheet {} has no parent id fields populated, skipping.'.format(line_number, sheet_name))
+                continue
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
             try:
                 id_field = find_deepest_id_field(raw_id_fields_with_values)
             except ConflictingIDFieldsError:
-                warn('Multiple conflicting ID fields have been filled in on line {} of sheet {}, skipping that line.'.format(i+2, sheet_name)) 
+                warn('Multiple conflicting ID fields have been filled in on line {} of sheet {}, skipping that line.'.format(line_number, sheet_name)) 
                 continue
             context = path_search(
                 {spreadsheet_input.main_sheet_name:main_sheet_by_ocid[line['ocid']]},

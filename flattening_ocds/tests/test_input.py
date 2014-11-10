@@ -416,6 +416,41 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': { 'id': 4}}]}
         ]
 
+    def test_missing_columns(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'ocid': 1,
+                        'custom_main/id:subField': '',
+                        'id': 3,
+                        'testA/id': 4,
+                    },
+                    {
+                        'ocid': 1,
+                        'custom_main/id:subField': 2,
+                        'id': 3,
+                        'testA': 5,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
+        # We should have a warning about conflicting ID fields
+        w = recwarn.pop(UserWarning)
+        assert 'no parent id fields populated' in text_type(w.message)
+        assert 'Line 2 of sheet sub' in text_type(w.message)
+        # Check that following lines are parsed correctly
+        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+            {'ocid': 1, 'id': 2, 'subField': [{'id':3, 'testA': 5}]}
+        ]
 
 class TestUnflattenEmpty(object):
     def test_all_empty(self):
