@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
 from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
 from decimal import Decimal
+from collections import OrderedDict
 import sys
 import pytest
 
@@ -205,10 +206,10 @@ class TestUnflatten(object):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': 1,
-                        'id': 2,
-                    }
+                    OrderedDict([
+                        ('ocid', 1),
+                        ('id', 2),
+                    ])
                 ],
                 'sub1': [
                     {
@@ -231,7 +232,7 @@ class TestUnflatten(object):
         spreadsheet_input.read_sheets()
         unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
         assert len(unflattened) == 1
-        assert set(unflattened[0]) == set(['sub1Field', 'id', 'ocid'])
+        assert list(unflattened[0]) == ['ocid', 'id', 'sub1Field']
         assert unflattened[0]['ocid'] == 1
         assert unflattened[0]['id'] == 2
         assert unflattened[0]['sub1Field'] == [

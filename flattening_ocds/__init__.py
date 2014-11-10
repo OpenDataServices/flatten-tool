@@ -4,6 +4,7 @@ from flattening_ocds.input import FORMATS as INPUT_FORMATS
 from flattening_ocds.input import unflatten_spreadsheet_input
 import json
 from decimal import Decimal
+from collections import OrderedDict
 
 
 def create_template(schema, output_name='release', output_format='all', main_sheet_name='main', **_):
@@ -64,9 +65,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     spreadsheet_input.read_sheets()
     if base_json:
         with open(base_json) as fp:
-            base = json.load(fp)
+            base = json.load(fp, object_pairs_hook=OrderedDict())
     else:
-        base = {}
+        base = OrderedDict()
     base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
     with open(output_name+'.json', 'w') as fp:
         json.dump(base, fp, indent=4, default=decimal_default)

@@ -1,13 +1,16 @@
 from __future__ import print_function
 import sys
+from decimal import Decimal
+import os
+from collections import OrderedDict
+import openpyxl
+from six import text_type
+
 if sys.version > '3':
     from csv import DictReader
 else:
     from unicodecsv import DictReader
-from decimal import Decimal
-import os
-import openpyxl
-from six import text_type
+
 try:
     from collections import UserDict
 except ImportError:
@@ -49,13 +52,15 @@ class CSVInput(SpreadsheetInput):
         if sys.version > '3': # If Python 3 or greater
             # Pass the encoding to the open function
             with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
-                for line in DictReader(main_sheet_file):
-                    yield line
+                dictreader = DictReader(main_sheet_file)
+                for line in dictreader:
+                    yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
         else: # If Python 2
             # Pass the encoding to DictReader
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-                for line in DictReader(main_sheet_file, encoding=self.encoding):
-                    yield line
+                dictreader = DictReader(main_sheet_file, encoding=self.encoding)
+                for line in dictreader:
+                    yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
 
 
 class XLSXInput(SpreadsheetInput):
@@ -73,7 +78,7 @@ class XLSXInput(SpreadsheetInput):
         remaining_rows = worksheet.rows[1:]
         coli_to_header = ({i:x.value for i, x in enumerate(header_row) if x.value is not None})
         for row in remaining_rows:
-            yield {coli_to_header[i]:x.value for i, x in enumerate(row) if i in coli_to_header}
+            yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
 
 FORMATS = {
@@ -83,7 +88,7 @@ FORMATS = {
 
 
 def unflatten_line(line):
-    unflattened = {}
+    unflattened = OrderedDict()
     for k, v in line.items():
         if v == '':
             continue
@@ -182,7 +187,7 @@ def convert_type(type_string, value):
         raise ValueError('Unrecognised type: {}'.format(type_string))
 
 def convert_types(in_dict):
-    out_dict = {}
+    out_dict = OrderedDict()
     for key, value in in_dict.items():
         parts = key.split(':')
         if len(parts) > 1:
@@ -193,7 +198,7 @@ def convert_types(in_dict):
 
 
 def unflatten_spreadsheet_input(spreadsheet_input):
-    main_sheet_by_ocid = {}
+    main_sheet_by_ocid = OrderedDict()
     for line in spreadsheet_input.get_main_sheet_lines():
         if line['ocid'] in main_sheet_by_ocid:
             raise ValueError('Two lines in main spreadsheet with same ocid')
@@ -204,11 +209,11 @@ def unflatten_spreadsheet_input(spreadsheet_input):
             id_fields = {k: v for k, v in line.items() if
                 k.split(':')[0].endswith('/id') and
                 k.startswith(spreadsheet_input.main_sheet_name)}
-            line_without_id_fields = {k: v for k, v in line.items() if k not in id_fields and k != 'ocid'}
+            line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
             # FIXME add test for why this is wrong
             #if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
             #    raise ValueError
-            raw_id_fields_with_values = {k.split(':')[0]:v for k, v in id_fields.items() if v}
+            raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
             id_field = find_deepest_id_field(raw_id_fields_with_values)
             context = path_search(
