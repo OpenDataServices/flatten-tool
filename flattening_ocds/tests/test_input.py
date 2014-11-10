@@ -62,9 +62,12 @@ class TestSuccessfulInput():
 class TestInputFailure():
     def test_csv_no_directory(self, tmpdir):
         csvinput = CSVInput(input_name='nonesensedirectory', main_sheet_name='main')
-        with pytest.raises(Exception) as e:
-            csvinput.read_sheets()
-        assert e.type in [OSError, FileNotFoundError]
+        if sys.version > '3':
+            with pytest.raises(FileNotFoundError) as e:
+                csvinput.read_sheets()
+        else:
+            with pytest.raises(OSError) as e:
+                csvinput.read_sheets()
 
     def test_csv_no_files(self, tmpdir):
         csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
