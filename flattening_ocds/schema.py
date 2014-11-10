@@ -73,6 +73,11 @@ class SchemaParser(object):
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         yield property_name+':array'
+                    elif 'array' in type_set:
+                        if 'string' in get_property_type_set(property_schema_dict['items']['items']):
+                            yield property_name+':array'
+                        else:
+                            raise ValueError
                     elif 'object' in type_set:
                         if hasattr(property_schema_dict['items'], '__reference__'):
                             sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]

@@ -257,6 +257,27 @@ def test_simple_array():
     assert set(parser.main_sheet) == set(['testA:array'])
 
 
+def test_nested_simple_array():
+    parser = SchemaParser(
+        root_schema_dict={
+            'properties': {
+                'testA': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string'
+                        }
+                    }
+                }
+            }
+        },
+        main_sheet_name='custom_main_sheet_name'
+    )
+    parser.parse()
+    assert set(parser.main_sheet) == set(['testA:array'])
+
+
 def test_references_sheet_names(tmpdir):
     """The referenced name should be used for the sheet name"""
     tmpfile = tmpdir.join('test_schema.json')
