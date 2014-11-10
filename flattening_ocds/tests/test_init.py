@@ -143,6 +143,22 @@ def test_unflatten(tmpdir):
 }''')
 
 
+def test_unflatten_empty(tmpdir):
+    input_dir = tmpdir.ensure('release_input', dir=True)
+    input_dir.join('main.csv').write_text(
+        'ocid,id\n,\n,\n,',
+        encoding='utf8'
+    )
+    unflatten(
+        input_dir.strpath,
+        input_format='csv',
+        output_name=tmpdir.join('release').strpath,
+        main_sheet_name='main')
+    assert lines_strip_whitespace(tmpdir.join('release.json').read()) == lines_strip_whitespace('''{
+        "releases": []
+    }''')
+
+
 def test_unflatten_csv_utf8(tmpdir):
     input_dir = tmpdir.ensure('release_input', dir=True)
     input_dir.join('main.csv').write_text(

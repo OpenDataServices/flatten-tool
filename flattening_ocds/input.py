@@ -1,10 +1,12 @@
 from __future__ import print_function
+from __future__ import unicode_literals
 import sys
 from decimal import Decimal
 import os
 from collections import OrderedDict
 import openpyxl
 from six import text_type
+from warnings import warn
 
 if sys.version > '3':
     from csv import DictReader
@@ -90,7 +92,7 @@ FORMATS = {
 def unflatten_line(line):
     unflattened = OrderedDict()
     for k, v in line.items():
-        if v == '':
+        if v is None:
             continue
         fields = k.split('/')
         path_search(unflattened, fields[:-1])[fields[-1]] = v
@@ -166,10 +168,16 @@ def find_deepest_id_field(id_fields):
 
 
 def convert_type(type_string, value):
+    if value == '':
+        return None
     if type_string == 'number':
         return Decimal(value)
     elif type_string == 'integer':
-        return int(value)
+        try:
+            return int(value)
+        except ValueError:
+            warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
+            return text_type(value)
     elif type_string == 'boolean':
         value = text_type(value)
         if value.lower() in ['true','1']:
@@ -205,12 +213,16 @@ def convert_types(in_dict):
 def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = OrderedDict()
     for line in spreadsheet_input.get_main_sheet_lines():
+        if all(x=='' for x in line.values()):
+            continue
         if line['ocid'] not in main_sheet_by_ocid:
             main_sheet_by_ocid[line['ocid']] = TemporaryDict('id')
         main_sheet_by_ocid[line['ocid']].append(unflatten_line(convert_types(line)))
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
+            if all(x=='' for x in line.values()):
+                continue
             id_fields = {k: v for k, v in line.items() if
                 k.split(':')[0].endswith('/id') and
                 k.startswith(spreadsheet_input.main_sheet_name)}

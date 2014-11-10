@@ -37,7 +37,7 @@ def test_csv_input(tmpdir):
 def test_csv_input_utf8(tmpdir):
     main = tmpdir.join('main.csv')
     main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
-    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+    csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main') # defaults to utf8
     csvinput.read_sheets()
     assert list(csvinput.get_main_sheet_lines()) == \
         [{'colA':'éαГ😼𝒞人'}]
@@ -172,6 +172,7 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'testA': 3}
         ]
 
+
     def test_main_sheet_nonflat(self):
         spreadsheet_input = ListInput(
             sheets={
@@ -299,6 +300,50 @@ class TestUnflatten(object):
             {'ocid': 1, 'testA': unicode_string}
         ]
 
+
+class TestUnflattenEmpty(object):
+    def test_all_empty(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': '',
+                        'id:integer': '',
+                        'testA:number': '',
+                        'testB:boolean': '',
+                        'testC:array': '',
+                        'testD:string': '',
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        output = list(unflatten_spreadsheet_input(spreadsheet_input))
+        assert len(output) == 0
+
+    def test_types_empty(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': '1',
+                        'id:integer': '',
+                        'testA:number': '',
+                        'testB:boolean': '',
+                        'testC:array': '',
+                        'testD:string': '',
+                        'testE': '',
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        output = list(unflatten_spreadsheet_input(spreadsheet_input))
+        assert len(output) == 1
+        assert output[0] == {'ocid':'1'}
+
+
+
 def test_convert_type():
     assert convert_type('', 'somestring') == 'somestring'
     # If not type is specified, ints are kept as ints...
@@ -330,8 +375,12 @@ def test_convert_type():
         convert_type('boolean', 2)
     with pytest.raises(ValueError):
         convert_type('boolean', 'test')
-    with pytest.raises(ValueError):
-        convert_type('boolean', '')
+
+    assert convert_type('string', '') == None
+    assert convert_type('number', '') == None
+    assert convert_type('integer', '') == None
+    assert convert_type('array', '') == None
+    assert convert_type('boolean', '') == None
 
     assert convert_type('array', 'one;two') == ['one', 'two']
     assert convert_type('array', 'one,two;three,four') == [ ['one', 'two'], ['three', 'four'] ]
