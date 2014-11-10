@@ -79,7 +79,7 @@ def test_sub_sheet():
     assert list(parser.sub_sheets['testA']) == ['ocid', 'testB']
 
 
-def simple_array_properties(parent_name, child_name):
+def object_in_array_example_properties(parent_name, child_name):
     return {
         'id': type_string,
         parent_name: {
@@ -98,7 +98,7 @@ class TestSubSheetParentID(object):
             'properties': {
                 'testA': {
                     'type': 'object',
-                    'properties': simple_array_properties('testB', 'testC')
+                    'properties': object_in_array_example_properties('testB', 'testC')
                 }
             }
         })
@@ -112,7 +112,7 @@ class TestSubSheetParentID(object):
             'properties': {
                 'testA': {
                     'type': 'array',
-                    'items': {'type':'object', 'properties': simple_array_properties('testB', 'testC')}
+                    'items': {'type':'object', 'properties': object_in_array_example_properties('testB', 'testC')}
                 }
             }
         })
@@ -128,12 +128,12 @@ class TestSubSheetParentID(object):
                 ('testA', {
                     'type': 'array',
                     'items': {'type':'object',
-                        'properties': simple_array_properties('testB', 'testC')}
+                        'properties': object_in_array_example_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
                     'items': {'type':'object',
-                        'properties': simple_array_properties('testB', 'testE')}
+                        'properties': object_in_array_example_properties('testB', 'testE')}
                 })
             ])
         })
@@ -152,7 +152,7 @@ class TestSubSheetParentID(object):
                     'properties': {
                         'testB': {
                             'type': 'object',
-                            'properties': simple_array_properties('testB', 'testC')
+                            'properties': object_in_array_example_properties('testB', 'testC')
                         }
                     }
                 }
@@ -171,7 +171,7 @@ class TestSubSheetMainID(object):
                 'id': type_string,
                 'testA': {
                     'type': 'object',
-                    'properties': simple_array_properties('testB', 'testC')
+                    'properties': object_in_array_example_properties('testB', 'testC')
                 }
             }
         })
@@ -187,7 +187,7 @@ class TestSubSheetMainID(object):
                 'testA': {
                     'type': 'array',
                     'items': {'type': 'object',
-                        'properties': simple_array_properties('testB', 'testC')}
+                        'properties': object_in_array_example_properties('testB', 'testC')}
                 }
             }
         })
@@ -204,12 +204,12 @@ class TestSubSheetMainID(object):
                 ('testA', {
                     'type': 'array',
                     'items': {'type': 'object',
-                        'properties': simple_array_properties('testB', 'testC')}
+                        'properties': object_in_array_example_properties('testB', 'testC')}
                 }),
                 ('testD', {
                     'type': 'array',
                     'items': {'type':'object',
-                        'properties': simple_array_properties('testB', 'testE')}
+                        'properties': object_in_array_example_properties('testB', 'testE')}
                 })
             ])
         })
@@ -227,7 +227,7 @@ class TestSubSheetMainID(object):
                     'id': type_string,
                     'testA': {
                         'type': 'object',
-                        'properties': simple_array_properties('testB', 'testC')
+                        'properties': object_in_array_example_properties('testB', 'testC')
                     }
                 }
             },
