@@ -1,5 +1,6 @@
 from flattening_ocds.schema import SchemaParser
 from flattening_ocds.output import FORMATS as OUTPUT_FORMATS
+from flattening_ocds.output import FORMATS_SUFFIX
 from flattening_ocds.input import FORMATS as INPUT_FORMATS
 from flattening_ocds.input import unflatten_spreadsheet_input
 import json
@@ -17,19 +18,19 @@ def create_template(schema, output_name='release', output_format='all', main_she
     parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name)
     parser.parse()
 
-    def spreadsheet_output(spreadsheet_output_class):
+    def spreadsheet_output(spreadsheet_output_class, name):
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
             main_sheet_name=main_sheet_name,
-            output_name=output_name)
+            output_name=name)
         spreadsheet_output.write_sheets()
 
     if output_format == 'all':
-        for spreadsheet_output_class in OUTPUT_FORMATS.values():
-            spreadsheet_output(spreadsheet_output_class)
+        for format_name, spreadsheet_output_class in OUTPUT_FORMATS.items():
+            spreadsheet_output(spreadsheet_output_class, output_name+FORMATS_SUFFIX[format_name])
 
     elif output_format in OUTPUT_FORMATS.keys():   # in dictionary of allowed formats
-        spreadsheet_output(OUTPUT_FORMATS[output_format])
+        spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
 
     else:
         raise Exception('The requested format is not available')
@@ -56,7 +57,7 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='release',
+def unflatten(input_name, base_json=None, input_format=None, output_name='release.json',
               main_sheet_name='release', encoding='utf8', **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
@@ -73,5 +74,5 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     else:
         base = OrderedDict()
     base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
-    with open(output_name+'.json', 'w') as fp:
+    with open(output_name, 'w') as fp:
         json.dump(base, fp, indent=4, default=decimal_default)

@@ -7,6 +7,7 @@ from collections import OrderedDict
 import openpyxl
 from six import text_type
 from warnings import warn
+import traceback
 
 # The "pylint: disable" lines exist to ignore warnings about the imports we expect not to work not working
 
@@ -101,6 +102,11 @@ def unflatten_line(line):
     return unflattened
 
 
+
+class IDFieldMissing(KeyError):
+    pass
+
+
 def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
     if not path_list:
         return nested_dict
@@ -114,7 +120,10 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
             parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
             nested_dict[parent_field] = TemporaryDict(keyfield='id')
-        sub_sheet_id = id_fields[path+'/id']
+        try:
+            sub_sheet_id = id_fields[path+'/id']
+        except KeyError:
+            raise IDFieldMissing(path+'/id')
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
         return path_search(nested_dict[parent_field][sub_sheet_id],
@@ -230,37 +239,51 @@ def unflatten_spreadsheet_input(spreadsheet_input):
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for i, line in enumerate(lines):
             line_number = i+2
-            if all(x == '' for x in line.values()):
-                continue
-            id_fields = {k: v for k, v in line.items() if
-                         k.split(':')[0].endswith('/id') and
-                         k.startswith(spreadsheet_input.main_sheet_name)}
-            line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
-            raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
-            if not raw_id_fields_with_values:
-                warn('Line {} of sheet {} has no parent id fields populated,'
-                     'skipping.'.format(line_number, sheet_name))
-                continue
-            sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
-                                   for k, v in id_fields.items() if v}
             try:
-                id_field = find_deepest_id_field(raw_id_fields_with_values)
-            except ConflictingIDFieldsError:
-                warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
-                     'skipping that line.'.format(line_number, sheet_name))
-                continue
-            context = path_search(
-                {spreadsheet_input.main_sheet_name: main_sheet_by_ocid[line['ocid']]},
-                id_field.split('/')[:-1],
-                id_fields=raw_id_fields_with_values,
-                top=True
-            )
-            sheet_context_name = sheet_context_names[id_field] or sheet_name
-            # Added the following line to support the usecase in test_nested_sub_sheet
-            context = path_search(context, sheet_context_name.split('/')[:-1])
-            if sheet_context_name not in context:
-                context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
-            context[sheet_context_name.split('/')[-1]].append(unflatten_line(convert_types(line_without_id_fields)))
+                if all(x == '' for x in line.values()):
+                    continue
+                id_fields = {k: v for k, v in line.items() if
+                             k.split(':')[0].endswith('/id') and
+                             k.startswith(spreadsheet_input.main_sheet_name)}
+                line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
+                raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
+                if not raw_id_fields_with_values:
+                    warn('Line {} of sheet {} has no parent id fields populated,'
+                         'skipping.'.format(line_number, sheet_name))
+                    continue
+                sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
+                                       for k, v in id_fields.items() if v}
+
+                try:
+                    id_field = find_deepest_id_field(raw_id_fields_with_values)
+                except ConflictingIDFieldsError:
+                    warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
+                         'skipping that line.'.format(line_number, sheet_name))
+                    continue
+
+                try:
+                    context = path_search(
+                        {spreadsheet_input.main_sheet_name: main_sheet_by_ocid[line['ocid']]},
+                        id_field.split('/')[:-1],
+                        id_fields=raw_id_fields_with_values,
+                        top=True
+                    )
+                except IDFieldMissing as e:
+                    warn('The parent id field "{}" was expected, but not present on line {} of sheet {}.'.format(
+                         e.args[0], line_number, sheet_name))
+                    continue
+
+                sheet_context_name = sheet_context_names[id_field] or sheet_name
+                # Added the following line to support the usecase in test_nested_sub_sheet
+                context = path_search(context, sheet_context_name.split('/')[:-1])
+                if sheet_context_name not in context:
+                    context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
+                context[sheet_context_name.split('/')[-1]].append(unflatten_line(convert_types(line_without_id_fields)))
+            except Exception as e:
+                print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
+                print(e)
+                traceback.print_exc()
+
     temporarydicts_to_lists(main_sheet_by_ocid)
 
     return sum(main_sheet_by_ocid.values(), [])

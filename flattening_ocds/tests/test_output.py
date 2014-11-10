@@ -20,11 +20,11 @@ def test_spreadsheetouput_base_fails():
 
 
 def test_blank_sheets(tmpdir):
-    for spreadsheet_output_class in output.FORMATS.values():
+    for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
             parser=MockParser([], {}),
             main_sheet_name='release',
-            output_name=os.path.join(tmpdir.strpath, 'release'))
+            output_name=os.path.join(tmpdir.strpath, 'release'+output.FORMATS_SUFFIX[format_name]))
         spreadsheet_output.write_sheets()
 
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
@@ -34,12 +34,12 @@ def test_blank_sheets(tmpdir):
 
 
 def test_populated_sheets(tmpdir):
-    for spreadsheet_output_class in output.FORMATS.values():
+    for format_name, spreadsheet_output_class in output.FORMATS.items():
         subsheet = schema.SubSheet()
         subsheet.add_field('c')
         spreadsheet_output = spreadsheet_output_class(
             parser=MockParser(['a'], {'b': subsheet}),
             main_sheet_name='release',
-            output_name=os.path.join(tmpdir.strpath, 'release'))
+            output_name=os.path.join(tmpdir.strpath, 'release'+output.FORMATS_SUFFIX[format_name]))
         spreadsheet_output.write_sheets()
     # TODO Actually check the sheets are populated

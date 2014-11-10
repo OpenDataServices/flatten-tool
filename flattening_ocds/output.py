@@ -44,7 +44,7 @@ class XLSXOutput(SpreadsheetOutput):
 
     def close(self):
         self.workbook.remove_sheet(self.workbook.active)
-        self.workbook.save(self.output_name+'.xlsx')
+        self.workbook.save(self.output_name)
 
 
 class CSVOutupt(SpreadsheetOutput):
@@ -63,4 +63,8 @@ class CSVOutupt(SpreadsheetOutput):
 FORMATS = {
     'xlsx': XLSXOutput,
     'csv': CSVOutupt
+}
+FORMATS_SUFFIX = {
+    'xlsx': '.xlsx',
+    'csv': '' # This is the suffix for the directory
 }

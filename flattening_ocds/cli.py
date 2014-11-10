@@ -6,9 +6,6 @@ from six import text_type
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-o", "--output-name",
-        help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to release")
     subparsers = parser.add_subparsers(dest='subparser_name')
 
     parser_create_template = subparsers.add_parser(
@@ -24,6 +21,9 @@ def create_parser():
     parser_create_template.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
+    parser_create_template.add_argument(
+        "-o", "--output-name",
+        help="Name of the outputted file. Will have an extension appended if format is all.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
@@ -44,6 +44,9 @@ def create_parser():
     parser_unflatten.add_argument(
         "-e", "--encoding",
         help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
+    parser_unflatten.add_argument(
+        "-o", "--output-name",
+        help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to release")
 
     return parser
 
