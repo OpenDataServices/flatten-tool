@@ -1,9 +1,15 @@
 import pytest
 from collections import OrderedDict
-from flattening_ocds.schema import SchemaParser
+from flattening_ocds.schema import SchemaParser, get_property_type_set
 
 
 type_string = { 'type': 'string' }
+
+
+def test_get_property_type_set():
+    assert get_property_type_set({'type': 'a'}) == set(['a'])
+    assert get_property_type_set({'type': ['a']}) == set(['a'])
+    assert get_property_type_set({'type': ['a', 'b']}) == set(['a', 'b'])
 
 
 def test_filename_and_dict_error(tmpdir):
@@ -231,6 +237,24 @@ class TestSubSheetMainID(object):
         assert set(parser.main_sheet) == set(['id', 'testA/id'])
         assert set(parser.sub_sheets) == set(['testB'])
         assert list(parser.sub_sheets['testB']) == ['ocid', 'custom_main_sheet_name/id:testB', 'custom_main_sheet_name/testA/id:testB', 'testC']
+
+
+def test_simple_array():
+    parser = SchemaParser(
+        root_schema_dict={
+            'properties': {
+                'testA': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string'
+                    }
+                }
+            }
+        },
+        main_sheet_name='custom_main_sheet_name'
+    )
+    parser.parse()
+    assert set(parser.main_sheet) == set(['testA:array'])
 
 
 def test_references_sheet_names(tmpdir):
