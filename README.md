@@ -27,13 +27,12 @@ Usage
 
 will print general help information.
 
-    flatten-ocds create-template -h
+    flatten-ocds {create-template,unflatten} -h
 
-will print help information specific to that subcomand.
+will print help information specific to that subcommand.
 
 
-Creating the Spreadsheet Templates
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+### Creating spreadsheet templates
 
 Download https://raw.githubusercontent.com/open-contracting/standard/master/standard/schema/release-schema.json to the current directory.
 
@@ -43,8 +42,7 @@ This will create `release.xlsx` and a `release/` directory of csv files.
 
 See `flatten-ocds --help` for details of the commandline options.
 
-Converting a Populated Spreadsheet to JSON
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+### Converting a populated spreadsheet to JSON
 
     cp base.json.example base.json
 
