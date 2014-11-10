@@ -392,6 +392,30 @@ class TestUnflatten(object):
                 }]
             }
 
+    def test_nested_id(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'ocid': 1,
+                        'custom_main/id:subField': 2,
+                        'id': 3,
+                        'testA/id': 4,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': { 'id': 4}}]}
+        ]
+
 
 class TestUnflattenEmpty(object):
     def test_all_empty(self):

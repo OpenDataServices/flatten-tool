@@ -232,9 +232,6 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                 k.split(':')[0].endswith('/id') and
                 k.startswith(spreadsheet_input.main_sheet_name)}
             line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
-            # FIXME add test for why this is wrong
-            #if not all(x.startswith(spreadsheet_input.main_sheet_name) for x in id_fields):
-            #    raise ValueError
             raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
             try:
