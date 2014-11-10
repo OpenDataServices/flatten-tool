@@ -97,13 +97,20 @@ def unflatten_line(line):
     return unflattened
 
 
-def path_search(nested_dict, path_list, id_fields=None, path=''):
+def print_args_kwargs(f):
+    def wrapped(*args, **kwargs):
+        print(args, kwargs)
+        return f(*args, **kwargs)
+    return wrapped
+
+
+def path_search(nested_dict, path_list, id_fields=None, path=None):
     if not path_list:
         return nested_dict
 
     id_fields = id_fields or {}
     parent_field = path_list[0]
-    path = path+'/'+parent_field
+    path = parent_field if path is None else path+'/'+parent_field
 
     if parent_field.endswith('[]'):
         parent_field = parent_field[:-2]
@@ -113,19 +120,25 @@ def path_search(nested_dict, path_list, id_fields=None, path=''):
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
         return path_search(nested_dict[parent_field][sub_sheet_id],
-                           path_list[1:], path=path)
+                           path_list[1:],
+                           id_fields=id_fields,
+                           path=path)
     else:
         if parent_field not in nested_dict:
             nested_dict[parent_field] = {}
         return path_search(nested_dict[parent_field],
-                           path_list[1:], path=path)
+                           path_list[1:],
+                           id_fields=id_fields,
+                           path=path)
+
+path_search_a = print_args_kwargs(path_search)
 
 
 class TemporaryDict(UserDict):
     def __init__(self, keyfield):
         self.keyfield = keyfield
         self.items_no_keyfield = []
-        UserDict.__init__(self)
+        self.data = OrderedDict()
 
     def append(self, item):
         if self.keyfield in item:
@@ -200,9 +213,9 @@ def convert_types(in_dict):
 def unflatten_spreadsheet_input(spreadsheet_input):
     main_sheet_by_ocid = OrderedDict()
     for line in spreadsheet_input.get_main_sheet_lines():
-        if line['ocid'] in main_sheet_by_ocid:
-            raise ValueError('Two lines in main spreadsheet with same ocid')
-        main_sheet_by_ocid[line['ocid']] = unflatten_line(convert_types(line))
+        if line['ocid'] not in main_sheet_by_ocid:
+            main_sheet_by_ocid[line['ocid']] = TemporaryDict('id')
+        main_sheet_by_ocid[line['ocid']].append(unflatten_line(convert_types(line)))
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
         for line in lines:
@@ -216,11 +229,10 @@ def unflatten_spreadsheet_input(spreadsheet_input):
             raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
             id_field = find_deepest_id_field(raw_id_fields_with_values)
-            context = path_search(
-                main_sheet_by_ocid[line['ocid']],
-                id_field.split('/')[1:-1],
-                id_fields=raw_id_fields_with_values,
-                path=spreadsheet_input.main_sheet_name
+            context = path_search_a(
+                {spreadsheet_input.main_sheet_name:main_sheet_by_ocid[line['ocid']]},
+                id_field.split('/')[:-1],
+                id_fields=raw_id_fields_with_values
             )
             sheet_context_name = sheet_context_names[id_field] or sheet_name
             if sheet_context_name not in context:
@@ -228,4 +240,4 @@ def unflatten_spreadsheet_input(spreadsheet_input):
             context[sheet_context_name].append(unflatten_line(convert_types(line_without_id_fields)))
     temporarydicts_to_lists(main_sheet_by_ocid)
 
-    return main_sheet_by_ocid.values()
+    return sum(main_sheet_by_ocid.values(), [])
