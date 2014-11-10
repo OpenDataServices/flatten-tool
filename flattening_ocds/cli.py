@@ -30,6 +30,10 @@ def create_parser():
     parser_unflatten.add_argument('input_name',
         help="Name of the input file or directory.")
     parser_unflatten.add_argument(
+        "-f", "--input-format",
+        help="File format of input file or directory.",
+        required=True)
+    parser_unflatten.add_argument(
         "-b", "--base-json",
         help="A base json file to populate the releases key in.")
     parser_unflatten.add_argument(

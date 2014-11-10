@@ -62,6 +62,12 @@ class XLSXInput(SpreadsheetInput):
             yield {coli_to_header[i]:x.value for i, x in enumerate(row) if i in coli_to_header}
 
 
+FORMATS = {
+    'xlsx': XLSXInput,
+    'csv': CSVInput
+}
+
+
 def unflatten_line(line):
     unflattened = {}
     for k, v in line.items():
