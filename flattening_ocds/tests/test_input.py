@@ -325,6 +325,70 @@ class TestUnflatten(object):
             {'ocid': 1, 'testA': unicode_string}
         ]
 
+    def test_conflicting_ids(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'ocid': 1,
+                        'custom_main/id': 2,
+                        'custom_main/testA[]/id:subField': 1,
+                        'custom_main/testB[]/id:subField': 1,
+                        'testC': 3,
+                    },
+                    {
+                        'ocid': 1,
+                        'custom_main/id': 2,
+                        'custom_main/testA[]/id:subField': 1,
+                        'custom_main/testB[]/id:subField': '',
+                        'testC': 4,
+                    }
+                ],
+                'testA': [
+                    {
+                        'ocid': 1,
+                        'custom_main/id': 2,
+                        'id': 1,
+                    }
+                ],
+                'testB': [
+                    {
+                        'ocid': 1,
+                        'custom_main/id': 2,
+                        'id': 1,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
+        # We should have a warning about conflicting ID fields
+        w = recwarn.pop(UserWarning)
+        assert 'Multiple conflicting ID fields' in text_type(w.message)
+        # (line number includes an assumed header line)
+        assert 'line 2 of sheet sub' in text_type(w.message)
+        # Only one top level object should have been outputted
+        assert len(unflattened) == 1
+        # Check that the valid data is outputted correctly
+        assert unflatten_spreadsheet_input(spreadsheet_input)[0] == \
+            {
+                'ocid': 1,
+                'id': 2,
+                'testA': [{
+                    'id': 1,
+                    'subField': [{'testC': 4}]
+                }],
+                'testB': [{
+                    'id': 1
+                }]
+            }
+
 
 class TestUnflattenEmpty(object):
     def test_all_empty(self):

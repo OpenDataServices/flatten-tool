@@ -158,12 +158,16 @@ def temporarydicts_to_lists(nested_dict):
             temporarydicts_to_lists(value)
 
 
+class ConflictingIDFieldsError(ValueError):
+    pass
+
+
 def find_deepest_id_field(id_fields):
     split_id_fields = [x.split('/') for x in id_fields]
     deepest_id_field = max(split_id_fields, key=len)
     for split_id_field in split_id_fields:
         if not all(deepest_id_field[i] == x for i, x in enumerate(split_id_field[:-1])):
-            raise ValueError
+            raise ConflictingIDFieldsError()
     return '/'.join(deepest_id_field)
 
 
@@ -221,7 +225,7 @@ def unflatten_spreadsheet_input(spreadsheet_input):
         main_sheet_by_ocid[line['ocid']].append(unflatten_line(convert_types(line)))
 
     for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
-        for line in lines:
+        for i, line in enumerate(lines):
             if all(x=='' for x in line.values()):
                 continue
             id_fields = {k: v for k, v in line.items() if
@@ -233,7 +237,11 @@ def unflatten_spreadsheet_input(spreadsheet_input):
             #    raise ValueError
             raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
-            id_field = find_deepest_id_field(raw_id_fields_with_values)
+            try:
+                id_field = find_deepest_id_field(raw_id_fields_with_values)
+            except ConflictingIDFieldsError:
+                warn('Multiple conflicting ID fields have been filled in on line {} of sheet {}, skipping that line.'.format(i+2, sheet_name)) 
+                continue
             context = path_search(
                 {spreadsheet_input.main_sheet_name:main_sheet_by_ocid[line['ocid']]},
                 id_field.split('/')[:-1],
