@@ -33,7 +33,7 @@ class SpreadsheetOutput(object):
         pass
 
 
-class XlsxOutput(SpreadsheetOutput):
+class XLSXOutput(SpreadsheetOutput):
     def open(self):
         self.workbook = xlsxwriter.Workbook(self.output_name+'.xlsx')
 
@@ -46,7 +46,7 @@ class XlsxOutput(SpreadsheetOutput):
         self.workbook.close()
 
 
-class CSVDirectoryOutupt(SpreadsheetOutput):
+class CSVOutupt(SpreadsheetOutput):
     def open(self):
         try:
             os.makedirs(self.output_name)
@@ -60,6 +60,6 @@ class CSVDirectoryOutupt(SpreadsheetOutput):
 
 
 FORMATS = {
-    'xlsx': XlsxOutput,
-    'csv': CSVDirectoryOutupt
+    'xlsx': XLSXOutput,
+    'csv': CSVOutupt
 }
