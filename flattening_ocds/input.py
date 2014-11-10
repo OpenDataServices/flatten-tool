@@ -147,6 +147,7 @@ def convert_type(type_string, value):
     elif type_string == 'integer':
         return int(value)
     elif type_string == 'boolean':
+        value = str(value)
         if value.lower() in ['true','1']:
             return True
         elif value.lower() in ['false','0']:
@@ -154,10 +155,15 @@ def convert_type(type_string, value):
         else:
             raise ValueError('Unrecognised value for boolean: {}'.format(value))
     elif type_string == 'array':
+        value = str(value)
         if ',' in value:
             return [ x.split(',') for x in value.split(';') ]
         else:
             return value.split(';')
+    elif type_string == 'string':
+        return str(value)
+    elif type_string == '':
+        return value if type(value) in [int] else str(value)
     else:
         raise ValueError('Unrecognised type: {}'.format(type_string))
 
@@ -168,7 +174,7 @@ def convert_types(in_dict):
         if len(parts) > 1:
             out_dict[parts[0]] = convert_type(parts[1], value)
         else:
-            out_dict[parts[0]] = value
+            out_dict[parts[0]] = convert_type('', value)
     return out_dict
 
 

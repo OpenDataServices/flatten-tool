@@ -1,5 +1,6 @@
 from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
 from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, find_deepest_id_field, convert_type
+from decimal import Decimal
 import pytest
 
 
@@ -41,6 +42,16 @@ def test_xlsx_input(tmpdir):
     assert list(xlsxinput.get_sheet_lines('subsheet')) == \
         [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
+
+def test_xlsx_input_integer(tmpdir):
+    xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/integer.xlsx', main_sheet_name='main')
+    assert xlsxinput.main_sheet_name == 'main'
+
+    xlsxinput.read_sheets()
+
+    assert list(xlsxinput.get_main_sheet_lines()) == \
+        [{'colA': 1}]
+    assert xlsxinput.sub_sheet_names == []
     
 
 
@@ -199,5 +210,38 @@ class TestUnflatten(object):
         ]
 
 def test_convert_type():
+    assert convert_type('', 'somestring') == 'somestring'
+    # If not type is specified, ints are kept as ints...
+    assert convert_type('', 3) == 3
+
+    # ... but all other ojbects are converted to strings
+    class NotAString(object):
+        def __str__(self):
+            return 'string representation'
+    assert NotAString() != 'string representation'
+    assert convert_type('', NotAString()) == 'string representation'
+    assert convert_type('string', NotAString()) == 'string representation'
+
+    assert convert_type('string', 3) == '3'
+    assert convert_type('number', '3') == Decimal('3')
+    assert convert_type('number', '1.2') == Decimal('1.2')
+    assert convert_type('integer', '3') == 3
+    assert convert_type('integer', 3) == 3
+
+    assert convert_type('boolean', 'TRUE') is True
+    assert convert_type('boolean', 'True') is True
+    assert convert_type('boolean', 1) is True
+    assert convert_type('boolean', '1') is True
+    assert convert_type('boolean', 'FALSE') is False
+    assert convert_type('boolean', 'False') is False
+    assert convert_type('boolean', 0) is False
+    assert convert_type('boolean', '0') is False
+    with pytest.raises(ValueError):
+        convert_type('boolean', 2)
+    with pytest.raises(ValueError):
+        convert_type('boolean', 'test')
+    with pytest.raises(ValueError):
+        convert_type('boolean', '')
+
     assert convert_type('array', 'one;two') == ['one', 'two']
     assert convert_type('array', 'one,two;three,four') == [ ['one', 'two'], ['three', 'four'] ]
