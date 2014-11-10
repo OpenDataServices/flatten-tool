@@ -126,6 +126,7 @@ def test_unflatten_line():
 def test_path_search():
     goal_dict = {}
     assert goal_dict is not {} # following tests rely on this
+    assert path_search(goal_dict, []) is goal_dict
     assert path_search(
         {'testA': goal_dict},
         ['testA']) is goal_dict
@@ -214,7 +215,6 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'subField': [{'testA': 3}]}
         ]
 
-    @pytest.mark.xfail
     def test_nested_sub_sheet(self):
         spreadsheet_input = ListInput(
             sheets={

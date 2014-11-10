@@ -240,9 +240,11 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                 top=True
             )
             sheet_context_name = sheet_context_names[id_field] or sheet_name
+            # Added the following line to support the usecase in test_nested_sub_sheet
+            context = path_search(context, sheet_context_name.split('/')[:-1])
             if sheet_context_name not in context:
-                context[sheet_context_name] = TemporaryDict(keyfield='id')
-            context[sheet_context_name].append(unflatten_line(convert_types(line_without_id_fields)))
+                context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
+            context[sheet_context_name.split('/')[-1]].append(unflatten_line(convert_types(line_without_id_fields)))
     temporarydicts_to_lists(main_sheet_by_ocid)
 
     return sum(main_sheet_by_ocid.values(), [])
