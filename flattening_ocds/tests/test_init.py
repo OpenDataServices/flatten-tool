@@ -28,7 +28,7 @@ def test_unflatten(tmpdir):
         '6,7,8,9,10\n'
     )
     input_dir.join('subsheet.csv').write(
-        'ocid,main[]/id,testA,testB,testC\n'
+        'ocid,main/id,testA,testB,testC\n'
         '1,2,11,12,13\n'
     )
     unflatten(input_dir.strpath,

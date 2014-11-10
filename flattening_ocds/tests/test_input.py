@@ -126,12 +126,18 @@ def test_path_search():
         ['a1','b1', 'c1']) is goal_dict
     assert path_search(
         {'a1': {'b1': {'c1': goal_dict}}},
-        ['a1[]','c1'],
-        id_fields={'a1[]/id':'b1'}) is goal_dict
-    assert path_search(
-        {'a1': {'b1': {'c1': goal_dict}}},
         ['a1','b1[]'],
         id_fields={'a1/b1[]/id':'c1'}) is goal_dict
+    assert path_search(
+        {'a1': {'b1': {'c1': goal_dict}}},
+        ['a1[]','c1'],
+        id_fields={'a1[]/id':'b1'}) is goal_dict
+    # Top is always assumed to be an arary
+    assert path_search(
+        {'a1': {'b1': {'c1': goal_dict}}},
+        ['a1','c1'],
+        id_fields={'a1/id':'b1'},
+        top=True) is goal_dict
 
 
 def test_find_deepest_id_field():
@@ -188,7 +194,7 @@ class TestUnflatten(object):
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main[]/id:subField': 2,
+                        'custom_main/id:subField': 2,
                         'testA': 3,
                     }
                 ]
@@ -212,7 +218,7 @@ class TestUnflatten(object):
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main[]/id:testA/subField': 2,
+                        'custom_main/id:testA/subField': 2,
                         'testB': 3,
                     }
                 ]
@@ -235,7 +241,7 @@ class TestUnflatten(object):
                 'sub1': [
                     {
                         'ocid': 1,
-                        'custom_main[]/id:sub1Field': 2,
+                        'custom_main/id:sub1Field': 2,
                         'id': 3,
                         'testA': 4,
                     }
@@ -243,8 +249,8 @@ class TestUnflatten(object):
                 'sub2': [
                     {
                         'ocid': 1,
-                        'custom_main[]/id:sub1Field': 2,
-                        'custom_main[]/sub1Field[]/id:sub2Field': 3,
+                        'custom_main/id:sub1Field': 2,
+                        'custom_main/sub1Field[]/id:sub2Field': 3,
                         'testB': 5,
                     }
                 ]

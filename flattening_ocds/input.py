@@ -97,14 +97,7 @@ def unflatten_line(line):
     return unflattened
 
 
-def print_args_kwargs(f):
-    def wrapped(*args, **kwargs):
-        print(args, kwargs)
-        return f(*args, **kwargs)
-    return wrapped
-
-
-def path_search(nested_dict, path_list, id_fields=None, path=None):
+def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
     if not path_list:
         return nested_dict
 
@@ -112,8 +105,9 @@ def path_search(nested_dict, path_list, id_fields=None, path=None):
     parent_field = path_list[0]
     path = parent_field if path is None else path+'/'+parent_field
 
-    if parent_field.endswith('[]'):
-        parent_field = parent_field[:-2]
+    if parent_field.endswith('[]') or top:
+        if parent_field.endswith('[]'):
+            parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
             nested_dict[parent_field] = TemporaryDict(keyfield='id')
         sub_sheet_id = id_fields[path+'/id']
@@ -130,8 +124,6 @@ def path_search(nested_dict, path_list, id_fields=None, path=None):
                            path_list[1:],
                            id_fields=id_fields,
                            path=path)
-
-path_search_a = print_args_kwargs(path_search)
 
 
 class TemporaryDict(UserDict):
@@ -229,10 +221,11 @@ def unflatten_spreadsheet_input(spreadsheet_input):
             raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
             sheet_context_names = {k.split(':')[0]:k.split(':')[1] if len(k.split(':')) > 1 else None for k, v in id_fields.items() if v}
             id_field = find_deepest_id_field(raw_id_fields_with_values)
-            context = path_search_a(
+            context = path_search(
                 {spreadsheet_input.main_sheet_name:main_sheet_by_ocid[line['ocid']]},
                 id_field.split('/')[:-1],
-                id_fields=raw_id_fields_with_values
+                id_fields=raw_id_fields_with_values,
+                top=True
             )
             sheet_context_name = sheet_context_names[id_field] or sheet_name
             if sheet_context_name not in context:
