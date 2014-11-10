@@ -66,7 +66,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     spreadsheet_input.read_sheets()
     if base_json:
         with open(base_json) as fp:
-            base = json.load(fp, object_pairs_hook=OrderedDict())
+            base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
     base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
