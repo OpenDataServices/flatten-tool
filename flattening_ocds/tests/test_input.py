@@ -88,7 +88,7 @@ class TestInputFailure():
         assert 'Main sheet "notmain" not found in workbook.' in text_type(e)
 
 
-class UnicodeInputTest(object):
+class TestUnicodeInput(object):
     def test_csv_input_utf8(self, tmpdir):
         main = tmpdir.join('main.csv')
         main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
