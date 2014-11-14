@@ -19,7 +19,7 @@ def test_spreadsheetinput_base_fails():
         spreadsheet_input.get_sheet_lines('test')
 
 
-class TestSuccessfulInput():
+class TestSuccessfulInput(object):
     def test_csv_input(self, tmpdir):
         main = tmpdir.join('main.csv')
         main.write('colA,colB\ncell1,cell2\ncell3,cell4')
@@ -37,7 +37,7 @@ class TestSuccessfulInput():
         assert list(csvinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
-    def test_xlsx_input(self, tmpdir):
+    def test_xlsx_input(self):
         xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/basic.xlsx', main_sheet_name='main')
         assert xlsxinput.main_sheet_name == 'main'
 
@@ -49,7 +49,7 @@ class TestSuccessfulInput():
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
-    def test_xlsx_input_integer(self, tmpdir):
+    def test_xlsx_input_integer(self):
         xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/integer.xlsx', main_sheet_name='main')
         assert xlsxinput.main_sheet_name == 'main'
 
@@ -60,8 +60,8 @@ class TestSuccessfulInput():
         assert xlsxinput.sub_sheet_names == []
 
 
-class TestInputFailure():
-    def test_csv_no_directory(self, tmpdir):
+class TestInputFailure(object):
+    def test_csv_no_directory(self):
         csvinput = CSVInput(input_name='nonesensedirectory', main_sheet_name='main')
         if sys.version > '3':
             with pytest.raises(FileNotFoundError):
@@ -121,7 +121,7 @@ class TestUnicodeInput(object):
             [{'colA': 'éαГ😼𝒞人'}]
         assert csvinput.sub_sheet_names == []
 
-    def test_xlsx_input_utf8(self, tmpdir):
+    def test_xlsx_input_utf8(self):
         """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
         xlsxinput = XLSXInput(input_name='flattening_ocds/tests/xlsx/unicode.xlsx', main_sheet_name='main')
 
