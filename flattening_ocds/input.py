@@ -102,7 +102,6 @@ def unflatten_line(line):
     return unflattened
 
 
-
 class IDFieldMissing(KeyError):
     pass
 
@@ -245,7 +244,9 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                 id_fields = {k: v for k, v in line.items() if
                              k.split(':')[0].endswith('/id') and
                              k.startswith(spreadsheet_input.main_sheet_name)}
-                line_without_id_fields = OrderedDict((k, v) for k, v in line.items() if k not in id_fields and k != 'ocid')
+                line_without_id_fields = OrderedDict(
+                    (k, v) for k, v in line.items()
+                    if k not in id_fields and k != 'ocid')
                 raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
                 if not raw_id_fields_with_values:
                     warn('Line {} of sheet {} has no parent id fields populated,'
@@ -270,7 +271,7 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                     )
                 except IDFieldMissing as e:
                     warn('The parent id field "{}" was expected, but not present on line {} of sheet {}.'.format(
-                         e.args[0], line_number, sheet_name))
+                        e.args[0], line_number, sheet_name))
                     continue
 
                 sheet_context_name = sheet_context_names[id_field] or sheet_name
@@ -278,8 +279,11 @@ def unflatten_spreadsheet_input(spreadsheet_input):
                 context = path_search(context, sheet_context_name.split('/')[:-1])
                 if sheet_context_name not in context:
                     context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
-                context[sheet_context_name.split('/')[-1]].append(unflatten_line(convert_types(line_without_id_fields)))
-            except Exception as e:
+                context[sheet_context_name.split('/')[-1]].append(
+                    unflatten_line(convert_types(line_without_id_fields)))
+            except Exception as e:  # pylint: disable=W0703
+                # Deliberately catch all exceptions for a line, so that
+                # all lines without exceptions will still be processed.
                 print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
                 traceback.print_exc()
                 sys.exit()

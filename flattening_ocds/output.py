@@ -66,5 +66,5 @@ FORMATS = {
 }
 FORMATS_SUFFIX = {
     'xlsx': '.xlsx',
-    'csv': '' # This is the suffix for the directory
+    'csv': ''  # This is the suffix for the directory
 }
