@@ -9,6 +9,7 @@ import json
 import six
 from collections import OrderedDict
 from decimal import Decimal
+from flattening_ocds.schema import SchemaParser
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal]
 
@@ -35,15 +36,45 @@ class JSONParser(object):
         else:
             self.root_json_dict = root_json_dict
 
+    def parse(self):
+        root_json_list = self.root_json_dict # TODO add support for finding
+        # the main json_list within the root_json_dict (e.g. root_json_dict['releases'])
+        for json_dict in root_json_list:
+            self.parse_json_dict(json_dict, sheet=self.main_sheet, sheet_lines=self.main_sheet_lines)
     
-    def parse_json_dict(self):
+    def parse_json_dict(self, json_dict, sheet, sheet_lines, parent_name='', flattened_dict=None):
         # Possibly main_sheet should be main_sheet_columns, but this is
         # currently named for consistency with schema.py
+        
+        if flattened_dict is None:
+            flattened_dict = {}
+            top = True
+        else:
+            top = False
 
-        root_json_list = self.root_json_dict # TODO add support for finding
-        # the main json_list withint the root_json_dict (e.g. root_json_dict['releases'])
-        for json_dict in root_json_list:
-            for key, value in json_dict.items():
-                if type(value) in BASIC_TYPES and not key in self.main_sheet:
-                    self.main_sheet.append(key)
-            self.main_sheet_lines.append({k:v for k,v in json_dict.items() if type(v) in BASIC_TYPES})
+        for key, value in json_dict.items():
+            if type(value) in BASIC_TYPES:
+                if not key in sheet:
+                    sheet.append(parent_name+key)
+                flattened_dict[parent_name+key] = value
+            elif hasattr(value, 'items'):
+                self.parse_json_dict(
+                    value,
+                    sheet=sheet,
+                    sheet_lines=sheet_lines,
+                    parent_name=parent_name+key+'/',
+                    flattened_dict=flattened_dict)
+            elif hasattr(value, '__iter__'):
+                if key not in self.sub_sheets:
+                    self.sub_sheets[key] = []
+                    self.sub_sheet_lines[key] = []
+                for json_dict in value:
+                    self.parse_json_dict(
+                        json_dict,
+                        sheet=self.sub_sheets[key],
+                        sheet_lines=self.sub_sheet_lines[key])
+            else:
+                raise ValueError('Unsupported type {}'.format(type(value)))
+
+        if top:
+            sheet_lines.append(flattened_dict)
