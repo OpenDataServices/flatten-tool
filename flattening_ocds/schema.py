@@ -52,7 +52,6 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
-        print('b')
         for field in self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict):
             self.main_sheet.append(field)
 

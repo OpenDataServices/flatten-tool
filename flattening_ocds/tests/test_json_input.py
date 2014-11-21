@@ -78,6 +78,42 @@ def test_parse_nested_list_json_dict():
     assert parser.sub_sheet_lines == {'c':[{'d':'e'}]}
 
 
-# TODO Check support for decimals, integers, booleans
+def test_parse_using_schema(tmpdir):
+    test_schema = tmpdir.join('test.json')
+    test_schema.write('''{
+        "properties": {
+            "c": {
+                "type": "array",
+                "items": {"$ref": "#/testB"}
+            }
+        },
+        "testB": {
+            "type": "object",
+            "properties": {
+                "d": { "type": "string" }
+            }
+        }
+    }''')
+    schema_parser = SchemaParser(
+        schema_filename=test_schema.strpath
+    )
+    schema_parser.parse()
+    parser = JSONParser(
+        root_json_dict=[OrderedDict([
+            ('a', 'b'),
+            ('c', [OrderedDict([('d', 'e')])]),
+        ])],
+        schema_parser=schema_parser
+    )
+    parser.parse()
+    assert parser.main_sheet == [ 'a' ]
+    assert parser.main_sheet_lines == [
+        {'a': 'b'}
+    ]
+    assert parser.sub_sheets == {'testB':['d']}
+    assert parser.sub_sheet_lines == {'testB':[{'d':'e'}]}
 
-# TODO Add support for cases where the eky doesn't match what the sheet name created by create_template is...
+    # TODO Also fetch spreadsheet column headers from schema
+    
+
+# TODO Check support for decimals, integers, booleans

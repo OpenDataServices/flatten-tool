@@ -17,12 +17,16 @@ class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
 
-    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main'):
+    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None):
         self.sub_sheets = {}
         self.main_sheet = []
         self.sub_sheet_lines = {}
         self.main_sheet_lines = []
         self.main_sheet_name = main_sheet_name
+        if schema_parser:
+            self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
+        else:
+            self.sub_sheet_mapping = {}
 
         if json_filename is None and root_json_dict is None:
             raise ValueError('Etiher json_filename or root_json_dict must be supplied')
@@ -65,14 +69,15 @@ class JSONParser(object):
                     parent_name=parent_name+key+'/',
                     flattened_dict=flattened_dict)
             elif hasattr(value, '__iter__'):
-                if key not in self.sub_sheets:
-                    self.sub_sheets[key] = []
-                    self.sub_sheet_lines[key] = []
+                sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
+                if sub_sheet_name not in self.sub_sheets:
+                    self.sub_sheets[sub_sheet_name] = []
+                    self.sub_sheet_lines[sub_sheet_name] = []
                 for json_dict in value:
                     self.parse_json_dict(
                         json_dict,
-                        sheet=self.sub_sheets[key],
-                        sheet_lines=self.sub_sheet_lines[key])
+                        sheet=self.sub_sheets[sub_sheet_name],
+                        sheet_lines=self.sub_sheet_lines[sub_sheet_name])
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
 
