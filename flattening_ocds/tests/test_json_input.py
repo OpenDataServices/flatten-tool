@@ -114,6 +114,29 @@ def test_parse_using_schema(tmpdir):
     assert parser.sub_sheet_lines == {'testB':[{'d':'e'}]}
 
     # TODO Also fetch spreadsheet column headers from schema
-    
+
+
+def test_parse_ids():
+    parser = JSONParser(root_json_dict=[OrderedDict([
+        ('ocid', 1),
+        ('id', 2),
+        ('a', 'b'),
+        ('c', [OrderedDict([('d', 'e')])]),
+    ])])
+    parser.parse()
+    assert parser.main_sheet == [ 'ocid', 'id', 'a' ]
+    assert parser.main_sheet_lines == [
+        {
+            'ocid': 1,
+            'id': 2,
+            'a': 'b'
+        }
+    ]
+    assert parser.sub_sheets == {'c':['ocid','main/id','d']}
+    assert parser.sub_sheet_lines == {'c':[{
+        'ocid': 1,
+        'main/id': 2,
+        'd':'e'
+    }]}
 
 # TODO Check support for decimals, integers, booleans

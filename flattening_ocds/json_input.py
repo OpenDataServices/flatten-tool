@@ -46,15 +46,27 @@ class JSONParser(object):
         for json_dict in root_json_list:
             self.parse_json_dict(json_dict, sheet=self.main_sheet, sheet_lines=self.main_sheet_lines)
     
-    def parse_json_dict(self, json_dict, sheet, sheet_lines, parent_name='', flattened_dict=None):
+    def parse_json_dict(self, json_dict, sheet, sheet_lines, parent_name='', flattened_dict=None, parent_id_fields=None):
         # Possibly main_sheet should be main_sheet_columns, but this is
         # currently named for consistency with schema.py
         
+        parent_id_fields = parent_id_fields or OrderedDict()
         if flattened_dict is None:
             flattened_dict = {}
             top = True
         else:
             top = False
+
+        for k, v in parent_id_fields.items():
+            sheet.append(k)
+            flattened_dict[k] = v
+
+        if 'ocid' in json_dict:
+            parent_id_fields['ocid'] = json_dict['ocid']
+
+        if 'id' in json_dict:
+            parent_id_fields[self.main_sheet_name+'/'+parent_name+'id'] = json_dict['id']
+
 
         for key, value in json_dict.items():
             if type(value) in BASIC_TYPES:
@@ -67,7 +79,8 @@ class JSONParser(object):
                     sheet=sheet,
                     sheet_lines=sheet_lines,
                     parent_name=parent_name+key+'/',
-                    flattened_dict=flattened_dict)
+                    flattened_dict=flattened_dict,
+                    parent_id_fields=parent_id_fields)
             elif hasattr(value, '__iter__'):
                 sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
                 if sub_sheet_name not in self.sub_sheets:
@@ -77,9 +90,10 @@ class JSONParser(object):
                     self.parse_json_dict(
                         json_dict,
                         sheet=self.sub_sheets[sub_sheet_name],
-                        sheet_lines=self.sub_sheet_lines[sub_sheet_name])
+                        sheet_lines=self.sub_sheet_lines[sub_sheet_name],
+                        parent_id_fields=parent_id_fields)
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
-
+        
         if top:
             sheet_lines.append(flattened_dict)
