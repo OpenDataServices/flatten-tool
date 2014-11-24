@@ -139,4 +139,19 @@ def test_parse_ids():
         'd':'e'
     }]}
 
+def test_root_list_path():
+    parser = JSONParser(
+        root_json_dict={'custom_key': [OrderedDict([
+            ('a', 'b'),
+            ('c', 'd'),
+        ])]},
+        root_list_path='custom_key')
+    parser.parse()
+    assert parser.main_sheet == [ 'a', 'c' ]
+    assert parser.main_sheet_lines == [
+        {'a': 'b', 'c': 'd'}
+    ]
+    assert parser.sub_sheets == {}
+    assert parser.sub_sheet_lines == {}
+
 # TODO Check support for decimals, integers, booleans

@@ -23,9 +23,15 @@ class SpreadsheetOutput(object):
     def write_sheets(self):
         self.open()
 
-        self.write_sheet(self.main_sheet_name, self.parser.main_sheet)
+        if hasattr(self.parser, 'main_sheet_lines'):
+            self.write_sheet(self.main_sheet_name, self.parser.main_sheet, self.parser.main_sheet_lines)
+        else:
+            self.write_sheet(self.main_sheet_name, self.parser.main_sheet)
         for sheet_name, sheet_header in sorted(self.parser.sub_sheets.items()):
-            self.write_sheet(sheet_name, list(sheet_header))
+            if hasattr(self.parser, 'sub_sheet_lines'):
+                self.write_sheet(sheet_name, list(sheet_header), self.parser.sub_sheet_lines)
+            else:
+                self.write_sheet(sheet_name, list(sheet_header))
 
         self.close()
 
@@ -54,10 +60,14 @@ class CSVOutupt(SpreadsheetOutput):
         except OSError:
             pass
 
-    def write_sheet(self, sheet_name, sheet_header):
+    def write_sheet(self, sheet_name, sheet_header, sheet_lines=None):
         with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
-            csv_sheet = csv.writer(csv_file)
-            csv_sheet.writerow(sheet_header)
+            if sheet_lines is not None:
+                raise NotImplementedError
+                #dictwriter = csv.DictWriter(csv_file, headers)
+            else:
+                csv_sheet = csv.writer(csv_file)
+                csv_sheet.writerow(sheet_header)
 
 
 FORMATS = {
