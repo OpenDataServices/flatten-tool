@@ -17,7 +17,7 @@ class SpreadsheetOutput(object):
     def open(self):
         pass
 
-    def write_sheet(self, sheet_name, sheet_header):
+    def write_sheet(self, sheet_name, sheet_header, sheet_lines=None):
         raise NotImplementedError
 
     def write_sheets(self):
@@ -43,10 +43,13 @@ class XLSXOutput(SpreadsheetOutput):
     def open(self):
         self.workbook = openpyxl.Workbook()
 
-    def write_sheet(self, sheet_name, sheet_header):
-        worksheet = self.workbook.create_sheet()
-        worksheet.title = sheet_name
-        worksheet.append(sheet_header)
+    def write_sheet(self, sheet_name, sheet_header, sheet_lines=None):
+        if sheet_lines is not None:
+            raise NotImplementedError
+        else:
+            worksheet = self.workbook.create_sheet()
+            worksheet.title = sheet_name
+            worksheet.append(sheet_header)
 
     def close(self):
         self.workbook.remove_sheet(self.workbook.active)
