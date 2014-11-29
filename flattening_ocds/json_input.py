@@ -62,7 +62,8 @@ class JSONParser(object):
             top = False
 
         for k, v in parent_id_fields.items():
-            sheet.append(k)
+            if k not in sheet:
+                sheet.append(k)
             flattened_dict[k] = v
 
         if 'ocid' in json_dict:
@@ -74,7 +75,7 @@ class JSONParser(object):
 
         for key, value in json_dict.items():
             if type(value) in BASIC_TYPES:
-                if not key in sheet:
+                if not parent_name+key in sheet:
                     sheet.append(parent_name+key)
                 flattened_dict[parent_name+key] = value
             elif hasattr(value, 'items'):

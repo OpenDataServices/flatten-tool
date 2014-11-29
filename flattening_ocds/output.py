@@ -49,7 +49,6 @@ class XLSXOutput(SpreadsheetOutput):
         worksheet.append(sheet_header)
         if sheet_lines is not None:
             for sheet_line in sheet_lines:
-                print(sheet_line)
                 worksheet.append([ sheet_line.get(x) for x in sheet_header ])
 
     def close(self):
