@@ -66,7 +66,6 @@ def test_populated_header(tmpdir):
     assert tmpdir.join('release', 'b.csv').read().strip('\n') == 'ocid,c'
 
 
-@pytest.mark.xfail
 def test_empty_lines(tmpdir):
     subsheet = schema.SubSheet()
     subsheet.add_field('c')
@@ -97,7 +96,6 @@ def test_empty_lines(tmpdir):
     assert tmpdir.join('release', 'b.csv').read().strip('\n') == 'ocid,c'
 
 
-@pytest.mark.xfail
 def test_populated_lines(tmpdir):
     subsheet = schema.SubSheet()
     subsheet.add_field('c')
