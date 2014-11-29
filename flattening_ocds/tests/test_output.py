@@ -27,10 +27,16 @@ def test_blank_sheets(tmpdir):
             output_name=os.path.join(tmpdir.strpath, 'release'+output.FORMATS_SUFFIX[format_name]))
         spreadsheet_output.write_sheets()
 
+    # Check XLSX is empty
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
     assert wb.get_sheet_names() == ['release']
-
-    # TODO Actually check the sheets are blank
+    assert len(wb['release'].rows) == 1
+    assert len(wb['release'].rows[0]) == 1
+    assert wb['release'].rows[0][0].value == None
+    
+    # Check CSV is Empty
+    assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
+    assert tmpdir.join('release', 'release.csv').read().strip('\n') == ''
 
 
 def test_populated_sheets(tmpdir):
@@ -42,4 +48,19 @@ def test_populated_sheets(tmpdir):
             main_sheet_name='release',
             output_name=os.path.join(tmpdir.strpath, 'release'+output.FORMATS_SUFFIX[format_name]))
         spreadsheet_output.write_sheets()
-    # TODO Actually check the sheets are populated
+
+    # Check XLSX
+    wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
+    assert wb.get_sheet_names() == ['release', 'b']
+    assert len(wb['release'].rows) == 1
+    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a' ]
+    assert len(wb['b'].rows) == 1
+    assert [ x.value for x in wb['b'].rows[0] ] == [ 'ocid', 'c' ]
+
+    # Check CSV
+    assert set(tmpdir.join('release').listdir()) == set([
+        tmpdir.join('release').join('release.csv'),
+        tmpdir.join('release').join('b.csv')
+    ])
+    assert tmpdir.join('release', 'release.csv').read().strip('\n') == 'a'
+    assert tmpdir.join('release', 'b.csv').read().strip('\n') == 'ocid,c'
