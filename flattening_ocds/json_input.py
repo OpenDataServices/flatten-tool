@@ -27,6 +27,8 @@ class JSONParser(object):
         self.root_list_path = root_list_path
         if schema_parser:
             self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
+            self.main_sheet = schema_parser.main_sheet
+            self.sub_sheets = schema_parser.sub_sheets
         else:
             self.sub_sheet_mapping = {}
 
@@ -98,6 +100,7 @@ class JSONParser(object):
                     sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = []
+                    if sub_sheet_name not in self.sub_sheet_lines:
                         self.sub_sheet_lines[sub_sheet_name] = []
 
 

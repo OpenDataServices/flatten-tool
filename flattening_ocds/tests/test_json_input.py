@@ -90,7 +90,8 @@ def test_parse_using_schema(tmpdir):
         "testB": {
             "type": "object",
             "properties": {
-                "d": { "type": "string" }
+                "d": { "type": "string" },
+                "f": { "type": "string" }
             }
         }
     }''')
@@ -110,10 +111,10 @@ def test_parse_using_schema(tmpdir):
     assert parser.main_sheet_lines == [
         {'a': 'b'}
     ]
-    assert parser.sub_sheets == {'testB':['d']}
+    assert len(parser.sub_sheets) == 1
+    assert list(parser.sub_sheets['testB']) == list(['ocid', 'd', 'f'])
     assert parser.sub_sheet_lines == {'testB':[{'d':'e'}]}
 
-    # TODO Also fetch spreadsheet column headers from schema
 
 
 def test_parse_ids():
