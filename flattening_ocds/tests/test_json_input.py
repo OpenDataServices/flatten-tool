@@ -130,14 +130,16 @@ def test_parse_ids():
         ('id', 2),
         ('a', 'b'),
         ('c', [OrderedDict([('d', 'e')])]),
+        ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
     ])])
     parser.parse()
-    assert parser.main_sheet == [ 'ocid', 'id', 'a' ]
+    assert parser.main_sheet == [ 'ocid', 'id', 'a', 'f/g' ]
     assert parser.main_sheet_lines == [
         {
             'ocid': 1,
             'id': 2,
-            'a': 'b'
+            'a': 'b',
+            'f/g': 'h'
         }
     ]
     assert parser.sub_sheets == {'c':['ocid','main/id','d']}

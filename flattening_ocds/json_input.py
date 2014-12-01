@@ -63,10 +63,12 @@ class JSONParser(object):
         else:
             top = False
 
-        for k, v in parent_id_fields.items():
-            if k not in sheet:
-                sheet.append(k)
-            flattened_dict[k] = v
+        if parent_name == '':
+            # Only add the IDs for the top level of object in an array
+            for k, v in parent_id_fields.items():
+                if k not in sheet:
+                    sheet.append(k)
+                flattened_dict[k] = v
 
         if 'ocid' in json_dict:
             parent_id_fields['ocid'] = json_dict['ocid']
