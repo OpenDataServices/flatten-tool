@@ -241,10 +241,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
             parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
             nested_dict[parent_field] = TemporaryDict(keyfield='id')
-        try:
-            sub_sheet_id = id_fields[path+'/id']
-        except KeyError:
-            raise IDFieldMissing(path+'/id')
+        sub_sheet_id = id_fields.get(path+'/id')
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
         return path_search(nested_dict[parent_field][sub_sheet_id],
