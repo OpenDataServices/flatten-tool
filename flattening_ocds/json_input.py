@@ -7,6 +7,7 @@ JSON schema, for that see schema.py).
 
 import json
 import six
+import copy
 from collections import OrderedDict
 from decimal import Decimal
 from flattening_ocds.schema import SchemaParser
@@ -52,11 +53,11 @@ class JSONParser(object):
         for json_dict in root_json_list:
             self.parse_json_dict(json_dict, sheet=self.main_sheet, sheet_lines=self.main_sheet_lines)
     
-    def parse_json_dict(self, json_dict, sheet, sheet_lines, parent_name='', flattened_dict=None, parent_id_fields=None):
+    def parse_json_dict(self, json_dict, sheet, sheet_lines, id_extra_parent_name='', parent_name='', flattened_dict=None, parent_id_fields=None):
         # Possibly main_sheet should be main_sheet_columns, but this is
         # currently named for consistency with schema.py
         
-        parent_id_fields = parent_id_fields or OrderedDict()
+        parent_id_fields = copy.copy(parent_id_fields) or OrderedDict()
         if flattened_dict is None:
             flattened_dict = {}
             top = True
@@ -74,7 +75,7 @@ class JSONParser(object):
             parent_id_fields['ocid'] = json_dict['ocid']
 
         if 'id' in json_dict:
-            parent_id_fields[self.main_sheet_name+'/'+parent_name+'id'] = json_dict['id']
+            parent_id_fields[self.main_sheet_name+'/'+id_extra_parent_name+parent_name+'id'] = json_dict['id']
 
 
         for key, value in json_dict.items():
@@ -112,7 +113,8 @@ class JSONParser(object):
                             json_dict,
                             sheet=self.sub_sheets[sub_sheet_name],
                             sheet_lines=self.sub_sheet_lines[sub_sheet_name],
-                            parent_id_fields=parent_id_fields)
+                            parent_id_fields=parent_id_fields,
+                            id_extra_parent_name=parent_name+key+'[]/')
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
         

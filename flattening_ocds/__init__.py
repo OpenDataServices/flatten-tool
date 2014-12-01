@@ -42,7 +42,11 @@ def flatten(input_name, schema=None, output_name='release', output_format='all',
         schema_parser = SchemaParser(schema_filename=schema)
     else:
         schema_parser = None
-    parser = JSONParser(json_filename=input_name, root_list_path=root_list_path, schema_parser=schema_parser)
+    parser = JSONParser(
+        json_filename=input_name,
+        root_list_path=root_list_path,
+        schema_parser=schema_parser,
+        main_sheet_name=main_sheet_name)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
