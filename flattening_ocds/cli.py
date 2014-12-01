@@ -33,8 +33,7 @@ def create_parser():
         help="Name of the input JSON file.")
     parser_flatten.add_argument(
         "-s", "--schema",
-        help="Path to a relevant schema.",
-        required=True)
+        help="Path to a relevant schema.")
     parser_flatten.add_argument(
         "-f", "--output-format",
         help="Type of template you want to create. Defaults to all available options")

@@ -37,14 +37,21 @@ def test_parse_empty_json_dict():
 
 
 def test_parse_basic_json_dict():
-    parser = JSONParser(root_json_dict=[OrderedDict([
-        ('a', 'b'),
-        ('c', 'd'),
-    ])])
+    parser = JSONParser(root_json_dict=[
+        OrderedDict([
+            ('a', 'b'),
+            ('c', 'd'),
+        ]),
+        OrderedDict([
+            ('a', 'e'),
+            ('c', 'f'),
+        ]),
+    ])
     parser.parse()
     assert parser.main_sheet == [ 'a', 'c' ]
     assert parser.main_sheet_lines == [
-        {'a': 'b', 'c': 'd'}
+        {'a': 'b', 'c': 'd'},
+        {'a': 'e', 'c': 'f'},
     ]
     assert parser.sub_sheets == {}
     assert parser.sub_sheet_lines == {}
@@ -155,4 +162,4 @@ def test_root_list_path():
     assert parser.sub_sheets == {}
     assert parser.sub_sheet_lines == {}
 
-# TODO Check support for decimals, integers, booleans
+# TODO Check support for decimals, integers, booleans and Nones

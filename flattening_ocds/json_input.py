@@ -12,7 +12,7 @@ from decimal import Decimal
 from flattening_ocds.schema import SchemaParser
 from flattening_ocds.input import path_search
 
-BASIC_TYPES = [six.text_type, bool, int, Decimal]
+BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
 class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
@@ -94,7 +94,8 @@ class JSONParser(object):
                     # TODO Make this check the schema
                     # TODO Error if the any of the values contain the seperator
                     # TODO Support doubly nested arrays
-                    sheet.append(parent_name+key)
+                    if not parent_name+key in sheet:
+                        sheet.append(parent_name+key)
                     flattened_dict[parent_name+key] = ';'.join(value)
                 else:
                     sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
