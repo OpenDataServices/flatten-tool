@@ -36,7 +36,7 @@ def test_blank_sheets(tmpdir):
     
     # Check CSV is Empty
     assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
-    assert tmpdir.join('release', 'release.csv').read().strip('\n') == ''
+    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == ''
 
 
 def test_populated_header(tmpdir):
@@ -62,8 +62,8 @@ def test_populated_header(tmpdir):
         tmpdir.join('release').join('release.csv'),
         tmpdir.join('release').join('b.csv')
     ])
-    assert tmpdir.join('release', 'release.csv').read().strip('\n') == 'a'
-    assert tmpdir.join('release', 'b.csv').read().strip('\n') == 'ocid,c'
+    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a'
+    assert tmpdir.join('release', 'b.csv').read().strip('\r\n') == 'ocid,c'
 
 
 def test_empty_lines(tmpdir):
@@ -92,8 +92,8 @@ def test_empty_lines(tmpdir):
         tmpdir.join('release').join('release.csv'),
         tmpdir.join('release').join('b.csv')
     ])
-    assert tmpdir.join('release', 'release.csv').read().strip('\n') == 'a'
-    assert tmpdir.join('release', 'b.csv').read().strip('\n') == 'ocid,c'
+    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a'
+    assert tmpdir.join('release', 'b.csv').read().strip('\r\n') == 'ocid,c'
 
 
 def test_populated_lines(tmpdir):
@@ -126,5 +126,5 @@ def test_populated_lines(tmpdir):
         tmpdir.join('release').join('release.csv'),
         tmpdir.join('release').join('b.csv')
     ])
-    assert tmpdir.join('release', 'release.csv').read().strip('\n') == 'a\ncell1\ncell2'
-    assert tmpdir.join('release', 'b.csv').read().strip('\n') == 'ocid,c\n,cell3\n,cell4'
+    assert tmpdir.join('release', 'release.csv').read().strip('\r\n').replace('\r', '') == 'a\ncell1\ncell2'
+    assert tmpdir.join('release', 'b.csv').read().strip('\r\n').replace('\r', '') == 'ocid,c\n,cell3\n,cell4'
