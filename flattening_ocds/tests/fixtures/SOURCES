@@ -1,0 +1,7 @@
+tenders_releases_2_releases.json
+Source: https://github.com/open-contracting/sample-data/tree/958fc30e827e980e750459e1b9a6fe09eb266d7d/buyandsell/ocds_data
+(but truncated to only two releases)
+
+tenders_releases_base.json
+Source: https://github.com/open-contracting/sample-data/tree/958fc30e827e980e750459e1b9a6fe09eb266d7d/buyandsell/ocds_data
+(but with the releases key removed)
