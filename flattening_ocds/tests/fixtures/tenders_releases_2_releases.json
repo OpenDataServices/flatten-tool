@@ -1,0 +1,113 @@
+{
+    "publisher": {
+        "scheme": null, 
+        "name": "Buyandsell.gc.ca", 
+        "uri": "https://buyandsell.gc.ca", 
+        "uid": null
+    }, 
+    "releases": [
+        {
+            "date": "2014-03-25", 
+            "language": "English", 
+            "id": "Buyandsell.gc.ca-2014-11-07-89f689cd-e784-4374-bb17-94144679d46f", 
+            "ocid": "PW-14-00627094", 
+            "initiationType": "tender", 
+            "tender": {
+                "documents": [
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/03/25/3a76d19e61825db7939e14afaa2002e3/14-2015_itt.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/03/25/3a76d19e61825db7939e14afaa2002e3/14-2015_itt.pdf"
+                    }, 
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/03/25/a5d07c1166142b8b2f4183d7a5363fec/14-2015_itt_-_f.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/03/25/a5d07c1166142b8b2f4183d7a5363fec/14-2015_itt_-_f.pdf"
+                    }, 
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/04/04/ea5d0f03cfc6ea201b5b6df8794dbb3c/14-2015_itt_amd1.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/04/04/ea5d0f03cfc6ea201b5b6df8794dbb3c/14-2015_itt_amd1.pdf"
+                    }, 
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/04/04/ac9afb3b664a28d519062f2b2a4cbceb/14-2015_itt_amd1-f.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/04/04/ac9afb3b664a28d519062f2b2a4cbceb/14-2015_itt_amd1-f.pdf"
+                    }, 
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/04/11/f3f3993b4f6f260e057d0cb95f43741d/14-2015_itt_amd2.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/04/11/f3f3993b4f6f260e057d0cb95f43741d/14-2015_itt_amd2.pdf"
+                    }, 
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/04/11/69359ba194d3f01f4f13cb9673b85071/14-2015_itt_amd2-f.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/04/11/69359ba194d3f01f4f13cb9673b85071/14-2015_itt_amd2-f.pdf"
+                    }
+                ], 
+                "tenderPeriod": {
+                    "endDate": "2014-04-15 14:00 Eastern Daylight Time (EDT)"
+                }, 
+                "items": [
+                    {
+                        "id": "1", 
+                        "classification": {
+                            "scheme": "GSIN", 
+                            "description": "F029: Other Animal Care and Control Services"
+                        }, 
+                        "description": "Canine Control of the Canada Geese (14-2015)"
+                    }
+                ], 
+                "awardCriteriaDetails": null, 
+                "procuringEntity": {
+                    "name": "Agriculture & Agrifood Canada"
+                }, 
+                "id": "PW-14-00627094", 
+                "methodRationale": "Open"
+            }, 
+            "tag": ["tender"], 
+            "buyer": {
+                "name": "Agriculture & Agrifood Canada"
+            }
+        }, 
+        {
+            "date": "2014-04-04", 
+            "language": "English", 
+            "id": "Buyandsell.gc.ca-2014-11-07-a76b0dd2-3dc8-4c52-bc36-cd0e42530602", 
+            "ocid": "PW-14-00629344", 
+            "initiationType": "tender", 
+            "tender": {
+                "documents": [
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/04/04/cb21d6397174fbba48c92edb694de76f/tender_document_5p404-13181.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/04/04/cb21d6397174fbba48c92edb694de76f/tender_document_5p404-13181.pdf"
+                    }, 
+                    {
+                        "url": "https://buyandsell.gc.ca/cds/public/2014/04/04/370b7a9ab2bdd35086e6caed9b5226f9/fr_tender_document_5p404-13181.pdf", 
+                        "id": "https://buyandsell.gc.ca/cds/public/2014/04/04/370b7a9ab2bdd35086e6caed9b5226f9/fr_tender_document_5p404-13181.pdf"
+                    }
+                ], 
+                "tenderPeriod": {
+                    "endDate": "2014-04-22 14:00 Central Daylight Time (CDT)"
+                }, 
+                "items": [
+                    {
+                        "id": "1", 
+                        "classification": {
+                            "scheme": "GSIN", 
+                            "description": "5131BI: Asphalt and Joint Sealing Services, 5131C: Highways, Roads, Railways,  Airfield Runways"
+                        }, 
+                        "description": "Clear Lake Campground Asphalt Paving - Riding Mountain National Park of Canada (5P404-13181)"
+                    }
+                ], 
+                "awardCriteriaDetails": null, 
+                "procuringEntity": {
+                    "name": "Parks Canada"
+                }, 
+                "id": "PW-14-00629344", 
+                "methodRationale": "Open"
+            }, 
+            "tag": ["tender"], 
+            "buyer": {
+                "name": "Parks Canada"
+            }
+        }
+    ], 
+    "uri": "https://github.com/open-contracting/sample-data/blob/master/buyandsell/ocds_data/tender_releases.json.zip", 
+    "license": "http://data.gc.ca/eng/open-government-licence-canada", 
+    "publishedDate": "2014-11-07"
+}

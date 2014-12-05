@@ -38,10 +38,13 @@ class SchemaParser(object):
     def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main'):
         self.sub_sheets = {}
         self.main_sheet = []
+        self.sub_sheet_mapping = {}
         self.main_sheet_name = main_sheet_name
 
+        if root_schema_dict is None and schema_filename is  None:
+            raise ValueError('One of schema_filename or root_schema_dict must be supplied')
         if root_schema_dict is not None and schema_filename is not None:
-            raise ValueError('Only one of schema_file or root_schema_dict should be supplied')
+            raise ValueError('Only one of schema_filename or root_schema_dict should be supplied')
         if schema_filename:
             with open(schema_filename) as schema_file:
                 self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict)
@@ -82,6 +85,8 @@ class SchemaParser(object):
                             sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
                         else:
                             sub_sheet_name = property_name
+
+                        self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
                             self.sub_sheets[sub_sheet_name] = SubSheet()

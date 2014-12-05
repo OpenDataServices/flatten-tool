@@ -1,6 +1,6 @@
 from __future__ import print_function
 import argparse
-from flattening_ocds import create_template, unflatten
+from flattening_ocds import create_template, unflatten, flatten
 from six import text_type
 
 
@@ -24,6 +24,28 @@ def create_parser():
     parser_create_template.add_argument(
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended if format is all.")
+
+    parser_flatten = subparsers.add_parser(
+        'flatten',
+        help='Flatten a JSON file')
+    parser_flatten.add_argument(
+        'input_name',
+        help="Name of the input JSON file.")
+    parser_flatten.add_argument(
+        "-s", "--schema",
+        help="Path to a relevant schema.")
+    parser_flatten.add_argument(
+        "-f", "--output-format",
+        help="Type of template you want to create. Defaults to all available options")
+    parser_flatten.add_argument(
+        "-m", "--main-sheet-name",
+        help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
+    parser_flatten.add_argument(
+        "-o", "--output-name",
+        help="Name of the outputted file. Will have an extension appended if format is all.")
+    parser_flatten.add_argument(
+        "--root-list-path",
+        help="Path of the root list, defaults to releases")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
@@ -77,6 +99,8 @@ def main():
         except (OSError, IOError) as e:
             print(text_type(e))
             return
+    elif args.subparser_name == 'flatten':
+        flatten(**kwargs_from_parsed_args(args))
     elif args.subparser_name == 'unflatten':
         unflatten(**kwargs_from_parsed_args(args))
 

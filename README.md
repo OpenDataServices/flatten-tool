@@ -36,11 +36,12 @@ will print help information specific to that subcommand.
 
 Download https://raw.githubusercontent.com/open-contracting/standard/master/standard/schema/release-schema.json to the current directory.
 
-    flatten-ocds create-template --output-format all --output-name release --schema release-schema.json --main-sheet-name release
+    flatten-ocds create-template --output-format all --output-name template --schema release-schema.json --main-sheet-name release
 
-This will create `release.xlsx` and a `release/` directory of csv files.
+This will create `template.xlsx` and a `template/` directory of csv files.
 
 See `flatten-ocds --help` for details of the commandline options.
+
 
 ### Converting a populated spreadsheet to JSON
 
@@ -57,6 +58,14 @@ Or for populated CSV files (in the release_populated directory):
     flatten-ocds unflatten release_populated --base-json base.json --input-format csv --output-name release.json  
 
 These produce a release.json file based on the data in the spreadsheets.
+
+
+### Converting a JSON file to a spreadsheet
+
+    flatten-ocds flatten input.json --main-sheet-name release --output-name unflattened
+
+This will create `unflattened.xlsx` and a `unflattened/` directory of csv files.
+
 
 
 Encodings

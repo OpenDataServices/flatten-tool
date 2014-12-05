@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 import sys
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import os
 from collections import OrderedDict
 import openpyxl
@@ -182,14 +182,18 @@ def find_deepest_id_field(id_fields):
 
 
 def convert_type(type_string, value):
-    if value == '':
+    if value == '' or value is None:
         return None
     if type_string == 'number':
-        return Decimal(value)
+        try:
+            return Decimal(value)
+        except (TypeError, ValueError, InvalidOperation):
+            warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value))
+            return text_type(value)
     elif type_string == 'integer':
         try:
             return int(value)
-        except ValueError:
+        except (TypeError, ValueError):
             warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
             return text_type(value)
     elif type_string == 'boolean':

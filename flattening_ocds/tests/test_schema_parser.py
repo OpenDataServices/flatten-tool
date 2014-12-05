@@ -19,7 +19,9 @@ def test_filename_and_dict_error(tmpdir):
     tmpfile.write('{}')
     with pytest.raises(ValueError):
         SchemaParser(schema_filename=tmpfile.strpath, root_schema_dict={})
-
+    # Supplying neither should also raise a ValueError
+    with pytest.raises(ValueError):
+        SchemaParser()
 
 def test_references_followed(tmpdir):
     """JSON references should be followed when a JSON file is read."""

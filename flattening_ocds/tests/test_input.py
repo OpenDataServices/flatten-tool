@@ -548,12 +548,21 @@ def test_convert_type(recwarn):
     convert_type('integer', 'test')
     assert 'Non-integer value "test"' in text_type(recwarn.pop(UserWarning).message)
 
+    convert_type('number', 'test')
+    assert 'Non-numeric value "test"' in text_type(recwarn.pop(UserWarning).message)
+
     assert convert_type('string', '') is None
     assert convert_type('number', '') is None
     assert convert_type('integer', '') is None
     assert convert_type('array', '') is None
     assert convert_type('boolean', '') is None
+    assert convert_type('string', None) is None
+    assert convert_type('number', None) is None
+    assert convert_type('integer', None) is None
+    assert convert_type('array', None) is None
+    assert convert_type('boolean', None) is None
 
+    assert convert_type('array', 'one') == ['one']
     assert convert_type('array', 'one;two') == ['one', 'two']
     assert convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
 
