@@ -3,7 +3,6 @@ import json
 import pytest
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip(tmpdir, output_format):
     input_name = 'flattening_ocds/tests/fixtures/tenders_releases_2_releases.json'
@@ -20,4 +19,12 @@ def test_roundtrip(tmpdir, output_format):
         input_format=output_format,
         base_json=base_name,
         main_sheet_name='release')
-    assert json.load(open(input_name)) == json.load(tmpdir.join('roundtrip.json'))
+    original_json = json.load(open(input_name))
+    roundtripped_json = json.load(tmpdir.join('roundtrip.json'))
+
+    # Not currently possible to roundtrib Nones
+    # https://github.com/open-contracting/flattening-ocds/issues/35
+    for release in roundtripped_json['releases']:
+        release['tender']['awardCriteriaDetails'] = None
+
+    assert original_json == roundtripped_json

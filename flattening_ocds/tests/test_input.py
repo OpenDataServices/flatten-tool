@@ -556,6 +556,11 @@ def test_convert_type(recwarn):
     assert convert_type('integer', '') is None
     assert convert_type('array', '') is None
     assert convert_type('boolean', '') is None
+    assert convert_type('string', None) is None
+    assert convert_type('number', None) is None
+    assert convert_type('integer', None) is None
+    assert convert_type('array', None) is None
+    assert convert_type('boolean', None) is None
 
     assert convert_type('array', 'one') == ['one']
     assert convert_type('array', 'one;two') == ['one', 'two']

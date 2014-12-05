@@ -182,7 +182,7 @@ def find_deepest_id_field(id_fields):
 
 
 def convert_type(type_string, value):
-    if value == '':
+    if value == '' or value is None:
         return None
     if type_string == 'number':
         try:
