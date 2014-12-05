@@ -2,6 +2,7 @@ from flattening_ocds import unflatten, flatten
 import json
 import pytest
 
+
 @pytest.mark.xfail
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip(tmpdir, output_format):
@@ -11,6 +12,7 @@ def test_roundtrip(tmpdir, output_format):
         input_name=input_name,
         output_name=tmpdir.join('flattened').strpath,
         output_format=output_format,
+        schema='flattening_ocds/tests/fixtures/release-schema.json',
         main_sheet_name='release')
     unflatten(
         input_name=tmpdir.join('flattened').strpath,

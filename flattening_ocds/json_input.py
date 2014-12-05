@@ -15,6 +15,25 @@ from flattening_ocds.input import path_search
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
+
+def sheet_key(sheet, key):
+    """
+    Check for a key in the sheet, and return it with any suffix (following a ':') that might be present).
+    
+    If a key does not exist, it will be created.
+
+    """
+    keys = [x for x in sheet if x.split(':')[0] == key]
+    if not keys:
+        sheet.append(key)
+        return key
+    elif len(keys) > 1:
+        # This shouldn't every happen, as the schema parser shouldn't output sheets like this...
+        raise ValueError('Sheet contains two conflicting keys')
+    else:
+        return keys[0]
+
+
 class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
@@ -67,9 +86,7 @@ class JSONParser(object):
         if parent_name == '':
             # Only add the IDs for the top level of object in an array
             for k, v in parent_id_fields.items():
-                if k not in sheet:
-                    sheet.append(k)
-                flattened_dict[k] = v
+                flattened_dict[sheet_key(sheet, k)] = v
 
         if 'ocid' in json_dict:
             parent_id_fields['ocid'] = json_dict['ocid']
@@ -80,9 +97,7 @@ class JSONParser(object):
 
         for key, value in json_dict.items():
             if type(value) in BASIC_TYPES:
-                if not parent_name+key in sheet:
-                    sheet.append(parent_name+key)
-                flattened_dict[parent_name+key] = value
+                flattened_dict[sheet_key(sheet, parent_name+key)] = value
             elif hasattr(value, 'items'):
                 self.parse_json_dict(
                     value,
@@ -97,9 +112,7 @@ class JSONParser(object):
                     # TODO Make this check the schema
                     # TODO Error if the any of the values contain the seperator
                     # TODO Support doubly nested arrays
-                    if not parent_name+key in sheet:
-                        sheet.append(parent_name+key)
-                    flattened_dict[parent_name+key] = ';'.join(value)
+                    flattened_dict[sheet_key(sheet, parent_name+key)] = ';'.join(value)
                 else:
                     sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
                     if sub_sheet_name not in self.sub_sheets:

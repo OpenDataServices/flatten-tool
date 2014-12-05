@@ -85,169 +85,19 @@ def test_parse_nested_list_json_dict():
     assert parser.sub_sheet_lines == {'c':[{'d':'e'}]}
 
 
-def test_parse_using_schema(tmpdir):
-    test_schema = tmpdir.join('test.json')
-    test_schema.write('''{
-        "properties": {
-            "c": {
-                "type": "array",
-                "items": {"$ref": "#/testB"}
-            }
-        },
-        "testB": {
-            "type": "object",
-            "properties": {
-                "d": { "type": "string" },
-                "f": { "type": "string" }
-            }
-        }
-    }''')
-    schema_parser = SchemaParser(
-        schema_filename=test_schema.strpath
-    )
-    schema_parser.parse()
-    parser = JSONParser(
-        root_json_dict=[OrderedDict([
-            ('a', 'b'),
-            ('c', [OrderedDict([('d', 'e')])]),
-        ])],
-        schema_parser=schema_parser
-    )
-    parser.parse()
-    assert parser.main_sheet == [ 'a' ]
-    assert parser.main_sheet_lines == [
-        {'a': 'b'}
-    ]
-    assert len(parser.sub_sheets) == 1
-    assert list(parser.sub_sheets['testB']) == list(['ocid', 'd', 'f'])
-    assert parser.sub_sheet_lines == {'testB':[{'d':'e'}]}
-
-
-def test_parse_ids():
+def test_parse_array():
     parser = JSONParser(root_json_dict=[OrderedDict([
-        ('ocid', 1),
-        ('id', 2),
-        ('a', 'b'),
-        ('c', [OrderedDict([('id', 3), ('d', 'e')]), OrderedDict([('id', 3), ('d', 'e2')])]),
-        ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
+        ('testarray', ['item','anotheritem'])
     ])])
     parser.parse()
-    assert parser.main_sheet == [ 'ocid', 'id', 'a', 'f/g' ]
+    assert parser.main_sheet == [ 'testarray' ]
     assert parser.main_sheet_lines == [
         {
-            'ocid': 1,
-            'id': 2,
-            'a': 'b',
-            'f/g': 'h'
+            'testarray': 'item;anotheritem'
         }
     ]
-    assert parser.sub_sheets == {'c': ['ocid','main/id','id','d']}
-    assert parser.sub_sheet_lines == {'c':[
-        {
-            'ocid': 1,
-            'main/id': 2,
-            'id': 3,
-            'd':'e'
-        },
-        {
-            'ocid': 1,
-            'main/id': 2,
-            'id': 3,
-            'd':'e2'
-        },
-    ]}
-
-
-
-def test_parse_ids_subsheet():
-    parser = JSONParser(root_json_dict=[OrderedDict([
-        ('ocid', 1),
-        ('id', 2),
-        ('testnest', [
-            OrderedDict([
-                ('id', 3),
-                ('a', 'b'),
-                ('c', [OrderedDict([('d', 'e')]), OrderedDict([('d', 'e2')])]),
-                ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
-            ])
-        ])
-    ])])
-    parser.parse()
-    assert parser.main_sheet == [ 'ocid', 'id' ]
-    assert parser.main_sheet_lines == [
-        {
-            'ocid': 1,
-            'id': 2,
-        }
-    ]
-    assert parser.sub_sheets == {
-            'testnest': ['ocid', 'main/id', 'id', 'a', 'f/g'],
-            'c': ['ocid', 'main/id', 'main/testnest[]/id', 'd']
-        }
-    assert parser.sub_sheet_lines == {
-        'testnest': [
-            {
-                'ocid': 1,
-                'main/id': 2,
-                'id': 3,
-                'a': 'b',
-                'f/g': 'h',
-            },
-        ],
-        'c': [
-            {
-                'ocid': 1,
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e'
-            },
-            {
-                'ocid': 1,
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e2'
-            },
-        ],
-    }
-
-
-def test_parse_ids_nested():
-    parser = JSONParser(root_json_dict=[OrderedDict([
-        ('ocid', 1),
-        ('id', 2),
-        ('a', 'b'),
-        ('testnest', OrderedDict([
-            ('id', 3),
-            ('c', [OrderedDict([('d', 'e')]), OrderedDict([('d', 'e2')])])
-        ])),
-        ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
-    ])])
-    parser.parse()
-    assert parser.main_sheet == [ 'ocid', 'id', 'a', 'testnest/id', 'f/g' ]
-    assert parser.main_sheet_lines == [
-        {
-            'ocid': 1,
-            'id': 2,
-            'a': 'b',
-            'testnest/id': 3,
-            'f/g': 'h'
-        }
-    ]
-    assert parser.sub_sheets == {'c': ['ocid','main/id','main/testnest/id','d']}
-    assert parser.sub_sheet_lines == {'c':[
-        {
-            'ocid': 1,
-            'main/id': 2,
-            'main/testnest/id': 3,
-            'd':'e'
-        },
-        {
-            'ocid': 1,
-            'main/id': 2,
-            'main/testnest/id': 3,
-            'd':'e2'
-        },
-    ]}
+    assert parser.sub_sheets == {}
+    assert parser.sub_sheet_lines == {}
 
 
 def test_root_list_path():
@@ -264,5 +114,196 @@ def test_root_list_path():
     ]
     assert parser.sub_sheets == {}
     assert parser.sub_sheet_lines == {}
+
+
+class TestParseIDs(object):
+    def test_parse_ids(self):
+        parser = JSONParser(root_json_dict=[OrderedDict([
+            ('ocid', 1),
+            ('id', 2),
+            ('a', 'b'),
+            ('c', [OrderedDict([('id', 3), ('d', 'e')]), OrderedDict([('id', 3), ('d', 'e2')])]),
+            ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
+        ])])
+        parser.parse()
+        assert parser.main_sheet == [ 'ocid', 'id', 'a', 'f/g' ]
+        assert parser.main_sheet_lines == [
+            {
+                'ocid': 1,
+                'id': 2,
+                'a': 'b',
+                'f/g': 'h'
+            }
+        ]
+        assert parser.sub_sheets == {'c': ['ocid','main/id','id','d']}
+        assert parser.sub_sheet_lines == {'c':[
+            {
+                'ocid': 1,
+                'main/id': 2,
+                'id': 3,
+                'd':'e'
+            },
+            {
+                'ocid': 1,
+                'main/id': 2,
+                'id': 3,
+                'd':'e2'
+            },
+        ]}
+
+    def test_parse_ids_subsheet(self):
+        parser = JSONParser(root_json_dict=[OrderedDict([
+            ('ocid', 1),
+            ('id', 2),
+            ('testnest', [
+                OrderedDict([
+                    ('id', 3),
+                    ('a', 'b'),
+                    ('c', [OrderedDict([('d', 'e')]), OrderedDict([('d', 'e2')])]),
+                    ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
+                ])
+            ])
+        ])])
+        parser.parse()
+        assert parser.main_sheet == [ 'ocid', 'id' ]
+        assert parser.main_sheet_lines == [
+            {
+                'ocid': 1,
+                'id': 2,
+            }
+        ]
+        assert parser.sub_sheets == {
+                'testnest': ['ocid', 'main/id', 'id', 'a', 'f/g'],
+                'c': ['ocid', 'main/id', 'main/testnest[]/id', 'd']
+            }
+        assert parser.sub_sheet_lines == {
+            'testnest': [
+                {
+                    'ocid': 1,
+                    'main/id': 2,
+                    'id': 3,
+                    'a': 'b',
+                    'f/g': 'h',
+                },
+            ],
+            'c': [
+                {
+                    'ocid': 1,
+                    'main/id': 2,
+                    'main/testnest[]/id': 3,
+                    'd':'e'
+                },
+                {
+                    'ocid': 1,
+                    'main/id': 2,
+                    'main/testnest[]/id': 3,
+                    'd':'e2'
+                },
+            ],
+        }
+
+    def test_parse_ids_nested(self):
+        parser = JSONParser(root_json_dict=[OrderedDict([
+            ('ocid', 1),
+            ('id', 2),
+            ('a', 'b'),
+            ('testnest', OrderedDict([
+                ('id', 3),
+                ('c', [OrderedDict([('d', 'e')]), OrderedDict([('d', 'e2')])])
+            ])),
+            ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
+        ])])
+        parser.parse()
+        assert parser.main_sheet == [ 'ocid', 'id', 'a', 'testnest/id', 'f/g' ]
+        assert parser.main_sheet_lines == [
+            {
+                'ocid': 1,
+                'id': 2,
+                'a': 'b',
+                'testnest/id': 3,
+                'f/g': 'h'
+            }
+        ]
+        assert parser.sub_sheets == {'c': ['ocid','main/id','main/testnest/id','d']}
+        assert parser.sub_sheet_lines == {'c':[
+            {
+                'ocid': 1,
+                'main/id': 2,
+                'main/testnest/id': 3,
+                'd':'e'
+            },
+            {
+                'ocid': 1,
+                'main/id': 2,
+                'main/testnest/id': 3,
+                'd':'e2'
+            },
+        ]}
+
+
+class TestParseUsingSchema(object):
+    def test_sub_sheet_names(self, tmpdir):
+        test_schema = tmpdir.join('test.json')
+        test_schema.write('''{
+            "properties": {
+                "c": {
+                    "type": "array",
+                    "items": {"$ref": "#/testB"}
+                }
+            },
+            "testB": {
+                "type": "object",
+                "properties": {
+                    "d": { "type": "string" },
+                    "f": { "type": "string" }
+                }
+            }
+        }''')
+        schema_parser = SchemaParser(
+            schema_filename=test_schema.strpath
+        )
+        schema_parser.parse()
+        parser = JSONParser(
+            root_json_dict=[OrderedDict([
+                ('a', 'b'),
+                ('c', [OrderedDict([('d', 'e')])]),
+            ])],
+            schema_parser=schema_parser
+        )
+        parser.parse()
+        assert parser.main_sheet == [ 'a' ]
+        assert parser.main_sheet_lines == [
+            {'a': 'b'}
+        ]
+        assert len(parser.sub_sheets) == 1
+        assert list(parser.sub_sheets['testB']) == list(['ocid', 'd', 'f'])
+        assert parser.sub_sheet_lines == {'testB':[{'d':'e'}]}
+
+    def test_column_matching(self, tmpdir): 
+        test_schema = tmpdir.join('test.json')
+        test_schema.write('''{
+            "properties": {
+                "c": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                }
+            }
+        }''')
+        schema_parser = SchemaParser(
+            schema_filename=test_schema.strpath
+        )
+        schema_parser.parse()
+        parser = JSONParser(
+            root_json_dict=[OrderedDict([
+                ('c', ['d']),
+            ])],
+            schema_parser=schema_parser
+        )
+        parser.parse()
+        assert parser.main_sheet == [ 'c:array' ]
+        assert parser.main_sheet_lines == [
+                {'c:array': 'd'}
+        ]
+        assert len(parser.sub_sheets) == 0
 
 # TODO Check support for decimals, integers, booleans and Nones
