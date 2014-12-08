@@ -8,6 +8,8 @@ import openpyxl
 from six import text_type
 from warnings import warn
 import traceback
+import datetime
+import pytz
 
 # The "pylint: disable" lines exist to ignore warnings about the imports we expect not to work not working
 
@@ -212,8 +214,12 @@ def convert_type(type_string, value):
         else:
             return value.split(';')
     elif type_string == 'string':
+        if type(value) == datetime.datetime:
+            return pytz.utc.localize(value).isoformat()
         return text_type(value)
     elif type_string == '':
+        if type(value) == datetime.datetime:
+            return pytz.utc.localize(value).isoformat()
         return value if type(value) in [int] else text_type(value)
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))

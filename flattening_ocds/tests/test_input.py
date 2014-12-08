@@ -8,6 +8,7 @@ from collections import OrderedDict
 import sys
 import pytest
 import openpyxl
+import datetime
 from six import text_type
 
 
@@ -569,3 +570,8 @@ def test_convert_type(recwarn):
     with pytest.raises(ValueError) as e:
         convert_type('notatype', 'test')
     assert 'Unrecognised type: "notatype"' in text_type(e)
+
+    assert convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
