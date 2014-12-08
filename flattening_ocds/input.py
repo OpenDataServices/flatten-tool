@@ -25,10 +25,11 @@ except ImportError:
 
 
 class SpreadsheetInput(object):
-    def __init__(self, input_name='', main_sheet_name=''):
+    def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC'):
         self.input_name = input_name
         self.main_sheet_name = main_sheet_name
         self.sub_sheet_names = []
+        self.timezone = pytz.timezone(timezone_name)
 
     def get_main_sheet_lines(self):
         return self.get_sheet_lines(self.main_sheet_name)
@@ -42,6 +43,125 @@ class SpreadsheetInput(object):
 
     def read_sheets(self):
         raise NotImplementedError
+
+    def convert_type(self, type_string, value):
+        if value == '' or value is None:
+            return None
+        if type_string == 'number':
+            try:
+                return Decimal(value)
+            except (TypeError, ValueError, InvalidOperation):
+                warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value))
+                return text_type(value)
+        elif type_string == 'integer':
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
+                return text_type(value)
+        elif type_string == 'boolean':
+            value = text_type(value)
+            if value.lower() in ['true', '1']:
+                return True
+            elif value.lower() in ['false', '0']:
+                return False
+            else:
+                warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
+                return text_type(value)
+        elif type_string == 'array':
+            value = text_type(value)
+            if ',' in value:
+                return [x.split(',') for x in value.split(';')]
+            else:
+                return value.split(';')
+        elif type_string == 'string':
+            if type(value) == datetime.datetime:
+                return self.timezone.localize(value).isoformat()
+            return text_type(value)
+        elif type_string == '':
+            if type(value) == datetime.datetime:
+                return self.timezone.localize(value).isoformat()
+            return value if type(value) in [int] else text_type(value)
+        else:
+            raise ValueError('Unrecognised type: "{}"'.format(type_string))
+
+
+    def convert_types(self, in_dict):
+        out_dict = OrderedDict()
+        for key, value in in_dict.items():
+            parts = key.split(':')
+            if len(parts) > 1:
+                out_dict[parts[0]] = self.convert_type(parts[1], value)
+            else:
+                out_dict[parts[0]] = self.convert_type('', value)
+        return out_dict
+
+
+    def unflatten(self):
+        main_sheet_by_ocid = OrderedDict()
+        for line in self.get_main_sheet_lines():
+            if all(x == '' for x in line.values()):
+                continue
+            if line['ocid'] not in main_sheet_by_ocid:
+                main_sheet_by_ocid[line['ocid']] = TemporaryDict('id')
+            main_sheet_by_ocid[line['ocid']].append(unflatten_line(self.convert_types(line)))
+
+        for sheet_name, lines in self.get_sub_sheets_lines():
+            for i, line in enumerate(lines):
+                line_number = i+2
+                try:
+                    if all(x == '' for x in line.values()):
+                        continue
+                    id_fields = {k: v for k, v in line.items() if
+                                 k.split(':')[0].endswith('/id') and
+                                 k.startswith(self.main_sheet_name)}
+                    line_without_id_fields = OrderedDict(
+                        (k, v) for k, v in line.items()
+                        if k not in id_fields and k != 'ocid')
+                    raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
+                    if not raw_id_fields_with_values:
+                        warn('Line {} of sheet {} has no parent id fields populated,'
+                             'skipping.'.format(line_number, sheet_name))
+                        continue
+                    sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
+                                           for k, v in id_fields.items() if v}
+
+                    try:
+                        id_field = find_deepest_id_field(raw_id_fields_with_values)
+                    except ConflictingIDFieldsError:
+                        warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
+                             'skipping that line.'.format(line_number, sheet_name))
+                        continue
+
+                    try:
+                        context = path_search(
+                            {self.main_sheet_name: main_sheet_by_ocid[line['ocid']]},
+                            id_field.split('/')[:-1],
+                            id_fields=raw_id_fields_with_values,
+                            top=True
+                        )
+                    except IDFieldMissing as e:
+                        warn('The parent id field "{}" was expected, but not present on line {} of sheet {}.'.format(
+                            e.args[0], line_number, sheet_name))
+                        continue
+
+                    sheet_context_name = sheet_context_names[id_field] or sheet_name
+                    # Added the following line to support the usecase in test_nested_sub_sheet
+                    context = path_search(context, sheet_context_name.split('/')[:-1])
+                    if sheet_context_name not in context:
+                        context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
+                    context[sheet_context_name.split('/')[-1]].append(
+                        unflatten_line(self.convert_types(line_without_id_fields)))
+                except Exception as e:  # pylint: disable=W0703
+                    # Deliberately catch all exceptions for a line, so that
+                    # all lines without exceptions will still be processed.
+                    print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
+                    traceback.print_exc()
+                    sys.exit()
+
+        temporarydicts_to_lists(main_sheet_by_ocid)
+
+        return sum(main_sheet_by_ocid.values(), [])
 
 
 class CSVInput(SpreadsheetInput):
@@ -182,122 +302,3 @@ def find_deepest_id_field(id_fields):
             raise ConflictingIDFieldsError()
     return '/'.join(deepest_id_field)
 
-
-def convert_type(type_string, value):
-    if value == '' or value is None:
-        return None
-    if type_string == 'number':
-        try:
-            return Decimal(value)
-        except (TypeError, ValueError, InvalidOperation):
-            warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value))
-            return text_type(value)
-    elif type_string == 'integer':
-        try:
-            return int(value)
-        except (TypeError, ValueError):
-            warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
-            return text_type(value)
-    elif type_string == 'boolean':
-        value = text_type(value)
-        if value.lower() in ['true', '1']:
-            return True
-        elif value.lower() in ['false', '0']:
-            return False
-        else:
-            warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
-            return text_type(value)
-    elif type_string == 'array':
-        value = text_type(value)
-        if ',' in value:
-            return [x.split(',') for x in value.split(';')]
-        else:
-            return value.split(';')
-    elif type_string == 'string':
-        if type(value) == datetime.datetime:
-            return pytz.utc.localize(value).isoformat()
-        return text_type(value)
-    elif type_string == '':
-        if type(value) == datetime.datetime:
-            return pytz.utc.localize(value).isoformat()
-        return value if type(value) in [int] else text_type(value)
-    else:
-        raise ValueError('Unrecognised type: "{}"'.format(type_string))
-
-
-def convert_types(in_dict):
-    out_dict = OrderedDict()
-    for key, value in in_dict.items():
-        parts = key.split(':')
-        if len(parts) > 1:
-            out_dict[parts[0]] = convert_type(parts[1], value)
-        else:
-            out_dict[parts[0]] = convert_type('', value)
-    return out_dict
-
-
-def unflatten_spreadsheet_input(spreadsheet_input):
-    main_sheet_by_ocid = OrderedDict()
-    for line in spreadsheet_input.get_main_sheet_lines():
-        if all(x == '' for x in line.values()):
-            continue
-        if line['ocid'] not in main_sheet_by_ocid:
-            main_sheet_by_ocid[line['ocid']] = TemporaryDict('id')
-        main_sheet_by_ocid[line['ocid']].append(unflatten_line(convert_types(line)))
-
-    for sheet_name, lines in spreadsheet_input.get_sub_sheets_lines():
-        for i, line in enumerate(lines):
-            line_number = i+2
-            try:
-                if all(x == '' for x in line.values()):
-                    continue
-                id_fields = {k: v for k, v in line.items() if
-                             k.split(':')[0].endswith('/id') and
-                             k.startswith(spreadsheet_input.main_sheet_name)}
-                line_without_id_fields = OrderedDict(
-                    (k, v) for k, v in line.items()
-                    if k not in id_fields and k != 'ocid')
-                raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
-                if not raw_id_fields_with_values:
-                    warn('Line {} of sheet {} has no parent id fields populated,'
-                         'skipping.'.format(line_number, sheet_name))
-                    continue
-                sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
-                                       for k, v in id_fields.items() if v}
-
-                try:
-                    id_field = find_deepest_id_field(raw_id_fields_with_values)
-                except ConflictingIDFieldsError:
-                    warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
-                         'skipping that line.'.format(line_number, sheet_name))
-                    continue
-
-                try:
-                    context = path_search(
-                        {spreadsheet_input.main_sheet_name: main_sheet_by_ocid[line['ocid']]},
-                        id_field.split('/')[:-1],
-                        id_fields=raw_id_fields_with_values,
-                        top=True
-                    )
-                except IDFieldMissing as e:
-                    warn('The parent id field "{}" was expected, but not present on line {} of sheet {}.'.format(
-                        e.args[0], line_number, sheet_name))
-                    continue
-
-                sheet_context_name = sheet_context_names[id_field] or sheet_name
-                # Added the following line to support the usecase in test_nested_sub_sheet
-                context = path_search(context, sheet_context_name.split('/')[:-1])
-                if sheet_context_name not in context:
-                    context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
-                context[sheet_context_name.split('/')[-1]].append(
-                    unflatten_line(convert_types(line_without_id_fields)))
-            except Exception as e:  # pylint: disable=W0703
-                # Deliberately catch all exceptions for a line, so that
-                # all lines without exceptions will still be processed.
-                print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
-                traceback.print_exc()
-                sys.exit()
-
-    temporarydicts_to_lists(main_sheet_by_ocid)
-
-    return sum(main_sheet_by_ocid.values(), [])

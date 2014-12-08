@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
-from flattening_ocds.input import unflatten_line, unflatten_spreadsheet_input, \
-    find_deepest_id_field, convert_type, path_search
+from flattening_ocds.input import unflatten_line, \
+    find_deepest_id_field, path_search
 from decimal import Decimal
 from collections import OrderedDict
 import sys
@@ -197,7 +197,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+        assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'testA': 3}
         ]
 
@@ -215,7 +215,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+        assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}
         ]
 
@@ -238,7 +238,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+        assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'subField': [{'testA': 3}]}
         ]
 
@@ -261,7 +261,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+        assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'testA': {'subField': [{'testB': 3}]}}
         ]
 
@@ -293,7 +293,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
+        unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 1
         assert list(unflattened[0]) == ['ocid', 'id', 'sub1Field']
         assert unflattened[0]['ocid'] == 1
@@ -323,7 +323,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+        assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'testA': unicode_string}
         ]
 
@@ -369,7 +369,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
+        unflattened = list(spreadsheet_input.unflatten())
         # We should have a warning about conflicting ID fields
         w = recwarn.pop(UserWarning)
         assert 'Multiple conflicting ID fields' in text_type(w.message)
@@ -378,7 +378,7 @@ class TestUnflatten(object):
         # Only one top level object should have been outputted
         assert len(unflattened) == 1
         # Check that the valid data is outputted correctly
-        assert unflatten_spreadsheet_input(spreadsheet_input)[0] == \
+        assert spreadsheet_input.unflatten()[0] == \
             {
                 'ocid': 1,
                 'id': 2,
@@ -411,7 +411,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        assert list(unflatten_spreadsheet_input(spreadsheet_input)) == [
+        assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': {'id': 4}}]}
         ]
 
@@ -441,7 +441,7 @@ class TestUnflatten(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        unflattened = list(unflatten_spreadsheet_input(spreadsheet_input))
+        unflattened = list(spreadsheet_input.unflatten())
         # We should have a warning about conflicting ID fields
         w = recwarn.pop(UserWarning)
         assert 'no parent id fields populated' in text_type(w.message)
@@ -469,7 +469,7 @@ class TestUnflattenEmpty(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        output = list(unflatten_spreadsheet_input(spreadsheet_input))
+        output = list(spreadsheet_input.unflatten())
         assert len(output) == 0
 
     def test_sub_sheet_empty(self):
@@ -489,7 +489,7 @@ class TestUnflattenEmpty(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        output = list(unflatten_spreadsheet_input(spreadsheet_input))
+        output = list(spreadsheet_input.unflatten())
         assert len(output) == 0
 
     def test_types_empty(self):
@@ -509,69 +509,80 @@ class TestUnflattenEmpty(object):
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
-        output = list(unflatten_spreadsheet_input(spreadsheet_input))
+        output = list(spreadsheet_input.unflatten())
         assert len(output) == 1
         assert output[0] == {'ocid': '1'}
 
 
 def test_convert_type(recwarn):
-    assert convert_type('', 'somestring') == 'somestring'
+    si = SpreadsheetInput()
+    assert si.convert_type('', 'somestring') == 'somestring'
     # If not type is specified, ints are kept as ints...
-    assert convert_type('', 3) == 3
+    assert si.convert_type('', 3) == 3
 
     # ... but all other ojbects are converted to strings
     class NotAString(object):
         def __str__(self):
             return 'string representation'
     assert NotAString() != 'string representation'
-    assert convert_type('', NotAString()) == 'string representation'
-    assert convert_type('string', NotAString()) == 'string representation'
+    assert si.convert_type('', NotAString()) == 'string representation'
+    assert si.convert_type('string', NotAString()) == 'string representation'
 
-    assert convert_type('string', 3) == '3'
-    assert convert_type('number', '3') == Decimal('3')
-    assert convert_type('number', '1.2') == Decimal('1.2')
-    assert convert_type('integer', '3') == 3
-    assert convert_type('integer', 3) == 3
+    assert si.convert_type('string', 3) == '3'
+    assert si.convert_type('number', '3') == Decimal('3')
+    assert si.convert_type('number', '1.2') == Decimal('1.2')
+    assert si.convert_type('integer', '3') == 3
+    assert si.convert_type('integer', 3) == 3
 
-    assert convert_type('boolean', 'TRUE') is True
-    assert convert_type('boolean', 'True') is True
-    assert convert_type('boolean', 1) is True
-    assert convert_type('boolean', '1') is True
-    assert convert_type('boolean', 'FALSE') is False
-    assert convert_type('boolean', 'False') is False
-    assert convert_type('boolean', 0) is False
-    assert convert_type('boolean', '0') is False
-    convert_type('boolean', 2)
+    assert si.convert_type('boolean', 'TRUE') is True
+    assert si.convert_type('boolean', 'True') is True
+    assert si.convert_type('boolean', 1) is True
+    assert si.convert_type('boolean', '1') is True
+    assert si.convert_type('boolean', 'FALSE') is False
+    assert si.convert_type('boolean', 'False') is False
+    assert si.convert_type('boolean', 0) is False
+    assert si.convert_type('boolean', '0') is False
+    si.convert_type('boolean', 2)
     assert 'Unrecognised value for boolean: "2"' in text_type(recwarn.pop(UserWarning).message)
-    convert_type('boolean', 'test')
+    si.convert_type('boolean', 'test')
     assert 'Unrecognised value for boolean: "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    convert_type('integer', 'test')
+    si.convert_type('integer', 'test')
     assert 'Non-integer value "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    convert_type('number', 'test')
+    si.convert_type('number', 'test')
     assert 'Non-numeric value "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    assert convert_type('string', '') is None
-    assert convert_type('number', '') is None
-    assert convert_type('integer', '') is None
-    assert convert_type('array', '') is None
-    assert convert_type('boolean', '') is None
-    assert convert_type('string', None) is None
-    assert convert_type('number', None) is None
-    assert convert_type('integer', None) is None
-    assert convert_type('array', None) is None
-    assert convert_type('boolean', None) is None
+    assert si.convert_type('string', '') is None
+    assert si.convert_type('number', '') is None
+    assert si.convert_type('integer', '') is None
+    assert si.convert_type('array', '') is None
+    assert si.convert_type('boolean', '') is None
+    assert si.convert_type('string', None) is None
+    assert si.convert_type('number', None) is None
+    assert si.convert_type('integer', None) is None
+    assert si.convert_type('array', None) is None
+    assert si.convert_type('boolean', None) is None
 
-    assert convert_type('array', 'one') == ['one']
-    assert convert_type('array', 'one;two') == ['one', 'two']
-    assert convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
+    assert si.convert_type('array', 'one') == ['one']
+    assert si.convert_type('array', 'one;two') == ['one', 'two']
+    assert si.convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
 
     with pytest.raises(ValueError) as e:
-        convert_type('notatype', 'test')
+        si.convert_type('notatype', 'test')
     assert 'Unrecognised type: "notatype"' in text_type(e)
 
-    assert convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
-    assert convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
-    assert convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
-    assert convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert si.convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert si.convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert si.convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert si.convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+
+    si = SpreadsheetInput(timezone_name='Europe/London')
+    assert si.convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert si.convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert si.convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert si.convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert si.convert_type('string', datetime.datetime(2015, 6, 1)) == '2015-06-01T00:00:00+01:00'
+    assert si.convert_type('', datetime.datetime(2015, 6, 1)) == '2015-06-01T00:00:00+01:00'
+    assert si.convert_type('string', datetime.datetime(2015, 6, 1, 13, 37, 59)) == '2015-06-01T13:37:59+01:00'
+    assert si.convert_type('', datetime.datetime(2015, 6, 1, 13, 37, 59)) == '2015-06-01T13:37:59+01:00'

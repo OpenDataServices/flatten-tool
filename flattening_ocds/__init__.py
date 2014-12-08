@@ -3,7 +3,6 @@ from flattening_ocds.json_input import JSONParser
 from flattening_ocds.output import FORMATS as OUTPUT_FORMATS
 from flattening_ocds.output import FORMATS_SUFFIX
 from flattening_ocds.input import FORMATS as INPUT_FORMATS
-from flattening_ocds.input import unflatten_spreadsheet_input
 import json
 from decimal import Decimal
 from collections import OrderedDict
@@ -90,14 +89,17 @@ def decimal_default(o):
 
 
 def unflatten(input_name, base_json=None, input_format=None, output_name='release.json',
-              main_sheet_name='release', encoding='utf8', **_):
+              main_sheet_name='release', encoding='utf8', timezone_name='UTC', **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
         raise Exception('The requested format is not available')
 
     spreadsheet_input_class = INPUT_FORMATS[input_format]
-    spreadsheet_input = spreadsheet_input_class(input_name=input_name, main_sheet_name=main_sheet_name)
+    spreadsheet_input = spreadsheet_input_class(
+        input_name=input_name,
+        timezone_name=timezone_name,
+        main_sheet_name=main_sheet_name)
     spreadsheet_input.encoding = encoding
     spreadsheet_input.read_sheets()
     if base_json:
@@ -105,7 +107,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
-    base['releases'] = list(unflatten_spreadsheet_input(spreadsheet_input))
+    base['releases'] = list(spreadsheet_input.unflatten())
     with open(output_name, 'w') as fp:
         json.dump(base, fp, indent=4, default=decimal_default)
 

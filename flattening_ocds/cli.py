@@ -69,6 +69,9 @@ def create_parser():
     parser_unflatten.add_argument(
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to release")
+    parser_unflatten.add_argument(
+        "--timezone-name",
+        help="Name of the timezone, defaults to UTC. Should be in tzdata format, e.g. Europe/London")
 
     return parser
 
