@@ -4,6 +4,7 @@ Flattening OCDS
 [![Build Status](https://travis-ci.org/open-contracting/flattening-ocds.svg?branch=master)](https://travis-ci.org/open-contracting/flattening-ocds)
 [![Coverage Status](https://img.shields.io/coveralls/open-contracting/flattening-ocds.svg)](https://coveralls.io/r/open-contracting/flattening-ocds?branch=master)
 [![Code Health](https://landscape.io/github/open-contracting/flattening-ocds/master/landscape.png)](https://landscape.io/github/open-contracting/flattening-ocds/master)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/open-contracting/flattening-ocds/blob/master/LICENSE)
 
 Python Version Support
 ----------------------
