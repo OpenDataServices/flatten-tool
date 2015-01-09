@@ -601,6 +601,6 @@ def test_1n_override():
         },
         main_sheet_name='custom_main')
     spreadsheet_input.read_sheets()
-    output = list(unflatten_spreadsheet_input(spreadsheet_input))
+    output = list(spreadsheet_input.unflatten())
     assert len(output) == 1
     assert output[0] == { 'ocid': '1', 'testA': [{'id': '2', 'testB': '3'}] }
