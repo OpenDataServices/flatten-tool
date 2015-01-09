@@ -587,13 +587,13 @@ def test_convert_type(recwarn):
     assert si.convert_type('string', datetime.datetime(2015, 6, 1, 13, 37, 59)) == '2015-06-01T13:37:59+01:00'
     assert si.convert_type('', datetime.datetime(2015, 6, 1, 13, 37, 59)) == '2015-06-01T13:37:59+01:00'
 
-@pytest.mark.xfail
 def test_1n_override():
     spreadsheet_input = ListInput(
         sheets={
             'custom_main': [
                 {
                     'ocid': '1',
+                    'id': '4',
                     'testA[]/id': '2',
                     'testA[]/testB': '3',
                 }
@@ -603,4 +603,8 @@ def test_1n_override():
     spreadsheet_input.read_sheets()
     output = list(spreadsheet_input.unflatten())
     assert len(output) == 1
-    assert output[0] == { 'ocid': '1', 'testA': [{'id': '2', 'testB': '3'}] }
+    assert output[0] == {
+        'ocid': '1',
+        'id': '4',
+        'testA': [{'id': '2', 'testB': '3'}]
+    }
