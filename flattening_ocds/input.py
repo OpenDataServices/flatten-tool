@@ -263,6 +263,9 @@ class TemporaryDict(UserDict):
         self.items_no_keyfield = []
         self.data = OrderedDict()
 
+    def __repr__(self):
+        return 'TemporaryDict(keyfield={}, items_no_keyfield={}, data={})'.format(repr(self.keyfield), repr(self.items_no_keyfield), repr(self.data))
+
     def append(self, item):
         if self.keyfield in item:
             key = item[self.keyfield]
@@ -282,6 +285,9 @@ def temporarydicts_to_lists(nested_dict):
     for key, value in nested_dict.items():
         if hasattr(value, 'to_list'):
             temporarydicts_to_lists(value)
+            if hasattr(value, 'items_no_keyfield'):
+                for x in value.items_no_keyfield:
+                    temporarydicts_to_lists(x)
             nested_dict[key] = value.to_list()
         elif hasattr(value, 'items'):
             temporarydicts_to_lists(value)

@@ -608,3 +608,24 @@ def test_1n_override():
         'id': '4',
         'testA': [{'id': '2', 'testB': '3'}]
     }
+
+
+def test_1n_override_no_id():
+    spreadsheet_input = ListInput(
+        sheets={
+            'custom_main': [
+                {
+                    'ocid': '1',
+                    'testA[]/id': '2',
+                    'testA[]/testB': '3',
+                }
+            ]
+        },
+        main_sheet_name='custom_main')
+    spreadsheet_input.read_sheets()
+    output = list(spreadsheet_input.unflatten())
+    assert len(output) == 1
+    assert output[0] == {
+        'ocid': '1',
+        'testA': [{'id': '2', 'testB': '3'}]
+    }
