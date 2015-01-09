@@ -78,3 +78,11 @@ The encoding of input CSVs can be specified with the `--encoding` flag. This can
 However, Python 2 can not load CSVs that contain the NULL character. This includes CSVs encoded in UTF-16. If you wish to convert UTF-16 encoded CSVs you must use Python 3.
 
 (See [this test](https://github.com/open-contracting/flattening-ocds/blob/d7db1125fef079302dcd372593c471c527aff7fb/flattening_ocds/tests/test_input.py#L114) which passes for Python 3, but fails for Python 2).
+
+
+360 Giving Support
+------------------
+
+There is work currently in progress to convert this codebase to also flatten 360 giving files.
+
+    flatten-ocds create-template --output-format all --output-name 360giving-template --schema 360-giving-schema.json --main-sheet-name activity
