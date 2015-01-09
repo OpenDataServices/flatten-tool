@@ -24,6 +24,10 @@ def create_parser():
     parser_create_template.add_argument(
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended if format is all.")
+    parser_create_template.add_argument(
+        "--rollup",
+        action='store_true',
+        help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
 
     parser_flatten = subparsers.add_parser(
         'flatten',

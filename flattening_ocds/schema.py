@@ -35,11 +35,12 @@ def get_property_type_set(property_schema_dict):
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main'):
+    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main', rollup=False):
         self.sub_sheets = {}
         self.main_sheet = []
         self.sub_sheet_mapping = {}
         self.main_sheet_name = main_sheet_name
+        self.rollup = rollup
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -72,6 +73,9 @@ class SchemaParser(object):
                         yield property_name+'/'+field
 
                 elif 'array' in property_type_set:
+                    if self.rollup and 'rollUp' in property_schema_dict:
+                        for child_name in property_schema_dict['rollUp']:
+                            yield property_name+'[]/'+child_name
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         yield property_name+':array'

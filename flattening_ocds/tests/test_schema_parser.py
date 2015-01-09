@@ -300,3 +300,25 @@ def test_references_sheet_names(tmpdir):
     parser.parse()
     assert set(parser.sub_sheets) == set(['testB'])
     assert list(parser.sub_sheets['testB']) == ['ocid', 'testC']
+
+
+def test_rollup():
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'rollUp': [ 'testB' ],
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'testB': type_string,
+                        'testC': type_string
+                    }
+                }
+            },
+        }
+    }, rollup=True)
+    parser.parse()
+    assert set(parser.main_sheet) == set(['testA[]/testB'])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
