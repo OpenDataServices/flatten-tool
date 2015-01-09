@@ -49,8 +49,12 @@ class JSONParser(object):
             self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
             self.main_sheet = schema_parser.main_sheet
             self.sub_sheets = schema_parser.sub_sheets
+            # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified
+            self.rollup = schema_parser.rollup
+            self.schema_parser = schema_parser
         else:
             self.sub_sheet_mapping = {}
+            self.rollup = False
 
         if json_filename is None and root_json_dict is None:
             raise ValueError('Etiher json_filename or root_json_dict must be supplied')
@@ -114,6 +118,15 @@ class JSONParser(object):
                     # TODO Support doubly nested arrays
                     flattened_dict[sheet_key(sheet, parent_name+key)] = ';'.join(value)
                 else:
+                    if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
+                        if len(value) == 1:
+                            for k, v in value[0].items():
+                                if parent_name+key+'[]/'+k in self.schema_parser.main_sheet:
+                                    if type(v) in BASIC_TYPES:
+                                        flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = v
+                                    else:
+                                        raise ValueError('Rolled up values must be basic types')
+
                     sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = []

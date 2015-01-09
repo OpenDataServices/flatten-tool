@@ -50,6 +50,10 @@ def create_parser():
     parser_flatten.add_argument(
         "--root-list-path",
         help="Path of the root list, defaults to releases")
+    parser_flatten.add_argument(
+        "--rollup",
+        action='store_true',
+        help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',

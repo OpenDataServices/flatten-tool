@@ -306,4 +306,36 @@ class TestParseUsingSchema(object):
         ]
         assert len(parser.sub_sheets) == 0
 
+    def test_rollup(self):
+        schema_parser = SchemaParser(root_schema_dict={
+            'properties': {
+                'testA': {
+                    'type': 'array',
+                    'rollUp': [ 'testB' ],
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'testB': {'type': 'string'},
+                            'testC': {'type': 'string'}
+                        }
+                    }
+                },
+            }
+        }, rollup=True)
+        schema_parser.parse()
+        parser = JSONParser(
+            root_json_dict=[OrderedDict([
+                ('testA', [OrderedDict([('testB', '1'), ('testC', '2')])]),
+            ])],
+            schema_parser=schema_parser
+        )
+        parser.parse()
+        assert parser.main_sheet == [ 'testA[]/testB' ]
+        assert parser.main_sheet_lines == [
+            {'testA[]/testB': '1'}
+        ]
+        assert len(parser.sub_sheets) == 1
+        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
+        assert parser.sub_sheet_lines == {'testA':[{'testB':'1', 'testC': '2'}]}
+
 # TODO Check support for decimals, integers, booleans and Nones

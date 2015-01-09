@@ -36,9 +36,9 @@ def create_template(schema, output_name='release', output_format='all', main_she
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='release', output_format='all', main_sheet_name='main', root_list_path='releases', **_):
+def flatten(input_name, schema=None, output_name='release', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, **_):
     if schema:
-        schema_parser = SchemaParser(schema_filename=schema)
+        schema_parser = SchemaParser(schema_filename=schema, rollup=rollup)
         schema_parser.parse()
     else:
         schema_parser = None
