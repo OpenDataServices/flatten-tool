@@ -3,6 +3,7 @@ from flattening_ocds.json_input import JSONParser
 from flattening_ocds.schema import SchemaParser
 import pytest
 from collections import OrderedDict
+from six import text_type
 
 def test_jsonparser_exceptions(tmpdir):
     test_json = tmpdir.join('test.json')
@@ -337,5 +338,47 @@ class TestParseUsingSchema(object):
         assert len(parser.sub_sheets) == 1
         assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
         assert parser.sub_sheet_lines == {'testA':[{'testB':'1', 'testC': '2'}]}
+
+    def test_rollup_multiple_values(self, recwarn):
+        schema_parser = SchemaParser(root_schema_dict={
+            'properties': {
+                'testA': {
+                    'type': 'array',
+                    'rollUp': [ 'testB' ],
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'testB': {'type': 'string'},
+                            'testC': {'type': 'string'}
+                        }
+                    }
+                },
+            }
+        }, rollup=True)
+        schema_parser.parse()
+        parser = JSONParser(
+            root_json_dict=[OrderedDict([
+                ('testA', [
+                    OrderedDict([('testB', '1'), ('testC', '2')]),
+                    OrderedDict([('testB', '3'), ('testC', '4')])
+                    ]),
+            ])],
+            schema_parser=schema_parser
+        )
+        parser.parse()
+        assert parser.main_sheet == [ 'testA[]/testB' ]
+        assert parser.main_sheet_lines == [
+            {
+                'testA[]/testB': 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+            }
+        ]
+        assert len(parser.sub_sheets) == 1
+        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
+        assert parser.sub_sheet_lines == {'testA':[
+            {'testB':'1', 'testC': '2'},
+            {'testB':'3', 'testC': '4'}
+            ]}
+        w = recwarn.pop(UserWarning)
+        assert 'Could not provide rollup' in text_type(w.message)
 
 # TODO Check support for decimals, integers, booleans and Nones

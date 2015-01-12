@@ -12,6 +12,7 @@ from collections import OrderedDict
 from decimal import Decimal
 from flattening_ocds.schema import SchemaParser
 from flattening_ocds.input import path_search
+from warnings import warn
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
@@ -126,6 +127,11 @@ class JSONParser(object):
                                         flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = v
                                     else:
                                         raise ValueError('Rolled up values must be basic types')
+                        elif len(value) > 1:
+                            for k in set(sum((list(x.keys()) for x in value), [])):
+                                warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
+                                if parent_name+key+'[]/'+k in self.schema_parser.main_sheet:
+                                    flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
                     sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
                     if sub_sheet_name not in self.sub_sheets:
