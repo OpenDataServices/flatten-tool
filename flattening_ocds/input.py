@@ -148,10 +148,17 @@ class SpreadsheetInput(object):
                     sheet_context_name = sheet_context_names[id_field] or sheet_name
                     # Added the following line to support the usecase in test_nested_sub_sheet
                     context = path_search(context, sheet_context_name.split('/')[:-1])
-                    if sheet_context_name not in context:
-                        context[sheet_context_name.split('/')[-1]] = TemporaryDict(keyfield='id')
-                    context[sheet_context_name.split('/')[-1]].append(
-                        unflatten_line(self.convert_types(line_without_id_fields)))
+                    unflattened = unflatten_line(self.convert_types(line_without_id_fields))
+                    sheet_context_base_name = sheet_context_name.split('/')[-1]
+                    if sheet_context_base_name not in context:
+                        context[sheet_context_base_name] = TemporaryDict(keyfield='id')
+                    elif context[sheet_context_base_name].top_sheet:
+                        # Overwirte any rolled up data from the main sheet
+                        print(context[sheet_context_base_name].data, unflattened)
+                        if context[sheet_context_base_name].data.get(None) != unflattened:
+                            warn('Conflict between main sheet and sub sheet {}, using values from sub sheet'.format(sheet_context_base_name))
+                        context[sheet_context_base_name] = TemporaryDict(keyfield='id')
+                    context[sheet_context_base_name].append(unflattened)
                 except Exception as e:  # pylint: disable=W0703
                     # Deliberately catch all exceptions for a line, so that
                     # all lines without exceptions will still be processed.
@@ -220,7 +227,7 @@ def unflatten_line(line):
         if v is None:
             continue
         fields = k.split('/')
-        path_search(unflattened, fields[:-1])[fields[-1]] = v
+        path_search(unflattened, fields[:-1], top_sheet=True)[fields[-1]] = v
     return unflattened
 
 
@@ -228,7 +235,7 @@ class IDFieldMissing(KeyError):
     pass
 
 
-def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
+def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, top_sheet=False):
     if not path_list:
         return nested_dict
 
@@ -240,28 +247,31 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False):
         if parent_field.endswith('[]'):
             parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
-            nested_dict[parent_field] = TemporaryDict(keyfield='id')
+            nested_dict[parent_field] = TemporaryDict(keyfield='id', top_sheet=top_sheet)
         sub_sheet_id = id_fields.get(path+'/id')
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
         return path_search(nested_dict[parent_field][sub_sheet_id],
                            path_list[1:],
                            id_fields=id_fields,
-                           path=path)
+                           path=path,
+                           top_sheet=top_sheet)
     else:
         if parent_field not in nested_dict:
             nested_dict[parent_field] = OrderedDict()
         return path_search(nested_dict[parent_field],
                            path_list[1:],
                            id_fields=id_fields,
-                           path=path)
+                           path=path,
+                           top_sheet=top_sheet)
 
 
 class TemporaryDict(UserDict):
-    def __init__(self, keyfield):
+    def __init__(self, keyfield, top_sheet=False):
         self.keyfield = keyfield
         self.items_no_keyfield = []
         self.data = OrderedDict()
+        self.top_sheet = top_sheet
 
     def __repr__(self):
         return 'TemporaryDict(keyfield={}, items_no_keyfield={}, data={})'.format(repr(self.keyfield), repr(self.items_no_keyfield), repr(self.data))

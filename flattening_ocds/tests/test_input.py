@@ -452,6 +452,69 @@ class TestUnflatten(object):
         ]
 
 
+class TestUnflattenRollup(object):
+    def test_same_rollup(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                        'testA[]/id': 3,
+                        'testA[]/testB': 4
+                    }
+                ],
+                'testA': [
+                    {
+                        'ocid': 1,
+                        'main/id': 2,
+                        'id': 3,
+                        'testB': 4,
+                    }
+                ]
+            },
+            main_sheet_name='main'
+        )
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert unflattened == [
+            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
+        ]
+        # We expect no warnings
+        assert recwarn.list == []
+
+    def test_conflicting_rollup(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                        'testA[]/id': 3,
+                        'testA[]/testB': 4
+                    }
+                ],
+                'testA': [
+                    {
+                        'ocid': 1,
+                        'main/id': 2,
+                        'id': 3,
+                        'testB': 5,
+                    }
+                ]
+            },
+            main_sheet_name='main'
+        )
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert unflattened == [
+            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 5}]}
+        ]
+        # We should have a warning about the conflist
+        w = recwarn.pop(UserWarning)
+        assert 'Conflict between main sheet and sub sheet' in text_type(w.message)
+
+
 class TestUnflattenEmpty(object):
     def test_all_empty(self):
         spreadsheet_input = ListInput(
