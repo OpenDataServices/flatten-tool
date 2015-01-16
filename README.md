@@ -38,7 +38,7 @@ will print help information specific to that subcommand.
 
 Download https://raw.githubusercontent.com/open-contracting/standard/master/standard/schema/release-schema.json to the current directory.
 
-    flatten-ocds create-template --output-format all --output-name template --schema release-schema.json --main-sheet-name release
+    flatten-ocds create-template --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
 
 This will create `template.xlsx` and a `template/` directory of csv files.
 

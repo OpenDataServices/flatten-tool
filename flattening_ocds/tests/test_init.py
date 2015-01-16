@@ -50,7 +50,7 @@ def test_unflatten(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     assert lines_strip_whitespace(tmpdir.join('release.json').read()) == lines_strip_whitespace('''{
-    "releases": [
+    "main": [
         {
             "ocid": "1",
             "id": "2",
@@ -156,7 +156,7 @@ def test_unflatten_empty(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     assert lines_strip_whitespace(tmpdir.join('release.json').read()) == lines_strip_whitespace('''{
-        "releases": []
+        "main": []
     }''')
 
 
@@ -173,7 +173,7 @@ def test_unflatten_csv_utf8(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'releases': [{'ocid': '1', 'id': 'éαГ😼𝒞人'}]}
+    assert reloaded_json == {'main': [{'ocid': '1', 'id': 'éαГ😼𝒞人'}]}
 
 
 def test_unflatten_csv_latin1(tmpdir):
@@ -189,7 +189,7 @@ def test_unflatten_csv_latin1(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'releases': [{'ocid': '1', 'id': 'é'}]}
+    assert reloaded_json == {'main': [{'ocid': '1', 'id': 'é'}]}
 
 
 def test_unflatten_xslx_unicode(tmpdir):
@@ -199,4 +199,4 @@ def test_unflatten_xslx_unicode(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'releases': [{'ocid': 1, 'id': 'éαГ😼𝒞人'}]}
+    assert reloaded_json == {'main': [{'ocid': 1, 'id': 'éαГ😼𝒞人'}]}

@@ -8,7 +8,7 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='release', output_format='all', main_sheet_name='main', flatten=False, rollup=False, **_):
+def create_template(schema, output_name='releases', output_format='all', main_sheet_name='main', flatten=False, rollup=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -36,7 +36,7 @@ def create_template(schema, output_name='release', output_format='all', main_she
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='release', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, **_):
+def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, **_):
     if schema:
         schema_parser = SchemaParser(schema_filename=schema, rollup=rollup)
         schema_parser.parse()
@@ -88,8 +88,8 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='release.json',
-              main_sheet_name='release', encoding='utf8', timezone_name='UTC', **_):
+def unflatten(input_name, base_json=None, input_format=None, output_name='releases.json',
+              main_sheet_name='releases', encoding='utf8', timezone_name='UTC', **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
@@ -107,7 +107,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
-    base['releases'] = list(spreadsheet_input.unflatten())
+    base[main_sheet_name] = list(spreadsheet_input.unflatten())
     with open(output_name, 'w') as fp:
         json.dump(base, fp, indent=4, default=decimal_default)
 

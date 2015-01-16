@@ -12,17 +12,17 @@ def test_roundtrip(tmpdir, output_format):
         output_name=tmpdir.join('flattened').strpath,
         output_format=output_format,
         schema='flattening_ocds/tests/fixtures/release-schema.json',
-        main_sheet_name='release')
+        main_sheet_name='releases')
     unflatten(
         input_name=tmpdir.join('flattened').strpath,
         output_name=tmpdir.join('roundtrip.json').strpath,
         input_format=output_format,
         base_json=base_name,
-        main_sheet_name='release')
+        main_sheet_name='releases')
     original_json = json.load(open(input_name))
     roundtripped_json = json.load(tmpdir.join('roundtrip.json'))
 
-    # Not currently possible to roundtrib Nones
+    # Not currently possible to roundtrip Nones
     # https://github.com/open-contracting/flattening-ocds/issues/35
     for release in roundtripped_json['releases']:
         release['tender']['awardCriteriaDetails'] = None

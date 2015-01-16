@@ -70,13 +70,13 @@ def create_parser():
         help="A base json file to populate the releases key in.")
     parser_unflatten.add_argument(
         "-m", "--main-sheet-name",
-        help="The name of the main sheet. Defaults to release")
+        help="The name of the main sheet. Defaults to releases")
     parser_unflatten.add_argument(
         "-e", "--encoding",
         help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
     parser_unflatten.add_argument(
         "-o", "--output-name",
-        help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to release")
+        help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to releases")
     parser_unflatten.add_argument(
         "--timezone-name",
         help="Name of the timezone, defaults to UTC. Should be in tzdata format, e.g. Europe/London")
