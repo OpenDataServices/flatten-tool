@@ -18,6 +18,8 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
     parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup, root_id=root_id)
     parser.parse()
 
+    print(parser.titles)
+
     def spreadsheet_output(spreadsheet_output_class, name):
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
@@ -91,7 +93,7 @@ def decimal_default(o):
 
 def unflatten(input_name, base_json=None, input_format=None, output_name='releases.json',
               main_sheet_name='releases', encoding='utf8', timezone_name='UTC',
-              root_id='ocid', **_):
+              root_id='ocid', schema='', convert_titles=False, **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
@@ -102,7 +104,12 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
         input_name=input_name,
         timezone_name=timezone_name,
         main_sheet_name=main_sheet_name,
-        root_id=root_id)
+        root_id=root_id,
+        convert_titles=convert_titles)
+    if convert_titles:
+        parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=True, root_id=root_id)
+        parser.parse()
+        spreadsheet_input.parser = parser
     spreadsheet_input.encoding = encoding
     spreadsheet_input.read_sheets()
     if base_json:

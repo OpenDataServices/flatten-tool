@@ -25,19 +25,31 @@ except ImportError:
 
 
 class SpreadsheetInput(object):
-    def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid'):
+    def convert_dict_titles(self, dicts, titles):
+        titles = titles or {}
+        for d in dicts:
+            yield { (titles[k] if k in titles else k.replace(':','/')):v for k,v in d.items() }
+
+    def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid', convert_titles=False):
         self.input_name = input_name
         self.main_sheet_name = main_sheet_name
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
+        self.convert_titles = convert_titles
 
     def get_main_sheet_lines(self):
-        return self.get_sheet_lines(self.main_sheet_name)
+        if self.convert_titles:
+            return self.convert_dict_titles(self.get_sheet_lines(self.main_sheet_name), self.parser.main_sheet_titles)
+        else:
+            return self.get_sheet_lines(self.main_sheet_name)
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
-            yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
+            if self.convert_titles:
+                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name), self.parser.sub_sheet_titles.get(subsheet))
+            else:
+                yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
 
     def get_sheet_lines(self, sheet_name):
         raise NotImplementedError

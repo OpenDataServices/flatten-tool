@@ -89,6 +89,13 @@ def create_parser():
     parser_unflatten.add_argument(
         "-r", "--root-id",
         help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
+    parser_unflatten.add_argument(
+        "-s", "--schema",
+        help="Path to a relevant schema.")
+    parser_unflatten.add_argument(
+        "--convert-titles",
+        action='store_true',
+        help="Convert titles. Requires a schema to be specified.")
 
     return parser
 

@@ -44,6 +44,8 @@ class SchemaParser(object):
         self.main_sheet_name = main_sheet_name
         self.rollup = rollup
         self.root_id = root_id
+        self.main_sheet_titles = {}
+        self.sub_sheet_titles = {}
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -56,8 +58,11 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
-        for field in self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict):
+        fields = self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict)
+        for field, title in fields:
             self.main_sheet.append(field)
+            if title:
+                self.main_sheet_titles[title] = field
 
     def parse_schema_dict(self, parent_name, schema_dict, parent_id_fields=None):
         parent_id_fields = parent_id_fields or []
@@ -70,21 +75,20 @@ class SchemaParser(object):
             for property_name, property_schema_dict in schema_dict['properties'].items():
                 property_type_set = get_property_type_set(property_schema_dict)
 
+                title = property_schema_dict.get('title')
+
                 if 'object' in property_type_set:
-                    for field in self.parse_schema_dict(parent_name+'/'+property_name, property_schema_dict,
+                    for field, child_title in self.parse_schema_dict(parent_name+'/'+property_name, property_schema_dict,
                                                         parent_id_fields=id_fields):
-                        yield property_name+'/'+field
+                        yield property_name+'/'+field, (title+':'+child_title if title and child_title else None)
 
                 elif 'array' in property_type_set:
-                    if self.rollup and 'rollUp' in property_schema_dict:
-                        for child_name in property_schema_dict['rollUp']:
-                            yield property_name+'[]/'+child_name
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
-                        yield property_name+':array'
+                        yield property_name+':array', title
                     elif 'array' in type_set:
                         if 'string' in get_property_type_set(property_schema_dict['items']['items']):
-                            yield property_name+':array'
+                            yield property_name+':array', title
                         else:
                             raise ValueError
                     elif 'object' in type_set:
@@ -97,24 +101,30 @@ class SchemaParser(object):
 
                         if sub_sheet_name not in self.sub_sheets:
                             self.sub_sheets[sub_sheet_name] = SubSheet(root_id=self.root_id)
+                            self.sub_sheet_titles[sub_sheet_name] = {}
                         sub_sheet = self.sub_sheets[sub_sheet_name]
 
                         for field in id_fields:
                             sub_sheet.add_field(field+':'+property_name, id_field=True)
-                        for field in self.parse_schema_dict(parent_name+'/'+property_name+'[]',
-                                                            property_schema_dict['items'],
-                                                            parent_id_fields=id_fields):
+                        fields = self.parse_schema_dict(parent_name+'/'+property_name+'[]',
+                                property_schema_dict['items'],
+                                parent_id_fields=id_fields)
+                        for field, child_title in fields:
                             sub_sheet.add_field(field)
+                            if child_title:
+                                self.sub_sheet_titles[sub_sheet_name][child_title] = field
+                            if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
+                                yield property_name+'[]/'+field, (title+':'+child_title if title and child_title else None)
                     else:
                         raise ValueError
                 elif 'string' in property_type_set:
-                    yield property_name
+                    yield property_name, title
                 elif 'number' in property_type_set:
-                    yield property_name+':number'
+                    yield property_name+':number', title
                 elif 'integer' in property_type_set:
-                    yield property_name+':integer'
+                    yield property_name+':integer', title
                 elif 'boolean' in property_type_set:
-                    yield property_name+':boolean'
+                    yield property_name+':boolean', title
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}",'
                          'so this property has been ignored.'.format(
