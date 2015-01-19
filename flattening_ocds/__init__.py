@@ -18,8 +18,6 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
     parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup, root_id=root_id)
     parser.parse()
 
-    print(parser.titles)
-
     def spreadsheet_output(spreadsheet_output_class, name):
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
