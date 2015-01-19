@@ -37,7 +37,7 @@ def get_property_type_set(property_schema_dict):
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main', rollup=False, root_id='ocid'):
+    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main', rollup=False, root_id='ocid', use_titles=False):
         self.sub_sheets = {}
         self.main_sheet = []
         self.sub_sheet_mapping = {}
@@ -46,6 +46,7 @@ class SchemaParser(object):
         self.root_id = root_id
         self.main_sheet_titles = {}
         self.sub_sheet_titles = {}
+        self.use_titles = use_titles
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -60,7 +61,10 @@ class SchemaParser(object):
     def parse(self):
         fields = self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict)
         for field, title in fields:
-            self.main_sheet.append(field)
+            if self.use_titles:
+                self.main_sheet.append(title)
+            else:
+                self.main_sheet.append(field)
             if title:
                 self.main_sheet_titles[title] = field
 
@@ -110,7 +114,10 @@ class SchemaParser(object):
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields)
                         for field, child_title in fields:
-                            sub_sheet.add_field(field)
+                            if self.use_titles:
+                                sub_sheet.add_field(title)
+                            else:
+                                sub_sheet.add_field(field)
                             if child_title:
                                 self.sub_sheet_titles[sub_sheet_name][child_title] = field
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:

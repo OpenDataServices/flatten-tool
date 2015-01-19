@@ -8,14 +8,14 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='releases', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', **_):
+def create_template(schema, output_name='releases', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', use_titles=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
     but to also be called from elswhere in future
     """
 
-    parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup, root_id=root_id)
+    parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup, root_id=root_id, use_titles=use_titles)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
