@@ -39,13 +39,14 @@ class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
 
-    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None, root_list_path=None):
+    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None, root_list_path=None, root_id='ocid'):
         self.sub_sheets = {}
         self.main_sheet = []
         self.sub_sheet_lines = {}
         self.main_sheet_lines = []
         self.main_sheet_name = main_sheet_name
         self.root_list_path = root_list_path
+        self.root_id = root_id
         if schema_parser:
             self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
             self.main_sheet = schema_parser.main_sheet
@@ -93,8 +94,8 @@ class JSONParser(object):
             for k, v in parent_id_fields.items():
                 flattened_dict[sheet_key(sheet, k)] = v
 
-        if 'ocid' in json_dict:
-            parent_id_fields['ocid'] = json_dict['ocid']
+        if self.root_id and self.root_id in json_dict:
+            parent_id_fields[self.root_id] = json_dict[self.root_id]
 
         if 'id' in json_dict:
             parent_id_fields[self.main_sheet_name+'/'+id_extra_parent_name+parent_name+'id'] = json_dict['id']

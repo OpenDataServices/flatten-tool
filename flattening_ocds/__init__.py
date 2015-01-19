@@ -8,14 +8,14 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='releases', output_format='all', main_sheet_name='main', flatten=False, rollup=False, **_):
+def create_template(schema, output_name='releases', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
     but to also be called from elswhere in future
     """
 
-    parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup)
+    parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup, root_id=root_id)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
@@ -36,9 +36,9 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, **_):
+def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, root_id='ocid', **_):
     if schema:
-        schema_parser = SchemaParser(schema_filename=schema, rollup=rollup)
+        schema_parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id)
         schema_parser.parse()
     else:
         schema_parser = None
@@ -46,7 +46,8 @@ def flatten(input_name, schema=None, output_name='releases', output_format='all'
         json_filename=input_name,
         root_list_path=root_list_path,
         schema_parser=schema_parser,
-        main_sheet_name=main_sheet_name)
+        main_sheet_name=main_sheet_name,
+        root_id=root_id)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
@@ -89,7 +90,8 @@ def decimal_default(o):
 
 
 def unflatten(input_name, base_json=None, input_format=None, output_name='releases.json',
-              main_sheet_name='releases', encoding='utf8', timezone_name='UTC', **_):
+              main_sheet_name='releases', encoding='utf8', timezone_name='UTC',
+              root_id='ocid', **_):
     if input_format is None:
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
@@ -99,7 +101,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     spreadsheet_input = spreadsheet_input_class(
         input_name=input_name,
         timezone_name=timezone_name,
-        main_sheet_name=main_sheet_name)
+        main_sheet_name=main_sheet_name,
+        root_id=root_id)
     spreadsheet_input.encoding = encoding
     spreadsheet_input.read_sheets()
     if base_json:

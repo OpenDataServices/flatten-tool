@@ -25,11 +25,12 @@ except ImportError:
 
 
 class SpreadsheetInput(object):
-    def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC'):
+    def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid'):
         self.input_name = input_name
         self.main_sheet_name = main_sheet_name
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
+        self.root_id = root_id
 
     def get_main_sheet_lines(self):
         return self.get_sheet_lines(self.main_sheet_name)
@@ -102,9 +103,10 @@ class SpreadsheetInput(object):
         for line in self.get_main_sheet_lines():
             if all(x == '' for x in line.values()):
                 continue
-            if line['ocid'] not in main_sheet_by_ocid:
-                main_sheet_by_ocid[line['ocid']] = TemporaryDict('id')
-            main_sheet_by_ocid[line['ocid']].append(unflatten_line(self.convert_types(line)))
+            root_id_or_none = line[self.root_id] if self.root_id else None
+            if root_id_or_none not in main_sheet_by_ocid:
+                main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
+            main_sheet_by_ocid[root_id_or_none].append(unflatten_line(self.convert_types(line)))
 
         for sheet_name, lines in self.get_sub_sheets_lines():
             for i, line in enumerate(lines):
@@ -117,7 +119,7 @@ class SpreadsheetInput(object):
                                  k.startswith(self.main_sheet_name)}
                     line_without_id_fields = OrderedDict(
                         (k, v) for k, v in line.items()
-                        if k not in id_fields and k != 'ocid')
+                        if k not in id_fields and (not k or k != self.root_id))
                     raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
                     if not raw_id_fields_with_values:
                         warn('Line {} of sheet {} has no parent id fields populated,'
@@ -135,7 +137,7 @@ class SpreadsheetInput(object):
 
                     try:
                         context = path_search(
-                            {self.main_sheet_name: main_sheet_by_ocid[line['ocid']]},
+                            {self.main_sheet_name: main_sheet_by_ocid[line[self.root_id] if self.root_id else None]},
                             id_field.split('/')[:-1],
                             id_fields=raw_id_fields_with_values,
                             top=True

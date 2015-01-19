@@ -322,3 +322,38 @@ def test_rollup():
     assert set(parser.main_sheet) == set(['testA[]/testB'])
     assert set(parser.sub_sheets) == set(['testA'])
     assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
+
+
+def test_sub_sheet_custom_id():
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {'testB': type_string}
+                }
+            },
+        }
+    }, root_id='custom')
+    parser.parse()
+    assert set(parser.main_sheet) == set([])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert list(parser.sub_sheets['testA']) == ['custom', 'testB']
+
+def test_sub_sheet_no_root_id():
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {'testB': type_string}
+                }
+            },
+        }
+    }, root_id='')
+    parser.parse()
+    assert set(parser.main_sheet) == set([])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert list(parser.sub_sheets['testA']) == ['testB']

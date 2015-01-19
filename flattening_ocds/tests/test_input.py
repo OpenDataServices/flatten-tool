@@ -692,3 +692,259 @@ def test_1n_override_no_id():
         'ocid': '1',
         'testA': [{'id': '2', 'testB': '3'}]
     }
+
+
+class TestUnflattenCustomRootID(object):
+    def test_main_sheet_flat(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'custom': 1,
+                        'id': 2,
+                        'testA': 3,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='custom')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'custom': 1, 'id': 2, 'testA': 3}
+        ]
+
+    def test_main_sheet_nonflat(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'custom': 1,
+                        'id': 2,
+                        'testA/testB': 3,
+                        'testA/testC': 4,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='custom')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'custom': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}
+        ]
+
+    def test_basic_sub_sheet(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'custom': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'custom': 1,
+                        'custom_main/id:subField': 2,
+                        'testA': 3,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='custom')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'custom': 1, 'id': 2, 'subField': [{'testA': 3}]}
+        ]
+
+    def test_nested_sub_sheet(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'custom': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'custom': 1,
+                        'custom_main/id:testA/subField': 2,
+                        'testB': 3,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='custom')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'custom': 1, 'id': 2, 'testA': {'subField': [{'testB': 3}]}}
+        ]
+
+    def test_basic_two_sub_sheets(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    OrderedDict([
+                        ('custom', 1),
+                        ('id', 2),
+                    ])
+                ],
+                'sub1': [
+                    {
+                        'custom': 1,
+                        'custom_main/id:sub1Field': 2,
+                        'id': 3,
+                        'testA': 4,
+                    }
+                ],
+                'sub2': [
+                    {
+                        'custom': 1,
+                        'custom_main/id:sub1Field': 2,
+                        'custom_main/sub1Field[]/id:sub2Field': 3,
+                        'testB': 5,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='custom')
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert len(unflattened) == 1
+        assert list(unflattened[0]) == ['custom', 'id', 'sub1Field']
+        assert unflattened[0]['custom'] == 1
+        assert unflattened[0]['id'] == 2
+        assert unflattened[0]['sub1Field'] == [
+            {
+                'id': 3,
+                'testA': 4,
+                'sub2Field': [
+                    {
+                        'testB': 5
+                    }
+                ]
+            }
+        ]
+
+
+class TestUnflattenNoRootID(object):
+    def test_main_sheet_flat(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'id': 2,
+                        'testA': 3,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'id': 2, 'testA': 3}
+        ]
+
+    def test_main_sheet_nonflat(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'id': 2,
+                        'testA/testB': 3,
+                        'testA/testC': 4,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'id': 2, 'testA': {'testB': 3, 'testC': 4}}
+        ]
+
+    def test_basic_sub_sheet(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'custom_main/id:subField': 2,
+                        'testA': 3,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'id': 2, 'subField': [{'testA': 3}]}
+        ]
+
+    def test_nested_sub_sheet(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'custom_main/id:testA/subField': 2,
+                        'testB': 3,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='')
+        spreadsheet_input.read_sheets()
+        assert list(spreadsheet_input.unflatten()) == [
+            {'id': 2, 'testA': {'subField': [{'testB': 3}]}}
+        ]
+
+    def test_basic_two_sub_sheets(self):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    OrderedDict([
+                        ('id', 2),
+                    ])
+                ],
+                'sub1': [
+                    {
+                        'custom_main/id:sub1Field': 2,
+                        'id': 3,
+                        'testA': 4,
+                    }
+                ],
+                'sub2': [
+                    {
+                        'custom_main/id:sub1Field': 2,
+                        'custom_main/sub1Field[]/id:sub2Field': 3,
+                        'testB': 5,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='')
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert len(unflattened) == 1
+        assert unflattened[0]['id'] == 2
+        assert unflattened[0]['sub1Field'] == [
+            {
+                'id': 3,
+                'testA': 4,
+                'sub2Field': [
+                    {
+                        'testB': 5
+                    }
+                ]
+            }
+        ]
+

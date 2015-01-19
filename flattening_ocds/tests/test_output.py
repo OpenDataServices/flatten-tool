@@ -41,7 +41,7 @@ def test_blank_sheets(tmpdir):
 
 def test_populated_header(tmpdir):
     for format_name, spreadsheet_output_class in output.FORMATS.items():
-        subsheet = schema.SubSheet()
+        subsheet = schema.SubSheet(root_id='ocid')
         subsheet.add_field('c')
         spreadsheet_output = spreadsheet_output_class(
             parser=MockParser(['a'], {'b': subsheet}),
@@ -67,7 +67,7 @@ def test_populated_header(tmpdir):
 
 
 def test_empty_lines(tmpdir):
-    subsheet = schema.SubSheet()
+    subsheet = schema.SubSheet(root_id='ocid')
     subsheet.add_field('c')
     parser = MockParser(['a'], {'b': subsheet})
     parser.main_sheet_lines = []
@@ -97,7 +97,7 @@ def test_empty_lines(tmpdir):
 
 
 def test_populated_lines(tmpdir):
-    subsheet = schema.SubSheet()
+    subsheet = schema.SubSheet(root_id='ocid')
     subsheet.add_field('c')
     parser = MockParser(['a'], {'b': subsheet})
     parser.main_sheet_lines = [{'a': 'cell1'}, {'a': 'cell2'}]

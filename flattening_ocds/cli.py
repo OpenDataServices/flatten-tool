@@ -28,6 +28,9 @@ def create_parser():
         "--rollup",
         action='store_true',
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
+    parser_create_template.add_argument(
+        "-r", "--root-id",
+        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
 
     parser_flatten = subparsers.add_parser(
         'flatten',
@@ -54,6 +57,9 @@ def create_parser():
         "--rollup",
         action='store_true',
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
+    parser_flatten.add_argument(
+        "-r", "--root-id",
+        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
@@ -80,6 +86,9 @@ def create_parser():
     parser_unflatten.add_argument(
         "--timezone-name",
         help="Name of the timezone, defaults to UTC. Should be in tzdata format, e.g. Europe/London")
+    parser_unflatten.add_argument(
+        "-r", "--root-id",
+        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
 
     return parser
 

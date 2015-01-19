@@ -7,9 +7,10 @@ from warnings import warn
 
 
 class SubSheet(object):
-    def __init__(self):
+    def __init__(self, root_id=''):
         self.id_columns = []
         self.columns = []
+        self.root_id = root_id
 
     def add_field(self, field, id_field=False):
         columns = self.id_columns if id_field else self.columns
@@ -17,7 +18,8 @@ class SubSheet(object):
             columns.append(field)
 
     def __iter__(self):
-        yield 'ocid'
+        if self.root_id:
+            yield self.root_id
         for column in self.id_columns:
             yield column
         for column in self.columns:
@@ -35,12 +37,13 @@ def get_property_type_set(property_schema_dict):
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main', rollup=False):
+    def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main', rollup=False, root_id='ocid'):
         self.sub_sheets = {}
         self.main_sheet = []
         self.sub_sheet_mapping = {}
         self.main_sheet_name = main_sheet_name
         self.rollup = rollup
+        self.root_id = root_id
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -93,7 +96,7 @@ class SchemaParser(object):
                         self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
-                            self.sub_sheets[sub_sheet_name] = SubSheet()
+                            self.sub_sheets[sub_sheet_name] = SubSheet(root_id=self.root_id)
                         sub_sheet = self.sub_sheets[sub_sheet_name]
 
                         for field in id_fields:
