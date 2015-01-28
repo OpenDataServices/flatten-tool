@@ -213,7 +213,7 @@ class CSVInput(SpreadsheetInput):
 
 class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
-        self.workbook = openpyxl.load_workbook(self.input_name)
+        self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
         sheet_names = self.workbook.get_sheet_names()
         if self.main_sheet_name not in sheet_names:
             raise ValueError('Main sheet "{}" not found in workbook.'.format(self.main_sheet_name))
