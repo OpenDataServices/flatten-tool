@@ -62,7 +62,10 @@ class SchemaParser(object):
         fields = self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict)
         for field, title in fields:
             if self.use_titles:
-                self.main_sheet.append(title)
+                if not title:
+                    warn('Field {} does not have a title, skipping.'.format(field))
+                else:
+                    self.main_sheet.append(title)
             else:
                 self.main_sheet.append(field)
             if title:
@@ -115,7 +118,10 @@ class SchemaParser(object):
                                 parent_id_fields=id_fields)
                         for field, child_title in fields:
                             if self.use_titles:
-                                sub_sheet.add_field(title)
+                                if not child_title:
+                                    warn('Field {} does not have a title, skipping.'.format(field))
+                                else:
+                                    sub_sheet.add_field(child_title)
                             else:
                                 sub_sheet.add_field(field)
                             if child_title:

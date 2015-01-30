@@ -1,5 +1,6 @@
 import pytest
 from collections import OrderedDict
+from six import text_type
 from flattening_ocds.schema import SchemaParser, get_property_type_set
 
 
@@ -357,3 +358,83 @@ def test_sub_sheet_no_root_id():
     assert set(parser.main_sheet) == set([])
     assert set(parser.sub_sheets) == set(['testA'])
     assert list(parser.sub_sheets['testA']) == ['testB']
+
+def test_use_titles(recwarn):
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'testB': {
+                            'type': 'string',
+                            'title': 'BTitle'
+                        }
+                    }
+                }
+            },
+            'testC': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=True)
+    parser.parse()
+    assert set(parser.main_sheet) == set(['CTitle'])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert list(parser.sub_sheets['testA']) == ['ocid', 'BTitle']
+
+    # Main sheet title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'testB': {
+                            'type': 'string',
+                            'title': 'BTitle'
+                        }
+                    }
+                }
+            },
+            'testC': {
+                'type': 'string'
+            }
+        }
+    }, use_titles=True)
+    parser.parse()
+    assert set(parser.main_sheet) == set([])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert list(parser.sub_sheets['testA']) == ['ocid', 'BTitle']
+    w = recwarn.pop(UserWarning)
+    assert 'does not have a title' in text_type(w.message)
+
+    # Child sheet title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'testB': {
+                            'type': 'string'
+                        }
+                    }
+                }
+            },
+            'testC': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=True)
+    parser.parse()
+    assert set(parser.main_sheet) == set(['CTitle'])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert list(parser.sub_sheets['testA']) == ['ocid']
+    w = recwarn.pop(UserWarning)
+    assert 'does not have a title' in text_type(w.message)
