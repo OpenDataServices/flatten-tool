@@ -194,7 +194,7 @@ def test_unflatten_csv_latin1(tmpdir):
 
 def test_unflatten_xslx_unicode(tmpdir):
     unflatten(
-        'flattening_ocds/tests/xlsx/unicode.xlsx',
+        'flattening_ocds/tests/fixtures/xlsx/unicode.xlsx',
         input_format='xlsx',
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
