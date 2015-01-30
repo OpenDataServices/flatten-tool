@@ -60,6 +60,21 @@ class TestSuccessfulInput(object):
             [{'colA': 1}]
         assert xlsxinput.sub_sheet_names == []
 
+    def test_xlsx_input_formula(self):
+        """ When a forumla is present, we should use the value, rather than the
+        formula itself. """
+
+        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/fixtures/xlsx/formula.xlsx', main_sheet_name='main')
+        assert xlsxinput.main_sheet_name == 'main'
+
+        xlsxinput.read_sheets()
+
+        assert list(xlsxinput.get_main_sheet_lines()) == \
+            [{'colA': 1, 'colB': 2}, {'colA': 2, 'colB': 4}]
+        assert xlsxinput.sub_sheet_names == ['subsheet']
+        assert list(xlsxinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 3, 'colD': 9}, {'colC': 4, 'colD': 12}]
+
 
 class TestInputFailure(object):
     def test_csv_no_directory(self):
