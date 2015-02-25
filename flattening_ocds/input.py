@@ -47,7 +47,7 @@ class SpreadsheetInput(object):
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
             if self.convert_titles:
-                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name), self.parser.sub_sheet_titles.get(subsheet))
+                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name), self.parser.sub_sheet_titles.get(sub_sheet_name))
             else:
                 yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
 
