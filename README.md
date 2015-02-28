@@ -85,6 +85,8 @@ However, Python 2 can not load CSVs that contain the NULL character. This includ
 
 There is work currently in progress to convert this codebase to also flatten 360 giving files.
 
+Download https://raw.githubusercontent.com/ThreeSixtyGiving/standard/master/schema/360-giving-schema.json to the current directory.
+
     flatten-ocds create-template --output-format all --output-name 360giving-template --schema 360-giving-schema.json --main-sheet-name grants --rollup --use-titles
 
     flatten-ocds unflatten --root-id='' -o out.json -f xlsx --main-sheet-name=grants input.xlsx --schema 360-giving-schema.json --convert-titles
