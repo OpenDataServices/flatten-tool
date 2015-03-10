@@ -28,7 +28,7 @@ class SpreadsheetInput(object):
     def convert_dict_titles(self, dicts, titles):
         titles = titles or {}
         for d in dicts:
-            yield { (titles[k] if k in titles else k.replace(':','/')):v for k,v in d.items() }
+            yield { (titles[k] if k in titles else (k if '/' in k else k.replace(':','/'))):v for k,v in d.items() }
 
     def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid', convert_titles=False):
         self.input_name = input_name
