@@ -25,7 +25,7 @@ Installation
 Usage
 -----
 
-    flatten-ocds
+    flatten-ocds -h
 
 will print general help information.
 
