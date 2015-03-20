@@ -1,5 +1,5 @@
 import pytest
-from flattening_ocds import cli
+from flattentool import cli
 from test.test_argparse import stderr_to_parser_error, ArgumentParserError
 
 

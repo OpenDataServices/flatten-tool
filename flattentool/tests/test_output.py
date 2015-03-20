@@ -1,6 +1,6 @@
 import pytest
 import os
-from flattening_ocds import output, schema
+from flattentool import output, schema
 import openpyxl
 
 

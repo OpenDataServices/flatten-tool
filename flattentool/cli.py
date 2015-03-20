@@ -1,6 +1,6 @@
 from __future__ import print_function
 import argparse
-from flattening_ocds import create_template, unflatten, flatten
+from flattentool import create_template, unflatten, flatten
 from six import text_type
 
 

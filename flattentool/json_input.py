@@ -10,8 +10,8 @@ import six
 import copy
 from collections import OrderedDict
 from decimal import Decimal
-from flattening_ocds.schema import SchemaParser
-from flattening_ocds.input import path_search
+from flattentool.schema import SchemaParser
+from flattentool.input import path_search
 from warnings import warn
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from flattening_ocds.input import SpreadsheetInput, CSVInput, XLSXInput
-from flattening_ocds.input import unflatten_line, \
+from flattentool.input import SpreadsheetInput, CSVInput, XLSXInput
+from flattentool.input import unflatten_line, \
     find_deepest_id_field, path_search
 from decimal import Decimal
 from collections import OrderedDict
@@ -39,7 +39,7 @@ class TestSuccessfulInput(object):
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
     def test_xlsx_input(self):
-        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='main')
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='main')
         assert xlsxinput.main_sheet_name == 'main'
 
         xlsxinput.read_sheets()
@@ -51,7 +51,7 @@ class TestSuccessfulInput(object):
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
     def test_xlsx_input_integer(self):
-        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/fixtures/xlsx/integer.xlsx', main_sheet_name='main')
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer.xlsx', main_sheet_name='main')
         assert xlsxinput.main_sheet_name == 'main'
 
         xlsxinput.read_sheets()
@@ -64,7 +64,7 @@ class TestSuccessfulInput(object):
         """ When a forumla is present, we should use the value, rather than the
         formula itself. """
 
-        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/fixtures/xlsx/formula.xlsx', main_sheet_name='main')
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/formula.xlsx', main_sheet_name='main')
         assert xlsxinput.main_sheet_name == 'main'
 
         xlsxinput.read_sheets()
@@ -98,7 +98,7 @@ class TestInputFailure(object):
             xlsxinput.read_sheets()
 
     def test_xlsx_no_main_sheet(self):
-        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='notmain')
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='notmain')
         with pytest.raises(ValueError) as e:
             xlsxinput.read_sheets()
         assert 'Main sheet "notmain" not found in workbook.' in text_type(e)
@@ -139,7 +139,7 @@ class TestUnicodeInput(object):
 
     def test_xlsx_input_utf8(self):
         """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
-        xlsxinput = XLSXInput(input_name='flattening_ocds/tests/fixtures/xlsx/unicode.xlsx', main_sheet_name='main')
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/unicode.xlsx', main_sheet_name='main')
 
         xlsxinput.read_sheets()
         assert list(xlsxinput.get_main_sheet_lines())[0]['id'] == 'éαГ😼𝒞人'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from flattening_ocds import decimal_default, unflatten
+from flattentool import decimal_default, unflatten
 from decimal import Decimal
 import json
 
@@ -194,7 +194,7 @@ def test_unflatten_csv_latin1(tmpdir):
 
 def test_unflatten_xslx_unicode(tmpdir):
     unflatten(
-        'flattening_ocds/tests/fixtures/xlsx/unicode.xlsx',
+        'flattentool/tests/fixtures/xlsx/unicode.xlsx',
         input_format='xlsx',
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')

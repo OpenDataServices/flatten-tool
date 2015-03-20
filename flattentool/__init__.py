@@ -1,8 +1,8 @@
-from flattening_ocds.schema import SchemaParser
-from flattening_ocds.json_input import JSONParser
-from flattening_ocds.output import FORMATS as OUTPUT_FORMATS
-from flattening_ocds.output import FORMATS_SUFFIX
-from flattening_ocds.input import FORMATS as INPUT_FORMATS
+from flattentool.schema import SchemaParser
+from flattentool.json_input import JSONParser
+from flattentool.output import FORMATS as OUTPUT_FORMATS
+from flattentool.output import FORMATS_SUFFIX
+from flattentool.input import FORMATS as INPUT_FORMATS
 import json
 from decimal import Decimal
 from collections import OrderedDict

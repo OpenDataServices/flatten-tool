@@ -1,17 +1,17 @@
-from flattening_ocds import unflatten, flatten
+from flattentool import unflatten, flatten
 import json
 import pytest
 
 
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip(tmpdir, output_format):
-    input_name = 'flattening_ocds/tests/fixtures/tenders_releases_2_releases.json'
-    base_name = 'flattening_ocds/tests/fixtures/tenders_releases_base.json'
+    input_name = 'flattentool/tests/fixtures/tenders_releases_2_releases.json'
+    base_name = 'flattentool/tests/fixtures/tenders_releases_base.json'
     flatten(
         input_name=input_name,
         output_name=tmpdir.join('flattened').strpath,
         output_format=output_format,
-        schema='flattening_ocds/tests/fixtures/release-schema.json',
+        schema='flattentool/tests/fixtures/release-schema.json',
         main_sheet_name='releases')
     unflatten(
         input_name=tmpdir.join('flattened').strpath,
