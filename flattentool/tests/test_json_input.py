@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-from flattening_ocds.json_input import JSONParser
-from flattening_ocds.schema import SchemaParser
+from flattentool.json_input import JSONParser
+from flattentool.schema import SchemaParser
 import pytest
 from collections import OrderedDict
 from six import text_type

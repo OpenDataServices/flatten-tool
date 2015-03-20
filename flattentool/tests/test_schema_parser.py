@@ -1,7 +1,7 @@
 import pytest
 from collections import OrderedDict
 from six import text_type
-from flattening_ocds.schema import SchemaParser, get_property_type_set
+from flattentool.schema import SchemaParser, get_property_type_set
 
 
 type_string = {'type': 'string'}
