@@ -1,10 +1,10 @@
 Flatten Tool
 ============
 
-[![Build Status](https://travis-ci.org/open-contracting/flatten-tool.svg?branch=master)](https://travis-ci.org/open-contracting/flattening-ocds)
-[![Coverage Status](https://img.shields.io/coveralls/open-contracting/flatten-tool.svg)](https://coveralls.io/r/open-contracting/flattening-ocds?branch=master)
-[![Code Health](https://landscape.io/github/open-contracting/flatten-tool/master/landscape.png)](https://landscape.io/github/open-contracting/flattening-ocds/master)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/open-contracting/flatten-tool/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/OpenDataServices/flatten-tool.svg?branch=master)](https://travis-ci.org/OpenDataServices/flatten-tool)
+[![Coverage Status](https://img.shields.io/coveralls/OpenDataServices/flatten-tool.svg)](https://coveralls.io/r/OpenDataServices/flatten-tool?branch=master)
+[![Code Health](https://landscape.io/github/OpenDataServices/flatten-tool/master/landscape.png)](https://landscape.io/github/OpenDataServices/flatten-tool/master)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/OpenDataServices/flatten-tool/blob/master/LICENSE)
 
 Python Version Support
 ----------------------
@@ -16,7 +16,7 @@ Python 2.6 and earlier are not supported because our code makes use new language
 Installation
 ------------
 
-    git clone https://github.com/open-contracting/flatten-tool.git
+    git clone https://github.com/OpenDataServices/flatten-tool.git
     cd flatten-tool
     virtualenv pyenv
     source pyenv/bin/activate
@@ -77,7 +77,7 @@ The encoding of input CSVs can be specified with the `--encoding` flag. This can
 
 However, Python 2 can not load CSVs that contain the NULL character. This includes CSVs encoded in UTF-16. If you wish to convert UTF-16 encoded CSVs you must use Python 3.
 
-(See [this test](https://github.com/open-contracting/flatten-tool/blob/d7db1125fef079302dcd372593c471c527aff7fb/flattentool/tests/test_input.py#L114) which passes for Python 3, but fails for Python 2).
+(See [this test](https://github.com/OpenDataServices/flatten-tool/blob/d7db1125fef079302dcd372593c471c527aff7fb/flattentool/tests/test_input.py#L114) which passes for Python 3, but fails for Python 2).
 
 
 360 Giving Support
