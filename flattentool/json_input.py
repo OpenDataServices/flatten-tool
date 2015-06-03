@@ -17,6 +17,10 @@ from warnings import warn
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
 
+class BadlyFormedJSONError(ValueError):
+    pass
+
+
 def sheet_key(sheet, key):
     """
     Check for a key in the sheet, and return it with any suffix (following a ':') that might be present).
@@ -66,7 +70,10 @@ class JSONParser(object):
  
         if json_filename:
             with open(json_filename) as json_file:
-                self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
+                try:
+                    self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
+                except ValueError as err:
+                    raise BadlyFormedJSONError(*err.args)
         else:
             self.root_json_dict = root_json_dict
 

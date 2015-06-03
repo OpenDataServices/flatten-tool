@@ -1,11 +1,26 @@
 from __future__ import unicode_literals
-from flattentool.json_input import JSONParser
+from flattentool.json_input import JSONParser, BadlyFormedJSONError
 from flattentool.schema import SchemaParser
 import pytest
 from collections import OrderedDict
 from six import text_type
 
-def test_jsonparser_exceptions(tmpdir):
+
+def test_jsonparser_bad_json(tmpdir):
+    test_json = tmpdir.join('test.json')
+    test_json.write('{"a":"b",}')
+    with pytest.raises(BadlyFormedJSONError):
+        JSONParser(json_filename=test_json.strpath)
+    # JSONInputValueError also matches against ValueError
+    with pytest.raises(ValueError):
+        JSONParser(json_filename=test_json.strpath)
+
+
+def test_jsonparser_arguments_exceptions(tmpdir):
+    """
+    Test that JSONParser throws a ValueError if it recievs too many or too few arguments.
+
+    """
     test_json = tmpdir.join('test.json')
     test_json.write('{}')
     with pytest.raises(ValueError):
