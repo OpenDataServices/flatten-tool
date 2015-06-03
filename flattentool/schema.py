@@ -53,8 +53,13 @@ class SchemaParser(object):
         if root_schema_dict is not None and schema_filename is not None:
             raise ValueError('Only one of schema_filename or root_schema_dict should be supplied')
         if schema_filename:
-            with open(schema_filename) as schema_file:
-                self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict)
+            if schema_filename.startswith('http'):
+                import requests
+                r = requests.get(schema_filename)
+                self.root_schema_dict = jsonref.loads(r.text, object_pairs_hook=OrderedDict)
+            else:
+                with open(schema_filename) as schema_file:
+                    self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict)
         else:
             self.root_schema_dict = root_schema_dict
 

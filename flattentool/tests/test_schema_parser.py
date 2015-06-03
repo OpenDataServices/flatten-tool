@@ -438,3 +438,9 @@ def test_use_titles(recwarn):
     assert list(parser.sub_sheets['testA']) == ['ocid']
     w = recwarn.pop(UserWarning)
     assert 'does not have a title' in text_type(w.message)
+
+
+def test_schema_from_uri(httpserver):
+    httpserver.serve_content('{"a":{"$ref":"#/b"}, "b":"c"}', 404)
+    parser = SchemaParser(schema_filename=httpserver.url)
+    assert parser.root_schema_dict['a'] == 'c'

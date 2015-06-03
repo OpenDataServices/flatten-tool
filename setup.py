@@ -17,4 +17,7 @@ setup(
     license='MIT',
     description='Tools for generating CSV and other flat versions of the structured data',
     install_requires=install_requires,
+    extras_requires = {
+        'HTTP': ['requests']
+    }
 )
