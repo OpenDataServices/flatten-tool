@@ -17,6 +17,9 @@ class SubSheet(object):
         if field not in columns:
             columns.append(field)
 
+    def append(self, item):
+        self.add_field(item)
+
     def __iter__(self):
         if self.root_id:
             yield self.root_id

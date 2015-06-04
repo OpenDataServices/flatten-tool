@@ -33,7 +33,7 @@ def sheet_key(sheet, key):
         sheet.append(key)
         return key
     elif len(keys) > 1:
-        # This shouldn't every happen, as the schema parser shouldn't output sheets like this...
+        # This shouldn't ever happen, as the schema parser shouldn't output sheets like this...
         raise ValueError('Sheet contains two conflicting keys')
     else:
         return keys[0]
