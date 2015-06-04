@@ -23,15 +23,9 @@ class SpreadsheetOutput(object):
     def write_sheets(self):
         self.open()
 
-        if hasattr(self.parser, 'main_sheet_lines'):
-            self.write_sheet(self.main_sheet_name, self.parser.main_sheet, self.parser.main_sheet_lines)
-        else:
-            self.write_sheet(self.main_sheet_name, self.parser.main_sheet)
-        for sheet_name, sheet_header in sorted(self.parser.sub_sheets.items()):
-            if hasattr(self.parser, 'sub_sheet_lines'):
-                self.write_sheet(sheet_name, list(sheet_header), self.parser.sub_sheet_lines.get(sheet_name))
-            else:
-                self.write_sheet(sheet_name, list(sheet_header))
+        self.write_sheet(self.main_sheet_name, self.parser.main_sheet)
+        for sheet_name, sub_sheet in sorted(self.parser.sub_sheets.items()):
+            self.write_sheet(sheet_name, sub_sheet)
 
         self.close()
 
@@ -43,13 +37,13 @@ class XLSXOutput(SpreadsheetOutput):
     def open(self):
         self.workbook = openpyxl.Workbook()
 
-    def write_sheet(self, sheet_name, sheet_header, sheet_lines=None):
+    def write_sheet(self, sheet_name, sheet):
+        sheet_header = list(sheet)
         worksheet = self.workbook.create_sheet()
         worksheet.title = sheet_name
         worksheet.append(sheet_header)
-        if sheet_lines is not None:
-            for sheet_line in sheet_lines:
-                worksheet.append([ sheet_line.get(x) for x in sheet_header ])
+        for sheet_line in sheet.lines:
+            worksheet.append([ sheet_line.get(x) for x in sheet_header ])
 
     def close(self):
         self.workbook.remove_sheet(self.workbook.active)
@@ -63,13 +57,13 @@ class CSVOutput(SpreadsheetOutput):
         except OSError:
             pass
 
-    def write_sheet(self, sheet_name, sheet_header, sheet_lines=None):
+    def write_sheet(self, sheet_name, sheet):
+        sheet_header = list(sheet)
         with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
             dictwriter = csv.DictWriter(csv_file, sheet_header)
             dictwriter.writeheader()
-            if sheet_lines is not None:
-                for sheet_line in sheet_lines:
-                    dictwriter.writerow(sheet_line)
+            for sheet_line in sheet.lines:
+                dictwriter.writerow(sheet_line)
 
 
 FORMATS = {

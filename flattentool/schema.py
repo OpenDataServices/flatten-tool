@@ -4,30 +4,7 @@ from __future__ import print_function
 from collections import OrderedDict
 import jsonref
 from warnings import warn
-
-
-class SubSheet(object):
-    def __init__(self, root_id=''):
-        self.id_columns = []
-        self.columns = []
-        self.root_id = root_id
-
-    def add_field(self, field, id_field=False):
-        columns = self.id_columns if id_field else self.columns
-        if field not in columns:
-            columns.append(field)
-
-    def append(self, item):
-        self.add_field(item)
-
-    def __iter__(self):
-        if self.root_id:
-            yield self.root_id
-        for column in self.id_columns:
-            yield column
-        for column in self.columns:
-            yield column
-
+from flattentool.sheet import Sheet
 
 def get_property_type_set(property_schema_dict):
     property_type = property_schema_dict.get('type')
@@ -42,13 +19,11 @@ class SchemaParser(object):
 
     def __init__(self, schema_filename=None, root_schema_dict=None, main_sheet_name='main', rollup=False, root_id='ocid', use_titles=False):
         self.sub_sheets = {}
-        self.main_sheet = []
+        self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
         self.main_sheet_name = main_sheet_name
         self.rollup = rollup
         self.root_id = root_id
-        self.main_sheet_titles = {}
-        self.sub_sheet_titles = {}
         self.use_titles = use_titles
 
         if root_schema_dict is None and schema_filename is  None:
@@ -77,7 +52,7 @@ class SchemaParser(object):
             else:
                 self.main_sheet.append(field)
             if title:
-                self.main_sheet_titles[title] = field
+                self.main_sheet.titles[title] = field
 
     def parse_schema_dict(self, parent_name, schema_dict, parent_id_fields=None):
         parent_id_fields = parent_id_fields or []
@@ -115,8 +90,7 @@ class SchemaParser(object):
                         self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
-                            self.sub_sheets[sub_sheet_name] = SubSheet(root_id=self.root_id)
-                            self.sub_sheet_titles[sub_sheet_name] = {}
+                            self.sub_sheets[sub_sheet_name] = Sheet(root_id=self.root_id)
                         sub_sheet = self.sub_sheets[sub_sheet_name]
 
                         for field in id_fields:
@@ -133,7 +107,7 @@ class SchemaParser(object):
                             else:
                                 sub_sheet.add_field(field)
                             if child_title:
-                                self.sub_sheet_titles[sub_sheet_name][child_title] = field
+                                self.sub_sheets[sub_sheet_name].titles[child_title] = field
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
                                 yield property_name+'[]/'+field, (title+':'+child_title if title and child_title else None)
                     else:

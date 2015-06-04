@@ -1,7 +1,8 @@
 import pytest
 from collections import OrderedDict
 from six import text_type
-from flattentool.schema import SchemaParser, get_property_type_set, SubSheet
+from flattentool.schema import SchemaParser, get_property_type_set
+from flattentool.sheet import Sheet
 
 
 type_string = {'type': 'string'}
@@ -10,7 +11,7 @@ type_string = {'type': 'string'}
 def test_sub_sheet_list_like():
     # SubSheet object should be appendable and iterable...
     # .append() is used in json_input.py at https://github.com/OpenDataServices/flatten-tool/blob/master/flattentool/json_input.py#L33
-    sub_sheet = SubSheet()
+    sub_sheet = Sheet()
     assert list(sub_sheet) == []
     sub_sheet.append('a')
     sub_sheet.append('b')

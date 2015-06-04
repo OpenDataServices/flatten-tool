@@ -12,6 +12,7 @@ from collections import OrderedDict
 from decimal import Decimal
 from flattentool.schema import SchemaParser
 from flattentool.input import path_search
+from flattentool.sheet import Sheet
 from warnings import warn
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
@@ -45,9 +46,7 @@ class JSONParser(object):
 
     def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None, root_list_path=None, root_id='ocid'):
         self.sub_sheets = {}
-        self.main_sheet = []
-        self.sub_sheet_lines = {}
-        self.main_sheet_lines = []
+        self.main_sheet = Sheet()
         self.main_sheet_name = main_sheet_name
         self.root_list_path = root_list_path
         self.root_id = root_id
@@ -83,12 +82,12 @@ class JSONParser(object):
         else:
             root_json_list = path_search(self.root_json_dict, self.root_list_path.split('/'))
         for json_dict in root_json_list:
-            self.parse_json_dict(json_dict, sheet=self.main_sheet, sheet_lines=self.main_sheet_lines)
+            self.parse_json_dict(json_dict, sheet=self.main_sheet)
     
-    def parse_json_dict(self, json_dict, sheet, sheet_lines, id_extra_parent_name='', parent_name='', flattened_dict=None, parent_id_fields=None):
+    def parse_json_dict(self, json_dict, sheet, id_extra_parent_name='', parent_name='', flattened_dict=None, parent_id_fields=None):
         # Possibly main_sheet should be main_sheet_columns, but this is
         # currently named for consistency with schema.py
-        
+
         parent_id_fields = copy.copy(parent_id_fields) or OrderedDict()
         if flattened_dict is None:
             flattened_dict = {}
@@ -115,7 +114,6 @@ class JSONParser(object):
                 self.parse_json_dict(
                     value,
                     sheet=sheet,
-                    sheet_lines=sheet_lines,
                     parent_name=parent_name+key+'/',
                     flattened_dict=flattened_dict,
                     parent_id_fields=parent_id_fields)
@@ -143,20 +141,17 @@ class JSONParser(object):
 
                     sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
                     if sub_sheet_name not in self.sub_sheets:
-                        self.sub_sheets[sub_sheet_name] = []
-                    if sub_sheet_name not in self.sub_sheet_lines:
-                        self.sub_sheet_lines[sub_sheet_name] = []
+                        self.sub_sheets[sub_sheet_name] = Sheet()
 
 
                     for json_dict in value:
                         self.parse_json_dict(
                             json_dict,
                             sheet=self.sub_sheets[sub_sheet_name],
-                            sheet_lines=self.sub_sheet_lines[sub_sheet_name],
                             parent_id_fields=parent_id_fields,
                             id_extra_parent_name=parent_name+key+'[]/')
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
         
         if top:
-            sheet_lines.append(flattened_dict)
+            sheet.lines.append(flattened_dict)

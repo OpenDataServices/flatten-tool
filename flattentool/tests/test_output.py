@@ -1,13 +1,14 @@
 import pytest
 import os
 from flattentool import output, schema
+from flattentool.sheet import Sheet
 import openpyxl
 
 
 class MockParser(object):
     def __init__(self, main_sheet, sub_sheets):
-        self.main_sheet = main_sheet
-        self.sub_sheets = sub_sheets
+        self.main_sheet = Sheet(main_sheet)
+        self.sub_sheets = {k:Sheet(v) for k,v in sub_sheets.items()}
 
 
 def test_spreadsheetouput_base_fails():
@@ -41,7 +42,7 @@ def test_blank_sheets(tmpdir):
 
 def test_populated_header(tmpdir):
     for format_name, spreadsheet_output_class in output.FORMATS.items():
-        subsheet = schema.SubSheet(root_id='ocid')
+        subsheet = Sheet(root_id='ocid')
         subsheet.add_field('c')
         spreadsheet_output = spreadsheet_output_class(
             parser=MockParser(['a'], {'b': subsheet}),
@@ -67,11 +68,10 @@ def test_populated_header(tmpdir):
 
 
 def test_empty_lines(tmpdir):
-    subsheet = schema.SubSheet(root_id='ocid')
+    subsheet = Sheet(root_id='ocid')
     subsheet.add_field('c')
     parser = MockParser(['a'], {'b': subsheet})
-    parser.main_sheet_lines = []
-    parser.sub_sheet_lines = {}
+    parser.main_sheet.lines = []
     for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
@@ -97,11 +97,12 @@ def test_empty_lines(tmpdir):
 
 
 def test_populated_lines(tmpdir):
-    subsheet = schema.SubSheet(root_id='ocid')
+    subsheet = Sheet(root_id='ocid')
     subsheet.add_field('c')
-    parser = MockParser(['a'], {'b': subsheet})
-    parser.main_sheet_lines = [{'a': 'cell1'}, {'a': 'cell2'}]
-    parser.sub_sheet_lines = {'b': [{'c': 'cell3'}, {'c': 'cell4'}]}
+    parser = MockParser(['a'], {})
+    parser.main_sheet.lines = [{'a': 'cell1'}, {'a': 'cell2'}]
+    subsheet.lines = [{'c': 'cell3'}, {'c': 'cell4'}]
+    parser.sub_sheets['b'] = subsheet
     for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,

@@ -6,6 +6,10 @@ from collections import OrderedDict
 from six import text_type
 
 
+def listify(d):
+    return {k:list(v) for k,v in d.items()}
+
+
 def test_jsonparser_bad_json(tmpdir):
     test_json = tmpdir.join('test.json')
     test_json.write('{"a":"b",}')
@@ -46,10 +50,9 @@ def test_json_filename_ordered(tmpdir):
 def test_parse_empty_json_dict():
     parser = JSONParser(root_json_dict={})
     parser.parse()
-    assert parser.main_sheet == []
-    assert parser.main_sheet_lines == []
+    assert list(parser.main_sheet) == []
+    assert parser.main_sheet.lines == []
     assert parser.sub_sheets == {}
-    assert parser.sub_sheet_lines == {}
 
 
 def test_parse_basic_json_dict():
@@ -64,13 +67,12 @@ def test_parse_basic_json_dict():
         ]),
     ])
     parser.parse()
-    assert parser.main_sheet == [ 'a', 'c' ]
-    assert parser.main_sheet_lines == [
+    assert list(parser.main_sheet) == [ 'a', 'c' ]
+    assert parser.main_sheet.lines == [
         {'a': 'b', 'c': 'd'},
         {'a': 'e', 'c': 'f'},
     ]
     assert parser.sub_sheets == {}
-    assert parser.sub_sheet_lines == {}
 
 
 def test_parse_nested_dict_json_dict():
@@ -79,12 +81,11 @@ def test_parse_nested_dict_json_dict():
         ('c', OrderedDict([('d', 'e')])),
     ])])
     parser.parse()
-    assert parser.main_sheet == [ 'a', 'c/d' ]
-    assert parser.main_sheet_lines == [
+    assert list(parser.main_sheet) == [ 'a', 'c/d' ]
+    assert parser.main_sheet.lines == [
         {'a': 'b', 'c/d': 'e'}
     ]
     assert parser.sub_sheets == {}
-    assert parser.sub_sheet_lines == {}
 
 
 def test_parse_nested_list_json_dict():
@@ -93,12 +94,12 @@ def test_parse_nested_list_json_dict():
         ('c', [OrderedDict([('d', 'e')])]),
     ])])
     parser.parse()
-    assert parser.main_sheet == [ 'a' ]
-    assert parser.main_sheet_lines == [
+    assert list(parser.main_sheet) == [ 'a' ]
+    assert parser.main_sheet.lines == [
         {'a': 'b'}
     ]
-    assert parser.sub_sheets == {'c':['d']}
-    assert parser.sub_sheet_lines == {'c':[{'d':'e'}]}
+    listify(parser.sub_sheets) == {'c': ['d']}
+    parser.sub_sheets['c'].lines == [{'d':'e'}]
 
 
 def test_parse_array():
@@ -106,14 +107,13 @@ def test_parse_array():
         ('testarray', ['item','anotheritem'])
     ])])
     parser.parse()
-    assert parser.main_sheet == [ 'testarray' ]
-    assert parser.main_sheet_lines == [
+    assert list(parser.main_sheet) == [ 'testarray' ]
+    assert parser.main_sheet.lines == [
         {
             'testarray': 'item;anotheritem'
         }
     ]
     assert parser.sub_sheets == {}
-    assert parser.sub_sheet_lines == {}
 
 
 def test_root_list_path():
@@ -124,12 +124,11 @@ def test_root_list_path():
         ])]},
         root_list_path='custom_key')
     parser.parse()
-    assert parser.main_sheet == [ 'a', 'c' ]
-    assert parser.main_sheet_lines == [
+    assert list(parser.main_sheet) == [ 'a', 'c' ]
+    assert parser.main_sheet.lines == [
         {'a': 'b', 'c': 'd'}
     ]
     assert parser.sub_sheets == {}
-    assert parser.sub_sheet_lines == {}
 
 
 class TestParseIDs(object):
@@ -142,8 +141,8 @@ class TestParseIDs(object):
             ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
         ])])
         parser.parse()
-        assert parser.main_sheet == [ 'ocid', 'id', 'a', 'f/g' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'ocid', 'id', 'a', 'f/g' ]
+        assert parser.main_sheet.lines == [
             {
                 'ocid': 1,
                 'id': 2,
@@ -151,8 +150,8 @@ class TestParseIDs(object):
                 'f/g': 'h'
             }
         ]
-        assert parser.sub_sheets == {'c': ['ocid','main/id','id','d']}
-        assert parser.sub_sheet_lines == {'c':[
+        listify(parser.sub_sheets) == {'c': ['ocid','main/id','id','d']}
+        assert parser.sub_sheets['c'].lines == [
             {
                 'ocid': 1,
                 'main/id': 2,
@@ -165,7 +164,7 @@ class TestParseIDs(object):
                 'id': 3,
                 'd':'e2'
             },
-        ]}
+        ]
 
     def test_parse_ids_subsheet(self):
         parser = JSONParser(root_json_dict=[OrderedDict([
@@ -181,19 +180,18 @@ class TestParseIDs(object):
             ])
         ])])
         parser.parse()
-        assert parser.main_sheet == [ 'ocid', 'id' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'ocid', 'id' ]
+        assert parser.main_sheet.lines == [
             {
                 'ocid': 1,
                 'id': 2,
             }
         ]
-        assert parser.sub_sheets == {
+        assert listify(parser.sub_sheets) == {
                 'testnest': ['ocid', 'main/id', 'id', 'a', 'f/g'],
                 'c': ['ocid', 'main/id', 'main/testnest[]/id', 'd']
             }
-        assert parser.sub_sheet_lines == {
-            'testnest': [
+        assert parser.sub_sheets['testnest'].lines == [
                 {
                     'ocid': 1,
                     'main/id': 2,
@@ -201,22 +199,21 @@ class TestParseIDs(object):
                     'a': 'b',
                     'f/g': 'h',
                 },
-            ],
-            'c': [
-                {
-                    'ocid': 1,
-                    'main/id': 2,
-                    'main/testnest[]/id': 3,
-                    'd':'e'
-                },
-                {
-                    'ocid': 1,
-                    'main/id': 2,
-                    'main/testnest[]/id': 3,
-                    'd':'e2'
-                },
-            ],
-        }
+            ]
+        assert parser.sub_sheets['c'].lines == [
+            {
+                'ocid': 1,
+                'main/id': 2,
+                'main/testnest[]/id': 3,
+                'd':'e'
+            },
+            {
+                'ocid': 1,
+                'main/id': 2,
+                'main/testnest[]/id': 3,
+                'd':'e2'
+            },
+        ]
 
     def test_parse_ids_nested(self):
         parser = JSONParser(root_json_dict=[OrderedDict([
@@ -230,8 +227,8 @@ class TestParseIDs(object):
             ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
         ])])
         parser.parse()
-        assert parser.main_sheet == [ 'ocid', 'id', 'a', 'testnest/id', 'f/g' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'ocid', 'id', 'a', 'testnest/id', 'f/g' ]
+        assert parser.main_sheet.lines == [
             {
                 'ocid': 1,
                 'id': 2,
@@ -240,8 +237,8 @@ class TestParseIDs(object):
                 'f/g': 'h'
             }
         ]
-        assert parser.sub_sheets == {'c': ['ocid','main/id','main/testnest/id','d']}
-        assert parser.sub_sheet_lines == {'c':[
+        assert listify(parser.sub_sheets) == {'c': ['ocid','main/id','main/testnest/id','d']}
+        assert parser.sub_sheets['c'].lines == [
             {
                 'ocid': 1,
                 'main/id': 2,
@@ -254,7 +251,7 @@ class TestParseIDs(object):
                 'main/testnest/id': 3,
                 'd':'e2'
             },
-        ]}
+        ]
 
 
 class TestParseUsingSchema(object):
@@ -287,13 +284,13 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert parser.main_sheet == [ 'a' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'a' ]
+        assert parser.main_sheet.lines == [
             {'a': 'b'}
         ]
         assert len(parser.sub_sheets) == 1
         assert list(parser.sub_sheets['testB']) == list(['ocid', 'd', 'f'])
-        assert parser.sub_sheet_lines == {'testB':[{'d':'e'}]}
+        assert parser.sub_sheets['testB'].lines == [{'d':'e'}]
 
     def test_column_matching(self, tmpdir): 
         test_schema = tmpdir.join('test.json')
@@ -316,8 +313,8 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert parser.main_sheet == [ 'c:array' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'c:array' ]
+        assert parser.main_sheet.lines == [
                 {'c:array': 'd'}
         ]
         assert len(parser.sub_sheets) == 0
@@ -346,13 +343,13 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert parser.main_sheet == [ 'testA[]/testB' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'testA[]/testB' ]
+        assert parser.main_sheet.lines == [
             {'testA[]/testB': '1'}
         ]
         assert len(parser.sub_sheets) == 1
         assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
-        assert parser.sub_sheet_lines == {'testA':[{'testB':'1', 'testC': '2'}]}
+        assert parser.sub_sheets['testA'].lines == [{'testB':'1', 'testC': '2'}]
 
     def test_rollup_multiple_values(self, recwarn):
         schema_parser = SchemaParser(root_schema_dict={
@@ -381,18 +378,18 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert parser.main_sheet == [ 'testA[]/testB' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'testA[]/testB' ]
+        assert parser.main_sheet.lines == [
             {
                 'testA[]/testB': 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
             }
         ]
         assert len(parser.sub_sheets) == 1
         assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
-        assert parser.sub_sheet_lines == {'testA':[
+        assert parser.sub_sheets['testA'].lines == [
             {'testB':'1', 'testC': '2'},
             {'testB':'3', 'testC': '4'}
-            ]}
+            ]
         w = recwarn.pop(UserWarning)
         assert 'Could not provide rollup' in text_type(w.message)
 
@@ -408,8 +405,8 @@ class TestParseIDsCustomRootID(object):
             ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
         ])], root_id='custom')
         parser.parse()
-        assert parser.main_sheet == [ 'custom', 'id', 'a', 'f/g' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'custom', 'id', 'a', 'f/g' ]
+        assert parser.main_sheet.lines == [
             {
                 'custom': 1,
                 'id': 2,
@@ -417,8 +414,8 @@ class TestParseIDsCustomRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert parser.sub_sheets == {'c': ['custom','main/id','id','d']}
-        assert parser.sub_sheet_lines == {'c':[
+        assert listify(parser.sub_sheets) == {'c': ['custom','main/id','id','d']}
+        assert parser.sub_sheets['c'].lines == [
             {
                 'custom': 1,
                 'main/id': 2,
@@ -431,7 +428,7 @@ class TestParseIDsCustomRootID(object):
                 'id': 3,
                 'd':'e2'
             },
-        ]}
+        ]
 
     def test_parse_ids_subsheet(self):
         parser = JSONParser(root_json_dict=[OrderedDict([
@@ -447,42 +444,40 @@ class TestParseIDsCustomRootID(object):
             ])
         ])], root_id='custom')
         parser.parse()
-        assert parser.main_sheet == [ 'custom', 'id' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'custom', 'id' ]
+        assert parser.main_sheet.lines == [
             {
                 'custom': 1,
                 'id': 2,
             }
         ]
-        assert parser.sub_sheets == {
+        assert listify(parser.sub_sheets) == {
                 'testnest': ['custom', 'main/id', 'id', 'a', 'f/g'],
                 'c': ['custom', 'main/id', 'main/testnest[]/id', 'd']
             }
-        assert parser.sub_sheet_lines == {
-            'testnest': [
-                {
-                    'custom': 1,
-                    'main/id': 2,
-                    'id': 3,
-                    'a': 'b',
-                    'f/g': 'h',
-                },
-            ],
-            'c': [
-                {
-                    'custom': 1,
-                    'main/id': 2,
-                    'main/testnest[]/id': 3,
-                    'd':'e'
-                },
-                {
-                    'custom': 1,
-                    'main/id': 2,
-                    'main/testnest[]/id': 3,
-                    'd':'e2'
-                },
-            ],
-        }
+        assert parser.sub_sheets['testnest'].lines == [
+            {
+                'custom': 1,
+                'main/id': 2,
+                'id': 3,
+                'a': 'b',
+                'f/g': 'h',
+            },
+        ]
+        assert parser.sub_sheets['c'].lines == [
+            {
+                'custom': 1,
+                'main/id': 2,
+                'main/testnest[]/id': 3,
+                'd':'e'
+            },
+            {
+                'custom': 1,
+                'main/id': 2,
+                'main/testnest[]/id': 3,
+                'd':'e2'
+            },
+        ]
 
     def test_parse_ids_nested(self):
         parser = JSONParser(root_json_dict=[OrderedDict([
@@ -496,8 +491,8 @@ class TestParseIDsCustomRootID(object):
             ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
         ])], root_id='custom')
         parser.parse()
-        assert parser.main_sheet == [ 'custom', 'id', 'a', 'testnest/id', 'f/g' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'custom', 'id', 'a', 'testnest/id', 'f/g' ]
+        assert parser.main_sheet.lines == [
             {
                 'custom': 1,
                 'id': 2,
@@ -506,8 +501,8 @@ class TestParseIDsCustomRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert parser.sub_sheets == {'c': ['custom','main/id','main/testnest/id','d']}
-        assert parser.sub_sheet_lines == {'c':[
+        assert listify(parser.sub_sheets) == {'c': ['custom','main/id','main/testnest/id','d']}
+        assert parser.sub_sheets['c'].lines == [
             {
                 'custom': 1,
                 'main/id': 2,
@@ -520,7 +515,7 @@ class TestParseIDsCustomRootID(object):
                 'main/testnest/id': 3,
                 'd':'e2'
             },
-        ]}
+        ]
 
 
 class TestParseIDsNoRootID(object):
@@ -532,16 +527,16 @@ class TestParseIDsNoRootID(object):
             ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
         ])], root_id='')
         parser.parse()
-        assert parser.main_sheet == [ 'id', 'a', 'f/g' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'id', 'a', 'f/g' ]
+        assert parser.main_sheet.lines == [
             {
                 'id': 2,
                 'a': 'b',
                 'f/g': 'h'
             }
         ]
-        assert parser.sub_sheets == {'c': ['main/id','id','d']}
-        assert parser.sub_sheet_lines == {'c':[
+        assert listify(parser.sub_sheets) == {'c': ['main/id','id','d']}
+        assert parser.sub_sheets['c'].lines == [
             {
                 'main/id': 2,
                 'id': 3,
@@ -552,7 +547,7 @@ class TestParseIDsNoRootID(object):
                 'id': 3,
                 'd':'e2'
             },
-        ]}
+        ]
 
     def test_parse_ids_subsheet(self):
         parser = JSONParser(root_json_dict=[OrderedDict([
@@ -567,38 +562,36 @@ class TestParseIDsNoRootID(object):
             ])
         ])], root_id='')
         parser.parse()
-        assert parser.main_sheet == [ 'id' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'id' ]
+        assert parser.main_sheet.lines == [
             {
                 'id': 2,
             }
         ]
-        assert parser.sub_sheets == {
+        assert listify(parser.sub_sheets) == {
                 'testnest': ['main/id', 'id', 'a', 'f/g'],
                 'c': ['main/id', 'main/testnest[]/id', 'd']
             }
-        assert parser.sub_sheet_lines == {
-            'testnest': [
-                {
-                    'main/id': 2,
-                    'id': 3,
-                    'a': 'b',
-                    'f/g': 'h',
-                },
-            ],
-            'c': [
-                {
-                    'main/id': 2,
-                    'main/testnest[]/id': 3,
-                    'd':'e'
-                },
-                {
-                    'main/id': 2,
-                    'main/testnest[]/id': 3,
-                    'd':'e2'
-                },
-            ],
-        }
+        assert parser.sub_sheets['testnest'].lines ==  [
+            {
+                'main/id': 2,
+                'id': 3,
+                'a': 'b',
+                'f/g': 'h',
+            },
+        ]
+        assert parser.sub_sheets['c'].lines == [
+            {
+                'main/id': 2,
+                'main/testnest[]/id': 3,
+                'd':'e'
+            },
+            {
+                'main/id': 2,
+                'main/testnest[]/id': 3,
+                'd':'e2'
+            },
+        ]
 
     def test_parse_ids_nested(self):
         parser = JSONParser(root_json_dict=[OrderedDict([
@@ -611,8 +604,8 @@ class TestParseIDsNoRootID(object):
             ('f', {'g':'h'}) # Check that having nested objects doesn't break ID output
         ])], root_id='')
         parser.parse()
-        assert parser.main_sheet == [ 'id', 'a', 'testnest/id', 'f/g' ]
-        assert parser.main_sheet_lines == [
+        assert list(parser.main_sheet) == [ 'id', 'a', 'testnest/id', 'f/g' ]
+        assert parser.main_sheet.lines == [
             {
                 'id': 2,
                 'a': 'b',
@@ -620,8 +613,8 @@ class TestParseIDsNoRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert parser.sub_sheets == {'c': ['main/id','main/testnest/id','d']}
-        assert parser.sub_sheet_lines == {'c':[
+        assert listify(parser.sub_sheets) == {'c': ['main/id','main/testnest/id','d']}
+        assert parser.sub_sheets['c'].lines == [
             {
                 'main/id': 2,
                 'main/testnest/id': 3,
@@ -632,4 +625,4 @@ class TestParseIDsNoRootID(object):
                 'main/testnest/id': 3,
                 'd':'e2'
             },
-        ]}
+        ]
