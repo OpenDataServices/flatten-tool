@@ -64,6 +64,10 @@ def create_parser():
     parser_flatten.add_argument(
         "-r", "--root-id",
         help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
+    parser_flatten.add_argument(
+        "--use-titles",
+        action='store_true',
+        help="Convert titles. Requires a schema to be specified.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',

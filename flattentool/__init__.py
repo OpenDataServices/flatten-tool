@@ -36,9 +36,9 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, root_id='ocid', **_):
+def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, root_id='ocid', use_titles=False, **_):
     if schema:
-        schema_parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id)
+        schema_parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
         schema_parser.parse()
     else:
         schema_parser = None
@@ -47,7 +47,8 @@ def flatten(input_name, schema=None, output_name='releases', output_format='all'
         root_list_path=root_list_path,
         schema_parser=schema_parser,
         main_sheet_name=main_sheet_name,
-        root_id=root_id)
+        root_id=root_id,
+        use_titles=use_titles)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):

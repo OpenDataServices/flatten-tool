@@ -22,7 +22,7 @@ class BadlyFormedJSONError(ValueError):
     pass
 
 
-def sheet_key(sheet, key):
+def sheet_key_field(sheet, key):
     """
     Check for a key in the sheet, and return it with any suffix (following a ':') that might be present).
     
@@ -39,17 +39,30 @@ def sheet_key(sheet, key):
     else:
         return keys[0]
 
+def sheet_key_title(sheet, key):
+    """
+    If the key has a corresponding title, return that. If doesn't, create it in the sheet and return it.
+
+    """
+    title_lookup = {v: k for k, v in sheet.titles.items()}
+    if key in title_lookup:
+        return title_lookup[key]
+    else:
+        sheet.append(key)
+        return key
+
 
 class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
 
-    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None, root_list_path=None, root_id='ocid'):
+    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None, root_list_path=None, root_id='ocid', use_titles=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.main_sheet_name = main_sheet_name
         self.root_list_path = root_list_path
         self.root_id = root_id
+        self.use_titles = use_titles
         if schema_parser:
             self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
             self.main_sheet = schema_parser.main_sheet
@@ -87,6 +100,11 @@ class JSONParser(object):
     def parse_json_dict(self, json_dict, sheet, id_extra_parent_name='', parent_name='', flattened_dict=None, parent_id_fields=None):
         # Possibly main_sheet should be main_sheet_columns, but this is
         # currently named for consistency with schema.py
+
+        if self.use_titles:
+            sheet_key = sheet_key_title
+        else:
+            sheet_key = sheet_key_field
 
         parent_id_fields = copy.copy(parent_id_fields) or OrderedDict()
         if flattened_dict is None:
