@@ -6,6 +6,31 @@ Flatten Tool
 [![Code Health](https://landscape.io/github/OpenDataServices/flatten-tool/master/landscape.png)](https://landscape.io/github/OpenDataServices/flatten-tool/master)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/OpenDataServices/flatten-tool/blob/master/LICENSE)
 
+Flatten-Tool (aka Flat Stan) [Alpha]
+------------------------------------
+
+Flat Stan is a general purpose tool with the goal of allowing a dataset to be round-tripped between structured JSON and tabular data packages or spreadsheets: providing a bridge between richly structured datasets and accessible flat formats. 
+
+It was developed for use with the [Open Contracting Data Standard](http://standard.open-contracting.ogr), and has been further developed with the [360 Giving Data Standard](http://docs.threesixtygiving.ogr). We're keen to see if it is useful in other contexts too. 
+
+It is also used in to power the [COnvert Validate Explore (COVE) tool](https://github.com/OpenDataServices/cove) which provides a web interface for Flat Stan configured against a particular JSON Schema. 
+
+### Features
+
+* Generate a template Excel or CSV file based on a JSON Schema;
+* Convert data from flat template into structured form;
+* Take JSON data and provide a flattened output;
+* Use a JSON schema to guide the approach to flattening; 
+* Use a JSON schema to provide column titles rather than field names;
+
+### ToDo:
+
+* Improve documentation;
+* Improve round-tripping of data;
+* Add support for [Data Packages](http://data.okfn.org/doc/data-package) as an input/output option;
+* Add support for annotation of columns and adding validation to Excel spreadsheet templates;
+
+
 Python Version Support
 ----------------------
 
