@@ -22,11 +22,11 @@ It is also used in to power the [COnvert Validate Explore (COVE) tool](https://g
 
 ToDo:
 
-[ ] Improve documentation;
-[ ] Improve round-tripping of data;
-[ ] Add support for [Data Packages](http://data.okfn.org/doc/data-package) as an input/output option;
-[ ] Add support for annotation of columns and adding validation to Excel spreadsheet templates;
-[ ] Add multi-lingual support for field titles
+- [ ] Improve documentation;
+- [ ] Improve round-tripping of data;
+- [ ] Add support for [Data Packages](http://data.okfn.org/doc/data-package) as an input/output option;
+- [ ] Add support for annotation of columns and adding validation to Excel spreadsheet templates;
+- [ ] Add multi-lingual support for field titles
 
 ### Why
 Imagine a simple dataset that describes grants. Chances are if is to represent the world, it is going to need to contain some one-to-many relationships (.e.g. one grant, many categories). This is structured data. 
