@@ -45,7 +45,7 @@ By introducing a couple of simple rules, Flat Stan is aiming to allow data to be
 
 Flat Stan was designed to work along with a JSON Schema. Flat Stan likes JSON Schemas which:
 
-**(1) Provide a ```id``` at every level of the structure**
+**(1) Provide an ```id``` at every level of the structure**
 
 So that each entity in the data structure can be referenced easily in the flat version. It turns out this is also pretty useful for JSON-LD mapping.
 
