@@ -45,11 +45,11 @@ By introducing a couple of simple rules, Flat Stan is aiming to allow data to be
 
 Flat Stan was designed to work along with a JSON Schema. Flat Stan likes JSON Schemas which:
 
-** (1) Provide a ```id``` at every level of the structure**
+**(1) Provide a ```id``` at every level of the structure**
 
 So that each entity in the data structure can be referenced easily in the flat version. It turns out this is also pretty useful for JSON-LD mapping.
 
-** (2) Re-use common blocks of schema...**
+**(2) Re-use common blocks of schema...**
 
 ...where it would make sense for the items described to all be gathered in one flattened table.
 
@@ -57,7 +57,7 @@ For example, if you have a fundingOrganisation, and a recipientOrganisation for 
 
 This keeps the spreadsheets simpler. Whether or not gathering receipientOrganisation and fundingOrganisation together is a design decision based on how you expect the flat version of the data to be used. 
 
-** (3) Describes the ideal root table by rolling up properties **
+**(3) Describes the ideal root table by rolling up properties **
 
 Often in a data structure, there are only a few properties that exist at the root level, with most properties at least one level deep in the structure. However, if Flat Stan hides away all the important properties in sub tables, then the spreadsheet user has to hunt all over the place for the properties that matter to them.
 
@@ -65,13 +65,13 @@ So, we introduce a custom 'rollUp' property to out JSON Schema. This allows the 
 
 You can even roll up fields which *could* be one-to-many, but which often will be one-to-one relationships, so that there is a good chance of a user of the flattened data being able to do all the data creation or analysis they want in a single table.
 
-** (4) Provide unique field titles **
+**(4) Provide unique field titles **
 
 "Recipient Org: Name" is a lot friendlier to spreadsheet users than 'receipientOrganisation/name'. So, Flat Stan includes support for using the titles of JSON fields instead of the field names when creating a spreadsheet template and converting data.
 
 But - to make that use, the titles at each level of the structure do need to be unique.
 
-** (5) Don't nest too deep **
+**(5) Don't nest too deep **
 
 Whilst Flat Stan can cope with multiple laters of nesting in a data structure, the deeper the structure gets, the trickier it is for the spreadsheet user to understand what is going on. So, we try and just go a few layers deep at most in data for Flat Stan to work with. 
 
