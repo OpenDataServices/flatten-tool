@@ -1,0 +1,80 @@
+{
+    "grants": [
+        {
+            "currency": "GBP", 
+            "grantProgramme": [
+                {
+                    "code": "AAC", 
+                    "title": "Arts Awards Funding Committee"
+                }
+            ], 
+            "id": "360G-wellcometrust-105177/Z/14/Z", 
+            "Co-applicant(s)": "Mr Bentley Crudgington, Mr Gary Thomas", 
+            "title": "Silent Signal.", 
+            "fundingOrganization": [
+                {
+                    "id": "GB-CHC-210183", 
+                    "name": "The Wellcome Trust"
+                }
+            ], 
+            "dateModified": "13-03-2015", 
+            "Data source": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
+            "plannedDates": [
+                {
+                    "duration": 30
+                }
+            ], 
+            "Surname of applicant": "Addison", 
+            "Grant number": "105177/Z/14/Z", 
+            "amountAwarded": 152505, 
+            "recipientOrganization": [
+                {
+                    "addressLocality": "London", 
+                    "name": "Animate Project Limited"
+                }
+            ], 
+            "Grant type": "Large Arts Awards", 
+            "Full name of applicant": "Miss Abigail Addison", 
+            "awardDate": "24/07/2014"
+        }, 
+        {
+            "recipientOrganization": [
+                {
+                    "id": "GB-COH-RC000659", 
+                    "addressLocality": "Leicester", 
+                    "name": "UNIVERSITY OF LEICESTER", 
+                    "companyNumber": "RC000659"
+                }
+            ], 
+            "currency": "GBP", 
+            "grantProgramme": [
+                {
+                    "code": "AAC", 
+                    "title": "Arts Awards Funding Committee"
+                }
+            ], 
+            "Department": "Department of Museum Studies", 
+            "id": "360G-wellcometrust-105182/Z/14/Z", 
+            "title": "Exceptional and Extraordinary: unruly bodies and minds in the medical museum.", 
+            "fundingOrganization": [
+                {
+                    "id": "GB-CHC-210183", 
+                    "name": "The Wellcome Trust"
+                }
+            ], 
+            "dateModified": "13-03-2015", 
+            "Data source": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
+            "plannedDates": [
+                {
+                    "duration": 25
+                }
+            ], 
+            "Surname of applicant": "Sandell", 
+            "Grant number": "105182/Z/14/Z", 
+            "amountAwarded": 178990, 
+            "Grant type": "Large Arts Awards", 
+            "Full name of applicant": "Prof Richard Sandell", 
+            "awardDate": "24/07/2014"
+        } 
+    ]
+}

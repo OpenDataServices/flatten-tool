@@ -1,10 +1,19 @@
 release-schema.json
 Source: https://github.com/open-contracting/standard/blob/94f72cf9dd6d31b814e7df9c306f40b150e58d45/standard/schema/release-schema.json
 
+360-giving-schema.json
+Source: https://raw.githubusercontent.com/ThreeSixtyGiving/standard/master/schema/360-giving-schema.json
 tenders_releases_2_releases.json
+
 Source: https://github.com/open-contracting/sample-data/tree/958fc30e827e980e750459e1b9a6fe09eb266d7d/buyandsell/ocds_data
+License: http://data.gc.ca/eng/open-government-licence-canada 
 (but truncated to only two releases)
 
 tenders_releases_base.json
-Source: https://github.com/open-contracting/sample-data/tree/958fc30e827e980e750459e1b9a6fe09eb266d7d/buyandsell/ocds_data
-(but with the releases key removed)
+Source: Same as tenders_releases_2_releases.json (but with the releases key removed)
+License: http://data.gc.ca/eng/open-government-licence-canada 
+
+WellcomeTrust-grants_fixed_2_grants.json
+Source: http://data.threesixtygiving.org/dataset/welcome-trust-grants-awarded
+(but with the key "Grants" changed to "grants" and truncated to to releases)
+License: Creative Commons Attribution

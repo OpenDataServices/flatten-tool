@@ -5,6 +5,7 @@ from collections import OrderedDict
 import jsonref
 from warnings import warn
 from flattentool.sheet import Sheet
+import codecs
 
 def get_property_type_set(property_schema_dict):
     property_type = property_schema_dict.get('type')
@@ -36,7 +37,7 @@ class SchemaParser(object):
                 r = requests.get(schema_filename)
                 self.root_schema_dict = jsonref.loads(r.text, object_pairs_hook=OrderedDict)
             else:
-                with open(schema_filename) as schema_file:
+                with codecs.open(schema_filename, encoding="utf-8") as schema_file:
                     self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict)
         else:
             self.root_schema_dict = root_schema_dict
@@ -70,7 +71,7 @@ class SchemaParser(object):
                 if 'object' in property_type_set:
                     for field, child_title in self.parse_schema_dict(parent_name+'/'+property_name, property_schema_dict,
                                                         parent_id_fields=id_fields):
-                        yield property_name+'/'+field, (title+':'+child_title if title and child_title else None)
+                        yield property_name+'/'+field, (title+':'+child_title if title and child_title else None) # TODO ambiguous use of "title"
 
                 elif 'array' in property_type_set:
                     type_set = get_property_type_set(property_schema_dict['items'])

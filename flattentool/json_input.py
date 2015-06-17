@@ -64,7 +64,7 @@ class JSONParser(object):
         self.root_id = root_id
         self.use_titles = use_titles
         if schema_parser:
-            self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
+            self.sub_sheet_mapping = {} # FIXME !!!!! {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
             self.main_sheet = schema_parser.main_sheet
             self.sub_sheets = schema_parser.sub_sheets
             # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified

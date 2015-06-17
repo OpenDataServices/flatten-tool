@@ -38,7 +38,12 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
 
 def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, root_id='ocid', use_titles=False, **_):
     if schema:
-        schema_parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
+        schema_parser = SchemaParser(
+            schema_filename=schema,
+            rollup=rollup,
+            root_id=root_id,
+            use_titles=use_titles,
+            main_sheet_name=main_sheet_name)
         schema_parser.parse()
     else:
         schema_parser = None
