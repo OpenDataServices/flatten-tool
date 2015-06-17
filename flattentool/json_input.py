@@ -55,6 +55,8 @@ def sheet_key_title(sheet, key, id_key=None):
     If the key has a corresponding title, return that. If doesn't, create it in the sheet and return it.
 
     """
+    if id_key: # call sheet_key_field instead
+        return sheet_key_field(sheet, key, id_key)
     title_lookup = {v: k for k, v in sheet.titles.items()}
     if key in title_lookup:
         return title_lookup[key]
