@@ -1,10 +1,11 @@
 class Sheet(object):
-    def __init__(self, columns=None, root_id=''):
+    def __init__(self, columns=None, root_id='', name=None):
         self.id_columns = []
         self.columns = columns if columns else []
         self.titles = {}
         self.lines = []
         self.root_id = root_id
+        self.name = name
 
     def add_field(self, field, id_field=False):
         columns = self.id_columns if id_field else self.columns

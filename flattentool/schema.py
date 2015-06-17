@@ -91,7 +91,7 @@ class SchemaParser(object):
                         self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
-                            self.sub_sheets[sub_sheet_name] = Sheet(root_id=self.root_id)
+                            self.sub_sheets[sub_sheet_name] = Sheet(root_id=self.root_id, name=sub_sheet_name)
                         sub_sheet = self.sub_sheets[sub_sheet_name]
 
                         for field in id_fields:
