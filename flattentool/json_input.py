@@ -14,6 +14,7 @@ from flattentool.schema import SchemaParser
 from flattentool.input import path_search
 from flattentool.sheet import Sheet
 from warnings import warn
+import codecs
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
@@ -94,7 +95,7 @@ class JSONParser(object):
             raise ValueError('Only one of json_file or root_json_dict should be supplied')
  
         if json_filename:
-            with open(json_filename) as json_file:
+            with codecs.open(json_filename, encoding='utf-8') as json_file:
                 try:
                     self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
                 except ValueError as err:

@@ -4,6 +4,12 @@ formats."""
 import openpyxl
 import csv
 import os
+import sys
+
+if sys.version > '3':
+    import csv
+else:
+    import unicodecsv as csv  # pylint: disable=F0401
 
 
 class SpreadsheetOutput(object):
@@ -59,11 +65,20 @@ class CSVOutput(SpreadsheetOutput):
 
     def write_sheet(self, sheet_name, sheet):
         sheet_header = list(sheet)
-        with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
-            dictwriter = csv.DictWriter(csv_file, sheet_header)
-            dictwriter.writeheader()
-            for sheet_line in sheet.lines:
-                dictwriter.writerow(sheet_line)
+        if sys.version > '3':  # If Python 3 or greater
+            # Pass the encoding to the open function
+            with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
+                dictwriter = csv.DictWriter(csv_file, sheet_header)
+                dictwriter.writeheader()
+                for sheet_line in sheet.lines:
+                    dictwriter.writerow(sheet_line)
+        else:  # If Python 2
+            # Pass the encoding to DictReader
+            with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
+                dictwriter = csv.DictWriter(csv_file, sheet_header, encoding='utf-8')
+                dictwriter.writeheader()
+                for sheet_line in sheet.lines:
+                    dictwriter.writerow(sheet_line)
 
 
 FORMATS = {

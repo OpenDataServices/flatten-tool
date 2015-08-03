@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import pytest
 import os
 from flattentool import output, schema
@@ -129,3 +131,29 @@ def test_populated_lines(tmpdir):
     ])
     assert tmpdir.join('release', 'release.csv').read().strip('\r\n').replace('\r', '') == 'a\ncell1\ncell2'
     assert tmpdir.join('release', 'b.csv').read().strip('\r\n').replace('\r', '') == 'ocid,c\n,cell3\n,cell4'
+
+
+def test_utf8(tmpdir):
+    parser = MockParser(['é'], {})
+    parser.main_sheet.lines = [{'é': 'éαГ😼𝒞人'}, {'é': 'cell2'}]
+    for format_name, spreadsheet_output_class in output.FORMATS.items():
+        spreadsheet_output = spreadsheet_output_class(
+            parser=parser,
+            main_sheet_name='release',
+            output_name=os.path.join(tmpdir.strpath, 'release'+output.FORMATS_SUFFIX[format_name]))
+        spreadsheet_output.write_sheets()
+
+    # Check XLSX
+    wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
+    assert wb.get_sheet_names() == ['release']
+    assert len(wb['release'].rows) == 3
+    assert [ x.value for x in wb['release'].rows[0] ] == [ 'é' ]
+    assert [ x.value for x in wb['release'].rows[1] ] == [ 'éαГ😼𝒞人' ]
+    assert [ x.value for x in wb['release'].rows[2] ] == [ 'cell2' ]
+
+    # Check CSV
+    assert set(tmpdir.join('release').listdir()) == set([
+        tmpdir.join('release').join('release.csv'),
+    ])
+    release_csv_text = tmpdir.join('release', 'release.csv').read_text(encoding='utf-8')
+    assert release_csv_text.strip('\r\n').replace('\r', '') == 'é\néαГ😼𝒞人\ncell2'

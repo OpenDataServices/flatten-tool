@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from flattentool.json_input import JSONParser, BadlyFormedJSONError
 from flattentool.schema import SchemaParser
@@ -38,6 +39,13 @@ def test_json_filename(tmpdir):
     test_json.write('{"a":"b"}')
     parser = JSONParser(json_filename=test_json.strpath)
     assert parser.root_json_dict == {'a':'b'}
+
+
+def test_json_filename_utf8(tmpdir):
+    test_json = tmpdir.join('test.json')
+    test_json.write_text('{"a":"éαГ😼𝒞人"}', encoding='utf-8')
+    parser = JSONParser(json_filename=test_json.strpath)
+    assert parser.root_json_dict == {'a':'éαГ😼𝒞人'}
 
 
 def test_json_filename_ordered(tmpdir):
