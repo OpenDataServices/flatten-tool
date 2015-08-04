@@ -149,7 +149,7 @@ The encoding of input CSVs can be specified with the `--encoding` flag. This can
 
 However, Python 2 can not load CSVs that contain the NULL character. This includes CSVs encoded in UTF-16. If you wish to convert UTF-16 encoded CSVs you must use Python 3.
 
-(See [this test](https://github.com/OpenDataServices/flatten-tool/blob/d7db1125fef079302dcd372593c471c527aff7fb/flattentool/tests/test_input.py#L114) which passes for Python 3, but fails for Python 2).
+(See [this test](https://github.com/OpenDataServices/flatten-tool/blob/61d8404b444f10384363cde1cad542a0d04af004/flattentool/tests/test_input.py#L130) which passes for Python 3, but fails for Python 2).
 
 
 360 Giving Support
