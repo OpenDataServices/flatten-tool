@@ -174,6 +174,9 @@ def test_unflatten_csv_utf8(tmpdir):
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
     assert reloaded_json == {'main': [{'ocid': '1', 'id': 'éαГ😼𝒞人'}]}
+    # The JSON we output should be UTF-8, rather than escaped ASCII
+    # https://github.com/OpenDataServices/flatten-tool/issues/71
+    assert 'éαГ😼𝒞人' in tmpdir.join('release.json').read_text(encoding='utf-8')
 
 
 def test_unflatten_csv_latin1(tmpdir):

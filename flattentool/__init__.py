@@ -4,6 +4,7 @@ from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS
 import json
+import codecs
 from decimal import Decimal
 from collections import OrderedDict
 
@@ -122,6 +123,6 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     else:
         base = OrderedDict()
     base[main_sheet_name] = list(spreadsheet_input.unflatten())
-    with open(output_name, 'w') as fp:
-        json.dump(base, fp, indent=4, default=decimal_default)
+    with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+        json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
 
