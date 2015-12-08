@@ -1,4 +1,9 @@
 class Sheet(object):
+    """
+    An abstract representation of a single sheet of a spreadsheet.
+
+    """
+
     def __init__(self, columns=None, root_id='', name=None):
         self.id_columns = []
         self.columns = columns if columns else []

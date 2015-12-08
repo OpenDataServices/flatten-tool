@@ -1,3 +1,8 @@
+"""
+This file has classes describing input from spreadsheets.
+
+"""
+
 from __future__ import print_function
 from __future__ import unicode_literals
 import sys
@@ -25,7 +30,17 @@ except ImportError:
 
 
 class SpreadsheetInput(object):
+    """
+    Base class describing a spreadsheet input. Has stubs which are
+    implemented via inheritance for particular types of spreadsheet (e.g. xlsx
+    or csv).
+
+    """
     def convert_dict_titles(self, dicts, titles):
+        """
+        Replace titles with field names in the given list of dictionaries (``dicts``) using the mapping in ``titles``.
+
+        """
         titles = titles or {}
         titles_map = {title.replace(' ', '').lower(): title for title in titles}
         for d in dicts:

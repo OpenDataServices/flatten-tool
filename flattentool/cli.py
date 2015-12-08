@@ -3,8 +3,28 @@ import argparse
 from flattentool import create_template, unflatten, flatten
 from six import text_type
 
+"""
+This file does most of the work of the flatten-tool commandline command.
+
+It takes any commandline arguments, and passes them to a function in
+``__init__.py``.
+
+It is callable via the ``flatten-tool`` executable in the directory below, or
+using ``python -m flattentool.cli``.
+
+"""
+
 
 def create_parser():
+    """
+    Create an argparse ArgumentParser for our commandline arguments
+
+    Defaults are not set here, but rather given in the appropriate function.
+
+    (This is split out as it's own function primarily so it can be tested.)
+
+    """
+
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='subparser_name')
 
@@ -109,15 +129,20 @@ def create_parser():
 
 
 def kwargs_from_parsed_args(args):
+    """
+    Transforms argparse's parsed args object into a dictionary to be passed  as
+    kwargs.
+
+    """
     return {k: v for k, v in vars(args).items() if v is not None}
 
 
 def main():
     """
-    Takes any command line arguments and then passes them onto
-    create_template
-    Defaults are not set here, but rather given in the create_template
-    function incase that function is called from elsewhere in future.
+    Use ``create_parser`` to get the commandline arguments, and pass them to
+    the appropriate function in __init__.py (create_template, flatten or
+    unflatten).
+
     """
     parser = create_parser()
     # Store the supplied arguments in args

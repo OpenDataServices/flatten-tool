@@ -1,5 +1,8 @@
-"""Code to output a parsed flattened JSON schema in various spreadsheet
-formats."""
+"""
+Code to output a parsed flattened JSON schema in various spreadsheet
+formats.
+
+"""
 
 import openpyxl
 import csv
