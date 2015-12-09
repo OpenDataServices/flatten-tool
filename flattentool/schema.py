@@ -99,6 +99,9 @@ class SchemaParser(object):
                         fields = self.parse_schema_dict(parent_name+'/'+property_name+'[]',
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields)
+
+                        rolledUp = set()
+
                         for field, child_title in fields:
                             if self.use_titles:
                                 if not child_title:
@@ -110,7 +113,14 @@ class SchemaParser(object):
                             if child_title:
                                 self.sub_sheets[sub_sheet_name].titles[child_title] = field
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
+                                rolledUp.add(field)
                                 yield property_name+'[]/'+field, (title+':'+child_title if title and child_title else None)
+
+                        # Check that all items in rollUp are in the schema
+                        if self.rollup and 'rollUp' in property_schema_dict:
+                            missedRollUp = set(property_schema_dict['rollUp']) - rolledUp
+                            if missedRollUp:
+                                warn('{} in rollUp but not in schema'.format(', '.join(missedRollUp)))
                     else:
                         raise ValueError
                 elif 'string' in property_type_set:

@@ -341,6 +341,35 @@ def test_rollup():
     assert set(parser.sub_sheets) == set(['testA'])
     assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
 
+def test_bad_rollup(recwarn):
+    '''
+    When rollUp is specified, but the field is missing in the schema, we expect
+    a warning.
+
+    '''
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'rollUp': [ 'testB' ],
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'testC': type_string
+                    }
+                }
+            },
+        }
+    }, rollup=True)
+    parser.parse()
+
+    w = recwarn.pop(UserWarning)
+    assert 'testB in rollUp but not in schema' in text_type(w.message)
+
+    assert set(parser.main_sheet) == set()
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert set(parser.sub_sheets['testA']) == set(['ocid', 'testC'])
+
 
 def test_sub_sheet_custom_id():
     parser = SchemaParser(root_schema_dict={
