@@ -141,6 +141,13 @@ These produce a release.json file based on the data in the spreadsheets.
 This will create `unflattened.xlsx` and a `unflattened/` directory of csv files.
 
 
+Running the tests
+-----------------
+
+After following the installation above, run `py.test`.
+
+Note that the tests require the Python testsuite. This should come with python, but some distros split it out. On Ubuntu you will need to install a package like `libpython3.4-testsuite` (depending on which Python version you are using).
+
 
 Encodings
 ---------
