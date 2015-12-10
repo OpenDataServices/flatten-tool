@@ -341,6 +341,7 @@ def test_rollup():
     assert set(parser.sub_sheets) == set(['testA'])
     assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
 
+
 def test_bad_rollup(recwarn):
     '''
     When rollUp is specified, but the field is missing in the schema, we expect
@@ -484,6 +485,35 @@ def test_use_titles(recwarn):
     assert list(parser.sub_sheets['testA']) == ['ocid']
     w = recwarn.pop(UserWarning)
     assert 'does not have a title' in text_type(w.message)
+
+
+def test_titles_rollup():
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'testA': {
+                'type': 'array',
+                'title': 'ATitle',
+                'rollUp': [ 'testB' ],
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'testB': {
+                            'type': 'string',
+                            'title': 'BTitle',
+                        },
+                        'testC': {
+                            'type': 'string',
+                            'title': 'CTitle',
+                        }
+                    }
+                }
+            },
+        }
+    }, rollup=True, use_titles=True)
+    parser.parse()
+    assert set(parser.main_sheet) == set(['ATitle:BTitle'])
+    assert set(parser.sub_sheets) == set(['testA'])
+    assert set(parser.sub_sheets['testA']) == set(['ocid', 'BTitle', 'CTitle'])
 
 
 def test_schema_from_uri(httpserver):
