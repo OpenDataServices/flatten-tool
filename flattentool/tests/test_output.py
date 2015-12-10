@@ -34,8 +34,7 @@ def test_blank_sheets(tmpdir):
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
     assert wb.get_sheet_names() == ['release']
     assert len(wb['release'].rows) == 1
-    assert len(wb['release'].rows[0]) == 1
-    assert wb['release'].rows[0][0].value == None
+    assert len(wb['release'].rows[0]) == 0
     
     # Check CSV is Empty
     assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
@@ -47,7 +46,7 @@ def test_populated_header(tmpdir):
         subsheet = Sheet(root_id='ocid')
         subsheet.add_field('c')
         spreadsheet_output = spreadsheet_output_class(
-            parser=MockParser(['a'], {'b': subsheet}),
+            parser=MockParser(['a', 'd'], {'b': subsheet}),
             main_sheet_name='release',
             output_name=os.path.join(tmpdir.strpath, 'release'+output.FORMATS_SUFFIX[format_name]))
         spreadsheet_output.write_sheets()
@@ -56,7 +55,7 @@ def test_populated_header(tmpdir):
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
     assert wb.get_sheet_names() == ['release', 'b']
     assert len(wb['release'].rows) == 1
-    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a' ]
+    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a', 'd' ]
     assert len(wb['b'].rows) == 1
     assert [ x.value for x in wb['b'].rows[0] ] == [ 'ocid', 'c' ]
 
@@ -65,14 +64,14 @@ def test_populated_header(tmpdir):
         tmpdir.join('release').join('release.csv'),
         tmpdir.join('release').join('b.csv')
     ])
-    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a'
+    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a,d'
     assert tmpdir.join('release', 'b.csv').read().strip('\r\n') == 'ocid,c'
 
 
 def test_empty_lines(tmpdir):
     subsheet = Sheet(root_id='ocid')
     subsheet.add_field('c')
-    parser = MockParser(['a'], {'b': subsheet})
+    parser = MockParser(['a', 'd'], {'b': subsheet})
     parser.main_sheet.lines = []
     for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
@@ -85,7 +84,7 @@ def test_empty_lines(tmpdir):
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
     assert wb.get_sheet_names() == ['release', 'b']
     assert len(wb['release'].rows) == 1
-    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a' ]
+    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a', 'd' ]
     assert len(wb['b'].rows) == 1
     assert [ x.value for x in wb['b'].rows[0] ] == [ 'ocid', 'c' ]
 
@@ -94,7 +93,7 @@ def test_empty_lines(tmpdir):
         tmpdir.join('release').join('release.csv'),
         tmpdir.join('release').join('b.csv')
     ])
-    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a'
+    assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a,d'
     assert tmpdir.join('release', 'b.csv').read().strip('\r\n') == 'ocid,c'
 
 

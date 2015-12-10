@@ -1,6 +1,7 @@
 from flattentool import unflatten, flatten
 import json
 import pytest
+import sys
 
 
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
@@ -9,12 +10,12 @@ def test_roundtrip(tmpdir, output_format):
     base_name = 'flattentool/tests/fixtures/tenders_releases_base.json'
     flatten(
         input_name=input_name,
-        output_name=tmpdir.join('flattened').strpath,
+        output_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_format=output_format,
         schema='flattentool/tests/fixtures/release-schema.json',
         main_sheet_name='releases')
     unflatten(
-        input_name=tmpdir.join('flattened').strpath,
+        input_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_name=tmpdir.join('roundtrip.json').strpath,
         input_format=output_format,
         base_json=base_name,
@@ -37,7 +38,7 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
     input_name = 'flattentool/tests/fixtures/WellcomeTrust-grants_fixed_2_grants.json'
     flatten(
         input_name=input_name,
-        output_name=tmpdir.join('flattened').strpath,
+        output_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_format=output_format,
         schema='flattentool/tests/fixtures/360-giving-schema.json',
         main_sheet_name='grants',
@@ -45,7 +46,7 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
         root_id='',
         use_titles=use_titles)
     unflatten(
-        input_name=tmpdir.join('flattened').strpath,
+        input_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_name=tmpdir.join('roundtrip.json').strpath,
         input_format=output_format,
         schema='flattentool/tests/fixtures/360-giving-schema.json',
@@ -58,7 +59,8 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
 
     # Currently not enough information to successfully roundtrip that values
     # are numbers, when this is not required by the schema
-    if output_format == 'csv':
+    # for CSV, and for openpyxl under Python 2
+    if output_format == 'csv' or sys.version_info < (3, 0):
         for grant in original_json['grants']:
             grant['plannedDates'][0]['duration'] = str(grant['plannedDates'][0]['duration'])
 

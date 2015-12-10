@@ -94,8 +94,12 @@ class TestInputFailure(object):
 
     def test_xlsx_no_file(self, tmpdir):
         xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'), main_sheet_name='main')
-        with pytest.raises(openpyxl.exceptions.InvalidFileException):
-            xlsxinput.read_sheets()
+        if sys.version > '3':
+            with pytest.raises(FileNotFoundError):
+                xlsxinput.read_sheets()
+        else:
+            with pytest.raises(IOError):
+                xlsxinput.read_sheets()
 
     def test_xlsx_no_main_sheet(self):
         xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='notmain')

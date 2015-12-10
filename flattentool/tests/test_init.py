@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from flattentool import decimal_default, unflatten
 from decimal import Decimal
 import json
+import sys
 
 
 def test_decimal_default():
@@ -202,4 +203,4 @@ def test_unflatten_xslx_unicode(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'main': [{'ocid': 1, 'id': 'éαГ😼𝒞人'}]}
+    assert reloaded_json == {'main': [{'ocid': 1 if sys.version > '3' else '1', 'id': 'éαГ😼𝒞人'}]}
