@@ -27,8 +27,9 @@ except ImportError:
 class SpreadsheetInput(object):
     def convert_dict_titles(self, dicts, titles):
         titles = titles or {}
+        titles_map = {title.replace(' ', '').lower(): title for title in titles}
         for d in dicts:
-            yield { (titles[k] if k in titles else (k if '/' in k else k.replace(':','/'))):v for k,v in d.items() }
+            yield { (titles[titles_map[k.replace(' ', '').lower()]] if k.replace(' ', '').lower() in titles_map else (k if '/' in k else k.replace(':','/'))):v for k,v in d.items() }
 
     def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid', convert_titles=False):
         self.input_name = input_name
@@ -214,14 +215,22 @@ class CSVInput(SpreadsheetInput):
 class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
-        sheet_names = self.workbook.get_sheet_names()
+
+        self.sheet_names_map = {sheet_name: sheet_name for sheet_name in self.workbook.get_sheet_names()}
+        # allow main sheet to be any case
+        for sheet_name in list(self.sheet_names_map):
+            if sheet_name.lower() == self.main_sheet_name.lower():
+                self.sheet_names_map.pop(sheet_name)
+                self.sheet_names_map[self.main_sheet_name] = sheet_name
+
+        sheet_names = list(self.sheet_names_map.keys())
         if self.main_sheet_name not in sheet_names:
             raise ValueError('Main sheet "{}" not found in workbook.'.format(self.main_sheet_name))
         sheet_names.remove(self.main_sheet_name)
         self.sub_sheet_names = sheet_names
 
     def get_sheet_lines(self, sheet_name):
-        worksheet = self.workbook[sheet_name]
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         header_row = worksheet.rows[0]
         remaining_rows = worksheet.rows[1:]
         coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
