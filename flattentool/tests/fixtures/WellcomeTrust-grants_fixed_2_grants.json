@@ -18,7 +18,7 @@
                 }
             ], 
             "dateModified": "13-03-2015", 
-            "Data source": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
+            "dataSource": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
             "plannedDates": [
                 {
                     "duration": 30
@@ -62,7 +62,7 @@
                 }
             ], 
             "dateModified": "13-03-2015", 
-            "Data source": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
+            "dataSource": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
             "plannedDates": [
                 {
                     "duration": 25
