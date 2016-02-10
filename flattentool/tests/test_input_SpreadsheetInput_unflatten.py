@@ -160,6 +160,11 @@ class TestUnflattenEmpty(object):
 
 
 class TestUnflattenCustomRootID(object):
+    """
+    Currently flatten tool assumes there is a special "root ID" in root elements called ocid.
+
+    This tests that we can specify a different name for this.
+    """
     def test_main_sheet_flat(self):
         spreadsheet_input = ListInput(
             sheets={
@@ -199,6 +204,14 @@ class TestUnflattenCustomRootID(object):
 
 
 class TestUnflattenNoRootID(object):
+    """
+    Currently flatten tool assumes there is a special ID in root elements called ocid.
+
+    This tests that we can turn this beaviour off by setting root_id to the empty string.
+
+    This behaviour is required for 360Giving.
+
+    """
     def test_main_sheet_flat(self):
         spreadsheet_input = ListInput(
             sheets={
@@ -233,4 +246,48 @@ class TestUnflattenNoRootID(object):
         assert list(spreadsheet_input.unflatten()) == [
             {'id': 2, 'testA': {'testB': 3, 'testC': 4}}
         ]
+
+    def test_rollup(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'main': [
+                    {
+                        'id': 2,
+                        'testA[]/id': 3,
+                        'testA[]/testB': 4
+                    }
+                ]
+            },
+            main_sheet_name='main',
+            root_id=''
+        )
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert len(unflattened) == 1
+        assert unflattened == [
+            {'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
+        ]
+        # We expect no warnings
+        assert recwarn.list == []
+
+    def test_rollup_no_id(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'testA[]/id': '2',
+                        'testA[]/testB': '3',
+                    }
+                ]
+            },
+            main_sheet_name='custom_main',
+            root_id='')
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert len(unflattened) == 1
+        assert unflattened == [ {
+            'testA': [{'id': '2', 'testB': '3'}]
+        } ]
+        # We expect no warnings
+        assert recwarn.list == []
 
