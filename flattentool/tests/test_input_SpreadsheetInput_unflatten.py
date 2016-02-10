@@ -85,11 +85,35 @@ class TestUnflattenRollup(object):
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
+        assert len(unflattened) == 1
         assert unflattened == [
             {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
         ]
         # We expect no warnings
         assert recwarn.list == []
+
+    def test_rollup_no_id(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': '1',
+                        'testA[]/id': '2',
+                        'testA[]/testB': '3',
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert len(unflattened) == 1
+        assert unflattened == [ {
+            'ocid': '1',
+            'testA': [{'id': '2', 'testB': '3'}]
+        } ]
+        # We expect no warnings
+        assert recwarn.list == []
+
 
 
 class TestUnflattenEmpty(object):
@@ -133,51 +157,6 @@ class TestUnflattenEmpty(object):
         assert len(output) == 1
         assert output[0] == {'ocid': '1'}
 
-
-# TODO: Is this doing the same as TestUnflattenRollup above?
-def test_1n_override():
-    spreadsheet_input = ListInput(
-        sheets={
-            'custom_main': [
-                {
-                    'ocid': '1',
-                    'id': '4',
-                    'testA[]/id': '2',
-                    'testA[]/testB': '3',
-                }
-            ]
-        },
-        main_sheet_name='custom_main')
-    spreadsheet_input.read_sheets()
-    output = list(spreadsheet_input.unflatten())
-    assert len(output) == 1
-    assert output[0] == {
-        'ocid': '1',
-        'id': '4',
-        'testA': [{'id': '2', 'testB': '3'}]
-    }
-
-
-# TODO: Should this be grouped with TestUnflattenRollup above?
-def test_1n_override_no_id():
-    spreadsheet_input = ListInput(
-        sheets={
-            'custom_main': [
-                {
-                    'ocid': '1',
-                    'testA[]/id': '2',
-                    'testA[]/testB': '3',
-                }
-            ]
-        },
-        main_sheet_name='custom_main')
-    spreadsheet_input.read_sheets()
-    output = list(spreadsheet_input.unflatten())
-    assert len(output) == 1
-    assert output[0] == {
-        'ocid': '1',
-        'testA': [{'id': '2', 'testB': '3'}]
-    }
 
 
 class TestUnflattenCustomRootID(object):
