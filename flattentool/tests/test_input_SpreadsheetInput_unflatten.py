@@ -79,7 +79,7 @@ testdata = [
             'testA': UNICODE_TEST_STRING
         }]
     ),
-    # Rollup
+    # Single item array
     (
         [{
             'ROOT_ID': 1,
@@ -93,7 +93,7 @@ testdata = [
             }]
         }]
     ),
-    # Rollup without an ID
+    # Single item array withou parent ID
     (
         [{
             'ROOT_ID': '1',
@@ -181,6 +181,10 @@ def create_schema(root_id):
                             'title': 'B title',
                             'type': 'string',
                         },
+                        'testC': {
+                            'title': 'C title',
+                            'type': 'string',
+                        },
                     }
                 }
             },
@@ -227,6 +231,20 @@ testdata_titles = [
             'testB': {'testC': 3, 'testD': 4}
         }]
     ),
+    # Nested titles should be converted individually
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'B title:C title': 3,
+            'B title:Not in schema': 4,
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testB': {'testC': 3, 'Not in schema': 4}
+        }]
+    )),
     # Unicode
     (
         [{
@@ -238,7 +256,7 @@ testdata_titles = [
             'testU': UNICODE_TEST_STRING
         }]
     ),
-    # Rollup
+    # Single item array
    (
         [{
             'ROOT_ID_TITLE': 1,
@@ -254,7 +272,7 @@ testdata_titles = [
             }]
         }]
     ),
-    # Rollup without an ID
+    # Single item array without parent ID
     (
         [{
             'ROOT_ID_TITLE': '1',
@@ -269,6 +287,38 @@ testdata_titles = [
             }]
         }]
     ),
+    # Properties of a single item array shouldn't need to be in rollUp list
+    # for their titles to be converted
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'R title:Identifier': 3,
+            'R title:C title': 4
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': [{
+                'id': 3,
+                'testC': 4
+            }]
+        }]
+    )),
+    # Single item array, titles should be converted individually
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'R title:C title': 3,
+            'R title:Not in schema': 4,
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': {'testC': 3, 'Not in schema': 4}
+        }]
+    )),
     # Empty
     (
         [{
