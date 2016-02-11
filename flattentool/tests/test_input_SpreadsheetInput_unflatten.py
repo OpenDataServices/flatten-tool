@@ -16,45 +16,49 @@ import datetime
 import copy
 from six import text_type
 
+ROOT_ID_TITLES = {
+    'ocid': 'Open Contracting ID',
+    'custom': 'Custom'
+}
+
 def inject_root_id(root_id, d):
     """
     Insert the appropriate root id, with the given value, into the dictionary d and return.
     """
     d = copy.copy(d)
-    if root_id != '':
-        d.update({root_id: d['ROOT_ID']})
-    del d['ROOT_ID']
+    if 'ROOT_ID' in d:
+        if root_id != '':
+            d.update({root_id: d['ROOT_ID']})
+        del d['ROOT_ID']
+    if 'ROOT_ID_TITLE' in d:
+        if root_id != '':
+            d.update({ROOT_ID_TITLES[root_id]: d['ROOT_ID_TITLE']})
+        del d['ROOT_ID_TITLE']
     return d
 
-UNICODE_TEST_STRING = 'éαГ😼𝒞人'
 
 # TODO Actually create appropriate schema
 SCHEMA = {}
 
+UNICODE_TEST_STRING = 'éαГ😼𝒞人'
 # ROOT_ID will be replace by the appropirate root_id name in the test (e.g. ocid)
+
 testdata = [
-    # Flat
+    # Basic flat
     (
-        [{
-            'ROOT_ID': 1,
-            'Identifier': 2,
-            'testA': 3
-        }],
         [{
             'ROOT_ID': 1,
             'id': 2,
             'testA': 3
         }],
-        [{'ROOT_ID': 1, 'id': 2, 'testA': 3}]
+        [{
+                'ROOT_ID': 1,
+                'id': 2,
+                'testA': 3
+        }]
     ),
     # Nested
     (
-        [{
-            'ROOT_ID': 1,
-            'Identifier': 2,
-            'testA/testB': 3,
-            'testA/testC': 4,
-        }],
         [{
             'ROOT_ID': 1,
             'id': 2,
@@ -71,10 +75,6 @@ testdata = [
     (
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
-            'A title': UNICODE_TEST_STRING
-        }],
-        [{
-            'ROOT_ID': UNICODE_TEST_STRING,
             'testA': UNICODE_TEST_STRING
         }],
         [{
@@ -84,12 +84,6 @@ testdata = [
     ),
     # Rollup
     (
-        [{
-            'ROOT_ID': 1,
-            'Identifier': 2,
-            'testA[]/id': 3,
-            'testA[]/testB': 4
-        }],
         [{
             'ROOT_ID': 1,
             'id': 2,
@@ -104,11 +98,6 @@ testdata = [
     ),
     # Rollup without an ID
     (
-        [{
-            'ROOT_ID': '1',
-            'Identifier': '2',
-            'testA[]/testB': '3',
-        }],
         [{
             'ROOT_ID': '1',
             'testA[]/id': '2',
@@ -126,15 +115,6 @@ testdata = [
     (
         [{
             'ROOT_ID': '',
-            'Identifier': '',
-            'testA:number': '',
-            'testB:boolean': '',
-            'testC:array': '',
-            'testD:string': '',
-            'testE': '',
-        }],
-        [{
-            'ROOT_ID': '',
             'id:integer': '',
             'testA:number': '',
             'testB:boolean': '',
@@ -146,15 +126,6 @@ testdata = [
     ),
     # Empty except for root id
     (
-        [{
-            'ROOT_ID': 1,
-            'Identifier': '',
-            'testA:number': '',
-            'testB:boolean': '',
-            'testC:array': '',
-            'testD:string': '',
-            'testE': '',
-        }],
         [{
             'ROOT_ID': 1,
             'id:integer': '',
@@ -170,25 +141,119 @@ testdata = [
     )
 ]
 
-# Convert titles modes: with appropirate schema, without, off
-@pytest.mark.parametrize('convert_titles,use_schema,use_input_titles', [
-    (False, False, False),  # Test without titles support at all
-    (True, False, False),   # Test that non-titles convert properly with convert_titles on
-    (True, True, False),    # Test that non-titles convert properly with
-                            # convert_titles on, and an appropriate schema
-    pytest.mark.xfail((True, True, True)),     # Test that actual titles convert
-    ])
-@pytest.mark.parametrize('root_id,root_id_kwargs',
-    [
+testdata_titles = [
+    # Basic flat
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID': 1,
+            'Identifier': 2,
+            'testA': 3
+        }],
+        [{
+                'ROOT_ID': 1,
+                'id': 2,
+                'testA': 3
+        }]
+    )),
+    # Nested
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA/testB': 3,
+            'testA/testC': 4,
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA': {'testB': 3, 'testC': 4}
+        }]
+    )),
+    # Unicode
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID': UNICODE_TEST_STRING,
+            'testA': UNICODE_TEST_STRING
+        }],
+        [{
+            'ROOT_ID': UNICODE_TEST_STRING,
+            'testA': UNICODE_TEST_STRING
+        }]
+    )),
+    # Rollup
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA[]/id': 3,
+            'testA[]/testB': 4
+        }],
+        [{
+            'ROOT_ID': 1, 'id': 2, 'testA': [{
+                'id': 3, 'testB': 4
+            }]
+        }]
+    )),
+    # Rollup without an ID
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID': '1',
+            'testA[]/id': '2',
+            'testA[]/testB': '3',
+        }],
+        [{
+            'ROOT_ID': '1',
+            'testA': [{
+                'id': '2',
+                'testB': '3'
+            }]
+        }]
+    )),
+    # Empty
+    (
+        [{
+            'ROOT_ID_TITLE': '',
+            'Identifier': '',
+            'A title': '',
+            'B title': '',
+            'C title': '',
+            'D title': '',
+            'E title': '',
+        }],
+        []
+    ),
+    # Empty except for root id
+    pytest.mark.xfail((
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': '',
+            'A title': '',
+            'B title': '',
+            'C title': '',
+            'D title': '',
+            'E title': '',
+        }],
+        [{
+            'ROOT_ID': 1
+        }]
+    ))
+]
+
+ROOT_ID_PARAMS =     [
         ('ocid', {}), # If not root_id kwarg is passed, then a root_id of ocid is assumed
         ('ocid', {'root_id': 'ocid'}),
         ('custom', {'root_id': 'custom'}),
         ('', {'root_id': ''})
-    ])
-@pytest.mark.parametrize('input_list_titles,input_list,,expected_output_list', testdata)
-def test_unflatten(convert_titles, use_schema, use_input_titles, root_id, root_id_kwargs, input_list, input_list_titles, expected_output_list, recwarn):
-    if use_input_titles:
-        input_list = input_list_titles
+    ]
+
+# Since we're not using titles, and titles mode should fall back to assuming
+# we've supplied a fieldname, we should be able to run this test with
+# convert_titles and use_schema as True or False
+@pytest.mark.parametrize('convert_titles', [True, False])
+@pytest.mark.parametrize('use_schema', [True, False])
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+@pytest.mark.parametrize('input_list,expected_output_list', testdata)
+def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
     extra_kwargs = {'convert_titles': convert_titles}
     extra_kwargs.update(root_id_kwargs)
     spreadsheet_input = ListInput(
@@ -217,4 +282,16 @@ def test_unflatten(convert_titles, use_schema, use_input_titles, root_id, root_i
     # We expect no warnings
     if not convert_titles: # TODO what are the warnings here
         assert recwarn.list == []
+
+
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+@pytest.mark.parametrize('input_list,expected_output_list', testdata_titles)
+def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+    """
+    Essentially the same as test unflatten, except that convert_titles and
+    use_schema are always true, as both of these are needed to convert titles
+    properly. (and runs with different test data).
+    """
+    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn)
+
 
