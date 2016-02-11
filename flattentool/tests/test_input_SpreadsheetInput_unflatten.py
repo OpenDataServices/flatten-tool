@@ -163,6 +163,27 @@ def create_schema(root_id):
                     }
                 }
             },
+            'testR': {
+                'title': 'R title',
+                'type': 'array',
+                'rollUp': ['id', 'testB'],
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {
+                            'title': 'Identifier',
+                            'type': 'string',
+                            # 'type': 'integer',
+                            # integer does not work, as testB:integer is not
+                            # in the rollUp
+                        },
+                        'testB': {
+                            'title': 'B title',
+                            'type': 'string',
+                        },
+                    }
+                }
+            },
             'testU': {
                 'title': UNICODE_TEST_STRING,
                 'type': 'string',
@@ -193,59 +214,61 @@ testdata_titles = [
         }]
     ),
     # Nested
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': 1,
-            'id': 2,
+            'Identifier': 2,
             'B title:C title': 3,
-            'B title:C title': 4,
+            'B title:D title': 4,
         }],
         [{
             'ROOT_ID': 1,
             'id': 2,
             'testB': {'testC': 3, 'testD': 4}
         }]
-    )),
+    ),
     # Unicode
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': UNICODE_TEST_STRING,
-            'UNICODE_TEST_STRING': UNICODE_TEST_STRING
+            UNICODE_TEST_STRING: UNICODE_TEST_STRING
         }],
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
             'testU': UNICODE_TEST_STRING
         }]
-    )),
+    ),
     # Rollup
-    pytest.mark.xfail((
+   (
         [{
             'ROOT_ID_TITLE': 1,
-            'id': 2,
-            'A title:Identifier': 3,
-            'A title:B title': 4
+            'Identifier': 2,
+            'R title:Identifier': 3,
+            'R title:B title': 4
         }],
         [{
-            'ROOT_ID': 1, 'id': 2, 'testA': [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': [{
                 'id': 3, 'testB': 4
             }]
         }]
-    )),
+    ),
     # Rollup without an ID
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': '1',
-            'A title:Identifier': 2,
-            'A title:B title': 3
+            'R title:Identifier': '2',
+            'R title:B title': '3'
         }],
         [{
             'ROOT_ID': '1',
-            'testA': [{
+            'testR': [{
                 'id': '2',
                 'testB': '3'
             }]
         }]
-    )),
+    ),
     # Empty
     (
         [{
@@ -305,6 +328,9 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
     if convert_titles:
         parser = SchemaParser(
             root_schema_dict=create_schema(root_id) if use_schema else {},
+            main_sheet_name='custom_main',
+            root_id=root_id,
+            rollup=True,
             use_titles=True
         )
         parser.parse()
@@ -321,8 +347,8 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
         assert recwarn.list == []
 
 
-@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
 @pytest.mark.parametrize('input_list,expected_output_list', testdata_titles)
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
 def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
     """
     Essentially the same as test unflatten, except that convert_titles and
