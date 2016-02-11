@@ -37,6 +37,11 @@ testdata = [
     (
         [{
             'ROOT_ID': 1,
+            'Identifier': 2,
+            'testA': 3
+        }],
+        [{
+            'ROOT_ID': 1,
             'id': 2,
             'testA': 3
         }],
@@ -46,32 +51,64 @@ testdata = [
     (
         [{
             'ROOT_ID': 1,
+            'Identifier': 2,
+            'testA/testB': 3,
+            'testA/testC': 4,
+        }],
+        [{
+            'ROOT_ID': 1,
             'id': 2,
             'testA/testB': 3,
             'testA/testC': 4,
         }],
-        [{'ROOT_ID': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}]
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA': {'testB': 3, 'testC': 4}
+        }]
     ),
     # Unicode
     (
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
+            'A title': UNICODE_TEST_STRING
+        }],
+        [{
+            'ROOT_ID': UNICODE_TEST_STRING,
             'testA': UNICODE_TEST_STRING
         }],
-        [{'ROOT_ID': UNICODE_TEST_STRING, 'testA': UNICODE_TEST_STRING}]
+        [{
+            'ROOT_ID': UNICODE_TEST_STRING,
+            'testA': UNICODE_TEST_STRING
+        }]
     ),
     # Rollup
     (
+        [{
+            'ROOT_ID': 1,
+            'Identifier': 2,
+            'testA[]/id': 3,
+            'testA[]/testB': 4
+        }],
         [{
             'ROOT_ID': 1,
             'id': 2,
             'testA[]/id': 3,
             'testA[]/testB': 4
         }],
-        [{'ROOT_ID': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}]
+        [{
+            'ROOT_ID': 1, 'id': 2, 'testA': [{
+                'id': 3, 'testB': 4
+            }]
+        }]
     ),
     # Rollup without an ID
     (
+        [{
+            'ROOT_ID': '1',
+            'Identifier': '2',
+            'testA[]/testB': '3',
+        }],
         [{
             'ROOT_ID': '1',
             'testA[]/id': '2',
@@ -79,11 +116,23 @@ testdata = [
         }],
         [{
             'ROOT_ID': '1',
-            'testA': [{'id': '2', 'testB': '3'}]
+            'testA': [{
+                'id': '2',
+                'testB': '3'
+            }]
         }]
     ),
     # Empty
     (
+        [{
+            'ROOT_ID': '',
+            'Identifier': '',
+            'testA:number': '',
+            'testB:boolean': '',
+            'testC:array': '',
+            'testD:string': '',
+            'testE': '',
+        }],
         [{
             'ROOT_ID': '',
             'id:integer': '',
@@ -99,6 +148,15 @@ testdata = [
     (
         [{
             'ROOT_ID': 1,
+            'Identifier': '',
+            'testA:number': '',
+            'testB:boolean': '',
+            'testC:array': '',
+            'testD:string': '',
+            'testE': '',
+        }],
+        [{
+            'ROOT_ID': 1,
             'id:integer': '',
             'testA:number': '',
             'testB:boolean': '',
@@ -106,12 +164,20 @@ testdata = [
             'testD:string': '',
             'testE': '',
         }],
-        [{'ROOT_ID': 1}]
+        [{
+            'ROOT_ID': 1
+        }]
     )
 ]
 
 # Convert titles modes: with appropirate schema, without, off
-@pytest.mark.parametrize('convert_titles,use_schema', [(False, False), (True, False), (True, True)])
+@pytest.mark.parametrize('convert_titles,use_schema,use_input_titles', [
+    (False, False, False),  # Test without titles support at all
+    (True, False, False),   # Test that non-titles convert properly with convert_titles on
+    (True, True, False),    # Test that non-titles convert properly with
+                            # convert_titles on, and an appropriate schema
+    pytest.mark.xfail((True, True, True)),     # Test that actual titles convert
+    ])
 @pytest.mark.parametrize('root_id,root_id_kwargs',
     [
         ('ocid', {}), # If not root_id kwarg is passed, then a root_id of ocid is assumed
@@ -119,8 +185,10 @@ testdata = [
         ('custom', {'root_id': 'custom'}),
         ('', {'root_id': ''})
     ])
-@pytest.mark.parametrize('input_list,expected_output_list', testdata)
-def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+@pytest.mark.parametrize('input_list_titles,input_list,,expected_output_list', testdata)
+def test_unflatten(convert_titles, use_schema, use_input_titles, root_id, root_id_kwargs, input_list, input_list_titles, expected_output_list, recwarn):
+    if use_input_titles:
+        input_list = input_list_titles
     extra_kwargs = {'convert_titles': convert_titles}
     extra_kwargs.update(root_id_kwargs)
     spreadsheet_input = ListInput(
