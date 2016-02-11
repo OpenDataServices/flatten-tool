@@ -14,280 +14,162 @@ import openpyxl
 import datetime
 from six import text_type
 
+class RootIDHelper(object):
+    def __init__(self, root_id):
+        self.root_id = root_id
+        self.kwargs = {'root_id': root_id} if root_id is not None else {}
+        
+    def inject(self, d, value=None):
+        d.update({'ocid' if self.root_id is None else self.root_id: value if value is not None else 1})
+        return d
+
+    def __repr__(self):
+        return '<RootIDHelper(root_id={})>'.format(self.root_id)
+
+@pytest.fixture(scope='module', params=[None, 'custom', ''])
+def root_id_helper(request):
+    return RootIDHelper(request.param)
+
 class TestUnflatten(object):
-    def test_main_sheet_flat(self):
+    def test_main_sheet_flat(self, root_id_helper):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': 1,
+                    root_id_helper.inject({
                         'id': 2,
                         'testA': 3,
-                    }
+                    })
                 ]
             },
-            main_sheet_name='custom_main')
+            main_sheet_name='custom_main',
+            **root_id_helper.kwargs)
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'id': 2, 'testA': 3}
+            root_id_helper.inject({'id': 2, 'testA': 3})
         ]
 
-    def test_main_sheet_nonflat(self):
+    def test_main_sheet_nonflat(self, root_id_helper):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': 1,
+                    root_id_helper.inject({
                         'id': 2,
                         'testA/testB': 3,
                         'testA/testC': 4,
-                    }
+                    })
                 ]
             },
-            main_sheet_name='custom_main')
+            main_sheet_name='custom_main',
+            **root_id_helper.kwargs)
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}
+            root_id_helper.inject({'id': 2, 'testA': {'testB': 3, 'testC': 4}})
         ]
 
-    def test_unicode(self):
+    def test_unicode(self, root_id_helper):
         unicode_string = 'éαГ😼𝒞人'
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': 1,
+                    root_id_helper.inject({
                         'testA': unicode_string,
-                    }
+                    })
                 ]
             },
-            main_sheet_name='custom_main')
+            main_sheet_name='custom_main',
+            **root_id_helper.kwargs)
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'testA': unicode_string}
+            root_id_helper.inject({'testA': unicode_string})
         ]
 
 
 class TestUnflattenRollup(object):
-    def test_rollup(self, recwarn):
+    def test_rollup(self, recwarn, root_id_helper):
         spreadsheet_input = ListInput(
             sheets={
                 'main': [
-                    {
-                        'ocid': 1,
+                    root_id_helper.inject({
                         'id': 2,
                         'testA[]/id': 3,
                         'testA[]/testB': 4
-                    }
+                    })
                 ]
             },
-            main_sheet_name='main'
+            main_sheet_name='main',
+            **root_id_helper.kwargs
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 1
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
+            root_id_helper.inject({'id': 2, 'testA': [{'id': 3, 'testB': 4}]})
         ]
         # We expect no warnings
         assert recwarn.list == []
 
-    def test_rollup_no_id(self, recwarn):
+    def test_rollup_no_id(self, recwarn, root_id_helper):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': '1',
+                    root_id_helper.inject({
                         'testA[]/id': '2',
                         'testA[]/testB': '3',
-                    }
+                    })
                 ]
             },
-            main_sheet_name='custom_main')
+            main_sheet_name='custom_main',
+            **root_id_helper.kwargs)
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 1
-        assert unflattened == [ {
-            'ocid': '1',
+        assert unflattened == [ root_id_helper.inject({
             'testA': [{'id': '2', 'testB': '3'}]
-        } ]
+        }) ]
         # We expect no warnings
         assert recwarn.list == []
 
 
 
 class TestUnflattenEmpty(object):
-    def test_all_empty(self):
+    def test_all_empty(self, root_id_helper):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': '',
+                    root_id_helper.inject({
                         'id:integer': '',
                         'testA:number': '',
                         'testB:boolean': '',
                         'testC:array': '',
                         'testD:string': '',
-                    }
+                    }, '')
                 ]
             },
-            main_sheet_name='custom_main')
+            main_sheet_name='custom_main',
+            **root_id_helper.kwargs)
         spreadsheet_input.read_sheets()
         output = list(spreadsheet_input.unflatten())
         assert len(output) == 0
 
-    def test_types_empty(self):
+    def test_types_empty(self, root_id_helper):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
-                    {
-                        'ocid': '1',
+                    root_id_helper.inject({
                         'id:integer': '',
                         'testA:number': '',
                         'testB:boolean': '',
                         'testC:array': '',
                         'testD:string': '',
                         'testE': '',
-                    }
+                    })
                 ]
             },
-            main_sheet_name='custom_main')
+            main_sheet_name='custom_main',
+            **root_id_helper.kwargs)
         spreadsheet_input.read_sheets()
         output = list(spreadsheet_input.unflatten())
         assert len(output) == 1
-        assert output[0] == {'ocid': '1'}
+        assert output[0] == root_id_helper.inject({})
 
-
-
-class TestUnflattenCustomRootID(object):
-    """
-    Currently flatten tool assumes there is a special "root ID" in root elements called ocid.
-
-    This tests that we can specify a different name for this.
-    """
-    def test_main_sheet_flat(self):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    {
-                        'custom': 1,
-                        'id': 2,
-                        'testA': 3,
-                    }
-                ]
-            },
-            main_sheet_name='custom_main',
-            root_id='custom')
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            {'custom': 1, 'id': 2, 'testA': 3}
-        ]
-
-    def test_main_sheet_nonflat(self):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    {
-                        'custom': 1,
-                        'id': 2,
-                        'testA/testB': 3,
-                        'testA/testC': 4,
-                    }
-                ]
-            },
-            main_sheet_name='custom_main',
-            root_id='custom')
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            {'custom': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}
-        ]
-
-
-class TestUnflattenNoRootID(object):
-    """
-    Currently flatten tool assumes there is a special ID in root elements called ocid.
-
-    This tests that we can turn this beaviour off by setting root_id to the empty string.
-
-    This behaviour is required for 360Giving.
-
-    """
-    def test_main_sheet_flat(self):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    {
-                        'id': 2,
-                        'testA': 3,
-                    }
-                ]
-            },
-            main_sheet_name='custom_main',
-            root_id='')
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            {'id': 2, 'testA': 3}
-        ]
-
-    def test_main_sheet_nonflat(self):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    {
-                        'id': 2,
-                        'testA/testB': 3,
-                        'testA/testC': 4,
-                    }
-                ]
-            },
-            main_sheet_name='custom_main',
-            root_id='')
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            {'id': 2, 'testA': {'testB': 3, 'testC': 4}}
-        ]
-
-    def test_rollup(self, recwarn):
-        spreadsheet_input = ListInput(
-            sheets={
-                'main': [
-                    {
-                        'id': 2,
-                        'testA[]/id': 3,
-                        'testA[]/testB': 4
-                    }
-                ]
-            },
-            main_sheet_name='main',
-            root_id=''
-        )
-        spreadsheet_input.read_sheets()
-        unflattened = list(spreadsheet_input.unflatten())
-        assert len(unflattened) == 1
-        assert unflattened == [
-            {'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
-        ]
-        # We expect no warnings
-        assert recwarn.list == []
-
-    def test_rollup_no_id(self, recwarn):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    {
-                        'testA[]/id': '2',
-                        'testA[]/testB': '3',
-                    }
-                ]
-            },
-            main_sheet_name='custom_main',
-            root_id='')
-        spreadsheet_input.read_sheets()
-        unflattened = list(spreadsheet_input.unflatten())
-        assert len(unflattened) == 1
-        assert unflattened == [ {
-            'testA': [{'id': '2', 'testB': '3'}]
-        } ]
-        # We expect no warnings
-        assert recwarn.list == []
 
