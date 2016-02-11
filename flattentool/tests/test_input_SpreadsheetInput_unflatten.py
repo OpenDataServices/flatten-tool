@@ -37,9 +37,6 @@ def inject_root_id(root_id, d):
     return d
 
 
-# TODO Actually create appropriate schema
-SCHEMA = {}
-
 UNICODE_TEST_STRING = 'éαГ😼𝒞人'
 # ROOT_ID will be replace by the appropirate root_id name in the test (e.g. ocid)
 
@@ -141,52 +138,92 @@ testdata = [
     )
 ]
 
+def create_schema(root_id):
+    schema = {
+        'properties': {
+            'id': {
+                'title': 'Identifier',
+                'type': 'integer',
+            },
+            'testA': {
+                'title': 'A title',
+                'type': 'integer',
+            },
+            'testB': {
+                'title': 'B title',
+                'type': 'object',
+                'properties': {
+                    'testC': {
+                        'title': 'C title',
+                        'type': 'integer',
+                    },
+                    'testD': {
+                        'title': 'D title',
+                        'type': 'integer',
+                    }
+                }
+            },
+            'testU': {
+                'title': UNICODE_TEST_STRING,
+                'type': 'string',
+            },
+        }
+    }
+    if root_id:
+        schema.update({
+            root_id: {
+                'title': ROOT_ID_TITLES[root_id],
+                'type': 'string'
+            }
+        })
+    return schema
+
 testdata_titles = [
     # Basic flat
-    pytest.mark.xfail((
+    (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID_TITLE': 1,
             'Identifier': 2,
-            'testA': 3
+            'A title': 3
         }],
         [{
-                'ROOT_ID': 1,
-                'id': 2,
-                'testA': 3
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA': 3
         }]
-    )),
+    ),
     # Nested
     pytest.mark.xfail((
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID_TITLE': 1,
             'id': 2,
-            'testA/testB': 3,
-            'testA/testC': 4,
+            'B title:C title': 3,
+            'B title:C title': 4,
         }],
         [{
             'ROOT_ID': 1,
             'id': 2,
-            'testA': {'testB': 3, 'testC': 4}
+            'testB': {'testC': 3, 'testD': 4}
         }]
     )),
     # Unicode
     pytest.mark.xfail((
         [{
-            'ROOT_ID': UNICODE_TEST_STRING,
-            'testA': UNICODE_TEST_STRING
+            'ROOT_ID_TITLE': UNICODE_TEST_STRING,
+            'UNICODE_TEST_STRING': UNICODE_TEST_STRING
         }],
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
-            'testA': UNICODE_TEST_STRING
+            'testU': UNICODE_TEST_STRING
         }]
     )),
     # Rollup
     pytest.mark.xfail((
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID_TITLE': 1,
             'id': 2,
-            'testA[]/id': 3,
-            'testA[]/testB': 4
+            'A title:Identifier': 3,
+            'A title:B title': 4
         }],
         [{
             'ROOT_ID': 1, 'id': 2, 'testA': [{
@@ -197,9 +234,9 @@ testdata_titles = [
     # Rollup without an ID
     pytest.mark.xfail((
         [{
-            'ROOT_ID': '1',
-            'testA[]/id': '2',
-            'testA[]/testB': '3',
+            'ROOT_ID_TITLE': '1',
+            'A title:Identifier': 2,
+            'A title:B title': 3
         }],
         [{
             'ROOT_ID': '1',
@@ -223,7 +260,7 @@ testdata_titles = [
         []
     ),
     # Empty except for root id
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': '',
@@ -236,7 +273,7 @@ testdata_titles = [
         [{
             'ROOT_ID': 1
         }]
-    ))
+    )
 ]
 
 ROOT_ID_PARAMS =     [
@@ -267,7 +304,7 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
     spreadsheet_input.read_sheets()
     if convert_titles:
         parser = SchemaParser(
-            root_schema_dict=SCHEMA if use_schema else {},
+            root_schema_dict=create_schema(root_id) if use_schema else {},
             use_titles=True
         )
         parser.parse()
@@ -292,6 +329,10 @@ def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_l
     use_schema are always true, as both of these are needed to convert titles
     properly. (and runs with different test data).
     """
+    if root_id != '':
+        # Skip all tests with a root ID for now, as this is broken
+        # https://github.com/OpenDataServices/flatten-tool/issues/84
+        pytest.skip()
     return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn)
 
 
