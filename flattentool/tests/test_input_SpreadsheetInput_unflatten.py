@@ -21,20 +21,16 @@ def inject_root_id(root_id, d, value=1):
     d.update({root_id: value})
     return d
 
-def root_id_kwargs(root_id):
-    """
-    Return the appropriate keyword arguments to pass to a SpreadsheetInput
-    child (generally ListInput in the tests), in order to handle the correct
-    root_id (or lack thereof).
-    """
-    if root_id == 'ocid':
-        return {}
-    else:
-        return {'root_id': root_id}
 
-@pytest.mark.parametrize('root_id', ['ocid', 'custom', ''])
+@pytest.mark.parametrize('root_id,root_id_kwargs',
+    [
+        ('ocid', {}), # If not root_id kwarg is passed, then a root_id of ocid is assumed
+        ('ocid', {'root_id': 'ocid'}),
+        ('custom', {'root_id': 'custom'}),
+        ('', {'root_id': ''})
+    ])
 class TestUnflatten(object):
-    def test_main_sheet_flat(self, root_id):
+    def test_main_sheet_flat(self, root_id, root_id_kwargs):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
@@ -45,13 +41,13 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='custom_main',
-            **root_id_kwargs(root_id))
+            **root_id_kwargs)
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             inject_root_id(root_id, {'id': 2, 'testA': 3})
         ]
 
-    def test_main_sheet_nonflat(self, root_id):
+    def test_main_sheet_nonflat(self, root_id, root_id_kwargs):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
@@ -63,13 +59,13 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='custom_main',
-            **root_id_kwargs(root_id))
+            **root_id_kwargs)
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             inject_root_id(root_id, {'id': 2, 'testA': {'testB': 3, 'testC': 4}})
         ]
 
-    def test_unicode(self, root_id):
+    def test_unicode(self, root_id, root_id_kwargs):
         unicode_string = 'éαГ😼𝒞人'
         spreadsheet_input = ListInput(
             sheets={
@@ -80,13 +76,13 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='custom_main',
-            **root_id_kwargs(root_id))
+            **root_id_kwargs)
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             inject_root_id(root_id, {'testA': unicode_string})
         ]
 
-    def test_rollup(self, recwarn, root_id):
+    def test_rollup(self, recwarn, root_id, root_id_kwargs):
         spreadsheet_input = ListInput(
             sheets={
                 'main': [
@@ -98,7 +94,7 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='main',
-            **root_id_kwargs(root_id)
+            **root_id_kwargs
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -109,7 +105,7 @@ class TestUnflatten(object):
         # We expect no warnings
         assert recwarn.list == []
 
-    def test_rollup_no_id(self, recwarn, root_id):
+    def test_rollup_no_id(self, recwarn, root_id, root_id_kwargs):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
@@ -120,7 +116,7 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='custom_main',
-            **root_id_kwargs(root_id))
+            **root_id_kwargs)
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 1
@@ -130,7 +126,7 @@ class TestUnflatten(object):
         # We expect no warnings
         assert recwarn.list == []
 
-    def test_all_empty(self, root_id):
+    def test_all_empty(self, root_id, root_id_kwargs):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
@@ -144,12 +140,12 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='custom_main',
-            **root_id_kwargs(root_id))
+            **root_id_kwargs)
         spreadsheet_input.read_sheets()
         output = list(spreadsheet_input.unflatten())
         assert len(output) == 0
 
-    def test_types_empty(self, root_id):
+    def test_types_empty(self, root_id, root_id_kwargs):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
@@ -164,7 +160,7 @@ class TestUnflatten(object):
                 ]
             },
             main_sheet_name='custom_main',
-            **root_id_kwargs(root_id))
+            **root_id_kwargs)
         spreadsheet_input.read_sheets()
         output = list(spreadsheet_input.unflatten())
         assert len(output) == 1
