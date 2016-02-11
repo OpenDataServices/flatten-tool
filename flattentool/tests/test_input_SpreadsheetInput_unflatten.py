@@ -12,15 +12,99 @@ import sys
 import pytest
 import openpyxl
 import datetime
+import copy
 from six import text_type
 
-def inject_root_id(root_id, d, value=1):
+def inject_root_id(root_id, d):
     """
     Insert the appropriate root id, with the given value, into the dictionary d and return.
     """
-    d.update({root_id: value})
+    d = copy.copy(d)
+    if root_id != '':
+        d.update({root_id: d['ROOT_ID']})
+    del d['ROOT_ID']
     return d
 
+UNICODE_TEST_STRING = 'éαГ😼𝒞人'
+
+# ROOT_ID will be replace by the appropirate root_id name in the test (e.g. ocid)
+testdata = [
+    # Flat
+    (
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA': 3
+        }],
+        [{'ROOT_ID': 1, 'id': 2, 'testA': 3}]
+    ),
+    # Nested
+    (
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA/testB': 3,
+            'testA/testC': 4,
+        }],
+        [{'ROOT_ID': 1, 'id': 2, 'testA': {'testB': 3, 'testC': 4}}]
+    ),
+    # Unicode
+    (
+        [{
+            'ROOT_ID': UNICODE_TEST_STRING,
+            'testA': UNICODE_TEST_STRING
+        }],
+        [{'ROOT_ID': UNICODE_TEST_STRING, 'testA': UNICODE_TEST_STRING}]
+    ),
+    # Rollup
+    (
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testA[]/id': 3,
+            'testA[]/testB': 4
+        }],
+        [{'ROOT_ID': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}]
+    ),
+    # Rollup without an ID
+    (
+        [{
+            'ROOT_ID': '1',
+            'testA[]/id': '2',
+            'testA[]/testB': '3',
+        }],
+        [{
+            'ROOT_ID': '1',
+            'testA': [{'id': '2', 'testB': '3'}]
+        }]
+    ),
+    # Empty
+    (
+        [{
+            'ROOT_ID': '',
+            'id:integer': '',
+            'testA:number': '',
+            'testB:boolean': '',
+            'testC:array': '',
+            'testD:string': '',
+            'testE': '',
+        }],
+        []
+    ),
+    # Empty except for root id
+    (
+        [{
+            'ROOT_ID': 1,
+            'id:integer': '',
+            'testA:number': '',
+            'testB:boolean': '',
+            'testC:array': '',
+            'testD:string': '',
+            'testE': '',
+        }],
+        [{'ROOT_ID': 1}]
+    )
+]
 
 @pytest.mark.parametrize('root_id,root_id_kwargs',
     [
@@ -29,141 +113,24 @@ def inject_root_id(root_id, d, value=1):
         ('custom', {'root_id': 'custom'}),
         ('', {'root_id': ''})
     ])
-class TestUnflatten(object):
-    def test_main_sheet_flat(self, root_id, root_id_kwargs):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    inject_root_id(root_id, {
-                        'id': 2,
-                        'testA': 3,
-                    })
-                ]
-            },
-            main_sheet_name='custom_main',
-            **root_id_kwargs)
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            inject_root_id(root_id, {'id': 2, 'testA': 3})
-        ]
-
-    def test_main_sheet_nonflat(self, root_id, root_id_kwargs):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    inject_root_id(root_id, {
-                        'id': 2,
-                        'testA/testB': 3,
-                        'testA/testC': 4,
-                    })
-                ]
-            },
-            main_sheet_name='custom_main',
-            **root_id_kwargs)
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            inject_root_id(root_id, {'id': 2, 'testA': {'testB': 3, 'testC': 4}})
-        ]
-
-    def test_unicode(self, root_id, root_id_kwargs):
-        unicode_string = 'éαГ😼𝒞人'
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    inject_root_id(root_id, {
-                        'testA': unicode_string,
-                    })
-                ]
-            },
-            main_sheet_name='custom_main',
-            **root_id_kwargs)
-        spreadsheet_input.read_sheets()
-        assert list(spreadsheet_input.unflatten()) == [
-            inject_root_id(root_id, {'testA': unicode_string})
-        ]
-
-    def test_rollup(self, recwarn, root_id, root_id_kwargs):
-        spreadsheet_input = ListInput(
-            sheets={
-                'main': [
-                    inject_root_id(root_id, {
-                        'id': 2,
-                        'testA[]/id': 3,
-                        'testA[]/testB': 4
-                    })
-                ]
-            },
-            main_sheet_name='main',
-            **root_id_kwargs
-        )
-        spreadsheet_input.read_sheets()
-        unflattened = list(spreadsheet_input.unflatten())
-        assert len(unflattened) == 1
-        assert unflattened == [
-            inject_root_id(root_id, {'id': 2, 'testA': [{'id': 3, 'testB': 4}]})
-        ]
-        # We expect no warnings
-        assert recwarn.list == []
-
-    def test_rollup_no_id(self, recwarn, root_id, root_id_kwargs):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    inject_root_id(root_id, {
-                        'testA[]/id': '2',
-                        'testA[]/testB': '3',
-                    })
-                ]
-            },
-            main_sheet_name='custom_main',
-            **root_id_kwargs)
-        spreadsheet_input.read_sheets()
-        unflattened = list(spreadsheet_input.unflatten())
-        assert len(unflattened) == 1
-        assert unflattened == [ inject_root_id(root_id, {
-            'testA': [{'id': '2', 'testB': '3'}]
-        }) ]
-        # We expect no warnings
-        assert recwarn.list == []
-
-    def test_all_empty(self, root_id, root_id_kwargs):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    inject_root_id(root_id, {
-                        'id:integer': '',
-                        'testA:number': '',
-                        'testB:boolean': '',
-                        'testC:array': '',
-                        'testD:string': '',
-                    }, '')
-                ]
-            },
-            main_sheet_name='custom_main',
-            **root_id_kwargs)
-        spreadsheet_input.read_sheets()
-        output = list(spreadsheet_input.unflatten())
-        assert len(output) == 0
-
-    def test_types_empty(self, root_id, root_id_kwargs):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    inject_root_id(root_id, {
-                        'id:integer': '',
-                        'testA:number': '',
-                        'testB:boolean': '',
-                        'testC:array': '',
-                        'testD:string': '',
-                        'testE': '',
-                    })
-                ]
-            },
-            main_sheet_name='custom_main',
-            **root_id_kwargs)
-        spreadsheet_input.read_sheets()
-        output = list(spreadsheet_input.unflatten())
-        assert len(output) == 1
-        assert output[0] == inject_root_id(root_id, {})
-
+@pytest.mark.parametrize('input_list,expected_output_list', testdata)
+def test_unflatten(root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+    spreadsheet_input = ListInput(
+        sheets={
+            'custom_main': [
+                inject_root_id(root_id, input_row) for input_row in input_list
+            ]
+        },
+        main_sheet_name='custom_main',
+        **root_id_kwargs)
+    spreadsheet_input.read_sheets()
+    expected_output_list = [
+        inject_root_id(root_id, expected_output_dict) for expected_output_dict in expected_output_list
+    ]
+    if expected_output_list == [{}]:
+        # We don't expect an empty dictionary
+        expected_output_list = []
+    assert list(spreadsheet_input.unflatten()) == expected_output_list
+    # We expect no warnings
+    assert recwarn.list == []
 
