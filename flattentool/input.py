@@ -42,13 +42,11 @@ class SpreadsheetInput(object):
         (``dicts``) using the titles lookup in the schema parser.
 
         """
-        # TODO add this to TitleLookup. Breaks the tests in test_unflatten
-        # titles_map = {title.replace(' ', '').lower(): title for title in titles}
-        if self.parser:
-            for d in dicts:
+        for d in dicts:
+            if self.parser:
                 yield { self.parser.title_lookup.lookup_header(k):v for k,v in d.items() }
-        else:
-            return dicts
+            else:
+                yield d
 
     def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid', convert_titles=False):
         self.input_name = input_name

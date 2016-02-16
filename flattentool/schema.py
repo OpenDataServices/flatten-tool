@@ -47,7 +47,10 @@ class TitleLookup(UserDict):
             return self.data[key.replace(' ', '').lower()]
     
     def __contains__(self, key):
-        return key.replace(' ', '').lower() in self.data
+        if key is None:
+            return False
+        else:
+            return key.replace(' ', '').lower() in self.data
 
 
 class SchemaParser(object):
