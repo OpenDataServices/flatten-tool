@@ -32,7 +32,22 @@ class TitleLookup(UserDict):
             else:
                 return self[first_title].property_name
         else:
-            return '/'.join(title_header_list)
+            # If we can't look up the title, treat it and any children as
+            # field names directly.
+            # Strip spaces off these.
+            return '/'.join(x.strip(' ') for x in title_header_list)
+
+    def __setitem__(self, key, value):
+        self.data[key.replace(' ', '').lower()] = value
+
+    def __getitem__(self, key):
+        if key is None:
+            raise KeyError
+        else:
+            return self.data[key.replace(' ', '').lower()]
+    
+    def __contains__(self, key):
+        return key.replace(' ', '').lower() in self.data
 
 
 class SchemaParser(object):
@@ -87,15 +102,16 @@ class SchemaParser(object):
                 property_type_set = get_property_type_set(property_schema_dict)
 
                 title = property_schema_dict.get('title')
-                title_lookup[title] = TitleLookup()
-                title_lookup[title].property_name = property_name
+                if title:
+                    title_lookup[title] = TitleLookup()
+                    title_lookup[title].property_name = property_name
 
                 if 'object' in property_type_set:
                     for field, child_title in self.parse_schema_dict(
                             parent_name+'/'+property_name,
                             property_schema_dict,
                             parent_id_fields=id_fields,
-                            title_lookup=title_lookup[title]):
+                            title_lookup=title_lookup.get(title)):
                         yield (
                             property_name+'/'+field,
                             # TODO ambiguous use of "title"
@@ -112,7 +128,8 @@ class SchemaParser(object):
                         else:
                             raise ValueError
                     elif 'object' in type_set:
-                        title_lookup[title].property_name = property_name+'[]'
+                        if title:
+                            title_lookup[title].property_name = property_name+'[]'
                         if hasattr(property_schema_dict['items'], '__reference__'):
                             sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
                         else:
@@ -129,7 +146,7 @@ class SchemaParser(object):
                         fields = self.parse_schema_dict(parent_name+'/'+property_name+'[]',
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
-                                title_lookup=title_lookup[title])
+                                title_lookup=title_lookup.get(title))
 
                         rolledUp = set()
 

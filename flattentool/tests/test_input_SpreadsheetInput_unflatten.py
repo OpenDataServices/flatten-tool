@@ -245,6 +245,20 @@ testdata_titles = [
             'testB': {'testC': 3, 'Not in schema': 4}
         }]
     ),
+    # Should be space and case invariant
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'B  title : c  title': 3,
+            'btitle : Not in schema': 4,
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testB': {'testC': 3, 'Not in schema': 4}
+        }]
+    ),
     # Unicode
     (
         [{
