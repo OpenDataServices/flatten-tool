@@ -232,7 +232,7 @@ testdata_titles = [
         }]
     ),
     # Nested titles should be converted individually
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -244,7 +244,7 @@ testdata_titles = [
             'id': 2,
             'testB': {'testC': 3, 'Not in schema': 4}
         }]
-    )),
+    ),
     # Unicode
     (
         [{
@@ -289,7 +289,7 @@ testdata_titles = [
     ),
     # Properties of a single item array shouldn't need to be in rollUp list
     # for their titles to be converted
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -304,9 +304,9 @@ testdata_titles = [
                 'testC': 4
             }]
         }]
-    )),
+    ),
     # Single item array, titles should be converted individually
-    pytest.mark.xfail((
+    (
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -316,9 +316,12 @@ testdata_titles = [
         [{
             'ROOT_ID': 1,
             'id': 2,
-            'testR': {'testC': 3, 'Not in schema': 4}
+            'testR': [{
+                'testC': 3,
+                'Not in schema': 4
+            }]
         }]
-    )),
+    ),
     # Empty
     (
         [{
@@ -380,8 +383,7 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
             root_schema_dict=create_schema(root_id) if use_schema else {},
             main_sheet_name='custom_main',
             root_id=root_id,
-            rollup=True,
-            use_titles=True
+            rollup=True
         )
         parser.parse()
         spreadsheet_input.parser = parser
