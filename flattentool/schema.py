@@ -21,6 +21,10 @@ class TitleLookup(UserDict):
     property_name = None
 
     def lookup_header(self, title_header):
+        # Ignore titles with a / in, as they may contain types
+        # https://github.com/OpenDataServices/flatten-tool/issues/56
+        if '/' in title_header:
+            return title_header
         return self.lookup_header_list(title_header.split(':'))
 
     def lookup_header_list(self, title_header_list):
@@ -143,6 +147,7 @@ class SchemaParser(object):
                         if sub_sheet_name not in self.sub_sheets:
                             self.sub_sheets[sub_sheet_name] = Sheet(root_id=self.root_id, name=sub_sheet_name)
                         sub_sheet = self.sub_sheets[sub_sheet_name]
+                        sub_sheet.title_lookup = title_lookup.get(title)
 
                         for field in id_fields:
                             sub_sheet.add_field(field+':'+property_name, id_field=True)

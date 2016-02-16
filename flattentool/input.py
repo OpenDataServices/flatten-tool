@@ -36,15 +36,17 @@ class SpreadsheetInput(object):
     or csv).
 
     """
-    def convert_dict_titles(self, dicts):
+    def convert_dict_titles(self, dicts, title_lookup=None):
         """
         Replace titles with field names in the given list of dictionaries
         (``dicts``) using the titles lookup in the schema parser.
 
         """
+        if self.parser:
+            title_lookup = title_lookup or self.parser.title_lookup
         for d in dicts:
-            if self.parser:
-                yield { self.parser.title_lookup.lookup_header(k):v for k,v in d.items() }
+            if title_lookup:
+                yield { title_lookup.lookup_header(k):v for k,v in d.items() }
             else:
                 yield d
 
@@ -66,10 +68,8 @@ class SpreadsheetInput(object):
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
             if self.convert_titles:
-                # TODO: This won't work properly any more (breaks roundtrip
-                # tests, but we should also have something more like unit
-                # tests!)
-                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name))
+                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name),
+                    self.parser.sub_sheets[sub_sheet_name].title_lookup if sub_sheet_name in self.parser.sub_sheets else None)
             else:
                 yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
 
