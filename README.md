@@ -8,7 +8,7 @@ Flatten-Tool (aka Flat Stan) [Alpha]
 
 Flat Stan is a general purpose tool with the goal of allowing a dataset to be round-tripped between structured JSON and tabular data packages or spreadsheets: providing a bridge between richly structured datasets and accessible flat formats. 
 
-It was developed for use with the [Open Contracting Data Standard](http://standard.open-contracting.ogr), and has been further developed with the [360 Giving Data Standard](http://docs.threesixtygiving.ogr). We're keen to see if it is useful in other contexts too. 
+It was developed for use with the [Open Contracting Data Standard](http://standard.open-contracting.org), and has been further developed with the [360 Giving Data Standard](http://www.threesixtygiving.org/standard/reference/). We're keen to see if it is useful in other contexts too. 
 
 It is also used in to power the [COnvert Validate Explore (COVE) tool](https://github.com/OpenDataServices/cove) which provides a web interface for Flat Stan configured against a particular JSON Schema. 
 
@@ -108,7 +108,7 @@ will print help information specific to that subcommand.
 
 ### Creating spreadsheet templates
 
-Download https://raw.githubusercontent.com/open-contracting/standard/master/standard/schema/release-schema.json to the current directory.
+Download https://raw.githubusercontent.com/open-contracting/standard/1.0/standard/schema/release-schema.json to the current directory.
 
     flatten-tool create-template --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
 
