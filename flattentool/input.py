@@ -36,15 +36,19 @@ class SpreadsheetInput(object):
     or csv).
 
     """
-    def convert_dict_titles(self, dicts, titles):
+    def convert_dict_titles(self, dicts, title_lookup=None):
         """
-        Replace titles with field names in the given list of dictionaries (``dicts``) using the mapping in ``titles``.
+        Replace titles with field names in the given list of dictionaries
+        (``dicts``) using the titles lookup in the schema parser.
 
         """
-        titles = titles or {}
-        titles_map = {title.replace(' ', '').lower(): title for title in titles}
+        if self.parser:
+            title_lookup = title_lookup or self.parser.title_lookup
         for d in dicts:
-            yield { (titles[titles_map[k.replace(' ', '').lower()]] if k.replace(' ', '').lower() in titles_map else (k if '/' in k else k.replace(':','/'))):v for k,v in d.items() }
+            if title_lookup:
+                yield { title_lookup.lookup_header(k):v for k,v in d.items() }
+            else:
+                yield d
 
     def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid', convert_titles=False):
         self.input_name = input_name
@@ -53,17 +57,19 @@ class SpreadsheetInput(object):
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
         self.convert_titles = convert_titles
+        self.parser = None
 
     def get_main_sheet_lines(self):
         if self.convert_titles:
-            return self.convert_dict_titles(self.get_sheet_lines(self.main_sheet_name), self.parser.main_sheet.titles)
+            return self.convert_dict_titles(self.get_sheet_lines(self.main_sheet_name))
         else:
             return self.get_sheet_lines(self.main_sheet_name)
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
             if self.convert_titles:
-                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name), self.parser.sub_sheets[sub_sheet_name].titles if sub_sheet_name in self.parser.sub_sheets else None)
+                yield sub_sheet_name, self.convert_dict_titles(self.get_sheet_lines(sub_sheet_name),
+                    self.parser.sub_sheets[sub_sheet_name].title_lookup if sub_sheet_name in self.parser.sub_sheets else None)
             else:
                 yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
 
