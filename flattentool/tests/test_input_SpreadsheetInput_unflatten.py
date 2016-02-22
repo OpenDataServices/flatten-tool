@@ -44,12 +44,12 @@ testdata = [
     # Basic flat
     (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
             'testA': 3
         }],
         [{
-                'ROOT_ID': 1,
+                'ROOT_ID': '1',
                 'id': 2,
                 'testA': 3
         }]
@@ -57,38 +57,38 @@ testdata = [
     # Nested
     (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
-            'testA/testB': 3,
-            'testA/testC': 4,
+            'testO/testB': 3,
+            'testO/testC': 4,
         }],
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
-            'testA': {'testB': 3, 'testC': 4}
+            'testO': {'testB': 3, 'testC': 4}
         }]
     ),
     # Unicode
     (
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
-            'testA': UNICODE_TEST_STRING
+            'testU': UNICODE_TEST_STRING
         }],
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
-            'testA': UNICODE_TEST_STRING
+            'testU': UNICODE_TEST_STRING
         }]
     ),
     # Single item array
     (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
-            'testA[]/id': 3,
-            'testA[]/testB': 4
+            'testL/0/id': 3,
+            'testL/0/testB': 4
         }],
         [{
-            'ROOT_ID': 1, 'id': 2, 'testA': [{
+            'ROOT_ID': '1', 'id': 2, 'testL': [{
                 'id': 3, 'testB': 4
             }]
         }]
@@ -97,12 +97,12 @@ testdata = [
     (
         [{
             'ROOT_ID': '1',
-            'testA[]/id': '2',
-            'testA[]/testB': '3',
+            'testL/0/id': '2',
+            'testL/0/testB': '3',
         }],
         [{
             'ROOT_ID': '1',
-            'testA': [{
+            'testL': [{
                 'id': '2',
                 'testB': '3'
             }]
@@ -112,11 +112,11 @@ testdata = [
     (
         [{
             'ROOT_ID': '',
-            'id:integer': '',
-            'testA:number': '',
-            'testB:boolean': '',
-            'testC:array': '',
-            'testD:string': '',
+            'id': '',
+            'testA': '',
+            'testB': '',
+            'testC': '',
+            'testD': '',
             'testE': '',
         }],
         []
@@ -125,11 +125,11 @@ testdata = [
     (
         [{
             'ROOT_ID': 1,
-            'id:integer': '',
-            'testA:number': '',
-            'testB:boolean': '',
-            'testC:array': '',
-            'testD:string': '',
+            'id': '',
+            'testA': '',
+            'testB': '',
+            'testC': '',
+            'testD': '',
             'testE': '',
         }],
         [{
@@ -282,7 +282,7 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testR': [{
-                'id': 3, 'testB': 4
+                'id': '3', 'testB': '4'
             }]
         }]
     ),
@@ -314,8 +314,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testR': [{
-                'id': 3,
-                'testC': 4
+                'id': '3',
+                'testC': '4'
             }]
         }]
     ),
@@ -331,7 +331,7 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testR': [{
-                'testC': 3,
+                'testC': '3',
                 'Not in schema': 4
             }]
         }]
@@ -392,15 +392,16 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
         main_sheet_name='custom_main',
         **extra_kwargs)
     spreadsheet_input.read_sheets()
-    if convert_titles:
-        parser = SchemaParser(
-            root_schema_dict=create_schema(root_id) if use_schema else {},
-            main_sheet_name='custom_main',
-            root_id=root_id,
-            rollup=True
-        )
-        parser.parse()
-        spreadsheet_input.parser = parser
+
+    parser = SchemaParser(
+        root_schema_dict=create_schema(root_id) if use_schema else {"properties": {}},
+        main_sheet_name='custom_main',
+        root_id=root_id,
+        rollup=True
+    )
+    parser.parse()
+    spreadsheet_input.parser = parser
+
     expected_output_list = [
         inject_root_id(root_id, expected_output_dict) for expected_output_dict in expected_output_list
     ]

@@ -30,6 +30,8 @@ class TitleLookup(UserDict):
     def lookup_header_list(self, title_header_list):
         first_title = title_header_list[0]
         remaining_titles = title_header_list[1:]
+        if isinstance(first_title, int):
+            return first_title + '/' + self[first_title].lookup_header_list(remaining_titles)
         if first_title in self:
             if remaining_titles:
                 return self[first_title].property_name + '/' + self[first_title].lookup_header_list(remaining_titles)
@@ -69,6 +71,7 @@ class SchemaParser(object):
         self.root_id = root_id
         self.use_titles = use_titles
         self.title_lookup = TitleLookup()
+        self.flattened = {}
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -86,7 +89,7 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
-        fields = self.parse_schema_dict(self.main_sheet_name, self.root_schema_dict)
+        fields = self.parse_schema_dict(self.main_sheet_name, '', self.root_schema_dict)
         for field, title in fields:
             if self.use_titles:
                 if not title:
@@ -96,7 +99,9 @@ class SchemaParser(object):
             else:
                 self.main_sheet.append(field)
 
-    def parse_schema_dict(self, parent_name, schema_dict, parent_id_fields=None, title_lookup=None):
+    def parse_schema_dict(self, parent_name, parent_path, schema_dict, parent_id_fields=None, title_lookup=None):
+        if parent_path:
+            parent_path = parent_path + '/'
         parent_id_fields = parent_id_fields or []
         title_lookup = self.title_lookup if title_lookup is None else title_lookup
         if 'properties' in schema_dict:
@@ -114,8 +119,10 @@ class SchemaParser(object):
                     title_lookup[title].property_name = property_name
 
                 if 'object' in property_type_set:
+                    self.flattened[parent_path+property_name] = "object"
                     for field, child_title in self.parse_schema_dict(
                             parent_name+'/'+property_name,
+                            parent_path+property_name,
                             property_schema_dict,
                             parent_id_fields=id_fields,
                             title_lookup=title_lookup.get(title)):
@@ -126,10 +133,13 @@ class SchemaParser(object):
                         )
 
                 elif 'array' in property_type_set:
+                    self.flattened[parent_path+property_name] = "array"
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
+                        self.flattened[parent_path+property_name] = "string_array"
                         yield property_name+':array', title
                     elif 'array' in type_set:
+                        self.flattened[parent_path+property_name] = "array_array"
                         if 'string' in get_property_type_set(property_schema_dict['items']['items']):
                             yield property_name+':array', title
                         else:
@@ -152,6 +162,7 @@ class SchemaParser(object):
                         for field in id_fields:
                             sub_sheet.add_field(field+':'+property_name, id_field=True)
                         fields = self.parse_schema_dict(parent_name+'/'+property_name+'[]',
+                                parent_path+property_name,
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
                                 title_lookup=title_lookup.get(title))
@@ -178,12 +189,16 @@ class SchemaParser(object):
                     else:
                         raise ValueError
                 elif 'string' in property_type_set:
+                    self.flattened[parent_path+property_name] = "string"
                     yield property_name, title
                 elif 'number' in property_type_set:
+                    self.flattened[parent_path+property_name] = "number"
                     yield property_name+':number', title
                 elif 'integer' in property_type_set:
+                    self.flattened[parent_path+property_name] = "integer"
                     yield property_name+':integer', title
                 elif 'boolean' in property_type_set:
+                    self.flattened[parent_path+property_name] = "boolean"
                     yield property_name+':boolean', title
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}",'

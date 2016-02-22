@@ -28,6 +28,46 @@ try:
 except ImportError:
     from UserDict import UserDict  # pylint: disable=F0401
 
+def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
+    if value == '' or value is None:
+        return None
+    if type_string == 'number':
+        try:
+            return Decimal(value)
+        except (TypeError, ValueError, InvalidOperation):
+            warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value))
+            return text_type(value)
+    elif type_string == 'integer':
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
+            return text_type(value)
+    elif type_string == 'boolean':
+        value = text_type(value)
+        if value.lower() in ['true', '1']:
+            return True
+        elif value.lower() in ['false', '0']:
+            return False
+        else:
+            warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
+            return text_type(value)
+    elif type_string in ('array', 'array_array', 'string_array'):
+        value = text_type(value)
+        if ',' in value:
+            return [x.split(',') for x in value.split(';')]
+        else:
+            return value.split(';')
+    elif type_string == 'string':
+        if type(value) == datetime.datetime:
+            return timezone.localize(value).isoformat()
+        return text_type(value)
+    elif type_string == '':
+        if type(value) == datetime.datetime:
+            return timezone.localize(value).isoformat()
+        return value if type(value) in [int] else text_type(value)
+    else:
+        raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
 class SpreadsheetInput(object):
     """
@@ -79,56 +119,15 @@ class SpreadsheetInput(object):
     def read_sheets(self):
         raise NotImplementedError
 
-    def convert_type(self, type_string, value):
-        if value == '' or value is None:
-            return None
-        if type_string == 'number':
-            try:
-                return Decimal(value)
-            except (TypeError, ValueError, InvalidOperation):
-                warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value))
-                return text_type(value)
-        elif type_string == 'integer':
-            try:
-                return int(value)
-            except (TypeError, ValueError):
-                warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
-                return text_type(value)
-        elif type_string == 'boolean':
-            value = text_type(value)
-            if value.lower() in ['true', '1']:
-                return True
-            elif value.lower() in ['false', '0']:
-                return False
-            else:
-                warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
-                return text_type(value)
-        elif type_string == 'array':
-            value = text_type(value)
-            if ',' in value:
-                return [x.split(',') for x in value.split(';')]
-            else:
-                return value.split(';')
-        elif type_string == 'string':
-            if type(value) == datetime.datetime:
-                return self.timezone.localize(value).isoformat()
-            return text_type(value)
-        elif type_string == '':
-            if type(value) == datetime.datetime:
-                return self.timezone.localize(value).isoformat()
-            return value if type(value) in [int] else text_type(value)
-        else:
-            raise ValueError('Unrecognised type: "{}"'.format(type_string))
-
 
     def convert_types(self, in_dict):
         out_dict = OrderedDict()
         for key, value in in_dict.items():
             parts = key.split(':')
             if len(parts) > 1:
-                out_dict[parts[0]] = self.convert_type(parts[1], value)
+                out_dict[parts[0]] = convert_type(parts[1], value, self.timezone)
             else:
-                out_dict[parts[0]] = self.convert_type('', value)
+                out_dict[parts[0]] = convert_type('', value, self.timezone)
         return out_dict
 
 
@@ -140,7 +139,10 @@ class SpreadsheetInput(object):
             root_id_or_none = line[self.root_id] if self.root_id else None
             if root_id_or_none not in main_sheet_by_ocid:
                 main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
-            main_sheet_by_ocid[root_id_or_none].append(unflatten_line(self.convert_types(line)))
+            if not self.parser:
+                main_sheet_by_ocid[root_id_or_none].append(unflatten_line(self.convert_types(line)))
+            else:
+                main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
 
         for sheet_name, lines in self.get_sub_sheets_lines():
             for i, line in enumerate(lines):
@@ -273,6 +275,86 @@ def unflatten_line(line):
         fields = k.split('/')
         path_search(unflattened, fields[:-1], top_sheet=True)[fields[-1]] = v
     return unflattened
+
+def isint(string):
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
+
+class ListAsDict(dict):
+    pass
+
+def list_as_dicts_to_temporary_dicts(unflattened):
+    for key, value in list(unflattened.items()):
+        if hasattr(value, 'items'):
+            if not value:
+                unflattened.pop(key)
+            list_as_dicts_to_temporary_dicts(value)
+        if isinstance(value, ListAsDict):
+            temporarydict = TemporaryDict("id")
+            for index in sorted(value.keys()):
+                temporarydict.append(value[index])
+            unflattened[key] = temporarydict
+    return unflattened
+
+
+def unflatten_main_with_parser(parser, line, timezone):
+    unflattened = {}
+    for path, value in line.items():
+        if not value:
+            continue
+        current_path = unflattened
+        path_list = [item.rstrip('[]') for item in path.split('/')]
+        for num, path_item in enumerate(path_list):
+            if isint(path_item):
+                continue
+            path_till_now = '/'.join([item for item in path_list[:num+1] if not isint(item)])
+            current_type = parser.flattened.get(path_till_now)
+            try:
+                next_path_item = path_list[num+1]
+            except IndexError:
+                next_path_item = ''
+
+            ## Array
+            list_index = -1
+            if isint(next_path_item):
+                if current_type and current_type != 'array':
+                    raise ValueError("There is an array at '{}' when the schema says there should be a '{}'".format(path_till_now, current_type))
+                list_index = int(next_path_item)
+
+            if isint(next_path_item) or current_type == 'array':
+                list_as_dict = current_path.get(path_item)
+                if list_as_dict is None:
+                    list_as_dict = ListAsDict()
+                    current_path[path_item] = list_as_dict
+                new_path = list_as_dict.get(list_index)
+                if new_path is None:
+                    new_path = {}
+                    list_as_dict[list_index] = new_path
+                current_path = new_path
+                continue
+
+            ## Object
+            if current_type == 'object' or (not current_type and next_path_item):
+                new_path = current_path.get(path_item)
+                if new_path is None:
+                    new_path = {}
+                    current_path[path_item] = new_path
+                current_path = new_path
+                continue
+            if current_type and current_type != 'object' and next_path_item:
+                raise ValueError("There is an object or list at '{}' but it should be an {}".format(path_till_now, current_type))
+
+            ## Other Types
+            converted_value = convert_type(current_type or '', value, timezone)
+            if converted_value:
+                current_path[path_item] = converted_value
+
+    unflattened = list_as_dicts_to_temporary_dicts(unflattened)
+    return unflattened
+
 
 
 class IDFieldMissing(KeyError):
