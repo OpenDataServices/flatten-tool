@@ -30,8 +30,12 @@ class TitleLookup(UserDict):
     def lookup_header_list(self, title_header_list):
         first_title = title_header_list[0]
         remaining_titles = title_header_list[1:]
-        if isinstance(first_title, int):
-            return first_title + '/' + self[first_title].lookup_header_list(remaining_titles)
+        try:
+            int(first_title)
+            return first_title + '/' + self.lookup_header_list(remaining_titles)
+        except ValueError:
+            pass
+
         if first_title in self:
             if remaining_titles:
                 return self[first_title].property_name + '/' + self[first_title].lookup_header_list(remaining_titles)
@@ -51,7 +55,7 @@ class TitleLookup(UserDict):
             raise KeyError
         else:
             return self.data[key.replace(' ', '').lower()]
-    
+
     def __contains__(self, key):
         if key is None:
             return False
@@ -129,7 +133,7 @@ class SchemaParser(object):
                         yield (
                             property_name+'/'+field,
                             # TODO ambiguous use of "title"
-                            (title+':'+child_title if title and child_title else None) 
+                            (title+':'+child_title if title and child_title else None)
                         )
 
                 elif 'array' in property_type_set:

@@ -138,6 +138,60 @@ testdata = [
     )
 ]
 
+testdata_pointer = [
+    # Single item array without json numbering
+    (
+        [{
+            'ROOT_ID': '1',
+            'testR/id': '2',
+            'testR/testB': '3',
+            'testR/testX': '3',
+        }],
+        [{
+            'ROOT_ID': '1',
+            'testR': [{
+                'id': '2',
+                'testB': '3',
+                'testX': '3'
+            }]
+        }]
+    ),
+    # Multi item array one with varied numbering 
+    (
+        [{
+            'ROOT_ID': '1',
+            'testR/id': '-1',
+            'testR/testB': '-1',
+            'testR/testX': '-2',
+            'testR/0/id': '0',
+            'testR/0/testB': '1',
+            'testR/0/testX': '1',
+            'testR/5/id': '5',
+            'testR/5/testB': '5',
+            'testR/5/testX': '6',
+        }],
+        [{
+            'ROOT_ID': '1',
+            'testR': [{
+                'id': '-1',
+                'testB': '-1',
+                'testX': '-2'
+            },
+            {
+                'id': '0',
+                'testB': '1',
+                'testX': '1'
+            },
+            {
+                'id': '5',
+                'testB': '5',
+                'testX': '6'
+            }
+            ]
+        }]
+    ),
+]
+
 def create_schema(root_id):
     schema = {
         'properties': {
@@ -336,6 +390,36 @@ testdata_titles = [
             }]
         }]
     ),
+    # Multi item array, allow numbering
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'R title:C title': 3,
+            'R title:Not in schema': 4,
+            'R title:0:C title': 5,
+            'R title:0:Not in schema': 6,
+            'R title:5:C title': 7,
+            'R title:5:Not in schema': 8,
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': [{
+                'testC': '3',
+                'Not in schema': 4
+            },
+            {
+                'testC': '5',
+                'Not in schema': 6
+            },
+            {
+                'testC': '7',
+                'Not in schema': 8
+            }
+            ]
+        }]
+    ),
     # Empty
     (
         [{
@@ -412,6 +496,13 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
     # We expect no warnings
     if not convert_titles: # TODO what are the warnings here
         assert recwarn.list == []
+
+
+@pytest.mark.parametrize('convert_titles', [True, False])
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+@pytest.mark.parametrize('input_list,expected_output_list', testdata_pointer)
+def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn)
 
 
 @pytest.mark.parametrize('input_list,expected_output_list', testdata_titles)
