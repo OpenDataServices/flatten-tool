@@ -246,6 +246,13 @@ def create_schema(root_id):
                 'title': UNICODE_TEST_STRING,
                 'type': 'string',
             },
+            'testSA': {
+                'title': 'SA title',
+                'type': 'array',
+                'items': {
+                    'type': 'string'
+                }
+            }
         }
     }
     if root_id:
@@ -447,7 +454,32 @@ testdata_titles = [
         [{
             'ROOT_ID': 1
         }]
-    )
+    ),
+    # Test arrays of strings
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'SA title': 'a',
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testSA': [ 'a' ],
+        }]
+    ),
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'SA title': 'a;b',
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testSA': [ 'a', 'b' ],
+        }]
+    ),
 ]
 
 ROOT_ID_PARAMS =     [
