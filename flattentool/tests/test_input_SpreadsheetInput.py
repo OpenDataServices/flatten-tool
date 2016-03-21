@@ -4,13 +4,14 @@ Tests of SpreadsheetInput class from input.py, and its chidlren.
 Tests of unflatten method are in test_input_SpreadsheetInput_unflatten.py
 """
 from __future__ import unicode_literals
-from flattentool.input import SpreadsheetInput, CSVInput, XLSXInput
+from flattentool.input import SpreadsheetInput, CSVInput, XLSXInput, convert_type
 from decimal import Decimal
 from collections import OrderedDict
 import sys
 import pytest
 import openpyxl
 import datetime
+import pytz
 from six import text_type
 
 class ListInput(SpreadsheetInput):
@@ -164,73 +165,73 @@ class TestUnicodeInput(object):
 
 def test_convert_type(recwarn):
     si = SpreadsheetInput()
-    assert si.convert_type('', 'somestring') == 'somestring'
+    assert convert_type('', 'somestring') == 'somestring'
     # If not type is specified, ints are kept as ints...
-    assert si.convert_type('', 3) == 3
+    assert convert_type('', 3) == 3
 
     # ... but all other ojbects are converted to strings
     class NotAString(object):
         def __str__(self):
             return 'string representation'
     assert NotAString() != 'string representation'
-    assert si.convert_type('', NotAString()) == 'string representation'
-    assert si.convert_type('string', NotAString()) == 'string representation'
+    assert convert_type('', NotAString()) == 'string representation'
+    assert convert_type('string', NotAString()) == 'string representation'
 
-    assert si.convert_type('string', 3) == '3'
-    assert si.convert_type('number', '3') == Decimal('3')
-    assert si.convert_type('number', '1.2') == Decimal('1.2')
-    assert si.convert_type('integer', '3') == 3
-    assert si.convert_type('integer', 3) == 3
+    assert convert_type('string', 3) == '3'
+    assert convert_type('number', '3') == Decimal('3')
+    assert convert_type('number', '1.2') == Decimal('1.2')
+    assert convert_type('integer', '3') == 3
+    assert convert_type('integer', 3) == 3
 
-    assert si.convert_type('boolean', 'TRUE') is True
-    assert si.convert_type('boolean', 'True') is True
-    assert si.convert_type('boolean', 1) is True
-    assert si.convert_type('boolean', '1') is True
-    assert si.convert_type('boolean', 'FALSE') is False
-    assert si.convert_type('boolean', 'False') is False
-    assert si.convert_type('boolean', 0) is False
-    assert si.convert_type('boolean', '0') is False
-    si.convert_type('boolean', 2)
+    assert convert_type('boolean', 'TRUE') is True
+    assert convert_type('boolean', 'True') is True
+    assert convert_type('boolean', 1) is True
+    assert convert_type('boolean', '1') is True
+    assert convert_type('boolean', 'FALSE') is False
+    assert convert_type('boolean', 'False') is False
+    assert convert_type('boolean', 0) is False
+    assert convert_type('boolean', '0') is False
+    convert_type('boolean', 2)
     assert 'Unrecognised value for boolean: "2"' in text_type(recwarn.pop(UserWarning).message)
-    si.convert_type('boolean', 'test')
+    convert_type('boolean', 'test')
     assert 'Unrecognised value for boolean: "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    si.convert_type('integer', 'test')
+    convert_type('integer', 'test')
     assert 'Non-integer value "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    si.convert_type('number', 'test')
+    convert_type('number', 'test')
     assert 'Non-numeric value "test"' in text_type(recwarn.pop(UserWarning).message)
 
-    assert si.convert_type('string', '') is None
-    assert si.convert_type('number', '') is None
-    assert si.convert_type('integer', '') is None
-    assert si.convert_type('array', '') is None
-    assert si.convert_type('boolean', '') is None
-    assert si.convert_type('string', None) is None
-    assert si.convert_type('number', None) is None
-    assert si.convert_type('integer', None) is None
-    assert si.convert_type('array', None) is None
-    assert si.convert_type('boolean', None) is None
+    assert convert_type('string', '') is None
+    assert convert_type('number', '') is None
+    assert convert_type('integer', '') is None
+    assert convert_type('array', '') is None
+    assert convert_type('boolean', '') is None
+    assert convert_type('string', None) is None
+    assert convert_type('number', None) is None
+    assert convert_type('integer', None) is None
+    assert convert_type('array', None) is None
+    assert convert_type('boolean', None) is None
 
-    assert si.convert_type('array', 'one') == ['one']
-    assert si.convert_type('array', 'one;two') == ['one', 'two']
-    assert si.convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
+    assert convert_type('array', 'one') == ['one']
+    assert convert_type('array', 'one;two') == ['one', 'two']
+    assert convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
 
     with pytest.raises(ValueError) as e:
-        si.convert_type('notatype', 'test')
+        convert_type('notatype', 'test')
     assert 'Unrecognised type: "notatype"' in text_type(e)
 
-    assert si.convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
-    assert si.convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
-    assert si.convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
-    assert si.convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
+    assert convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
+    assert convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
 
-    si = SpreadsheetInput(timezone_name='Europe/London')
-    assert si.convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
-    assert si.convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
-    assert si.convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
-    assert si.convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59)) == '2015-01-01T13:37:59+00:00'
-    assert si.convert_type('string', datetime.datetime(2015, 6, 1)) == '2015-06-01T00:00:00+01:00'
-    assert si.convert_type('', datetime.datetime(2015, 6, 1)) == '2015-06-01T00:00:00+01:00'
-    assert si.convert_type('string', datetime.datetime(2015, 6, 1, 13, 37, 59)) == '2015-06-01T13:37:59+01:00'
-    assert si.convert_type('', datetime.datetime(2015, 6, 1, 13, 37, 59)) == '2015-06-01T13:37:59+01:00'
+    timezone = pytz.timezone('Europe/London')
+    assert convert_type('string', datetime.datetime(2015, 1, 1), timezone) == '2015-01-01T00:00:00+00:00'
+    assert convert_type('', datetime.datetime(2015, 1, 1), timezone) == '2015-01-01T00:00:00+00:00'
+    assert convert_type('string', datetime.datetime(2015, 1, 1, 13, 37, 59), timezone) == '2015-01-01T13:37:59+00:00'
+    assert convert_type('', datetime.datetime(2015, 1, 1, 13, 37, 59), timezone) == '2015-01-01T13:37:59+00:00'
+    assert convert_type('string', datetime.datetime(2015, 6, 1), timezone) == '2015-06-01T00:00:00+01:00'
+    assert convert_type('', datetime.datetime(2015, 6, 1), timezone) == '2015-06-01T00:00:00+01:00'
+    assert convert_type('string', datetime.datetime(2015, 6, 1, 13, 37, 59), timezone) == '2015-06-01T13:37:59+01:00'
+    assert convert_type('', datetime.datetime(2015, 6, 1, 13, 37, 59), timezone) == '2015-06-01T13:37:59+01:00'

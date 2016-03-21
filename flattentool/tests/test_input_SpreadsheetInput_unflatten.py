@@ -44,12 +44,12 @@ testdata = [
     # Basic flat
     (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
             'testA': 3
         }],
         [{
-                'ROOT_ID': 1,
+                'ROOT_ID': '1',
                 'id': 2,
                 'testA': 3
         }]
@@ -57,38 +57,38 @@ testdata = [
     # Nested
     (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
-            'testA/testB': 3,
-            'testA/testC': 4,
+            'testO/testB': 3,
+            'testO/testC': 4,
         }],
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
-            'testA': {'testB': 3, 'testC': 4}
+            'testO': {'testB': 3, 'testC': 4}
         }]
     ),
     # Unicode
     (
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
-            'testA': UNICODE_TEST_STRING
+            'testU': UNICODE_TEST_STRING
         }],
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
-            'testA': UNICODE_TEST_STRING
+            'testU': UNICODE_TEST_STRING
         }]
     ),
     # Single item array
     (
         [{
-            'ROOT_ID': 1,
+            'ROOT_ID': '1',
             'id': 2,
-            'testA[]/id': 3,
-            'testA[]/testB': 4
+            'testL/0/id': 3,
+            'testL/0/testB': 4
         }],
         [{
-            'ROOT_ID': 1, 'id': 2, 'testA': [{
+            'ROOT_ID': '1', 'id': 2, 'testL': [{
                 'id': 3, 'testB': 4
             }]
         }]
@@ -97,12 +97,12 @@ testdata = [
     (
         [{
             'ROOT_ID': '1',
-            'testA[]/id': '2',
-            'testA[]/testB': '3',
+            'testL/0/id': '2',
+            'testL/0/testB': '3',
         }],
         [{
             'ROOT_ID': '1',
-            'testA': [{
+            'testL': [{
                 'id': '2',
                 'testB': '3'
             }]
@@ -112,11 +112,11 @@ testdata = [
     (
         [{
             'ROOT_ID': '',
-            'id:integer': '',
-            'testA:number': '',
-            'testB:boolean': '',
-            'testC:array': '',
-            'testD:string': '',
+            'id': '',
+            'testA': '',
+            'testB': '',
+            'testC': '',
+            'testD': '',
             'testE': '',
         }],
         []
@@ -125,17 +125,71 @@ testdata = [
     (
         [{
             'ROOT_ID': 1,
-            'id:integer': '',
-            'testA:number': '',
-            'testB:boolean': '',
-            'testC:array': '',
-            'testD:string': '',
+            'id': '',
+            'testA': '',
+            'testB': '',
+            'testC': '',
+            'testD': '',
             'testE': '',
         }],
         [{
             'ROOT_ID': 1
         }]
     )
+]
+
+testdata_pointer = [
+    # Single item array without json numbering
+    (
+        [{
+            'ROOT_ID': '1',
+            'testR/id': '2',
+            'testR/testB': '3',
+            'testR/testX': '3',
+        }],
+        [{
+            'ROOT_ID': '1',
+            'testR': [{
+                'id': '2',
+                'testB': '3',
+                'testX': '3'
+            }]
+        }]
+    ),
+    # Multi item array one with varied numbering 
+    (
+        [{
+            'ROOT_ID': '1',
+            'testR/id': '-1',
+            'testR/testB': '-1',
+            'testR/testX': '-2',
+            'testR/0/id': '0',
+            'testR/0/testB': '1',
+            'testR/0/testX': '1',
+            'testR/5/id': '5',
+            'testR/5/testB': '5',
+            'testR/5/testX': '6',
+        }],
+        [{
+            'ROOT_ID': '1',
+            'testR': [{
+                'id': '-1',
+                'testB': '-1',
+                'testX': '-2'
+            },
+            {
+                'id': '0',
+                'testB': '1',
+                'testX': '1'
+            },
+            {
+                'id': '5',
+                'testB': '5',
+                'testX': '6'
+            }
+            ]
+        }]
+    ),
 ]
 
 def create_schema(root_id):
@@ -192,6 +246,13 @@ def create_schema(root_id):
                 'title': UNICODE_TEST_STRING,
                 'type': 'string',
             },
+            'testSA': {
+                'title': 'SA title',
+                'type': 'array',
+                'items': {
+                    'type': 'string'
+                }
+            }
         }
     }
     if root_id:
@@ -282,7 +343,7 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testR': [{
-                'id': 3, 'testB': 4
+                'id': '3', 'testB': '4'
             }]
         }]
     ),
@@ -314,8 +375,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testR': [{
-                'id': 3,
-                'testC': 4
+                'id': '3',
+                'testC': '4'
             }]
         }]
     ),
@@ -331,9 +392,39 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testR': [{
-                'testC': 3,
+                'testC': '3',
                 'Not in schema': 4
             }]
+        }]
+    ),
+    # Multi item array, allow numbering
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'R title:C title': 3,
+            'R title:Not in schema': 4,
+            'R title:0:C title': 5,
+            'R title:0:Not in schema': 6,
+            'R title:5:C title': 7,
+            'R title:5:Not in schema': 8,
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': [{
+                'testC': '3',
+                'Not in schema': 4
+            },
+            {
+                'testC': '5',
+                'Not in schema': 6
+            },
+            {
+                'testC': '7',
+                'Not in schema': 8
+            }
+            ]
         }]
     ),
     # Empty
@@ -363,7 +454,32 @@ testdata_titles = [
         [{
             'ROOT_ID': 1
         }]
-    )
+    ),
+    # Test arrays of strings
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'SA title': 'a',
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testSA': [ 'a' ],
+        }]
+    ),
+    (
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'SA title': 'a;b',
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testSA': [ 'a', 'b' ],
+        }]
+    ),
 ]
 
 ROOT_ID_PARAMS =     [
@@ -392,15 +508,16 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
         main_sheet_name='custom_main',
         **extra_kwargs)
     spreadsheet_input.read_sheets()
-    if convert_titles:
-        parser = SchemaParser(
-            root_schema_dict=create_schema(root_id) if use_schema else {},
-            main_sheet_name='custom_main',
-            root_id=root_id,
-            rollup=True
-        )
-        parser.parse()
-        spreadsheet_input.parser = parser
+
+    parser = SchemaParser(
+        root_schema_dict=create_schema(root_id) if use_schema else {"properties": {}},
+        main_sheet_name='custom_main',
+        root_id=root_id,
+        rollup=True
+    )
+    parser.parse()
+    spreadsheet_input.parser = parser
+
     expected_output_list = [
         inject_root_id(root_id, expected_output_dict) for expected_output_dict in expected_output_list
     ]
@@ -411,6 +528,13 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
     # We expect no warnings
     if not convert_titles: # TODO what are the warnings here
         assert recwarn.list == []
+
+
+@pytest.mark.parametrize('convert_titles', [True, False])
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+@pytest.mark.parametrize('input_list,expected_output_list', testdata_pointer)
+def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn)
 
 
 @pytest.mark.parametrize('input_list,expected_output_list', testdata_titles)
