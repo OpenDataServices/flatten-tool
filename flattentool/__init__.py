@@ -121,7 +121,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
         main_sheet_name=main_sheet_name,
         root_id=root_id,
         convert_titles=convert_titles)
-    if convert_titles:
+    if schema:
         parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=True, root_id=root_id)
         parser.parse()
         spreadsheet_input.parser = parser
