@@ -321,9 +321,9 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert list(parser.main_sheet) == [ 'c:array' ]
+        assert list(parser.main_sheet) == [ 'c' ]
         assert parser.main_sheet.lines == [
-                {'c:array': 'd'}
+                {'c': 'd'}
         ]
         assert len(parser.sub_sheets) == 0
 

@@ -101,7 +101,7 @@ class SchemaParser(object):
                 else:
                     self.main_sheet.append(title)
             else:
-                self.main_sheet.append(field)
+                self.main_sheet.append(field.split(":")[0])
 
     def parse_schema_dict(self, parent_name, parent_path, schema_dict, parent_id_fields=None, title_lookup=None):
         if parent_path:

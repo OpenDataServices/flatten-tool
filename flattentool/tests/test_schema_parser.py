@@ -280,7 +280,7 @@ def test_simple_array():
         main_sheet_name='custom_main_sheet_name'
     )
     parser.parse()
-    assert set(parser.main_sheet) == set(['testA:array'])
+    assert set(parser.main_sheet) == set(['testA'])
 
 
 def test_nested_simple_array():
@@ -301,7 +301,7 @@ def test_nested_simple_array():
         main_sheet_name='custom_main_sheet_name'
     )
     parser.parse()
-    assert set(parser.main_sheet) == set(['testA:array'])
+    assert set(parser.main_sheet) == set(['testA'])
 
 
 def test_references_sheet_names(tmpdir):
