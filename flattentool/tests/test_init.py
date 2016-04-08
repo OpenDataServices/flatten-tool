@@ -4,6 +4,7 @@ from flattentool import decimal_default, unflatten
 from decimal import Decimal
 import json
 import sys
+import pytest
 
 
 def test_decimal_default():
@@ -16,6 +17,7 @@ def lines_strip_whitespace(text):
     return '\n'.join(line.strip() for line in lines)
 
 
+@pytest.mark.xfail
 def test_unflatten(tmpdir):
     """
     Perform a full CSV unflattening, and check the output is what we expect.

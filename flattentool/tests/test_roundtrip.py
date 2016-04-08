@@ -4,6 +4,7 @@ import pytest
 import sys
 
 
+@pytest.mark.xfail()
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip(tmpdir, output_format):
     input_name = 'flattentool/tests/fixtures/tenders_releases_2_releases.json'
@@ -32,6 +33,7 @@ def test_roundtrip(tmpdir, output_format):
     assert original_json == roundtripped_json
 
 
+@pytest.mark.xfail()
 @pytest.mark.parametrize('use_titles', [False, True])
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip_360(tmpdir, output_format, use_titles):

@@ -145,64 +145,8 @@ class SpreadsheetInput(object):
                 main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
 
         for sheet_name, lines in self.get_sub_sheets_lines():
-            for i, line in enumerate(lines):
-                line_number = i+2
-                try:
-                    if all(x == '' for x in line.values()):
-                        continue
-                    id_fields = {k: v for k, v in line.items() if
-                                 k.split(':')[0].endswith('/id') and
-                                 k.startswith(self.main_sheet_name)}
-                    line_without_id_fields = OrderedDict(
-                        (k, v) for k, v in line.items()
-                        if k not in id_fields and (not k or k != self.root_id))
-                    raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
-                    if not raw_id_fields_with_values:
-                        warn('Line {} of sheet {} has no parent id fields populated,'
-                             'skipping.'.format(line_number, sheet_name))
-                        continue
-                    sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
-                                           for k, v in id_fields.items() if v}
-
-                    try:
-                        id_field = find_deepest_id_field(raw_id_fields_with_values)
-                    except ConflictingIDFieldsError:
-                        warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
-                             'skipping that line.'.format(line_number, sheet_name))
-                        continue
-
-                    try:
-                        context = path_search(
-                            {self.main_sheet_name: main_sheet_by_ocid[line[self.root_id] if self.root_id else None]},
-                            id_field.split('/')[:-1],
-                            id_fields=raw_id_fields_with_values,
-                            top=True
-                        )
-                    except IDFieldMissing as e:
-                        warn('The parent id field "{}" was expected, but not present on line {} of sheet {}.'.format(
-                            e.args[0], line_number, sheet_name))
-                        continue
-
-                    sheet_context_name = sheet_context_names[id_field] or sheet_name
-                    # Added the following line to support the usecase in test_nested_sub_sheet
-                    context = path_search(context, sheet_context_name.split('/')[:-1])
-                    unflattened = unflatten_line(self.convert_types(line_without_id_fields))
-                    sheet_context_base_name = sheet_context_name.split('/')[-1]
-                    if sheet_context_base_name not in context:
-                        context[sheet_context_base_name] = TemporaryDict(keyfield='id')
-                    elif context[sheet_context_base_name].top_sheet:
-                        # Overwirte any rolled up data from the main sheet
-                        print(context[sheet_context_base_name].data, unflattened)
-                        if context[sheet_context_base_name].data.get(None) != unflattened:
-                            warn('Conflict between main sheet and sub sheet {}, using values from sub sheet'.format(sheet_context_base_name))
-                        context[sheet_context_base_name] = TemporaryDict(keyfield='id')
-                    context[sheet_context_base_name].append(unflattened)
-                except Exception as e:  # pylint: disable=W0703
-                    # Deliberately catch all exceptions for a line, so that
-                    # all lines without exceptions will still be processed.
-                    print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
-                    traceback.print_exc()
-                    sys.exit()
+            ## TODO: Reimplement multi-sheet unflattening to use JSON pointer
+            pass
 
         temporarydicts_to_lists(main_sheet_by_ocid)
 
