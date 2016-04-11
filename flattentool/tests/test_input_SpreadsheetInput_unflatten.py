@@ -54,6 +54,19 @@ testdata = [
                 'testA': 3
         }]
     ),
+    # Basic with zero
+    (
+        [{
+            'ROOT_ID': '1',
+            'id': 2,
+            'testA': 0
+        }],
+        [{
+                'ROOT_ID': '1',
+                'id': 2,
+                'testA': 0
+        }]
+    ),
     # Nested
     (
         [{
