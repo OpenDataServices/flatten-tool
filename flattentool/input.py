@@ -69,6 +69,22 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
+
+def merge(base, mergee):
+    for key, value in mergee.items():
+        if key in base:
+            if isinstance(value, TemporaryDict):
+                for temporarydict_key, temporarydict_value in value.items():
+                    assert isinstance(base[key], TemporaryDict)
+                    if temporarydict_key in base[key]:
+                        merge(base[key][temporarydict_key], temporarydict_value)
+                    else:
+                        base[key][temporarydict_key] = temporarydict_value
+            elif base[key] != mergee[key]:
+                warn('Conflict between main sheet and sub sheet') # FIXME make this more useful (we used to say which subsheet broke...)
+        else:
+            base[key] = value
+
 class SpreadsheetInput(object):
     """
     Base class describing a spreadsheet input. Has stubs which are
@@ -139,14 +155,19 @@ class SpreadsheetInput(object):
             root_id_or_none = line[self.root_id] if self.root_id else None
             if root_id_or_none not in main_sheet_by_ocid:
                 main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
-            if not self.parser:
-                main_sheet_by_ocid[root_id_or_none].append(unflatten_line(self.convert_types(line)))
-            else:
-                main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
+            main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
 
         for sheet_name, lines in self.get_sub_sheets_lines():
-            ## TODO: Reimplement multi-sheet unflattening to use JSON pointer
-            pass
+            for line in lines:
+                if all(x == '' for x in line.values()):
+                    continue
+                root_id_or_none = line[self.root_id] if self.root_id else None
+                unflattened = unflatten_main_with_parser(self.parser, line, self.timezone)
+                try:
+                    merge(main_sheet_by_ocid[root_id_or_none][line.get('id')], unflattened)
+                except KeyError:
+                    pass
+                    # FIXME add an appropriate warning here
 
         temporarydicts_to_lists(main_sheet_by_ocid)
 
@@ -255,7 +276,10 @@ def unflatten_main_with_parser(parser, line, timezone):
             if isint(path_item):
                 continue
             path_till_now = '/'.join([item for item in path_list[:num+1] if not isint(item)])
-            current_type = parser.flattened.get(path_till_now)
+            if parser:
+                current_type = parser.flattened.get(path_till_now)
+            else:
+                current_type = None
             try:
                 next_path_item = path_list[num+1]
             except IndexError:
