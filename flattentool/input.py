@@ -80,6 +80,8 @@ def merge(base, mergee):
                         merge(base[key][temporarydict_key], temporarydict_value)
                     else:
                         base[key][temporarydict_key] = temporarydict_value
+            elif isinstance(value, dict) and isinstance(base[key], dict):
+                merge(base[key], value)
             elif base[key] != mergee[key]:
                 warn('Conflict between main sheet and sub sheet') # FIXME make this more useful (we used to say which subsheet broke...)
         else:
@@ -266,7 +268,7 @@ def list_as_dicts_to_temporary_dicts(unflattened):
 
 
 def unflatten_main_with_parser(parser, line, timezone):
-    unflattened = {}
+    unflattened = OrderedDict()
     for path, value in line.items():
         if not value:
             continue
@@ -299,7 +301,7 @@ def unflatten_main_with_parser(parser, line, timezone):
                     current_path[path_item] = list_as_dict
                 new_path = list_as_dict.get(list_index)
                 if new_path is None:
-                    new_path = {}
+                    new_path = OrderedDict()
                     list_as_dict[list_index] = new_path
                 current_path = new_path
                 continue
@@ -308,7 +310,7 @@ def unflatten_main_with_parser(parser, line, timezone):
             if current_type == 'object' or (not current_type and next_path_item):
                 new_path = current_path.get(path_item)
                 if new_path is None:
-                    new_path = {}
+                    new_path = OrderedDict()
                     current_path[path_item] = new_path
                 current_path = new_path
                 continue

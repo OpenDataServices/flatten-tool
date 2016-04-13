@@ -38,27 +38,41 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'subField': [{'testA': 3}]}
         ]
 
-    def test_nested_sub_sheet(self):
+    @pytest.mark.parametrize('nested_id_in_subsheet', [True, False])
+    def test_nested_sub_sheet(self, nested_id_in_subsheet):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
                     {
                         'ocid': 1,
                         'id': 2,
+                        'testA/id': 3,
+                        'testA/testB': 4,
                     }
                 ],
                 'sub': [
+                    # It used to be neccesary to supply testA/id in this
+                    # situation, but now it's optional
                     {
                         'ocid': 1,
                         'id': 2,
-                        'testA/subField/0/testB': 3,
+                        'testA/id': 3,
+                        'testA/subField/0/testC': 5,
+                    } if nested_id_in_subsheet else {
+                        'ocid': 1,
+                        'id': 2,
+                        'testA/subField/0/testC': 5,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'id': 2, 'testA': {'subField': [{'testB': 3}]}}
+            {'ocid': 1, 'id': 2, 'testA': {
+                'id': 3,
+                'testB': 4,
+                'subField': [{'testC': 5}]
+            }}
         ]
 
     def test_basic_two_sub_sheets(self):
