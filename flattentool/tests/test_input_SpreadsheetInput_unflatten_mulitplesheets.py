@@ -239,11 +239,11 @@ class TestUnflattenEmpty(object):
                 'subsheet': [
                     {
                         'ocid': '',
-                        'id:integer': '',
-                        'testA:number': '',
-                        'testB:boolean': '',
-                        'testC:array': '',
-                        'testD:string': '',
+                        'id': '',
+                        'testA': '',
+                        'testB': '',
+                        'testC': '',
+                        'testD': '',
                     }
                 ]
             },
