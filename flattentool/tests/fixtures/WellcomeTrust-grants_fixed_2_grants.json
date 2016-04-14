@@ -21,7 +21,7 @@
             "dataSource": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
             "plannedDates": [
                 {
-                    "duration": 30
+                    "duration": "30"
                 }
             ], 
             "Surname of applicant": "Addison", 
@@ -65,7 +65,7 @@
             "dataSource": "http://www.wellcome.ac.uk/Managing-a-grant/Grants-awarded/index.htm", 
             "plannedDates": [
                 {
-                    "duration": 25
+                    "duration": "25"
                 }
             ], 
             "Surname of applicant": "Sandell", 
