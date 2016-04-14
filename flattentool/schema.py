@@ -101,7 +101,7 @@ class SchemaParser(object):
                 else:
                     self.main_sheet.append(title)
             else:
-                self.main_sheet.append(field.split(":")[0])
+                self.main_sheet.append(field)
 
     def parse_schema_dict(self, parent_name, parent_path, schema_dict, parent_id_fields=None, title_lookup=None):
         if parent_path:
@@ -141,11 +141,11 @@ class SchemaParser(object):
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         self.flattened[parent_path+property_name] = "string_array"
-                        yield property_name+':array', title
+                        yield property_name, title
                     elif 'array' in type_set:
                         self.flattened[parent_path+property_name] = "array_array"
                         if 'string' in get_property_type_set(property_schema_dict['items']['items']):
-                            yield property_name+':array', title
+                            yield property_name, title
                         else:
                             raise ValueError
                     elif 'object' in type_set:
@@ -197,13 +197,13 @@ class SchemaParser(object):
                     yield property_name, title
                 elif 'number' in property_type_set:
                     self.flattened[parent_path+property_name] = "number"
-                    yield property_name+':number', title
+                    yield property_name, title
                 elif 'integer' in property_type_set:
                     self.flattened[parent_path+property_name] = "integer"
-                    yield property_name+':integer', title
+                    yield property_name, title
                 elif 'boolean' in property_type_set:
                     self.flattened[parent_path+property_name] = "boolean"
-                    yield property_name+':boolean', title
+                    yield property_name, title
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}",'
                          'so this property has been ignored.'.format(
