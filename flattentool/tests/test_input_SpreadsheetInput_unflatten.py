@@ -41,8 +41,8 @@ UNICODE_TEST_STRING = 'éαГ😼𝒞人'
 # ROOT_ID will be replace by the appropirate root_id name in the test (e.g. ocid)
 
 testdata = [
-    # Basic flat
     (
+        'Basic flat',
         [{
             'ROOT_ID': '1',
             'id': 2,
@@ -54,8 +54,8 @@ testdata = [
                 'testA': 3
         }]
     ),
-    # Nested
     (
+        'Nested',
         [{
             'ROOT_ID': '1',
             'id': 2,
@@ -68,8 +68,8 @@ testdata = [
             'testO': {'testB': 3, 'testC': 4}
         }]
     ),
-    # Unicode
     (
+        'Unicode',
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
             'testU': UNICODE_TEST_STRING
@@ -79,8 +79,8 @@ testdata = [
             'testU': UNICODE_TEST_STRING
         }]
     ),
-    # Single item array
     (
+        'Single item array',
         [{
             'ROOT_ID': '1',
             'id': 2,
@@ -93,8 +93,8 @@ testdata = [
             }]
         }]
     ),
-    # Single item array withou parent ID
     (
+        'Single item array without parent ID',
         [{
             'ROOT_ID': '1',
             'testL/0/id': '2',
@@ -108,8 +108,8 @@ testdata = [
             }]
         }]
     ),
-    # Empty
     (
+        'Empty',
         [{
             'ROOT_ID': '',
             'id': '',
@@ -121,8 +121,8 @@ testdata = [
         }],
         []
     ),
-    # Empty except for root id
     (
+        'Empty except for root id',
         [{
             'ROOT_ID': 1,
             'id': '',
@@ -139,8 +139,8 @@ testdata = [
 ]
 
 testdata_pointer = [
-    # Single item array without json numbering
     (
+        'Single item array without json numbering',
         [{
             'ROOT_ID': '1',
             'testR/id': '2',
@@ -156,8 +156,8 @@ testdata_pointer = [
             }]
         }]
     ),
-    # Multi item array one with varied numbering 
     (
+        'Multi item array one with varied numbering ',
         [{
             'ROOT_ID': '1',
             'testR/id': '-1',
@@ -265,8 +265,8 @@ def create_schema(root_id):
     return schema
 
 testdata_titles = [
-    # Basic flat
     (
+        'Basic flat',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -278,8 +278,8 @@ testdata_titles = [
             'testA': 3
         }]
     ),
-    # Nested
     (
+        'Nested',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -292,8 +292,8 @@ testdata_titles = [
             'testB': {'testC': 3, 'testD': 4}
         }]
     ),
-    # Nested titles should be converted individually
     (
+        'Nested titles should be converted individually',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -306,8 +306,8 @@ testdata_titles = [
             'testB': {'testC': 3, 'Not in schema': 4}
         }]
     ),
-    # Should be space and case invariant
     (
+        'Should be space and case invariant',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -320,8 +320,8 @@ testdata_titles = [
             'testB': {'testC': 3, 'Not in schema': 4}
         }]
     ),
-    # Unicode
     (
+        'Unicode',
         [{
             'ROOT_ID_TITLE': UNICODE_TEST_STRING,
             UNICODE_TEST_STRING: UNICODE_TEST_STRING
@@ -331,8 +331,8 @@ testdata_titles = [
             'testU': UNICODE_TEST_STRING
         }]
     ),
-    # Single item array
    (
+        'Single item array',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -347,8 +347,8 @@ testdata_titles = [
             }]
         }]
     ),
-    # Single item array without parent ID
     (
+        'Single item array without parent ID',
         [{
             'ROOT_ID_TITLE': '1',
             'R title:Identifier': '2',
@@ -362,9 +362,11 @@ testdata_titles = [
             }]
         }]
     ),
-    # Properties of a single item array shouldn't need to be in rollUp list
-    # for their titles to be converted
     (
+        '''
+        Properties of a single item array shouldn't need to be in rollUp list
+        for their titles to be converted
+        ''',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -380,8 +382,8 @@ testdata_titles = [
             }]
         }]
     ),
-    # Single item array, titles should be converted individually
     (
+        'Single item array, titles should be converted individually',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -397,8 +399,8 @@ testdata_titles = [
             }]
         }]
     ),
-    # Multi item array, allow numbering
     pytest.mark.xfail((
+        'Multi item array, allow numbering',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -427,8 +429,8 @@ testdata_titles = [
             ]
         }]
     )),
-    # Empty
     (
+        'Empty',
         [{
             'ROOT_ID_TITLE': '',
             'Identifier': '',
@@ -440,8 +442,8 @@ testdata_titles = [
         }],
         []
     ),
-    # Empty except for root id
     (
+        'Empty except for root id',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': '',
@@ -455,8 +457,8 @@ testdata_titles = [
             'ROOT_ID': 1
         }]
     ),
-    # Test arrays of strings
     (
+        'Test arrays of strings (1 item)',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -469,6 +471,7 @@ testdata_titles = [
         }]
     ),
     (
+        'Test arrays of strings (2 items)',
         [{
             'ROOT_ID_TITLE': 1,
             'Identifier': 2,
@@ -495,8 +498,8 @@ ROOT_ID_PARAMS =     [
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('use_schema', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('input_list,expected_output_list', testdata)
-def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+@pytest.mark.parametrize('comment,input_list,expected_output_list', testdata)
+def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment):
     extra_kwargs = {'convert_titles': convert_titles}
     extra_kwargs.update(root_id_kwargs)
     spreadsheet_input = ListInput(
@@ -532,14 +535,14 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
 
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('input_list,expected_output_list', testdata_pointer)
-def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
-    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn)
+@pytest.mark.parametrize('comment,input_list,expected_output_list', testdata_pointer)
+def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment):
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment)
 
 
-@pytest.mark.parametrize('input_list,expected_output_list', testdata_titles)
+@pytest.mark.parametrize('comment,input_list,expected_output_list', testdata_titles)
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn):
+def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment):
     """
     Essentially the same as test unflatten, except that convert_titles and
     use_schema are always true, as both of these are needed to convert titles
@@ -549,6 +552,6 @@ def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_l
         # Skip all tests with a root ID for now, as this is broken
         # https://github.com/OpenDataServices/flatten-tool/issues/84
         pytest.skip()
-    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn)
+    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment)
 
 
