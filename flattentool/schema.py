@@ -21,10 +21,6 @@ class TitleLookup(UserDict):
     property_name = None
 
     def lookup_header(self, title_header):
-        # Ignore titles with a / in, as they may contain types
-        # https://github.com/OpenDataServices/flatten-tool/issues/56
-        if '/' in title_header:
-            return title_header
         return self.lookup_header_list(title_header.split(':'))
 
     def lookup_header_list(self, title_header_list):
