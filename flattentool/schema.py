@@ -150,7 +150,7 @@ class SchemaParser(object):
                         if title:
                             title_lookup[title].property_name = property_name+'/0'
 
-                        sub_sheet_name = ('_'.join(x[:3] for x in parent_path.split('/')) + property_name)[:31]
+                        sub_sheet_name = ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
 
                         #self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
@@ -162,7 +162,7 @@ class SchemaParser(object):
                         for field in id_fields:
                             sub_sheet.add_field(field, id_field=True)
                         fields = self.parse_schema_dict(
-                                parent_path+property_name,
+                                parent_path+property_name+'/0',
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
                                 title_lookup=title_lookup.get(title))
@@ -171,14 +171,16 @@ class SchemaParser(object):
 
                         for field, child_title in fields:
                             if self.use_titles:
-                                if not child_title or not title:
+                                if not child_title:
                                     warn('Field {} does not have a title, skipping.'.format(field))
+                                elif not title:
+                                    warn('Field {} does not have a title, skipping it and all its children.'.format(property_name))
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
-                                    assert len(parent_path.split('/')) <= 2
+                                    assert len(parent_path.replace('/0/', '/').split('/')) <= 2
                                     sub_sheet.add_field(title+':'+child_title)
                             else:
-                                sub_sheet.add_field(parent_path+property_name+'/'+field)
+                                sub_sheet.add_field(parent_path+property_name+'/0/'+field)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
                                 rolledUp.add(field)
                                 yield property_name+'/0/'+field, (title+':'+child_title if title and child_title else None)
