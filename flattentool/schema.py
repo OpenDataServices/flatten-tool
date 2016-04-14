@@ -106,7 +106,10 @@ class SchemaParser(object):
         title_lookup = self.title_lookup if title_lookup is None else title_lookup
         if 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
-                id_fields = parent_id_fields + [parent_path+'id']
+                if self.use_titles:
+                    id_fields = parent_id_fields + [parent_path+(schema_dict['properties']['id'].get('title') or 'id')]
+                else:
+                    id_fields = parent_id_fields + [parent_path+'id']
             else:
                 id_fields = parent_id_fields
 
@@ -168,10 +171,12 @@ class SchemaParser(object):
 
                         for field, child_title in fields:
                             if self.use_titles:
-                                if not child_title:
+                                if not child_title or not title:
                                     warn('Field {} does not have a title, skipping.'.format(field))
                                 else:
-                                    sub_sheet.add_field(child_title)
+                                    # This code only works for arrays that are at 0 or 1 layer of nesting
+                                    assert len(parent_path.split('/')) <= 2
+                                    sub_sheet.add_field(title+':'+child_title)
                             else:
                                 sub_sheet.add_field(parent_path+property_name+'/'+field)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
