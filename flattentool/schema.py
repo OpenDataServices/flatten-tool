@@ -193,16 +193,16 @@ class SchemaParser(object):
                     else:
                         raise ValueError
                 elif 'string' in property_type_set:
-                    self.flattened[parent_path+property_name] = "string"
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "string"
                     yield property_name, title
                 elif 'number' in property_type_set:
-                    self.flattened[parent_path+property_name] = "number"
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "number"
                     yield property_name, title
                 elif 'integer' in property_type_set:
-                    self.flattened[parent_path+property_name] = "integer"
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "integer"
                     yield property_name, title
                 elif 'boolean' in property_type_set:
-                    self.flattened[parent_path+property_name] = "boolean"
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "boolean"
                     yield property_name, title
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}",'

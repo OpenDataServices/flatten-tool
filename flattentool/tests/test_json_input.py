@@ -263,7 +263,6 @@ class TestParseIDs(object):
 
 
 class TestParseUsingSchema(object):
-    @pytest.mark.xfail
     def test_sub_sheet_names(self, tmpdir):
         test_schema = tmpdir.join('test.json')
         test_schema.write('''{
@@ -298,8 +297,8 @@ class TestParseUsingSchema(object):
             {'a': 'b'}
         ]
         assert len(parser.sub_sheets) == 1
-        assert list(parser.sub_sheets['testB']) == list(['ocid', 'd', 'f'])
-        assert parser.sub_sheets['testB'].lines == [{'d':'e'}]
+        assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d', 'c/0/f'])
+        assert parser.sub_sheets['c'].lines == [{'c/0/d':'e'}]
 
     def test_column_matching(self, tmpdir): 
         test_schema = tmpdir.join('test.json')
@@ -328,7 +327,6 @@ class TestParseUsingSchema(object):
         ]
         assert len(parser.sub_sheets) == 0
 
-    @pytest.mark.xfail
     def test_rollup(self):
         schema_parser = SchemaParser(root_schema_dict={
             'properties': {
@@ -353,15 +351,14 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert list(parser.main_sheet) == [ 'testA[]/testB' ]
+        assert list(parser.main_sheet) == [ 'testA/0/testB' ]
         assert parser.main_sheet.lines == [
-            {'testA[]/testB': '1'}
+            {'testA/0/testB': '1'}
         ]
         assert len(parser.sub_sheets) == 1
-        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
-        assert parser.sub_sheets['testA'].lines == [{'testB':'1', 'testC': '2'}]
+        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testA/0/testB', 'testA/0/testC'])
+        assert parser.sub_sheets['testA'].lines == [{'testA/0/testB':'1', 'testA/0/testC': '2'}]
 
-    @pytest.mark.xfail
     def test_rollup_multiple_values(self, recwarn):
         schema_parser = SchemaParser(root_schema_dict={
             'properties': {
@@ -389,17 +386,17 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert list(parser.main_sheet) == [ 'testA[]/testB' ]
+        assert list(parser.main_sheet) == [ 'testA/0/testB' ]
         assert parser.main_sheet.lines == [
             {
-                'testA[]/testB': 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+                'testA/0/testB': 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
             }
         ]
         assert len(parser.sub_sheets) == 1
-        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
+        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testA/0/testB', 'testA/0/testC'])
         assert parser.sub_sheets['testA'].lines == [
-            {'testB':'1', 'testC': '2'},
-            {'testB':'3', 'testC': '4'}
+            {'testA/0/testB':'1', 'testA/0/testC': '2'},
+            {'testA/0/testB':'3', 'testA/0/testC': '4'}
             ]
         w = recwarn.pop(UserWarning)
         assert 'Could not provide rollup' in text_type(w.message)

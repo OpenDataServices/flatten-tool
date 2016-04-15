@@ -143,16 +143,16 @@ class JSONParser(object):
                     if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
                         if len(value) == 1:
                             for k, v in value[0].items():
-                                if parent_name+key+'[]/'+k in self.schema_parser.main_sheet:
+                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     if type(v) in BASIC_TYPES:
-                                        flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = v
+                                        flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     else:
                                         raise ValueError('Rolled up values must be basic types')
                         elif len(value) > 1:
                             for k in set(sum((list(x.keys()) for x in value), [])):
                                 warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
-                                if parent_name+key+'[]/'+k in self.schema_parser.main_sheet:
-                                    flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+                                    flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
                     sub_sheet_name = key
                     if sub_sheet_name not in self.sub_sheets:
