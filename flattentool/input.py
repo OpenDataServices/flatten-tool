@@ -75,11 +75,12 @@ def merge(base, mergee):
         if key in base:
             if isinstance(value, TemporaryDict):
                 for temporarydict_key, temporarydict_value in value.items():
-                    assert isinstance(base[key], TemporaryDict)
                     if temporarydict_key in base[key]:
                         merge(base[key][temporarydict_key], temporarydict_value)
                     else:
                         base[key][temporarydict_key] = temporarydict_value
+                for temporarydict_value in  value.items_no_keyfield:
+                    base[key].items_no_keyfield.append(temporarydict_value)
             elif isinstance(value, dict) and isinstance(base[key], dict):
                 merge(base[key], value)
             elif base[key] != mergee[key]:

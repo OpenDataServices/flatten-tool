@@ -22,6 +22,10 @@ class TestUnflatten(object):
                     {
                         'ocid': 1,
                         'id': 2,
+                    },
+                    {
+                        'ocid': 1,
+                        'id': 3,
                     }
                 ],
                 'sub': [
@@ -29,13 +33,29 @@ class TestUnflatten(object):
                         'ocid': 1,
                         'id': 2,
                         'subField/0/testA': 3,
+                    },
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                        'subField/0/testA': 4,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'id': 2, 'subField': [{'testA': 3}]}
+            {
+                'ocid': 1,
+                'id': 2,
+                'subField': [
+                    {'testA': 3},
+                    {'testA': 4},
+                ]
+            },
+            {
+                'ocid': 1,
+                'id': 3
+            }
         ]
 
     @pytest.mark.parametrize('nested_id_in_subsheet', [True, False])
@@ -82,6 +102,10 @@ class TestUnflatten(object):
                     OrderedDict([
                         ('ocid', 1),
                         ('id', 2),
+                    ]),
+                    OrderedDict([
+                        ('ocid', 1),
+                        ('id', 6),
                     ])
                 ],
                 'sub1': [
@@ -104,7 +128,7 @@ class TestUnflatten(object):
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
-        assert len(unflattened) == 1
+        assert len(unflattened) == 2
         assert set(unflattened[0]) == set(['ocid', 'id', 'sub1Field']) # FIXME should be ordered
         assert unflattened[0]['ocid'] == 1
         assert unflattened[0]['id'] == 2
@@ -119,6 +143,7 @@ class TestUnflatten(object):
                 ]
             }
         ]
+        assert unflattened[1] == {'ocid':1 , 'id':6}
 
     def test_nested_id(self):
         spreadsheet_input = ListInput(
@@ -190,16 +215,28 @@ class TestUnflattenRollup(object):
                     {
                         'ocid': 1,
                         'id': 2,
-                        'testA/0/id': 3,
-                        'testA/0/testB': 4
+                        'testC': 3,
+                        'testA/0/id': 4,
+                        'testA/0/testB': 5,
+                    },
+                    {
+                        'ocid': 6,
+                        'id': 7,
+                        'testC': 8,
+                        'testA/0/testB': 9,
                     }
                 ],
                 'testA': [
                     {
                         'ocid': 1,
                         'id': 2,
-                        'testA/0/id': 3,
-                        'testA/0/testB': 4,
+                        'testA/0/id': 4,
+                        'testA/0/testB': 5,
+                    },
+                    {
+                        'ocid': 6,
+                        'id': 7,
+                        'testA/0/testB': 9,
                     }
                 ]
             },
@@ -208,7 +245,8 @@ class TestUnflattenRollup(object):
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
+            {'ocid': 1, 'id': 2, 'testC':3, 'testA': [{'id': 4, 'testB': 5}]},
+            {'ocid': 6, 'id': 7, 'testC':8, 'testA': [{'testB': 9}, {'testB': 9}]}, # FIXME rollup with ID causes duplicates
         ]
         # We expect no warnings
         assert recwarn.list == []
