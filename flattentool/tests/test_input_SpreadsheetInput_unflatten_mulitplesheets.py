@@ -144,7 +144,7 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': {'id': 4}}]}
         ]
 
-    @pytest.mark.xfail()
+    @pytest.mark.xfail
     def test_missing_columns(self, recwarn):
         spreadsheet_input = ListInput(
             sheets={
@@ -158,14 +158,14 @@ class TestUnflatten(object):
                     {
                         'ocid': 1,
                         'id': '',
-                        'subField/id': 3,
-                        'subField/testA/id': 4,
+                        'subField/0/id': 3,
+                        'subField/0/testA/id': 4,
                     },
                     {
                         'ocid': 1,
                         'id': 2,
-                        'subField/id': 3,
-                        'subField/testA': 5,
+                        'subField/0/id': 3,
+                        'subField/0/testA': 5,
                     }
                 ]
             },

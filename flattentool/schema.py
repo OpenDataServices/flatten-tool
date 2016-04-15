@@ -148,7 +148,7 @@ class SchemaParser(object):
                             raise ValueError
                     elif 'object' in type_set:
                         if title:
-                            title_lookup[title].property_name = property_name+'/0'
+                            title_lookup[title].property_name = property_name
 
                         sub_sheet_name = ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
 

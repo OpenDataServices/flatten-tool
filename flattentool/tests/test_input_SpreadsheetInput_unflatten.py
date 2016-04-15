@@ -399,7 +399,7 @@ testdata_titles = [
             }]
         }]
     ),
-    pytest.mark.xfail((
+    (
         'Multi item array, allow numbering',
         [{
             'ROOT_ID_TITLE': 1,
@@ -428,7 +428,7 @@ testdata_titles = [
             }
             ]
         }]
-    )),
+    ),
     (
         'Empty',
         [{
