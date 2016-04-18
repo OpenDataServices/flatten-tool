@@ -323,7 +323,7 @@ class TestUnflattenRollup(object):
         ]
         # We should have a warning about the conflict
         w = recwarn.pop(UserWarning)
-        assert 'Conflict when merging testB in sheet testA: 4 != 5' in text_type(w.message)
+        assert 'Conflict when merging field "testB" for ocid "1", id "2" in sheet testA: "4" != "5"' in text_type(w.message)
 
 
 class TestUnflattenEmpty(object):

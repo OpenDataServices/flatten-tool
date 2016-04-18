@@ -86,8 +86,11 @@ def merge(base, mergee, debug_info=None):
             elif isinstance(value, dict) and isinstance(base[key], dict):
                 merge(base[key], value, debug_info)
             elif base[key] != value:
-                warn('Conflict when merging {} in sheet {}: {} != {}'.format(
-                    key, debug_info.get('sheet_name'), base[key], value))
+                id_info = 'id "{}"'.format(debug_info.get('id'))
+                if debug_info.get('root_id'):
+                    id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info 
+                warn('Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
+                    key, id_info, debug_info.get('sheet_name'), base[key], value))
         else:
             base[key] = value
 
@@ -165,7 +168,16 @@ class SpreadsheetInput(object):
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
                 if 'id' in unflattened and unflattened['id'] in main_sheet_by_ocid[root_id_or_none]:
-                    merge(main_sheet_by_ocid[root_id_or_none][unflattened.get('id')], unflattened, {'sheet_name':sheet_name})
+                    merge(
+                        main_sheet_by_ocid[root_id_or_none][unflattened.get('id')],
+                        unflattened,
+                        {
+                            'sheet_name': sheet_name,
+                            'root_id': self.root_id,
+                            'root_id_or_none': root_id_or_none,
+                            'id': unflattened.get('id')
+                        }
+                    )
                 else:
                     main_sheet_by_ocid[root_id_or_none].append(unflattened)
 
