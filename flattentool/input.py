@@ -265,7 +265,7 @@ def list_as_dicts_to_temporary_dicts(unflattened):
 def unflatten_main_with_parser(parser, line, timezone):
     unflattened = OrderedDict()
     for path, value in line.items():
-        if not value:
+        if value is None or value == '':
             continue
         current_path = unflattened
         path_list = [item.rstrip('[]') for item in path.split('/')]
@@ -314,7 +314,7 @@ def unflatten_main_with_parser(parser, line, timezone):
 
             ## Other Types
             converted_value = convert_type(current_type or '', value, timezone)
-            if converted_value:
+            if converted_value is not None and converted_value != '':
                 current_path[path_item] = converted_value
 
     unflattened = list_as_dicts_to_temporary_dicts(unflattened)
