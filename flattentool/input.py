@@ -152,17 +152,9 @@ class SpreadsheetInput(object):
 
     def unflatten(self):
         main_sheet_by_ocid = OrderedDict()
-        for line in self.get_main_sheet_lines():
-            if all(x == '' for x in line.values()):
-                continue
-            root_id_or_none = line[self.root_id] if self.root_id else None
-            if root_id_or_none not in main_sheet_by_ocid:
-                main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
-            main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
-
-        for sheet_name, lines in self.get_sub_sheets_lines():
-            for i, line in enumerate(lines):
-                lineno = i+1
+        # Eventually we should get rid of the concept of a "main sheet entirely"
+        for sheet_name, lines in [(self.main_sheet_name, self.get_main_sheet_lines())] + list(self.get_sub_sheets_lines()):
+            for line in lines:
                 if all(x == '' for x in line.values()):
                     continue
                 root_id_or_none = line[self.root_id] if self.root_id else None
