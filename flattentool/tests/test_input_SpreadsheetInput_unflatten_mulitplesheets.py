@@ -274,7 +274,12 @@ class TestUnflattenRollup(object):
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
             {'ocid': 1, 'id': 2, 'testC':3, 'testA': [{'id': 4, 'testB': 5}]},
-            {'ocid': 6, 'id': 7, 'testC':8, 'testA': [{'testB': 9}, {'testB': 9}]}, # FIXME rollup without ID causes duplicates
+            {'ocid': 6, 'id': 7, 'testC':8, 'testA': [
+                {'testB': 9}, {'testB': 9}
+                # We have duplicates here because there's no ID to merge these
+                # on. This is different to the old behaviour. Issue filed at
+                # https://github.com/OpenDataServices/flatten-tool/issues/99
+            ]},
         ]
         # We expect no warnings
         assert recwarn.list == []
@@ -304,7 +309,17 @@ class TestUnflattenRollup(object):
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]} # FIXME could be 4 or 5 in future?
+            {
+                'ocid': 1,
+                'id': 2,
+                'testA': [{
+                    'id': 3,
+                    'testB': 4
+                    # We currently know that testB will be 4 because the main
+                    # sheet is currently always parsed first, but this may change:
+                    # https://github.com/OpenDataServices/flatten-tool/issues/96
+                }]
+            }
         ]
         # We should have a warning about the conflict
         w = recwarn.pop(UserWarning)
