@@ -161,16 +161,18 @@ class SpreadsheetInput(object):
             main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
 
         for sheet_name, lines in self.get_sub_sheets_lines():
-            for line in lines:
+            for i, line in enumerate(lines):
+                lineno = i+1
                 if all(x == '' for x in line.values()):
                     continue
                 root_id_or_none = line[self.root_id] if self.root_id else None
                 unflattened = unflatten_main_with_parser(self.parser, line, self.timezone)
-                try:
+                if root_id_or_none not in main_sheet_by_ocid:
+                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
+                if 'id' in unflattened and unflattened['id'] in main_sheet_by_ocid[root_id_or_none]:
                     merge(main_sheet_by_ocid[root_id_or_none][unflattened.get('id')], unflattened)
-                except KeyError:
-                    pass
-                    # FIXME add an appropriate warning here
+                else:
+                    main_sheet_by_ocid[root_id_or_none].append(unflattened)
 
         temporarydicts_to_lists(main_sheet_by_ocid)
 

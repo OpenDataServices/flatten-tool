@@ -169,7 +169,6 @@ class TestUnflatten(object):
             {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': {'id': 4}}]}
         ]
 
-    @pytest.mark.xfail
     def test_missing_columns(self, recwarn):
         spreadsheet_input = ListInput(
             sheets={
@@ -184,7 +183,7 @@ class TestUnflatten(object):
                         'ocid': 1,
                         'id': '',
                         'subField/0/id': 3,
-                        'subField/0/testA/id': 4,
+                        'subField/0/testA': 4,
                     },
                     {
                         'ocid': 1,
@@ -197,13 +196,42 @@ class TestUnflatten(object):
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
-        # We should have a warning about conflicting ID fields
-        w = recwarn.pop(UserWarning)
-        assert 'no parent id fields populated' in text_type(w.message)
-        assert 'Line 2 of sheet sub' in text_type(w.message)
         # Check that following lines are parsed correctly
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]}
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]},
+            {'ocid': 1, 'subField': [{'id': 3, 'testA': 4}]},
+        ]
+
+    def test_unmatched_id(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'ocid': 1,
+                        'id': 100,
+                        'subField/0/id': 3,
+                        'subField/0/testA': 4,
+                    },
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                        'subField/0/id': 3,
+                        'subField/0/testA': 5,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert unflattened == [
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]},
+            {'ocid': 1, 'id': 100, 'subField': [{'id': 3, 'testA': 4}]},
         ]
 
 
