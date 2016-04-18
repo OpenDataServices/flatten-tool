@@ -129,7 +129,7 @@ class TestUnflatten(object):
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 2
-        assert set(unflattened[0]) == set(['ocid', 'id', 'sub1Field']) # FIXME should be ordered
+        assert list(unflattened[0]) == ['ocid', 'id', 'sub1Field']
         assert unflattened[0]['ocid'] == 1
         assert unflattened[0]['id'] == 2
         assert unflattened[0]['sub1Field'] == [
@@ -274,7 +274,7 @@ class TestUnflattenRollup(object):
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
             {'ocid': 1, 'id': 2, 'testC':3, 'testA': [{'id': 4, 'testB': 5}]},
-            {'ocid': 6, 'id': 7, 'testC':8, 'testA': [{'testB': 9}, {'testB': 9}]}, # FIXME rollup with ID causes duplicates
+            {'ocid': 6, 'id': 7, 'testC':8, 'testA': [{'testB': 9}, {'testB': 9}]}, # FIXME rollup without ID causes duplicates
         ]
         # We expect no warnings
         assert recwarn.list == []
@@ -413,7 +413,7 @@ class TestUnflattenCustomRootID(object):
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 1
-        assert set(unflattened[0]) == set(['custom', 'id', 'sub1Field']) # FIXME should be ordered
+        assert list(unflattened[0]) == ['custom', 'id', 'sub1Field']
         assert unflattened[0]['custom'] == 1
         assert unflattened[0]['id'] == 2
         assert unflattened[0]['sub1Field'] == [
