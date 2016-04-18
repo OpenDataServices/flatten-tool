@@ -70,21 +70,24 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
 
-def merge(base, mergee):
+def merge(base, mergee, debug_info=None):
+    if not debug_info:
+        debug_info = {}
     for key, value in mergee.items():
         if key in base:
             if isinstance(value, TemporaryDict):
                 for temporarydict_key, temporarydict_value in value.items():
                     if temporarydict_key in base[key]:
-                        merge(base[key][temporarydict_key], temporarydict_value)
+                        merge(base[key][temporarydict_key], temporarydict_value, debug_info)
                     else:
                         base[key][temporarydict_key] = temporarydict_value
                 for temporarydict_value in  value.items_no_keyfield:
                     base[key].items_no_keyfield.append(temporarydict_value)
             elif isinstance(value, dict) and isinstance(base[key], dict):
-                merge(base[key], value)
-            elif base[key] != mergee[key]:
-                warn('Conflict between main sheet and sub sheet') # FIXME make this more useful (we used to say which subsheet broke...)
+                merge(base[key], value, debug_info)
+            elif base[key] != value:
+                warn('Conflict when merging {} in sheet {}: {} != {}'.format(
+                    key, debug_info.get('sheet_name'), base[key], value))
         else:
             base[key] = value
 
@@ -162,7 +165,7 @@ class SpreadsheetInput(object):
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
                 if 'id' in unflattened and unflattened['id'] in main_sheet_by_ocid[root_id_or_none]:
-                    merge(main_sheet_by_ocid[root_id_or_none][unflattened.get('id')], unflattened)
+                    merge(main_sheet_by_ocid[root_id_or_none][unflattened.get('id')], unflattened, {'sheet_name':sheet_name})
                 else:
                     main_sheet_by_ocid[root_id_or_none].append(unflattened)
 

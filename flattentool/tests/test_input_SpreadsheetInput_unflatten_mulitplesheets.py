@@ -323,7 +323,7 @@ class TestUnflattenRollup(object):
         ]
         # We should have a warning about the conflict
         w = recwarn.pop(UserWarning)
-        assert 'Conflict between main sheet and sub sheet' in text_type(w.message)
+        assert 'Conflict when merging testB in sheet testA: 4 != 5' in text_type(w.message)
 
 
 class TestUnflattenEmpty(object):
