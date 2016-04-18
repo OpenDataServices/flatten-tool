@@ -21,10 +21,6 @@ class TitleLookup(UserDict):
     property_name = None
 
     def lookup_header(self, title_header):
-        # Ignore titles with a / in, as they may contain types
-        # https://github.com/OpenDataServices/flatten-tool/issues/56
-        if '/' in title_header:
-            return title_header
         return self.lookup_header_list(title_header.split(':'))
 
     def lookup_header_list(self, title_header_list):
@@ -93,7 +89,7 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
-        fields = self.parse_schema_dict(self.main_sheet_name, '', self.root_schema_dict)
+        fields = self.parse_schema_dict('', self.root_schema_dict)
         for field, title in fields:
             if self.use_titles:
                 if not title:
@@ -101,16 +97,19 @@ class SchemaParser(object):
                 else:
                     self.main_sheet.append(title)
             else:
-                self.main_sheet.append(field.split(":")[0])
+                self.main_sheet.append(field)
 
-    def parse_schema_dict(self, parent_name, parent_path, schema_dict, parent_id_fields=None, title_lookup=None):
+    def parse_schema_dict(self, parent_path, schema_dict, parent_id_fields=None, title_lookup=None):
         if parent_path:
             parent_path = parent_path + '/'
         parent_id_fields = parent_id_fields or []
         title_lookup = self.title_lookup if title_lookup is None else title_lookup
         if 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
-                id_fields = parent_id_fields + [parent_name+'/id']
+                if self.use_titles:
+                    id_fields = parent_id_fields + [parent_path+(schema_dict['properties']['id'].get('title') or 'id')]
+                else:
+                    id_fields = parent_id_fields + [parent_path+'id']
             else:
                 id_fields = parent_id_fields
 
@@ -125,7 +124,6 @@ class SchemaParser(object):
                 if 'object' in property_type_set:
                     self.flattened[parent_path+property_name] = "object"
                     for field, child_title in self.parse_schema_dict(
-                            parent_name+'/'+property_name,
                             parent_path+property_name,
                             property_schema_dict,
                             parent_id_fields=id_fields,
@@ -141,22 +139,20 @@ class SchemaParser(object):
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         self.flattened[parent_path+property_name] = "string_array"
-                        yield property_name+':array', title
+                        yield property_name, title
                     elif 'array' in type_set:
                         self.flattened[parent_path+property_name] = "array_array"
                         if 'string' in get_property_type_set(property_schema_dict['items']['items']):
-                            yield property_name+':array', title
+                            yield property_name, title
                         else:
                             raise ValueError
                     elif 'object' in type_set:
                         if title:
-                            title_lookup[title].property_name = property_name+'[]'
-                        if hasattr(property_schema_dict['items'], '__reference__'):
-                            sub_sheet_name = property_schema_dict['items'].__reference__['$ref'].split('/')[-1]
-                        else:
-                            sub_sheet_name = property_name
+                            title_lookup[title].property_name = property_name
 
-                        self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
+                        sub_sheet_name = ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
+
+                        #self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
                             self.sub_sheets[sub_sheet_name] = Sheet(root_id=self.root_id, name=sub_sheet_name)
@@ -164,9 +160,9 @@ class SchemaParser(object):
                         sub_sheet.title_lookup = title_lookup.get(title)
 
                         for field in id_fields:
-                            sub_sheet.add_field(field+':'+property_name, id_field=True)
-                        fields = self.parse_schema_dict(parent_name+'/'+property_name+'[]',
-                                parent_path+property_name,
+                            sub_sheet.add_field(field, id_field=True)
+                        fields = self.parse_schema_dict(
+                                parent_path+property_name+'/0',
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
                                 title_lookup=title_lookup.get(title))
@@ -177,13 +173,17 @@ class SchemaParser(object):
                             if self.use_titles:
                                 if not child_title:
                                     warn('Field {} does not have a title, skipping.'.format(field))
+                                elif not title:
+                                    warn('Field {} does not have a title, skipping it and all its children.'.format(property_name))
                                 else:
-                                    sub_sheet.add_field(child_title)
+                                    # This code only works for arrays that are at 0 or 1 layer of nesting
+                                    assert len(parent_path.replace('/0/', '/').split('/')) <= 2
+                                    sub_sheet.add_field(title+':'+child_title)
                             else:
-                                sub_sheet.add_field(field)
+                                sub_sheet.add_field(parent_path+property_name+'/0/'+field)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
                                 rolledUp.add(field)
-                                yield property_name+'[]/'+field, (title+':'+child_title if title and child_title else None)
+                                yield property_name+'/0/'+field, (title+':'+child_title if title and child_title else None)
 
                         # Check that all items in rollUp are in the schema
                         if self.rollup and 'rollUp' in property_schema_dict:
@@ -193,22 +193,22 @@ class SchemaParser(object):
                     else:
                         raise ValueError
                 elif 'string' in property_type_set:
-                    self.flattened[parent_path+property_name] = "string"
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "string"
                     yield property_name, title
                 elif 'number' in property_type_set:
-                    self.flattened[parent_path+property_name] = "number"
-                    yield property_name+':number', title
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "number"
+                    yield property_name, title
                 elif 'integer' in property_type_set:
-                    self.flattened[parent_path+property_name] = "integer"
-                    yield property_name+':integer', title
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "integer"
+                    yield property_name, title
                 elif 'boolean' in property_type_set:
-                    self.flattened[parent_path+property_name] = "boolean"
-                    yield property_name+':boolean', title
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "boolean"
+                    yield property_name, title
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}",'
                          'so this property has been ignored.'.format(
                              repr(property_type_set),
                              property_name,
-                             parent_name))
+                             parent_path))
         else:
-            warn('Skipping field "{}", because it has no properties.'.format(parent_name))
+            warn('Skipping field "{}", because it has no properties.'.format(parent_path))

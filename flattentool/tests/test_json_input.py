@@ -158,19 +158,19 @@ class TestParseIDs(object):
                 'f/g': 'h'
             }
         ]
-        listify(parser.sub_sheets) == {'c': ['ocid','main/id','id','d']}
+        listify(parser.sub_sheets) == {'c': ['ocid','id','c/0/id','c/0/d']}
         assert parser.sub_sheets['c'].lines == [
             {
                 'ocid': 1,
-                'main/id': 2,
-                'id': 3,
-                'd':'e'
+                'id': 2,
+                'c/0/id': 3,
+                'c/0/d':'e'
             },
             {
                 'ocid': 1,
-                'main/id': 2,
-                'id': 3,
-                'd':'e2'
+                'id': 2,
+                'c/0/id': 3,
+                'c/0/d':'e2'
             },
         ]
 
@@ -196,30 +196,30 @@ class TestParseIDs(object):
             }
         ]
         assert listify(parser.sub_sheets) == {
-                'testnest': ['ocid', 'main/id', 'id', 'a', 'f/g'],
-                'c': ['ocid', 'main/id', 'main/testnest[]/id', 'd']
+                'testnest': ['ocid', 'id', 'testnest/0/id', 'testnest/0/a', 'testnest/0/f/g'],
+                'c': ['ocid', 'id', 'testnest/0/id', 'testnest/0/c/0/d']
             }
         assert parser.sub_sheets['testnest'].lines == [
                 {
                     'ocid': 1,
-                    'main/id': 2,
-                    'id': 3,
-                    'a': 'b',
-                    'f/g': 'h',
+                    'id': 2,
+                    'testnest/0/id': 3,
+                    'testnest/0/a': 'b',
+                    'testnest/0/f/g': 'h',
                 },
             ]
         assert parser.sub_sheets['c'].lines == [
             {
                 'ocid': 1,
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e'
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/c/0/d':'e'
             },
             {
                 'ocid': 1,
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e2'
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/c/0/d':'e2'
             },
         ]
 
@@ -245,19 +245,19 @@ class TestParseIDs(object):
                 'f/g': 'h'
             }
         ]
-        assert listify(parser.sub_sheets) == {'c': ['ocid','main/id','main/testnest/id','d']}
+        assert listify(parser.sub_sheets) == {'c': ['ocid','id','testnest/id','testnest/c/0/d']}
         assert parser.sub_sheets['c'].lines == [
             {
                 'ocid': 1,
-                'main/id': 2,
-                'main/testnest/id': 3,
-                'd':'e'
+                'id': 2,
+                'testnest/id': 3,
+                'testnest/c/0/d':'e'
             },
             {
                 'ocid': 1,
-                'main/id': 2,
-                'main/testnest/id': 3,
-                'd':'e2'
+                'id': 2,
+                'testnest/id': 3,
+                'testnest/c/0/d':'e2'
             },
         ]
 
@@ -297,8 +297,8 @@ class TestParseUsingSchema(object):
             {'a': 'b'}
         ]
         assert len(parser.sub_sheets) == 1
-        assert list(parser.sub_sheets['testB']) == list(['ocid', 'd', 'f'])
-        assert parser.sub_sheets['testB'].lines == [{'d':'e'}]
+        assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d', 'c/0/f'])
+        assert parser.sub_sheets['c'].lines == [{'c/0/d':'e'}]
 
     def test_column_matching(self, tmpdir): 
         test_schema = tmpdir.join('test.json')
@@ -351,13 +351,13 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert list(parser.main_sheet) == [ 'testA[]/testB' ]
+        assert list(parser.main_sheet) == [ 'testA/0/testB' ]
         assert parser.main_sheet.lines == [
-            {'testA[]/testB': '1'}
+            {'testA/0/testB': '1'}
         ]
         assert len(parser.sub_sheets) == 1
-        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
-        assert parser.sub_sheets['testA'].lines == [{'testB':'1', 'testC': '2'}]
+        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testA/0/testB', 'testA/0/testC'])
+        assert parser.sub_sheets['testA'].lines == [{'testA/0/testB':'1', 'testA/0/testC': '2'}]
 
     def test_rollup_multiple_values(self, recwarn):
         schema_parser = SchemaParser(root_schema_dict={
@@ -386,17 +386,17 @@ class TestParseUsingSchema(object):
             schema_parser=schema_parser
         )
         parser.parse()
-        assert list(parser.main_sheet) == [ 'testA[]/testB' ]
+        assert list(parser.main_sheet) == [ 'testA/0/testB' ]
         assert parser.main_sheet.lines == [
             {
-                'testA[]/testB': 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+                'testA/0/testB': 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
             }
         ]
         assert len(parser.sub_sheets) == 1
-        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testB', 'testC'])
+        assert set(parser.sub_sheets['testA']) == set(['ocid', 'testA/0/testB', 'testA/0/testC'])
         assert parser.sub_sheets['testA'].lines == [
-            {'testB':'1', 'testC': '2'},
-            {'testB':'3', 'testC': '4'}
+            {'testA/0/testB':'1', 'testA/0/testC': '2'},
+            {'testA/0/testB':'3', 'testA/0/testC': '4'}
             ]
         w = recwarn.pop(UserWarning)
         assert 'Could not provide rollup' in text_type(w.message)
@@ -422,19 +422,19 @@ class TestParseIDsCustomRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert listify(parser.sub_sheets) == {'c': ['custom','main/id','id','d']}
+        assert listify(parser.sub_sheets) == {'c': ['custom','id','c/0/id','c/0/d']}
         assert parser.sub_sheets['c'].lines == [
             {
                 'custom': 1,
-                'main/id': 2,
-                'id': 3,
-                'd':'e'
+                'id': 2,
+                'c/0/id': 3,
+                'c/0/d':'e'
             },
             {
                 'custom': 1,
-                'main/id': 2,
-                'id': 3,
-                'd':'e2'
+                'id': 2,
+                'c/0/id': 3,
+                'c/0/d':'e2'
             },
         ]
 
@@ -460,30 +460,30 @@ class TestParseIDsCustomRootID(object):
             }
         ]
         assert listify(parser.sub_sheets) == {
-                'testnest': ['custom', 'main/id', 'id', 'a', 'f/g'],
-                'c': ['custom', 'main/id', 'main/testnest[]/id', 'd']
+                'testnest': ['custom', 'id', 'testnest/0/id', 'testnest/0/a', 'testnest/0/f/g'],
+                'c': ['custom', 'id', 'testnest/0/id', 'testnest/0/c/0/d']
             }
         assert parser.sub_sheets['testnest'].lines == [
             {
                 'custom': 1,
-                'main/id': 2,
-                'id': 3,
-                'a': 'b',
-                'f/g': 'h',
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/a': 'b',
+                'testnest/0/f/g': 'h',
             },
         ]
         assert parser.sub_sheets['c'].lines == [
             {
                 'custom': 1,
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e'
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/c/0/d':'e'
             },
             {
                 'custom': 1,
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e2'
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/c/0/d':'e2'
             },
         ]
 
@@ -509,19 +509,19 @@ class TestParseIDsCustomRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert listify(parser.sub_sheets) == {'c': ['custom','main/id','main/testnest/id','d']}
+        assert listify(parser.sub_sheets) == {'c': ['custom','id','testnest/id','testnest/c/0/d']}
         assert parser.sub_sheets['c'].lines == [
             {
                 'custom': 1,
-                'main/id': 2,
-                'main/testnest/id': 3,
-                'd':'e'
+                'id': 2,
+                'testnest/id': 3,
+                'testnest/c/0/d':'e'
             },
             {
                 'custom': 1,
-                'main/id': 2,
-                'main/testnest/id': 3,
-                'd':'e2'
+                'id': 2,
+                'testnest/id': 3,
+                'testnest/c/0/d':'e2'
             },
         ]
 
@@ -543,17 +543,17 @@ class TestParseIDsNoRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert listify(parser.sub_sheets) == {'c': ['main/id','id','d']}
+        assert listify(parser.sub_sheets) == {'c': ['id','c/0/id','c/0/d']}
         assert parser.sub_sheets['c'].lines == [
             {
-                'main/id': 2,
-                'id': 3,
-                'd':'e'
+                'id': 2,
+                'c/0/id': 3,
+                'c/0/d':'e'
             },
             {
-                'main/id': 2,
-                'id': 3,
-                'd':'e2'
+                'id': 2,
+                'c/0/id': 3,
+                'c/0/d':'e2'
             },
         ]
 
@@ -577,27 +577,27 @@ class TestParseIDsNoRootID(object):
             }
         ]
         assert listify(parser.sub_sheets) == {
-                'testnest': ['main/id', 'id', 'a', 'f/g'],
-                'c': ['main/id', 'main/testnest[]/id', 'd']
+                'testnest': ['id', 'testnest/0/id', 'testnest/0/a', 'testnest/0/f/g'],
+                'c': ['id', 'testnest/0/id', 'testnest/0/c/0/d']
             }
         assert parser.sub_sheets['testnest'].lines ==  [
             {
-                'main/id': 2,
-                'id': 3,
-                'a': 'b',
-                'f/g': 'h',
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/a': 'b',
+                'testnest/0/f/g': 'h',
             },
         ]
         assert parser.sub_sheets['c'].lines == [
             {
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e'
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/c/0/d':'e'
             },
             {
-                'main/id': 2,
-                'main/testnest[]/id': 3,
-                'd':'e2'
+                'id': 2,
+                'testnest/0/id': 3,
+                'testnest/0/c/0/d':'e2'
             },
         ]
 
@@ -621,16 +621,16 @@ class TestParseIDsNoRootID(object):
                 'f/g': 'h'
             }
         ]
-        assert listify(parser.sub_sheets) == {'c': ['main/id','main/testnest/id','d']}
+        assert listify(parser.sub_sheets) == {'c': ['id','testnest/id','testnest/c/0/d']}
         assert parser.sub_sheets['c'].lines == [
             {
-                'main/id': 2,
-                'main/testnest/id': 3,
-                'd':'e'
+                'id': 2,
+                'testnest/id': 3,
+                'testnest/c/0/d':'e'
             },
             {
-                'main/id': 2,
-                'main/testnest/id': 3,
-                'd':'e2'
+                'id': 2,
+                'testnest/id': 3,
+                'testnest/c/0/d':'e2'
             },
         ]

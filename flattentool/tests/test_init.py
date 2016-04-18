@@ -4,6 +4,7 @@ from flattentool import decimal_default, unflatten
 from decimal import Decimal
 import json
 import sys
+import pytest
 
 
 def test_decimal_default():
@@ -22,8 +23,6 @@ def test_unflatten(tmpdir):
 
     Notable things we are checking for:
         Ordering is preseved - both the order of columns and rows
-        On an id column haeder, the information following a colon is the key for the array.
-        If this is not provided, the sheet name is used.
     """
     input_dir = tmpdir.ensure('release_input', dir=True)
     input_dir.join('main.csv').write(
@@ -34,15 +33,18 @@ def test_unflatten(tmpdir):
         '6,7a,8a,9a,10a\n'
     )
     input_dir.join('subsheet.csv').write(
-        'ocid,main/id:sub,main/test/id,id,testD,test2/E,test2/F\n'
-        '1,2,,S1,11,12,13\n'
-        '1,2a,,S1,14,15,16\n'
-        '1,2,,S2,17,18,19\n'
-        '6,7,,S1,20,21,22\n'
+        'ocid,id,sub/0/id,sub/0/testD,sub/0/test2/E,sub/0/test2/F\n'
+        '1,2,S1,11,12,13\n'
+        '1,2a,S1,14,15,16\n'
+        '1,2,S2,17,18,19\n'
+        '6,7,S1,20,21,22\n'
+    )
+    input_dir.join('subsheet_test.csv').write(
+        'ocid,id,test/id,test/subsheet/0/id,test/subsheet/0/testD,test/subsheet/0/test2/E,test/subsheet/0/test2/F\n'
         '1,2,4,S3,24,25,26\n'
     )
     input_dir.join('subsubsheet.csv').write(
-        'ocid,main/id,main/sub[]/id:subsub,testG\n'
+        'ocid,id,sub/0/id,sub/0/subsub/0/testG\n'
         '1,2,S1,23\n'
     )
     unflatten(

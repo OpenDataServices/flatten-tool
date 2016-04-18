@@ -24,32 +24,9 @@ class BadlyFormedJSONError(ValueError):
 
 
 def sheet_key_field(sheet, key, id_key=None):
-    """
-    Check for a key in the sheet, and return it with any suffix (following a ':') that might be present).
-    
-    If a key does not exist, it will be created.
-
-    """
-    if id_key:
-        if key in sheet: # If the key exists without a suffix, use that
-            return key
-        elif sheet.name == id_key: # also use without a suffix if the suffix matches the sheet name
-            sheet.append(key)
-            return key
-        else: # else use it with the :id_key suffix
-            if not key+':'+id_key in sheet:
-                sheet.append(key+':'+id_key)
-            return key+':'+id_key
-    else:
-        keys = [x for x in sheet if x.split(':')[0] == key]
-        if not keys:
-            sheet.append(key)
-            return key
-        elif len(keys) > 1:
-            # This shouldn't ever happen, as the schema parser shouldn't output sheets like this...
-            raise ValueError('Sheet contains two conflicting keys')
-        else:
-            return keys[0]
+    if key not in sheet:
+        sheet.append(key)
+    return key
 
 def sheet_key_title(sheet, key, id_key=None):
     """
@@ -78,14 +55,12 @@ class JSONParser(object):
         self.root_id = root_id
         self.use_titles = use_titles
         if schema_parser:
-            self.sub_sheet_mapping = {'/'.join(k.split('/')[1:]): v for k,v in schema_parser.sub_sheet_mapping.items()}
             self.main_sheet = schema_parser.main_sheet
             self.sub_sheets = schema_parser.sub_sheets
             # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified
             self.rollup = schema_parser.rollup
             self.schema_parser = schema_parser
         else:
-            self.sub_sheet_mapping = {}
             self.rollup = False
 
         if json_filename is None and root_json_dict is None:
@@ -111,7 +86,7 @@ class JSONParser(object):
         for json_dict in root_json_list:
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
     
-    def parse_json_dict(self, json_dict, sheet, json_key=None, id_extra_parent_name='', parent_name='', flattened_dict=None, parent_id_fields=None):
+    def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
         """
         Parse a json dictionary.
 
@@ -134,7 +109,7 @@ class JSONParser(object):
         else:
             top = False
 
-        if parent_name == '':
+        if top_level_of_sub_sheet:
             # Only add the IDs for the top level of object in an array
             for k, v in parent_id_fields.items():
                 flattened_dict[sheet_key(sheet, k, id_key=json_key)] = v
@@ -143,7 +118,7 @@ class JSONParser(object):
             parent_id_fields[self.root_id] = json_dict[self.root_id]
 
         if 'id' in json_dict:
-            parent_id_fields[self.main_sheet_name+'/'+id_extra_parent_name+parent_name+'id'] = json_dict['id']
+            parent_id_fields[parent_name+'id'] = json_dict['id']
 
 
         for key, value in json_dict.items():
@@ -168,18 +143,18 @@ class JSONParser(object):
                     if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
                         if len(value) == 1:
                             for k, v in value[0].items():
-                                if parent_name+key+'[]/'+k in self.schema_parser.main_sheet:
+                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     if type(v) in BASIC_TYPES:
-                                        flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = v
+                                        flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     else:
                                         raise ValueError('Rolled up values must be basic types')
                         elif len(value) > 1:
                             for k in set(sum((list(x.keys()) for x in value), [])):
                                 warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
-                                if parent_name+key+'[]/'+k in self.schema_parser.main_sheet:
-                                    flattened_dict[sheet_key(sheet, parent_name+key+'[]/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+                                    flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
-                    sub_sheet_name = self.sub_sheet_mapping[key] if key in self.sub_sheet_mapping else key
+                    sub_sheet_name = key
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
 
@@ -190,7 +165,8 @@ class JSONParser(object):
                             sheet=self.sub_sheets[sub_sheet_name],
                             json_key=key,
                             parent_id_fields=parent_id_fields,
-                            id_extra_parent_name=parent_name+key+'[]/')
+                            parent_name=parent_name+key+'/0/',
+                            top_level_of_sub_sheet=True)
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
         

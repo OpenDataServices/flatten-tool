@@ -69,6 +69,31 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
+
+def merge(base, mergee, debug_info=None):
+    if not debug_info:
+        debug_info = {}
+    for key, value in mergee.items():
+        if key in base:
+            if isinstance(value, TemporaryDict):
+                for temporarydict_key, temporarydict_value in value.items():
+                    if temporarydict_key in base[key]:
+                        merge(base[key][temporarydict_key], temporarydict_value, debug_info)
+                    else:
+                        base[key][temporarydict_key] = temporarydict_value
+                for temporarydict_value in  value.items_no_keyfield:
+                    base[key].items_no_keyfield.append(temporarydict_value)
+            elif isinstance(value, dict) and isinstance(base[key], dict):
+                merge(base[key], value, debug_info)
+            elif base[key] != value:
+                id_info = 'id "{}"'.format(debug_info.get('id'))
+                if debug_info.get('root_id'):
+                    id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info 
+                warn('Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
+                    key, id_info, debug_info.get('sheet_name'), base[key], value))
+        else:
+            base[key] = value
+
 class SpreadsheetInput(object):
     """
     Base class describing a spreadsheet input. Has stubs which are
@@ -133,76 +158,28 @@ class SpreadsheetInput(object):
 
     def unflatten(self):
         main_sheet_by_ocid = OrderedDict()
-        for line in self.get_main_sheet_lines():
-            if all(x == '' for x in line.values()):
-                continue
-            root_id_or_none = line[self.root_id] if self.root_id else None
-            if root_id_or_none not in main_sheet_by_ocid:
-                main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
-            if not self.parser:
-                main_sheet_by_ocid[root_id_or_none].append(unflatten_line(self.convert_types(line)))
-            else:
-                main_sheet_by_ocid[root_id_or_none].append(unflatten_main_with_parser(self.parser, line, self.timezone))
-
-        for sheet_name, lines in self.get_sub_sheets_lines():
-            for i, line in enumerate(lines):
-                line_number = i+2
-                try:
-                    if all(x == '' for x in line.values()):
-                        continue
-                    id_fields = {k: v for k, v in line.items() if
-                                 k.split(':')[0].endswith('/id') and
-                                 k.startswith(self.main_sheet_name)}
-                    line_without_id_fields = OrderedDict(
-                        (k, v) for k, v in line.items()
-                        if k not in id_fields and (not k or k != self.root_id))
-                    raw_id_fields_with_values = {k.split(':')[0]: v for k, v in id_fields.items() if v}
-                    if not raw_id_fields_with_values:
-                        warn('Line {} of sheet {} has no parent id fields populated,'
-                             'skipping.'.format(line_number, sheet_name))
-                        continue
-                    sheet_context_names = {k.split(':')[0]: k.split(':')[1] if len(k.split(':')) > 1 else None
-                                           for k, v in id_fields.items() if v}
-
-                    try:
-                        id_field = find_deepest_id_field(raw_id_fields_with_values)
-                    except ConflictingIDFieldsError:
-                        warn('Multiple conflicting ID fields have been filled in on line {} of sheet {},'
-                             'skipping that line.'.format(line_number, sheet_name))
-                        continue
-
-                    try:
-                        context = path_search(
-                            {self.main_sheet_name: main_sheet_by_ocid[line[self.root_id] if self.root_id else None]},
-                            id_field.split('/')[:-1],
-                            id_fields=raw_id_fields_with_values,
-                            top=True
-                        )
-                    except IDFieldMissing as e:
-                        warn('The parent id field "{}" was expected, but not present on line {} of sheet {}.'.format(
-                            e.args[0], line_number, sheet_name))
-                        continue
-
-                    sheet_context_name = sheet_context_names[id_field] or sheet_name
-                    # Added the following line to support the usecase in test_nested_sub_sheet
-                    context = path_search(context, sheet_context_name.split('/')[:-1])
-                    unflattened = unflatten_line(self.convert_types(line_without_id_fields))
-                    sheet_context_base_name = sheet_context_name.split('/')[-1]
-                    if sheet_context_base_name not in context:
-                        context[sheet_context_base_name] = TemporaryDict(keyfield='id')
-                    elif context[sheet_context_base_name].top_sheet:
-                        # Overwirte any rolled up data from the main sheet
-                        print(context[sheet_context_base_name].data, unflattened)
-                        if context[sheet_context_base_name].data.get(None) != unflattened:
-                            warn('Conflict between main sheet and sub sheet {}, using values from sub sheet'.format(sheet_context_base_name))
-                        context[sheet_context_base_name] = TemporaryDict(keyfield='id')
-                    context[sheet_context_base_name].append(unflattened)
-                except Exception as e:  # pylint: disable=W0703
-                    # Deliberately catch all exceptions for a line, so that
-                    # all lines without exceptions will still be processed.
-                    print('An error occured whilst parsing line {} of sheet {}"'.format(line_number, sheet_name))
-                    traceback.print_exc()
-                    sys.exit()
+        # Eventually we should get rid of the concept of a "main sheet entirely"
+        for sheet_name, lines in [(self.main_sheet_name, self.get_main_sheet_lines())] + list(self.get_sub_sheets_lines()):
+            for line in lines:
+                if all(x == '' for x in line.values()):
+                    continue
+                root_id_or_none = line[self.root_id] if self.root_id else None
+                unflattened = unflatten_main_with_parser(self.parser, line, self.timezone)
+                if root_id_or_none not in main_sheet_by_ocid:
+                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
+                if 'id' in unflattened and unflattened['id'] in main_sheet_by_ocid[root_id_or_none]:
+                    merge(
+                        main_sheet_by_ocid[root_id_or_none][unflattened.get('id')],
+                        unflattened,
+                        {
+                            'sheet_name': sheet_name,
+                            'root_id': self.root_id,
+                            'root_id_or_none': root_id_or_none,
+                            'id': unflattened.get('id')
+                        }
+                    )
+                else:
+                    main_sheet_by_ocid[root_id_or_none].append(unflattened)
 
         temporarydicts_to_lists(main_sheet_by_ocid)
 
@@ -301,7 +278,7 @@ def list_as_dicts_to_temporary_dicts(unflattened):
 
 
 def unflatten_main_with_parser(parser, line, timezone):
-    unflattened = {}
+    unflattened = OrderedDict()
     for path, value in line.items():
         if value is None or value == '':
             continue
@@ -311,7 +288,10 @@ def unflatten_main_with_parser(parser, line, timezone):
             if isint(path_item):
                 continue
             path_till_now = '/'.join([item for item in path_list[:num+1] if not isint(item)])
-            current_type = parser.flattened.get(path_till_now)
+            if parser:
+                current_type = parser.flattened.get(path_till_now)
+            else:
+                current_type = None
             try:
                 next_path_item = path_list[num+1]
             except IndexError:
@@ -331,7 +311,7 @@ def unflatten_main_with_parser(parser, line, timezone):
                     current_path[path_item] = list_as_dict
                 new_path = list_as_dict.get(list_index)
                 if new_path is None:
-                    new_path = {}
+                    new_path = OrderedDict()
                     list_as_dict[list_index] = new_path
                 current_path = new_path
                 continue
@@ -340,7 +320,7 @@ def unflatten_main_with_parser(parser, line, timezone):
             if current_type == 'object' or (not current_type and next_path_item):
                 new_path = current_path.get(path_item)
                 if new_path is None:
-                    new_path = {}
+                    new_path = OrderedDict()
                     current_path[path_item] = new_path
                 current_path = new_path
                 continue

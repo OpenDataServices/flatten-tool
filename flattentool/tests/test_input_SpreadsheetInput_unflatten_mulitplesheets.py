@@ -22,43 +22,77 @@ class TestUnflatten(object):
                     {
                         'ocid': 1,
                         'id': 2,
+                    },
+                    {
+                        'ocid': 1,
+                        'id': 3,
                     }
                 ],
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main/id:subField': 2,
-                        'testA': 3,
+                        'id': 2,
+                        'subField/0/testA': 3,
+                    },
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                        'subField/0/testA': 4,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'id': 2, 'subField': [{'testA': 3}]}
+            {
+                'ocid': 1,
+                'id': 2,
+                'subField': [
+                    {'testA': 3},
+                    {'testA': 4},
+                ]
+            },
+            {
+                'ocid': 1,
+                'id': 3
+            }
         ]
 
-    def test_nested_sub_sheet(self):
+    @pytest.mark.parametrize('nested_id_in_subsheet', [True, False])
+    def test_nested_sub_sheet(self, nested_id_in_subsheet):
         spreadsheet_input = ListInput(
             sheets={
                 'custom_main': [
                     {
                         'ocid': 1,
                         'id': 2,
+                        'testA/id': 3,
+                        'testA/testB': 4,
                     }
                 ],
                 'sub': [
+                    # It used to be neccesary to supply testA/id in this
+                    # situation, but now it's optional
                     {
                         'ocid': 1,
-                        'custom_main/id:testA/subField': 2,
-                        'testB': 3,
+                        'id': 2,
+                        'testA/id': 3,
+                        'testA/subField/0/testC': 5,
+                    } if nested_id_in_subsheet else {
+                        'ocid': 1,
+                        'id': 2,
+                        'testA/subField/0/testC': 5,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
-            {'ocid': 1, 'id': 2, 'testA': {'subField': [{'testB': 3}]}}
+            {'ocid': 1, 'id': 2, 'testA': {
+                'id': 3,
+                'testB': 4,
+                'subField': [{'testC': 5}]
+            }}
         ]
 
     def test_basic_two_sub_sheets(self):
@@ -68,29 +102,33 @@ class TestUnflatten(object):
                     OrderedDict([
                         ('ocid', 1),
                         ('id', 2),
+                    ]),
+                    OrderedDict([
+                        ('ocid', 1),
+                        ('id', 6),
                     ])
                 ],
                 'sub1': [
                     {
                         'ocid': 1,
-                        'custom_main/id:sub1Field': 2,
-                        'id': 3,
-                        'testA': 4,
+                        'id': 2,
+                        'sub1Field/0/id': 3,
+                        'sub1Field/0/testA': 4,
                     }
                 ],
                 'sub2': [
                     {
                         'ocid': 1,
-                        'custom_main/id:sub1Field': 2,
-                        'custom_main/sub1Field[]/id:sub2Field': 3,
-                        'testB': 5,
+                        'id': 2,
+                        'sub1Field/0/id': 3,
+                        'sub1Field/0/sub2Field/0/testB': 5,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
-        assert len(unflattened) == 1
+        assert len(unflattened) == 2
         assert list(unflattened[0]) == ['ocid', 'id', 'sub1Field']
         assert unflattened[0]['ocid'] == 1
         assert unflattened[0]['id'] == 2
@@ -105,70 +143,7 @@ class TestUnflatten(object):
                 ]
             }
         ]
-
-    def test_conflicting_ids(self, recwarn):
-        spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
-                    {
-                        'ocid': 1,
-                        'id': 2,
-                    }
-                ],
-                'sub': [
-                    {
-                        'ocid': 1,
-                        'custom_main/id': 2,
-                        'custom_main/testA[]/id:subField': 1,
-                        'custom_main/testB[]/id:subField': 1,
-                        'testC': 3,
-                    },
-                    {
-                        'ocid': 1,
-                        'custom_main/id': 2,
-                        'custom_main/testA[]/id:subField': 1,
-                        'custom_main/testB[]/id:subField': '',
-                        'testC': 4,
-                    }
-                ],
-                'testA': [
-                    {
-                        'ocid': 1,
-                        'custom_main/id': 2,
-                        'id': 1,
-                    }
-                ],
-                'testB': [
-                    {
-                        'ocid': 1,
-                        'custom_main/id': 2,
-                        'id': 1,
-                    }
-                ]
-            },
-            main_sheet_name='custom_main')
-        spreadsheet_input.read_sheets()
-        unflattened = list(spreadsheet_input.unflatten())
-        # We should have a warning about conflicting ID fields
-        w = recwarn.pop(UserWarning)
-        assert 'Multiple conflicting ID fields' in text_type(w.message)
-        # (line number includes an assumed header line)
-        assert 'line 2 of sheet sub' in text_type(w.message)
-        # Only one top level object should have been outputted
-        assert len(unflattened) == 1
-        # Check that the valid data is outputted correctly
-        assert spreadsheet_input.unflatten()[0] == \
-            {
-                'ocid': 1,
-                'id': 2,
-                'testA': [{
-                    'id': 1,
-                    'subField': [{'testC': 4}]
-                }],
-                'testB': [{
-                    'id': 1
-                }]
-            }
+        assert unflattened[1] == {'ocid':1 , 'id':6}
 
     def test_nested_id(self):
         spreadsheet_input = ListInput(
@@ -182,9 +157,9 @@ class TestUnflatten(object):
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main/id:subField': 2,
-                        'id': 3,
-                        'testA/id': 4,
+                        'id': 2,
+                        'subField/0/id': 3,
+                        'subField/0/testA/id': 4,
                     }
                 ]
             },
@@ -206,28 +181,57 @@ class TestUnflatten(object):
                 'sub': [
                     {
                         'ocid': 1,
-                        'custom_main/id:subField': '',
-                        'id': 3,
-                        'testA/id': 4,
+                        'id': '',
+                        'subField/0/id': 3,
+                        'subField/0/testA': 4,
                     },
                     {
                         'ocid': 1,
-                        'custom_main/id:subField': 2,
-                        'id': 3,
-                        'testA': 5,
+                        'id': 2,
+                        'subField/0/id': 3,
+                        'subField/0/testA': 5,
                     }
                 ]
             },
             main_sheet_name='custom_main')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
-        # We should have a warning about conflicting ID fields
-        w = recwarn.pop(UserWarning)
-        assert 'no parent id fields populated' in text_type(w.message)
-        assert 'Line 2 of sheet sub' in text_type(w.message)
         # Check that following lines are parsed correctly
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]}
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]},
+            {'ocid': 1, 'subField': [{'id': 3, 'testA': 4}]},
+        ]
+
+    def test_unmatched_id(self, recwarn):
+        spreadsheet_input = ListInput(
+            sheets={
+                'custom_main': [
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                    }
+                ],
+                'sub': [
+                    {
+                        'ocid': 1,
+                        'id': 100,
+                        'subField/0/id': 3,
+                        'subField/0/testA': 4,
+                    },
+                    {
+                        'ocid': 1,
+                        'id': 2,
+                        'subField/0/id': 3,
+                        'subField/0/testA': 5,
+                    }
+                ]
+            },
+            main_sheet_name='custom_main')
+        spreadsheet_input.read_sheets()
+        unflattened = list(spreadsheet_input.unflatten())
+        assert unflattened == [
+            {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': 5}]},
+            {'ocid': 1, 'id': 100, 'subField': [{'id': 3, 'testA': 4}]},
         ]
 
 
@@ -239,16 +243,28 @@ class TestUnflattenRollup(object):
                     {
                         'ocid': 1,
                         'id': 2,
-                        'testA[]/id': 3,
-                        'testA[]/testB': 4
+                        'testC': 3,
+                        'testA/0/id': 4,
+                        'testA/0/testB': 5,
+                    },
+                    {
+                        'ocid': 6,
+                        'id': 7,
+                        'testC': 8,
+                        'testA/0/testB': 9,
                     }
                 ],
                 'testA': [
                     {
                         'ocid': 1,
-                        'main/id': 2,
-                        'id': 3,
-                        'testB': 4,
+                        'id': 2,
+                        'testA/0/id': 4,
+                        'testA/0/testB': 5,
+                    },
+                    {
+                        'ocid': 6,
+                        'id': 7,
+                        'testA/0/testB': 9,
                     }
                 ]
             },
@@ -257,7 +273,13 @@ class TestUnflattenRollup(object):
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 4}]}
+            {'ocid': 1, 'id': 2, 'testC':3, 'testA': [{'id': 4, 'testB': 5}]},
+            {'ocid': 6, 'id': 7, 'testC':8, 'testA': [
+                {'testB': 9}, {'testB': 9}
+                # We have duplicates here because there's no ID to merge these
+                # on. This is different to the old behaviour. Issue filed at
+                # https://github.com/OpenDataServices/flatten-tool/issues/99
+            ]},
         ]
         # We expect no warnings
         assert recwarn.list == []
@@ -269,16 +291,16 @@ class TestUnflattenRollup(object):
                     {
                         'ocid': 1,
                         'id': 2,
-                        'testA[]/id': 3,
-                        'testA[]/testB': 4
+                        'testA/0/id': 3,
+                        'testA/0/testB': 4
                     }
                 ],
                 'testA': [
                     {
                         'ocid': 1,
-                        'main/id': 2,
-                        'id': 3,
-                        'testB': 5,
+                        'id': 2,
+                        'testA/0/id': 3,
+                        'testA/0/testB': 5,
                     }
                 ]
             },
@@ -287,11 +309,21 @@ class TestUnflattenRollup(object):
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
-            {'ocid': 1, 'id': 2, 'testA': [{'id': 3, 'testB': 5}]}
+            {
+                'ocid': 1,
+                'id': 2,
+                'testA': [{
+                    'id': 3,
+                    'testB': 4
+                    # We currently know that testB will be 4 because the main
+                    # sheet is currently always parsed first, but this may change:
+                    # https://github.com/OpenDataServices/flatten-tool/issues/96
+                }]
+            }
         ]
-        # We should have a warning about the conflist
+        # We should have a warning about the conflict
         w = recwarn.pop(UserWarning)
-        assert 'Conflict between main sheet and sub sheet' in text_type(w.message)
+        assert 'Conflict when merging field "testB" for ocid "1", id "2" in sheet testA: "4" != "5"' in text_type(w.message)
 
 
 class TestUnflattenEmpty(object):
@@ -302,11 +334,11 @@ class TestUnflattenEmpty(object):
                 'subsheet': [
                     {
                         'ocid': '',
-                        'id:integer': '',
-                        'testA:number': '',
-                        'testB:boolean': '',
-                        'testC:array': '',
-                        'testD:string': '',
+                        'id': '',
+                        'testA': '',
+                        'testB': '',
+                        'testC': '',
+                        'testD': '',
                     }
                 ]
             },
@@ -329,8 +361,8 @@ class TestUnflattenCustomRootID(object):
                 'sub': [
                     {
                         'custom': 1,
-                        'custom_main/id:subField': 2,
-                        'testA': 3,
+                        'id': 2,
+                        'subField/0/testA': 3,
                     }
                 ]
             },
@@ -353,8 +385,8 @@ class TestUnflattenCustomRootID(object):
                 'sub': [
                     {
                         'custom': 1,
-                        'custom_main/id:testA/subField': 2,
-                        'testB': 3,
+                        'id': 2,
+                        'testA/subField/0/testB': 3,
                     }
                 ]
             },
@@ -377,17 +409,17 @@ class TestUnflattenCustomRootID(object):
                 'sub1': [
                     {
                         'custom': 1,
-                        'custom_main/id:sub1Field': 2,
-                        'id': 3,
-                        'testA': 4,
+                        'id': 2,
+                        'sub1Field/0/id': 3,
+                        'sub1Field/0/testA': 4,
                     }
                 ],
                 'sub2': [
                     {
                         'custom': 1,
-                        'custom_main/id:sub1Field': 2,
-                        'custom_main/sub1Field[]/id:sub2Field': 3,
-                        'testB': 5,
+                        'id': 2,
+                        'sub1Field/0/id': 3,
+                        'sub1Field/0/sub2Field/0/testB': 5,
                     }
                 ]
             },
@@ -423,8 +455,8 @@ class TestUnflattenNoRootID(object):
                 ],
                 'sub': [
                     {
-                        'custom_main/id:subField': 2,
-                        'testA': 3,
+                        'id': 2,
+                        'subField/0/testA': 3,
                     }
                 ]
             },
@@ -445,8 +477,8 @@ class TestUnflattenNoRootID(object):
                 ],
                 'sub': [
                     {
-                        'custom_main/id:testA/subField': 2,
-                        'testB': 3,
+                        'id': 2,
+                        'testA/subField/0/testB': 3,
                     }
                 ]
             },
@@ -467,16 +499,16 @@ class TestUnflattenNoRootID(object):
                 ],
                 'sub1': [
                     {
-                        'custom_main/id:sub1Field': 2,
-                        'id': 3,
-                        'testA': 4,
+                        'id': 2,
+                        'sub1Field/0/id': 3,
+                        'sub1Field/0/testA': 4,
                     }
                 ],
                 'sub2': [
                     {
-                        'custom_main/id:sub1Field': 2,
-                        'custom_main/sub1Field[]/id:sub2Field': 3,
-                        'testB': 5,
+                        'id': 2,
+                        'sub1Field/0/id': 3,
+                        'sub1Field/0/sub2Field/0/testB': 5,
                     }
                 ]
             },
@@ -497,3 +529,58 @@ class TestUnflattenNoRootID(object):
                 ]
             }
         ]
+
+
+from flattentool.schema import SchemaParser
+
+def test_with_schema():
+    spreadsheet_input = ListInput(
+        sheets={
+            'custom_main': [
+                {
+                    'ocid': 1,
+                    'id': 2,
+                    'testA': 3
+                }
+            ],
+            'sub': [
+                {
+                    'ocid': 1,
+                    'id': 2,
+                    'testR/testB': 4 # test that we can infer this an array from schema
+                }
+            ]
+        },
+        main_sheet_name='custom_main')
+    spreadsheet_input.read_sheets()
+
+    parser = SchemaParser(
+        root_schema_dict={
+            'properties': {
+                'id': {
+                    'type': 'string',
+                },
+                'testR': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'object'
+                    }
+                },
+            }
+        },
+        main_sheet_name='custom_main',
+        root_id='ocid',
+        rollup=True
+    )
+    parser.parse()
+    spreadsheet_input.parser = parser
+    assert list(spreadsheet_input.unflatten()) == [{
+        'ocid': 1,
+        'id': '2', # check that we join correctly when this gets converted to a
+                   # string because of the schema type
+        'testA': 3,
+        'testR': [{
+            'testB': 4
+        }]
+    }]
+

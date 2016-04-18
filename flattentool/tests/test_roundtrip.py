@@ -57,11 +57,4 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
     original_json = json.load(open(input_name))
     roundtripped_json = json.load(tmpdir.join('roundtrip.json'))
 
-    # Currently not enough information to successfully roundtrip that values
-    # are numbers, when this is not required by the schema
-    # for CSV, and for openpyxl under Python 2
-    if output_format == 'csv' or sys.version_info < (3, 0):
-        for grant in original_json['grants']:
-            grant['plannedDates'][0]['duration'] = str(grant['plannedDates'][0]['duration'])
-
     assert original_json == roundtripped_json
