@@ -486,3 +486,58 @@ class TestUnflattenNoRootID(object):
                 ]
             }
         ]
+
+
+from flattentool.schema import SchemaParser
+
+def test_with_schema():
+    spreadsheet_input = ListInput(
+        sheets={
+            'custom_main': [
+                {
+                    'ocid': 1,
+                    'id': 2,
+                    'testA': 3
+                }
+            ],
+            'sub': [
+                {
+                    'ocid': 1,
+                    'id': 2,
+                    'testR/testB': 4 # test that we can infer this an array from schema
+                }
+            ]
+        },
+        main_sheet_name='custom_main')
+    spreadsheet_input.read_sheets()
+
+    parser = SchemaParser(
+        root_schema_dict={
+            'properties': {
+                'id': {
+                    'type': 'string',
+                },
+                'testR': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'object'
+                    }
+                },
+            }
+        },
+        main_sheet_name='custom_main',
+        root_id='ocid',
+        rollup=True
+    )
+    parser.parse()
+    spreadsheet_input.parser = parser
+    assert list(spreadsheet_input.unflatten()) == [{
+        'ocid': 1,
+        'id': '2', # check that we join correctly when this gets converted to a
+                   # string because of the schema type
+        'testA': 3,
+        'testR': [{
+            'testB': 4
+        }]
+    }]
+

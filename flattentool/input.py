@@ -167,7 +167,7 @@ class SpreadsheetInput(object):
                 root_id_or_none = line[self.root_id] if self.root_id else None
                 unflattened = unflatten_main_with_parser(self.parser, line, self.timezone)
                 try:
-                    merge(main_sheet_by_ocid[root_id_or_none][line.get('id')], unflattened)
+                    merge(main_sheet_by_ocid[root_id_or_none][unflattened.get('id')], unflattened)
                 except KeyError:
                     pass
                     # FIXME add an appropriate warning here
