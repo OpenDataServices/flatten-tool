@@ -99,7 +99,7 @@ class SchemaParser(object):
             else:
                 self.main_sheet.append(field)
 
-    def parse_schema_dict(self, parent_path, schema_dict, parent_id_fields=None, title_lookup=None):
+    def parse_schema_dict(self, parent_path, schema_dict, parent_id_fields=None, title_lookup=None, parent_title=''):
         if parent_path:
             parent_path = parent_path + '/'
         parent_id_fields = parent_id_fields or []
@@ -127,7 +127,8 @@ class SchemaParser(object):
                             parent_path+property_name,
                             property_schema_dict,
                             parent_id_fields=id_fields,
-                            title_lookup=title_lookup.get(title)):
+                            title_lookup=title_lookup.get(title),
+                            parent_title=parent_title+title+':' if title else None):
                         yield (
                             property_name+'/'+field,
                             # TODO ambiguous use of "title"
@@ -165,7 +166,8 @@ class SchemaParser(object):
                                 parent_path+property_name+'/0',
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
-                                title_lookup=title_lookup.get(title))
+                                title_lookup=title_lookup.get(title),
+                                parent_title=parent_title+title+':' if title else None)
 
                         rolledUp = set()
 
@@ -177,9 +179,7 @@ class SchemaParser(object):
                                     warn('Field {} does not have a title, skipping it and all its children.'.format(property_name))
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
-                                    print(parent_path)
-                                    assert parent_path == ''
-                                    sub_sheet.add_field(title+':'+child_title)
+                                    sub_sheet.add_field(parent_title+title+':'+child_title)
                             else:
                                 sub_sheet.add_field(parent_path+property_name+'/0/'+field)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
