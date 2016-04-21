@@ -177,7 +177,8 @@ class SchemaParser(object):
                                     warn('Field {} does not have a title, skipping it and all its children.'.format(property_name))
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
-                                    assert len(parent_path.replace('/0/', '/').split('/')) <= 2
+                                    print(parent_path)
+                                    assert parent_path == ''
                                     sub_sheet.add_field(title+':'+child_title)
                             else:
                                 sub_sheet.add_field(parent_path+property_name+'/0/'+field)
