@@ -107,7 +107,7 @@ class SchemaParser(object):
         if 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
                 if self.use_titles:
-                    id_fields = parent_id_fields + [parent_path+(schema_dict['properties']['id'].get('title') or 'id')]
+                    id_fields = parent_id_fields + [(parent_title if parent_title is not None else parent_path)+(schema_dict['properties']['id'].get('title') or 'id')]
                 else:
                     id_fields = parent_id_fields + [parent_path+'id']
             else:
