@@ -9,7 +9,7 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id=None, use_titles=False, **_):
+def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id=None, use_titles=False, create_reference_tables=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -17,14 +17,15 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
     """
 
-    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
+    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles, create_reference_tables=create_reference_tables)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
             main_sheet_name=main_sheet_name,
-            output_name=name)
+            output_name=name,
+            create_reference_tables=create_reference_tables)
         spreadsheet_output.write_sheets()
 
     if output_format == 'all':

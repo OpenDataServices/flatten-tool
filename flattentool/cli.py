@@ -55,6 +55,10 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_create_template.add_argument(
+        "--create-reference-tables",
+        action='store_true',
+        help="Instead of creating a normal template, create reference tables instead.")
 
     parser_flatten = subparsers.add_parser(
         'flatten',

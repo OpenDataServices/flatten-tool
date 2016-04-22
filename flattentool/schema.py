@@ -62,7 +62,7 @@ class TitleLookup(UserDict):
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False):
+    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False, create_reference_tables=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
@@ -71,6 +71,10 @@ class SchemaParser(object):
         self.use_titles = use_titles
         self.title_lookup = TitleLookup()
         self.flattened = {}
+        self.create_reference_tables = create_reference_tables
+        if self.create_reference_tables:
+            self.reference_tables = {}
+            self.reference_table_headers = ['title','name','description','type','format','allowed_values','required']
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -88,8 +92,24 @@ class SchemaParser(object):
             self.root_schema_dict = root_schema_dict
 
     def parse(self):
+        if self.create_reference_tables:
+            self.reference_tables['main'] = []
         fields = self.parse_schema_dict('', self.root_schema_dict)
-        for field, title in fields:
+        for field, title, property_schema_dict in fields:
+            if self.create_reference_tables:
+                if 'format' in property_schema_dict:
+                    type_ = property_schema_dict['format']
+                else:
+                    type_ = property_schema_dict['type']
+                self.reference_tables['main'].append({
+                    'title': title,
+                    'name': field,
+                    'description': property_schema_dict['description'],
+                    'type': type_ if isinstance(type_, str) else ','.join(x for x in type_ if x != 'null'),
+                    'format': '',
+                    'allowed_values': '',
+                    'required': 'True' if property_schema_dict['required'] else 'False'
+                })
             if self.use_titles:
                 if not title:
                     warn('Field {} does not have a title, skipping.'.format(field))
@@ -98,7 +118,9 @@ class SchemaParser(object):
             else:
                 self.main_sheet.append(field)
 
-    def parse_schema_dict(self, parent_path, schema_dict, parent_id_fields=None, title_lookup=None, parent_title=''):
+    def parse_schema_dict(self, parent_path, schema_dict, parent_id_fields=None, title_lookup=None, parent_title='', sub_sheet_name=None):
+        if sub_sheet_name is None:
+            sub_sheet_name = self.root_schema_dict
         if parent_path:
             parent_path = parent_path + '/'
         parent_id_fields = parent_id_fields or []
@@ -113,6 +135,8 @@ class SchemaParser(object):
                 id_fields = parent_id_fields
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
+                if self.create_reference_tables:
+                    property_schema_dict['required'] = property_name in schema_dict['required'] if 'required' in schema_dict else False
                 property_type_set = get_property_type_set(property_schema_dict)
 
                 title = property_schema_dict.get('title')
@@ -122,16 +146,18 @@ class SchemaParser(object):
 
                 if 'object' in property_type_set:
                     self.flattened[parent_path+property_name] = "object"
-                    for field, child_title in self.parse_schema_dict(
+                    for field, child_title, child_property_schema_dict in self.parse_schema_dict(
                             parent_path+property_name,
                             property_schema_dict,
                             parent_id_fields=id_fields,
                             title_lookup=title_lookup.get(title),
-                            parent_title=parent_title+title+':' if title else None):
+                            parent_title=parent_title+title+':' if title else None,
+                            sub_sheet_name=sub_sheet_name):
                         yield (
                             property_name+'/'+field,
                             # TODO ambiguous use of "title"
-                            (title+':'+child_title if title and child_title else None)
+                            (title+':'+child_title if title and child_title else None),
+                            child_property_schema_dict
                         )
 
                 elif 'array' in property_type_set:
@@ -139,11 +165,11 @@ class SchemaParser(object):
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         self.flattened[parent_path+property_name] = "string_array"
-                        yield property_name, title
+                        yield property_name, title, property_schema_dict
                     elif 'array' in type_set:
                         self.flattened[parent_path+property_name] = "array_array"
                         if 'string' in get_property_type_set(property_schema_dict['items']['items']):
-                            yield property_name, title
+                            yield property_name, title, property_schema_dict
                         else:
                             raise ValueError
                     elif 'object' in type_set:
@@ -166,11 +192,29 @@ class SchemaParser(object):
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
                                 title_lookup=title_lookup.get(title),
-                                parent_title=parent_title+title+':' if title else None)
+                                parent_title=parent_title+title+':' if title else None,
+                                sub_sheet_name=sub_sheet_name)
 
                         rolledUp = set()
 
-                        for field, child_title in fields:
+                        if self.create_reference_tables:
+                            self.reference_tables[sub_sheet_name] = []
+
+                        for field, child_title, child_property_schema_dict in fields:
+                            if self.create_reference_tables:
+                                if 'format' in child_property_schema_dict:
+                                    type_ = child_property_schema_dict['format']
+                                else:
+                                    type_ = child_property_schema_dict['type']
+                                self.reference_tables[sub_sheet_name].append({
+                                    'title': parent_title+title+':'+child_title if title is not None else '',
+                                    'name': parent_path+property_name+'/0/'+field,
+                                    'description': child_property_schema_dict['description'],
+                                    'type': type_ if isinstance(type_, str) else ','.join(x for x in type_ if x != 'null'),
+                                    'format': '',
+                                    'allowed_values': '',
+                                    'required': 'True' if child_property_schema_dict['required'] else 'False'
+                                })
                             if self.use_titles:
                                 if not child_title:
                                     warn('Field {} does not have a title, skipping.'.format(field))
@@ -183,7 +227,7 @@ class SchemaParser(object):
                                 sub_sheet.add_field(parent_path+property_name+'/0/'+field)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
                                 rolledUp.add(field)
-                                yield property_name+'/0/'+field, (title+':'+child_title if title and child_title else None)
+                                yield property_name+'/0/'+field, (title+':'+child_title if title and child_title else None), child_property_schema_dict
 
                         # Check that all items in rollUp are in the schema
                         if self.rollup and 'rollUp' in property_schema_dict:
@@ -194,16 +238,16 @@ class SchemaParser(object):
                         raise ValueError
                 elif 'string' in property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "string"
-                    yield property_name, title
+                    yield property_name, title, property_schema_dict
                 elif 'number' in property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "number"
-                    yield property_name, title
+                    yield property_name, title, property_schema_dict
                 elif 'integer' in property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "integer"
-                    yield property_name, title
+                    yield property_name, title, property_schema_dict
                 elif 'boolean' in property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "boolean"
-                    yield property_name, title
+                    yield property_name, title, property_schema_dict
                 else:
                     warn('Unrecognised types {} for property "{}" with context "{}",'
                          'so this property has been ignored.'.format(

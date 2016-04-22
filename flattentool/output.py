@@ -21,10 +21,11 @@ else:
 class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
-    def __init__(self, parser, main_sheet_name='main', output_name='unflattened'):
+    def __init__(self, parser, main_sheet_name='main', output_name='unflattened', create_reference_tables=False):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
+        self.create_reference_tables = create_reference_tables
 
     def open(self):
         pass
@@ -35,9 +36,14 @@ class SpreadsheetOutput(object):
     def write_sheets(self):
         self.open()
 
-        self.write_sheet(self.main_sheet_name, self.parser.main_sheet)
-        for sheet_name, sub_sheet in sorted(self.parser.sub_sheets.items()):
-            self.write_sheet(sheet_name, sub_sheet)
+        if self.create_reference_tables:
+            self.write_sheet(self.main_sheet_name, self.parser.reference_tables['main'], self.parser.reference_table_headers)
+            for sheet_name, sub_sheet in sorted(self.parser.sub_sheets.items()):
+                self.write_sheet(sheet_name, self.parser.reference_tables[sheet_name], self.parser.reference_table_headers)
+        else:
+            self.write_sheet(self.main_sheet_name, self.parser.main_sheet.lines, list(self.parser.main_sheet))
+            for sheet_name, sub_sheet in sorted(self.parser.sub_sheets.items()):
+                self.write_sheet(sheet_name, sub_sheet.lines, list(sub_sheet))
 
         self.close()
 
@@ -49,12 +55,11 @@ class XLSXOutput(SpreadsheetOutput):
     def open(self):
         self.workbook = openpyxl.Workbook()
 
-    def write_sheet(self, sheet_name, sheet):
-        sheet_header = list(sheet)
+    def write_sheet(self, sheet_name, sheet_lines, sheet_header):
         worksheet = self.workbook.create_sheet()
         worksheet.title = sheet_name
         worksheet.append(sheet_header)
-        for sheet_line in sheet.lines:
+        for sheet_line in sheet_lines:
             line = []
             for header in sheet_header:
                 value = sheet_line.get(header)
@@ -78,21 +83,20 @@ class CSVOutput(SpreadsheetOutput):
         except OSError:
             pass
 
-    def write_sheet(self, sheet_name, sheet):
-        sheet_header = list(sheet)
+    def write_sheet(self, sheet_name, sheet_lines, sheet_header):
         if sys.version > '3':  # If Python 3 or greater
             # Pass the encoding to the open function
             with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
                 dictwriter = csv.DictWriter(csv_file, sheet_header)
                 dictwriter.writeheader()
-                for sheet_line in sheet.lines:
+                for sheet_line in sheet_lines:
                     dictwriter.writerow(sheet_line)
         else:  # If Python 2
             # Pass the encoding to DictReader
             with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
                 dictwriter = csv.DictWriter(csv_file, sheet_header, encoding='utf-8')
                 dictwriter.writeheader()
-                for sheet_line in sheet.lines:
+                for sheet_line in sheet_lines:
                     dictwriter.writerow(sheet_line)
 
 
