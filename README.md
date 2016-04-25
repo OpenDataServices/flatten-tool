@@ -81,7 +81,7 @@ Whilst Flat Stan can cope with multiple laters of nesting in a data structure, t
 Python Version Support
 ----------------------
 
-This code supports Python 2.7 and Python 3.3 (and later).
+This code supports Python 2.7 and Python 3.3 (and later). Python 3 is preferred, and any Python 2 specific bugs are currently treated as low priority.
 
 Python 2.6 and earlier are not supported because our code makes use new language constructs introduced in Python 3 and 2.7. Python 3.2 (also 3.1 and 3.0) is not supported, because one of the dependencies (openpyxl) does not support it.
 
@@ -90,8 +90,8 @@ Installation
 
     git clone https://github.com/OpenDataServices/flatten-tool.git
     cd flatten-tool
-    virtualenv pyenv
-    source pyenv/bin/activate
+    python3 -m virtualenv -p $(which python3) .ve
+    source .ve/bin/activate
     pip install -r requirements_dev.txt
 
 Usage
