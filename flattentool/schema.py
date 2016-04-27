@@ -104,11 +104,11 @@ class SchemaParser(object):
                 self.reference_tables['main'].append({
                     'title': title,
                     'name': field,
-                    'description': property_schema_dict['description'],
+                    'description': property_schema_dict.get('description'),
                     'type': type_ if isinstance(type_, str) else ','.join(x for x in type_ if x != 'null'),
                     'format': '',
                     'allowed_values': '',
-                    'required': 'True' if property_schema_dict['required'] else 'False'
+                    'required': 'True' if property_schema_dict['required_bool'] else 'False'
                 })
             if self.use_titles:
                 if not title:
@@ -136,7 +136,7 @@ class SchemaParser(object):
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
                 if self.create_reference_tables:
-                    property_schema_dict['required'] = property_name in schema_dict['required'] if 'required' in schema_dict else False
+                    property_schema_dict['required_bool'] = property_name in schema_dict['required'] if 'required' in schema_dict else False
                 property_type_set = get_property_type_set(property_schema_dict)
 
                 title = property_schema_dict.get('title')
@@ -207,13 +207,13 @@ class SchemaParser(object):
                                 else:
                                     type_ = child_property_schema_dict['type']
                                 self.reference_tables[sub_sheet_name].append({
-                                    'title': parent_title+title+':'+child_title if title is not None else '',
+                                    'title': parent_title+title+':'+child_title if title is not None and child_title is not None else '',
                                     'name': parent_path+property_name+'/0/'+field,
                                     'description': child_property_schema_dict['description'],
                                     'type': type_ if isinstance(type_, str) else ','.join(x for x in type_ if x != 'null'),
                                     'format': '',
                                     'allowed_values': '',
-                                    'required': 'True' if child_property_schema_dict['required'] else 'False'
+                                    'required': 'True' if child_property_schema_dict['required_bool'] else 'False'
                                 })
                             if self.use_titles:
                                 if not child_title:
