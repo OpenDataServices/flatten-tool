@@ -154,6 +154,95 @@ Repeated rows:
 flatten-tool unflatten -f csv examples/array_repeat_rows --main-sheet-name main --root-id='' -o examples/array.json
 ```
 
+
+### Arrays within arrays
+
+```
+{
+    "main": [
+        {
+            "id": "1",
+            "d": "6",
+            "a": [
+                {
+                    "id": "2",
+                    "b": [
+                        {
+                            "c": "3"
+                        },
+                        {
+                            "c": "3a"
+                        }
+                    ]
+                },
+                {
+                    "id": "4",
+                    "b": [
+                        {
+                            "c": "5"
+                        },
+                        {
+                            "c": "5a"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "7",
+            "d": "12",
+            "a": [
+                {
+                    "id": "8",
+                    "b": [
+                        {
+                            "c": "9"
+                        },
+                        {
+                            "c": "9a"
+                        }
+                    ]
+                },
+                {
+                    "id": "10",
+                    "b": [
+                        {
+                            "c": "11"
+                        },
+                        {
+                            "c": "11a"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
+|id|d|
+|---|---|
+|1|6|
+|7|12|
+
+|id|a/0/id|
+|---|---|
+|1|2|
+|1|4|
+|7|8|
+|7|10|
+
+|id|a/0/id|a/0/b/0/c|
+|---|---|---|
+|1|2|3|
+|1|2|3a|
+|1|4|5|
+|1|4|5a|
+|7|8|9|
+|7|8|9a|
+|7|10|11|
+|7|10|11a|
+
 ### Why
 Imagine a simple dataset that describes grants. Chances are if is to represent the world, it is going to need to contain some one-to-many relationships (.e.g. one grant, many categories). This is structured data. 
 
