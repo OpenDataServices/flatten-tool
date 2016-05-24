@@ -169,6 +169,9 @@ class SpreadsheetInput(object):
     def get_sheet_lines(self, sheet_name):
         raise NotImplementedError
 
+    def get_sheet_headings(self, sheet_name):
+        raise NotImplementedError
+
     def read_sheets(self):
         raise NotImplementedError
 
@@ -190,6 +193,11 @@ class SpreadsheetInput(object):
         sheets = [(self.main_sheet_name, self.get_main_sheet_lines())] + list(self.get_sub_sheets_lines())
         for i, sheet in enumerate(sheets):
             sheet_name, lines = sheet
+            try:
+                actual_headings = self.get_sheet_headings(sheet_name)
+            except NotImplementedError:
+                # The ListInput type used in the tests doesn't support getting headings.
+                actual_headings = None
             for j, line in enumerate(lines):
                 if all(x is None or x == '' for x in line.values()):
                 #if all(x == '' for x in line.values()):
@@ -198,7 +206,10 @@ class SpreadsheetInput(object):
                 if WITH_CELLS:
                     cells = OrderedDict()
                     for k, header in enumerate(line):
-                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
+                        if actual_headings:
+                            cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, actual_headings[k]))
+                        else:
+                            cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
                     unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone)
                 else:
                     unflattened = unflatten_main_with_parser(self.parser, line, self.timezone)
@@ -241,10 +252,11 @@ class SpreadsheetInput(object):
         cell_tree = self.do_unflatten()
         result = extract_list_to_value(cell_tree)
         cell_source_map = extract_list_to_error_path([self.main_sheet_name.lower()], cell_tree)
-        ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in sorted(cell_source_map.items()))
+        ordered_items = sorted(cell_source_map.items())
+        ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
         row_source_map = OrderedDict()
         heading_source_map = {}
-        for path in cell_source_map:
+        for path, _ in ordered_items:
             cells = cell_source_map[path]
             # Prepare row_source_map key
             key = '/'.join(str(x) for x in path[:-1])
@@ -327,6 +339,20 @@ def extract_dict_to_value(input):
 class CSVInput(SpreadsheetInput):
     encoding = 'utf-8'
 
+    def get_sheet_headings(self, sheet_name):
+        if sys.version > '3':  # If Python 3 or greater
+            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+                r = csvreader(main_sheet_file)
+                for row in enumerate(r):
+                    # Just return the first row
+                    return row[1]
+        else:  # If Python 2
+            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
+                r = csvreader(main_sheet_file, encoding=self.encoding)
+                for row in enumerate(r):
+                    # Just return the first row
+                    return row[1]
+
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
         if self.main_sheet_name+'.csv' not in sheet_file_names:
@@ -366,6 +392,10 @@ class XLSXInput(SpreadsheetInput):
             raise ValueError('Main sheet "{}" not found in workbook.'.format(self.main_sheet_name))
         sheet_names.remove(self.main_sheet_name)
         self.sub_sheet_names = sheet_names
+
+    def get_sheet_headings(self, sheet_name):
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        return [cell.value for cell in worksheet.rows[0]]
 
     def get_sheet_lines(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]

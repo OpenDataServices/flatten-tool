@@ -51,7 +51,571 @@ def test_unflatten(tmpdir):
         input_dir.strpath,
         input_format='csv',
         output_name=tmpdir.join('release.json').strpath,
-        main_sheet_name='main')
+        main_sheet_name='main',
+        cell_source_map=tmpdir.join('cell_source_map.json').strpath,
+        heading_source_map=tmpdir.join('heading_source_map.json').strpath)
+    # Note, "main/0/testA": comes after "main/0/test" because 'testA' > 'testA'
+    # Note also that all the row entries come after the cell ones
+    assert lines_strip_whitespace(tmpdir.join('cell_source_map.json').read()) == lines_strip_whitespace('''{
+        "main/0/id": [
+            [
+                "main",
+                "B",
+                2,
+                "id"
+            ],
+            [
+                "subsheet",
+                "B",
+                2,
+                "id"
+            ],
+            [
+                "subsheet",
+                "B",
+                4,
+                "id"
+            ],
+            [
+                "subsheet_test",
+                "B",
+                2,
+                "id"
+            ],
+            [
+                "subsubsheet",
+                "B",
+                2,
+                "id"
+            ]
+        ],
+        "main/0/ocid": [
+            [
+                "main",
+                "A",
+                2,
+                "ocid"
+            ],
+            [
+                "subsheet",
+                "A",
+                2,
+                "ocid"
+            ],
+            [
+                "subsheet",
+                "A",
+                4,
+                "ocid"
+            ],
+            [
+                "subsheet_test",
+                "A",
+                2,
+                "ocid"
+            ],
+            [
+                "subsubsheet",
+                "A",
+                2,
+                "ocid"
+            ]
+        ],
+        "main/0/sub/0/id": [
+            [
+                "subsheet",
+                "C",
+                2,
+                "sub/0/id"
+            ],
+            [
+                "subsubsheet",
+                "C",
+                2,
+                "sub/0/id"
+            ]
+        ],
+        "main/0/sub/0/subsub/0/testG": [
+            [
+                "subsubsheet",
+                "D",
+                2,
+                "sub/0/subsub/0/testG"
+            ]
+        ],
+        "main/0/sub/0/test2/E": [
+            [
+                "subsheet",
+                "E",
+                2,
+                "sub/0/test2/E"
+            ]
+        ],
+        "main/0/sub/0/test2/F": [
+            [
+                "subsheet",
+                "F",
+                2,
+                "sub/0/test2/F"
+            ]
+        ],
+        "main/0/sub/0/testD": [
+            [
+                "subsheet",
+                "D",
+                2,
+                "sub/0/testD"
+            ]
+        ],
+        "main/0/sub/1/id": [
+            [
+                "subsheet",
+                "C",
+                4,
+                "sub/0/id"
+            ]
+        ],
+        "main/0/sub/1/test2/E": [
+            [
+                "subsheet",
+                "E",
+                4,
+                "sub/0/test2/E"
+            ]
+        ],
+        "main/0/sub/1/test2/F": [
+            [
+                "subsheet",
+                "F",
+                4,
+                "sub/0/test2/F"
+            ]
+        ],
+        "main/0/sub/1/testD": [
+            [
+                "subsheet",
+                "D",
+                4,
+                "sub/0/testD"
+            ]
+        ],
+        "main/0/test/C": [
+            [
+                "main",
+                "E",
+                2,
+                "test/C"
+            ]
+        ],
+        "main/0/test/id": [
+            [
+                "main",
+                "D",
+                2,
+                "test/id"
+            ],
+            [
+                "subsheet_test",
+                "C",
+                2,
+                "test/id"
+            ]
+        ],
+        "main/0/test/subsheet/0/id": [
+            [
+                "subsheet_test",
+                "D",
+                2,
+                "test/subsheet/0/id"
+            ]
+        ],
+        "main/0/test/subsheet/0/test2/E": [
+            [
+                "subsheet_test",
+                "F",
+                2,
+                "test/subsheet/0/test2/E"
+            ]
+        ],
+        "main/0/test/subsheet/0/test2/F": [
+            [
+                "subsheet_test",
+                "G",
+                2,
+                "test/subsheet/0/test2/F"
+            ]
+        ],
+        "main/0/test/subsheet/0/testD": [
+            [
+                "subsheet_test",
+                "E",
+                2,
+                "test/subsheet/0/testD"
+            ]
+        ],
+        "main/0/testA": [
+            [
+                "main",
+                "C",
+                2,
+                "testA"
+            ]
+        ],
+        "main/1/id": [
+            [
+                "main",
+                "B",
+                3,
+                "id"
+            ],
+            [
+                "subsheet",
+                "B",
+                3,
+                "id"
+            ]
+        ],
+        "main/1/ocid": [
+            [
+                "main",
+                "A",
+                3,
+                "ocid"
+            ],
+            [
+                "subsheet",
+                "A",
+                3,
+                "ocid"
+            ]
+        ],
+        "main/1/sub/0/id": [
+            [
+                "subsheet",
+                "C",
+                3,
+                "sub/0/id"
+            ]
+        ],
+        "main/1/sub/0/test2/E": [
+            [
+                "subsheet",
+                "E",
+                3,
+                "sub/0/test2/E"
+            ]
+        ],
+        "main/1/sub/0/test2/F": [
+            [
+                "subsheet",
+                "F",
+                3,
+                "sub/0/test2/F"
+            ]
+        ],
+        "main/1/sub/0/testD": [
+            [
+                "subsheet",
+                "D",
+                3,
+                "sub/0/testD"
+            ]
+        ],
+        "main/1/test/C": [
+            [
+                "main",
+                "E",
+                3,
+                "test/C"
+            ]
+        ],
+        "main/1/test/id": [
+            [
+                "main",
+                "D",
+                3,
+                "test/id"
+            ]
+        ],
+        "main/1/testA": [
+            [
+                "main",
+                "C",
+                3,
+                "testA"
+            ]
+        ],
+        "main/2/id": [
+            [
+                "main",
+                "B",
+                4,
+                "id"
+            ],
+            [
+                "subsheet",
+                "B",
+                5,
+                "id"
+            ]
+        ],
+        "main/2/ocid": [
+            [
+                "main",
+                "A",
+                4,
+                "ocid"
+            ],
+            [
+                "subsheet",
+                "A",
+                5,
+                "ocid"
+            ]
+        ],
+        "main/2/sub/0/id": [
+            [
+                "subsheet",
+                "C",
+                5,
+                "sub/0/id"
+            ]
+        ],
+        "main/2/sub/0/test2/E": [
+            [
+                "subsheet",
+                "E",
+                5,
+                "sub/0/test2/E"
+            ]
+        ],
+        "main/2/sub/0/test2/F": [
+            [
+                "subsheet",
+                "F",
+                5,
+                "sub/0/test2/F"
+            ]
+        ],
+        "main/2/sub/0/testD": [
+            [
+                "subsheet",
+                "D",
+                5,
+                "sub/0/testD"
+            ]
+        ],
+        "main/2/test/C": [
+            [
+                "main",
+                "E",
+                4,
+                "test/C"
+            ]
+        ],
+        "main/2/test/id": [
+            [
+                "main",
+                "D",
+                4,
+                "test/id"
+            ]
+        ],
+        "main/2/testA": [
+            [
+                "main",
+                "C",
+                4,
+                "testA"
+            ]
+        ],
+        "main/3/id": [
+            [
+                "main",
+                "B",
+                5,
+                "id"
+            ]
+        ],
+        "main/3/ocid": [
+            [
+                "main",
+                "A",
+                5,
+                "ocid"
+            ]
+        ],
+        "main/3/test/C": [
+            [
+                "main",
+                "E",
+                5,
+                "test/C"
+            ]
+        ],
+        "main/3/test/id": [
+            [
+                "main",
+                "D",
+                5,
+                "test/id"
+            ]
+        ],
+        "main/3/testA": [
+            [
+                "main",
+                "C",
+                5,
+                "testA"
+            ]
+        ],
+        "main/0": [
+            [
+                "main",
+                2
+            ],
+            [
+                "subsheet",
+                2
+            ],
+            [
+                "subsheet",
+                4
+            ],
+            [
+                "subsheet_test",
+                2
+            ],
+            [
+                "subsubsheet",
+                2
+            ]
+        ],
+        "main/0/sub/0": [
+            [
+                "subsheet",
+                2
+            ],
+            [
+                "subsubsheet",
+                2
+            ]
+        ],
+        "main/0/sub/0/subsub/0": [
+            [
+                "subsubsheet",
+                2
+            ]
+        ],
+        "main/0/sub/0/test2": [
+            [
+                "subsheet",
+                2
+            ]
+        ],
+        "main/0/sub/1": [
+            [
+                "subsheet",
+                4
+            ]
+        ],
+        "main/0/sub/1/test2": [
+            [
+                "subsheet",
+                4
+            ]
+        ],
+        "main/0/test": [
+            [
+                "main",
+                2
+            ],
+            [
+                "subsheet_test",
+                2
+            ]
+        ],
+        "main/0/test/subsheet/0": [
+            [
+                "subsheet_test",
+                2
+            ]
+        ],
+        "main/0/test/subsheet/0/test2": [
+            [
+                "subsheet_test",
+                2
+            ]
+        ],
+        "main/1": [
+            [
+                "main",
+                3
+            ],
+            [
+                "subsheet",
+                3
+            ]
+        ],
+        "main/1/sub/0": [
+            [
+                "subsheet",
+                3
+            ]
+        ],
+        "main/1/sub/0/test2": [
+            [
+                "subsheet",
+                3
+            ]
+        ],
+        "main/1/test": [
+            [
+                "main",
+                3
+            ]
+        ],
+        "main/2": [
+            [
+                "main",
+                4
+            ],
+            [
+                "subsheet",
+                5
+            ]
+        ],
+        "main/2/sub/0": [
+            [
+                "subsheet",
+                5
+            ]
+        ],
+        "main/2/sub/0/test2": [
+            [
+                "subsheet",
+                5
+            ]
+        ],
+        "main/2/test": [
+            [
+                "main",
+                4
+            ]
+        ],
+        "main/3": [
+            [
+                "main",
+                5
+            ]
+        ],
+        "main/3/test": [
+            [
+                "main",
+                5
+            ]
+        ]
+    }''')
     assert lines_strip_whitespace(tmpdir.join('release.json').read()) == lines_strip_whitespace('''{
     "main": [
         {
