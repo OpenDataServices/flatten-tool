@@ -255,7 +255,7 @@ class SpreadsheetInput(object):
         ordered_items = sorted(cell_source_map.items())
         ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
         row_source_map = OrderedDict()
-        heading_source_map = {}
+        heading_source_map = OrderedDict()
         for path, _ in ordered_items:
             cells = cell_source_map[path]
             # Prepare row_source_map key
