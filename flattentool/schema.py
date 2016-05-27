@@ -191,7 +191,7 @@ class SchemaParser(object):
                             if missedRollUp:
                                 warn('{} in rollUp but not in schema'.format(', '.join(missedRollUp)))
                     else:
-                        raise ValueError
+                        raise ValueError('Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'.format(type_set))
                 elif 'string' in property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "string"
                     yield property_name, title

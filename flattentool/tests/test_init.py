@@ -7,6 +7,48 @@ import sys
 import pytest
 
 
+def original_cell_and_row_locations(data):
+    '''
+    Cells should each appear only once
+
+    Rows should appear the number of times a column in it resolves to a unique dictionary
+    '''
+    cells = []
+    rows = {}
+    for key in data:
+        cell_list = data[key]
+        for cell in cell_list:
+            if len(cell) == 2:
+                # This is a row
+                row_str = '{}:{}'.format(cell[0], cell[1])
+                if row_str not in rows:
+                    rows[row_str] = 1
+                else:
+                    rows[row_str] += 1
+            else:
+                # This is a cell
+                cell_str = '{}:{}{}'.format(cell[0], cell[1], cell[2])
+                assert cell_str not in cells
+                cells.append(cell_str)
+    cells.sort()
+    return cells, rows
+
+
+def original_headings(heading_data):
+    '''\
+    '''
+    headings = []
+    for key in heading_data:
+        cell_list = heading_data[key]
+        for cell in cell_list:
+            assert len(cell) == 2
+            heading_str = '{}:{}'.format(cell[0], cell[1])
+            assert heading_str not in headings
+            headings.append(heading_str)
+    headings.sort()
+    return headings
+
+
 def test_decimal_default():
     assert json.dumps(Decimal('1.2'), default=decimal_default) == '1.2'
     assert json.dumps(Decimal('42'), default=decimal_default) == '42'
@@ -626,24 +668,7 @@ def test_unflatten(tmpdir):
         }'''
         assert lines_strip_whitespace(tmpdir.join('cell_source_map.json').read()) == lines_strip_whitespace(expected)
         data = json.loads(expected)
-        cells = []
-        rows = {}
-        for key in data:
-            cell_list = data[key]
-            for cell in cell_list:
-                if len(cell) == 2:
-                    # This is a row
-                    row_str = '{}:{}'.format(cell[0], cell[1])
-                    if row_str not in rows:
-                        rows[row_str] = 1
-                    else:
-                        rows[row_str] += 1
-                else:
-                    # This is a cell
-                    cell_str = '{}:{}{}'.format(cell[0], cell[1], cell[2])
-                    assert cell_str not in cells
-                    cells.append(cell_str)
-        cells.sort()
+        cells, rows = original_cell_and_row_locations(data)
         # Make sure every cell in the original appeared in the cell source map exactly once
         assert cells == [
             'main:A2',
@@ -836,15 +861,7 @@ def test_unflatten(tmpdir):
         }'''
         assert lines_strip_whitespace(tmpdir.join('heading_source_map.json').read()) == lines_strip_whitespace(expected_headings)
         heading_data = json.loads(expected_headings)
-        headings = []
-        for key in heading_data:
-            cell_list = heading_data[key]
-            for cell in cell_list:
-                assert len(cell) == 2
-                heading_str = '{}:{}'.format(cell[0], cell[1])
-                assert heading_str not in headings
-                headings.append(heading_str)
-        headings.sort()
+        headings = original_headings(heading_data)
         # Make sure every heading in the original appeared in the heading source map exactly once
         assert headings == [
             'main:id',
