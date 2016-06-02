@@ -112,6 +112,12 @@ def create_parser():
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to releases")
     parser_unflatten.add_argument(
+        "-c", "--cell-source-map",
+        help="Path to write a cell source map to. Will have an extension appended as appropriate.")
+    parser_unflatten.add_argument(
+        "-a", "--heading-source-map",
+        help="Path to write a heading source map to. Will have an extension appended as appropriate.")
+    parser_unflatten.add_argument(
         "--timezone-name",
         help="Name of the timezone, defaults to UTC. Should be in tzdata format, e.g. Europe/London")
     parser_unflatten.add_argument(
