@@ -95,12 +95,6 @@ class TestInputFailure(object):
             with pytest.raises(OSError):
                 csvinput.read_sheets()
 
-    def test_csv_no_files(self, tmpdir):
-        csvinput = CSVInput(input_name=tmpdir.strpath)
-        with pytest.raises(ValueError) as e:
-            csvinput.read_sheets()
-        assert 'Main sheet' in text_type(e) and 'not found' in text_type(e)
-
     def test_xlsx_no_file(self, tmpdir):
         xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'))
         if sys.version > '3':

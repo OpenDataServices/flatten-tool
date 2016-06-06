@@ -369,7 +369,7 @@ class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
-        self.sheet_names_map = {sheet_name: sheet_name for sheet_name in self.workbook.get_sheet_names()}
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.get_sheet_names())
 
         sheet_names = list(self.sheet_names_map.keys())
         self.sub_sheet_names = sheet_names
