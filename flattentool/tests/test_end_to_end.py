@@ -978,7 +978,6 @@ class HeadingListInput(SpreadsheetInput):
 
     def read_sheets(self):
         self.sub_sheet_names = list(self.sheets.keys())
-        self.sub_sheet_names.remove(self.main_sheet_name)
 
 
 def run(sheets, schema=None, source_maps=False):
@@ -996,7 +995,6 @@ def run(sheets, schema=None, source_maps=False):
         spreadsheet_input = HeadingListInput(
             input_sheets,
             input_headings,
-            main_sheet_name=sheets[0]['name'],  # Always use the first sheet as the main one
             root_id='',                         # QUESTION: I don't understand root_id
             convert_titles=True,                # Without this, the titles aren't understood
         )
@@ -1005,7 +1003,6 @@ def run(sheets, schema=None, source_maps=False):
         # raise Exception(dereferenced_schema)
         parser = SchemaParser(
             root_schema_dict=dereferenced_schema,
-            main_sheet_name=sheets[0]['name'],
             root_id='main',
             rollup=True
         )
@@ -1015,7 +1012,6 @@ def run(sheets, schema=None, source_maps=False):
         spreadsheet_input = HeadingListInput(
             input_sheets,
             input_headings,
-            main_sheet_name=sheets[0]['name'],
             root_id='',
         )
     spreadsheet_input.read_sheets()
