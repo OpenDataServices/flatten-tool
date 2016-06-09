@@ -2,7 +2,7 @@ from flattentool.schema import SchemaParser
 from flattentool.json_input import JSONParser
 from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
-from flattentool.input import FORMATS as INPUT_FORMATS
+from flattentool.input import FORMATS as INPUT_FORMATS, WITH_CELLS
 import json
 import codecs
 from decimal import Decimal
@@ -104,7 +104,8 @@ def decimal_default(o):
 
 def unflatten(input_name, base_json=None, input_format=None, output_name='releases.json',
               main_sheet_name='releases', encoding='utf8', timezone_name='UTC',
-              root_id='ocid', schema='', convert_titles=False, **_):
+              root_id='ocid', schema='', convert_titles=False, cell_source_map=None,
+              heading_source_map=None, **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
 
@@ -132,7 +133,20 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
-    base[main_sheet_name] = list(spreadsheet_input.unflatten())
-    with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-        json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+    if WITH_CELLS:
+        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
+        base[main_sheet_name] = list(result)
+        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        if cell_source_map:
+            with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
+                json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        if heading_source_map:
+            with codecs.open(heading_source_map, 'w', encoding='utf-8') as fp:
+                json.dump(heading_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
+    else:
+        result = spreadsheet_input.unflatten()
+        base[main_sheet_name] = list(result)
+        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
 
