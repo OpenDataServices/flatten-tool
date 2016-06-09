@@ -252,8 +252,7 @@ class TestSubSheetMainID(object):
                         'properties': object_in_array_example_properties('Btest', 'Ctest')
                     }
                 }
-            },
-            main_sheet_name='custom_main_sheet_name'
+            }
         )
         parser.parse()
         assert set(parser.main_sheet) == set(['id', 'Atest/id'])
@@ -276,8 +275,7 @@ def test_simple_array():
                     }
                 }
             }
-        },
-        main_sheet_name='custom_main_sheet_name'
+        }
     )
     parser.parse()
     assert set(parser.main_sheet) == set(['Atest'])
@@ -297,8 +295,7 @@ def test_nested_simple_array():
                     }
                 }
             }
-        },
-        main_sheet_name='custom_main_sheet_name'
+        }
     )
     parser.parse()
     assert set(parser.main_sheet) == set(['Atest'])

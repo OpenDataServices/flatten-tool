@@ -521,13 +521,11 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
                 inject_root_id(root_id, input_row) for input_row in input_list
             ]
         },
-        main_sheet_name='custom_main',
         **extra_kwargs)
     spreadsheet_input.read_sheets()
 
     parser = SchemaParser(
         root_schema_dict=create_schema(root_id) if use_schema else {"properties": {}},
-        main_sheet_name='custom_main',
         root_id=root_id,
         rollup=True
     )

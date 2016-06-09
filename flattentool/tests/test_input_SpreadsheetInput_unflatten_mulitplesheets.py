@@ -40,8 +40,8 @@ class TestUnflatten(object):
                         'subField/0/testA': 4,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             {
@@ -84,8 +84,8 @@ class TestUnflatten(object):
                         'testA/subField/0/testC': 5,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'testA': {
@@ -124,8 +124,8 @@ class TestUnflatten(object):
                         'sub1Field/0/sub2Field/0/testB': 5,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 2
@@ -162,8 +162,8 @@ class TestUnflatten(object):
                         'subField/0/testA/id': 4,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': {'id': 4}}]}
@@ -192,8 +192,8 @@ class TestUnflatten(object):
                         'subField/0/testA': 5,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         # Check that following lines are parsed correctly
@@ -225,8 +225,8 @@ class TestUnflatten(object):
                         'subField/0/testA': 5,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
@@ -268,7 +268,6 @@ class TestUnflattenRollup(object):
                     }
                 ]
             },
-            main_sheet_name='main'
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -304,7 +303,6 @@ class TestUnflattenRollup(object):
                     }
                 ]
             },
-            main_sheet_name='main'
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -341,8 +339,8 @@ class TestUnflattenEmpty(object):
                         'testD': '',
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         output = list(spreadsheet_input.unflatten())
         assert len(output) == 0
@@ -366,7 +364,6 @@ class TestUnflattenCustomRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='custom')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -390,7 +387,6 @@ class TestUnflattenCustomRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='custom')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -423,7 +419,6 @@ class TestUnflattenCustomRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='custom')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -460,7 +455,6 @@ class TestUnflattenNoRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -482,7 +476,6 @@ class TestUnflattenNoRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -512,7 +505,6 @@ class TestUnflattenNoRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -550,8 +542,8 @@ def test_with_schema():
                     'testR/testB': 4 # test that we can infer this an array from schema
                 }
             ]
-        },
-        main_sheet_name='custom_main')
+        }
+        )
     spreadsheet_input.read_sheets()
 
     parser = SchemaParser(
@@ -568,7 +560,6 @@ def test_with_schema():
                 },
             }
         },
-        main_sheet_name='custom_main',
         root_id='ocid',
         rollup=True
     )

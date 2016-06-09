@@ -143,20 +143,14 @@ class SpreadsheetInput(object):
             else:
                 yield d
 
-    def __init__(self, input_name='', main_sheet_name='', timezone_name='UTC', root_id='ocid', convert_titles=False):
+    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False):
         self.input_name = input_name
-        self.main_sheet_name = main_sheet_name
+        self.root_list_path = root_list_path
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
         self.convert_titles = convert_titles
         self.parser = None
-
-    def get_main_sheet_lines(self):
-        if self.convert_titles:
-            return self.convert_dict_titles(self.get_sheet_lines(self.main_sheet_name))
-        else:
-            return self.get_sheet_lines(self.main_sheet_name)
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -189,8 +183,7 @@ class SpreadsheetInput(object):
 
     def do_unflatten(self):
         main_sheet_by_ocid = OrderedDict()
-        # Eventually we should get rid of the concept of a "main sheet entirely"
-        sheets = [(self.main_sheet_name, self.get_main_sheet_lines())] + list(self.get_sub_sheets_lines())
+        sheets = list(self.get_sub_sheets_lines())
         for i, sheet in enumerate(sheets):
             sheet_name, lines = sheet
             try:
@@ -251,7 +244,7 @@ class SpreadsheetInput(object):
             raise Exception('Can only do a fancy_unflatten() if WITH_CELLS=True')
         cell_tree = self.do_unflatten()
         result = extract_list_to_value(cell_tree)
-        cell_source_map = extract_list_to_error_path([self.main_sheet_name.lower()], cell_tree)
+        cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
         ordered_items = sorted(cell_source_map.items())
         ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
         row_source_map = OrderedDict()
@@ -355,10 +348,6 @@ class CSVInput(SpreadsheetInput):
 
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
-        if self.main_sheet_name+'.csv' not in sheet_file_names:
-            raise ValueError('Main sheet "{}.csv" not found.'.format(self.main_sheet_name))
-        sheet_file_names.remove(self.main_sheet_name+'.csv')
-
         self.sub_sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
 
     def get_sheet_lines(self, sheet_name):
@@ -381,16 +370,8 @@ class XLSXInput(SpreadsheetInput):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
         self.sheet_names_map = {sheet_name: sheet_name for sheet_name in self.workbook.get_sheet_names()}
-        # allow main sheet to be any case
-        for sheet_name in list(self.sheet_names_map):
-            if sheet_name.lower() == self.main_sheet_name.lower():
-                self.sheet_names_map.pop(sheet_name)
-                self.sheet_names_map[self.main_sheet_name] = sheet_name
 
         sheet_names = list(self.sheet_names_map.keys())
-        if self.main_sheet_name not in sheet_names:
-            raise ValueError('Main sheet "{}" not found in workbook.'.format(self.main_sheet_name))
-        sheet_names.remove(self.main_sheet_name)
         self.sub_sheet_names = sheet_names
 
     def get_sheet_headings(self, sheet_name):

@@ -24,7 +24,6 @@ class ListInput(SpreadsheetInput):
 
     def read_sheets(self):
         self.sub_sheet_names = list(self.sheets.keys())
-        self.sub_sheet_names.remove(self.main_sheet_name)
 
 def test_spreadsheetinput_base_fails():
     spreadsheet_input = SpreadsheetInput()
@@ -41,58 +40,54 @@ class TestSuccessfulInput(object):
         subsheet = tmpdir.join('subsheet.csv')
         subsheet.write('colC,colD\ncell5,cell6\ncell7,cell8')
 
-        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
-        assert csvinput.main_sheet_name == 'main'
+        csvinput = CSVInput(input_name=tmpdir.strpath)
 
         csvinput.read_sheets()
 
-        assert list(csvinput.get_main_sheet_lines()) == \
+        assert csvinput.sub_sheet_names == ['main', 'subsheet']
+        assert list(csvinput.get_sheet_lines('main')) == \
             [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
-        assert csvinput.sub_sheet_names == ['subsheet']
         assert list(csvinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
     def test_xlsx_input(self):
-        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='main')
-        assert xlsxinput.main_sheet_name == 'main'
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic.xlsx')
 
         xlsxinput.read_sheets()
 
-        assert list(xlsxinput.get_main_sheet_lines()) == \
+        assert xlsxinput.sub_sheet_names == ['main', 'subsheet']
+        assert list(xlsxinput.get_sheet_lines('main')) == \
             [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
-        assert xlsxinput.sub_sheet_names == ['subsheet']
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
     def test_xlsx_input_integer(self):
-        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer.xlsx', main_sheet_name='main')
-        assert xlsxinput.main_sheet_name == 'main'
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer.xlsx')
 
         xlsxinput.read_sheets()
 
-        assert list(xlsxinput.get_main_sheet_lines()) == \
+        assert list(xlsxinput.get_sheet_lines('main')) == \
             [{'colA': 1}]
-        assert xlsxinput.sub_sheet_names == []
+        assert xlsxinput.sub_sheet_names == ['main']
 
     def test_xlsx_input_formula(self):
         """ When a forumla is present, we should use the value, rather than the
         formula itself. """
 
-        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/formula.xlsx', main_sheet_name='main')
-        assert xlsxinput.main_sheet_name == 'main'
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/formula.xlsx')
 
         xlsxinput.read_sheets()
 
-        assert list(xlsxinput.get_main_sheet_lines()) == \
+        assert xlsxinput.sub_sheet_names == ['main', 'subsheet']
+        assert list(xlsxinput.get_sheet_lines('main')) == \
             [{'colA': 1, 'colB': 2}, {'colA': 2, 'colB': 4}]
-        assert xlsxinput.sub_sheet_names == ['subsheet']
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 3, 'colD': 9}, {'colC': 4, 'colD': 12}]
 
 
 class TestInputFailure(object):
     def test_csv_no_directory(self):
-        csvinput = CSVInput(input_name='nonesensedirectory', main_sheet_name='main')
+        csvinput = CSVInput(input_name='nonesensedirectory')
         if sys.version > '3':
             with pytest.raises(FileNotFoundError):
                 csvinput.read_sheets()
@@ -101,13 +96,13 @@ class TestInputFailure(object):
                 csvinput.read_sheets()
 
     def test_csv_no_files(self, tmpdir):
-        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        csvinput = CSVInput(input_name=tmpdir.strpath)
         with pytest.raises(ValueError) as e:
             csvinput.read_sheets()
         assert 'Main sheet' in text_type(e) and 'not found' in text_type(e)
 
     def test_xlsx_no_file(self, tmpdir):
-        xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'), main_sheet_name='main')
+        xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'))
         if sys.version > '3':
             with pytest.raises(FileNotFoundError):
                 xlsxinput.read_sheets()
@@ -115,32 +110,26 @@ class TestInputFailure(object):
             with pytest.raises(IOError):
                 xlsxinput.read_sheets()
 
-    def test_xlsx_no_main_sheet(self):
-        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic.xlsx', main_sheet_name='notmain')
-        with pytest.raises(ValueError) as e:
-            xlsxinput.read_sheets()
-        assert 'Main sheet "notmain" not found in workbook.' in text_type(e)
-
 
 class TestUnicodeInput(object):
     def test_csv_input_utf8(self, tmpdir):
         main = tmpdir.join('main.csv')
         main.write_text('colA\néαГ😼𝒞人', encoding='utf8')
-        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')  # defaults to utf8
+        csvinput = CSVInput(input_name=tmpdir.strpath)  # defaults to utf8
         csvinput.read_sheets()
-        assert list(csvinput.get_main_sheet_lines()) == \
+        assert list(csvinput.get_sheet_lines('main')) == \
             [{'colA': 'éαГ😼𝒞人'}]
-        assert csvinput.sub_sheet_names == []
+        assert csvinput.sub_sheet_names == ['main']
 
     def test_csv_input_latin1(self, tmpdir):
         main = tmpdir.join('main.csv')
         main.write_text('colA\né', encoding='latin-1')
-        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        csvinput = CSVInput(input_name=tmpdir.strpath)
         csvinput.encoding = 'latin-1'
         csvinput.read_sheets()
-        assert list(csvinput.get_main_sheet_lines()) == \
+        assert list(csvinput.get_sheet_lines('main')) == \
             [{'colA': 'é'}]
-        assert csvinput.sub_sheet_names == []
+        assert csvinput.sub_sheet_names == ['main']
 
     @pytest.mark.xfail(
         sys.version_info < (3, 0),
@@ -148,19 +137,19 @@ class TestUnicodeInput(object):
     def test_csv_input_utf16(self, tmpdir):
         main = tmpdir.join('main.csv')
         main.write_text('colA\néαГ😼𝒞人', encoding='utf16')
-        csvinput = CSVInput(input_name=tmpdir.strpath, main_sheet_name='main')
+        csvinput = CSVInput(input_name=tmpdir.strpath)
         csvinput.encoding = 'utf16'
         csvinput.read_sheets()
-        assert list(csvinput.get_main_sheet_lines()) == \
+        assert list(csvinput.get_sheet_lines('main')) == \
             [{'colA': 'éαГ😼𝒞人'}]
-        assert csvinput.sub_sheet_names == []
+        assert csvinput.sub_sheet_names == ['main']
 
     def test_xlsx_input_utf8(self):
         """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
-        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/unicode.xlsx', main_sheet_name='main')
+        csvinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/unicode.xlsx')
 
-        xlsxinput.read_sheets()
-        assert list(xlsxinput.get_main_sheet_lines())[0]['id'] == 'éαГ😼𝒞人'
+        csvinput.read_sheets()
+        assert list(csvinput.get_sheet_lines('main'))[0]['id'] == 'éαГ😼𝒞人'
 
 
 def test_convert_type(recwarn):

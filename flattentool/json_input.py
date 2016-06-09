@@ -47,10 +47,9 @@ class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
 
-    def __init__(self, json_filename=None, root_json_dict=None, main_sheet_name='main', schema_parser=None, root_list_path=None, root_id='ocid', use_titles=False):
+    def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None, root_id='ocid', use_titles=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
-        self.main_sheet_name = main_sheet_name
         self.root_list_path = root_list_path
         self.root_id = root_id
         self.use_titles = use_titles
