@@ -76,7 +76,7 @@ def create_parser():
         help="Name of the outputted file. Will have an extension appended if format is all.")
     parser_flatten.add_argument(
         "--root-list-path",
-        help="Path of the root list, defaults to releases")
+        help="Path of the root list, defaults to main")
     parser_flatten.add_argument(
         "--rollup",
         action='store_true',
@@ -103,8 +103,8 @@ def create_parser():
         "-b", "--base-json",
         help="A base json file to populate the releases key in.")
     parser_unflatten.add_argument(
-        "-m", "--main-sheet-name",
-        help="The name of the main sheet. Defaults to releases")
+        "-m", "--root-list-path",
+        help="The path in the JSON that will contain the unflattened list. Defaults to main.")
     parser_unflatten.add_argument(
         "-e", "--encoding",
         help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
