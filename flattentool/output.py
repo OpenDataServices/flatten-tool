@@ -5,9 +5,12 @@ formats.
 """
 
 import openpyxl
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 import csv
 import os
 import sys
+from warnings import warn
+import six
 
 if sys.version > '3':
     import csv
@@ -52,7 +55,16 @@ class XLSXOutput(SpreadsheetOutput):
         worksheet.title = sheet_name
         worksheet.append(sheet_header)
         for sheet_line in sheet.lines:
-            worksheet.append([ sheet_line.get(x) for x in sheet_header ])
+            line = []
+            for header in sheet_header:
+                value = sheet_line.get(header)
+                if isinstance(value, six.text_type):
+                    new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
+                    if new_value != value:
+                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value))
+                    value = new_value
+                line.append(value)
+            worksheet.append(line)
 
     def close(self):
         self.workbook.remove_sheet(self.workbook.active)
