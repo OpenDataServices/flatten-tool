@@ -3,9 +3,9 @@ from flattentool.json_input import JSONParser
 from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS, WITH_CELLS
+from flattentool.lib import decimal_default
 import json
 import codecs
-from decimal import Decimal
 from collections import OrderedDict
 
 
@@ -79,26 +79,6 @@ def flatten(input_name, schema=None, output_name='flattened', output_format='all
         raise Exception('The requested format is not available')
 
 
-# From http://bugs.python.org/issue16535
-class NumberStr(float):
-    def __init__(self, o):
-        # We don't call the parent here, since we're deliberately altering it's functionality
-        # pylint: disable=W0231
-        self.o = o
-
-    def __repr__(self):
-        return str(self.o)
-
-    # This is needed for this trick to work in python 3.4
-    def __float__(self):
-        return self
-
-
-def decimal_default(o):
-    if isinstance(o, Decimal):
-        return NumberStr(o)
-    raise TypeError(repr(o) + " is not JSON serializable")
-
 
 def unflatten(input_name, base_json=None, input_format=None, output_name='unflattened.json',
               root_list_path='main', encoding='utf8', timezone_name='UTC',
@@ -132,16 +112,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='unflat
     else:
         base = OrderedDict()
     if WITH_CELLS:
-        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
-        base[root_list_path] = list(result)
-        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
-        if cell_source_map:
-            with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
-                json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
-        if heading_source_map:
-            with codecs.open(heading_source_map, 'w', encoding='utf-8') as fp:
-                json.dump(heading_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        spreadsheet_input.fancy_unflatten(base, root_list_path, output_name, cell_source_map, heading_source_map)
     else:
         result = spreadsheet_input.unflatten()
         base[root_list_path] = list(result)
