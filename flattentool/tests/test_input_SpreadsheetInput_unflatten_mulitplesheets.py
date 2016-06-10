@@ -40,8 +40,8 @@ class TestUnflatten(object):
                         'subField/0/testA': 4,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             {
@@ -84,8 +84,8 @@ class TestUnflatten(object):
                         'testA/subField/0/testC': 5,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'testA': {
@@ -97,8 +97,8 @@ class TestUnflatten(object):
 
     def test_basic_two_sub_sheets(self):
         spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
+            sheets=OrderedDict([
+                ('custom_main', [
                     OrderedDict([
                         ('ocid', 1),
                         ('id', 2),
@@ -107,25 +107,25 @@ class TestUnflatten(object):
                         ('ocid', 1),
                         ('id', 6),
                     ])
-                ],
-                'sub1': [
+                ]),
+                ('sub1', [
                     {
                         'ocid': 1,
                         'id': 2,
                         'sub1Field/0/id': 3,
                         'sub1Field/0/testA': 4,
                     }
-                ],
-                'sub2': [
+                ]),
+                ('sub2', [
                     {
                         'ocid': 1,
                         'id': 2,
                         'sub1Field/0/id': 3,
                         'sub1Field/0/sub2Field/0/testB': 5,
                     }
-                ]
-            },
-            main_sheet_name='custom_main')
+                ])
+            ])
+            )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert len(unflattened) == 2
@@ -162,8 +162,8 @@ class TestUnflatten(object):
                         'subField/0/testA/id': 4,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
             {'ocid': 1, 'id': 2, 'subField': [{'id': 3, 'testA': {'id': 4}}]}
@@ -192,8 +192,8 @@ class TestUnflatten(object):
                         'subField/0/testA': 5,
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         # Check that following lines are parsed correctly
@@ -204,14 +204,14 @@ class TestUnflatten(object):
 
     def test_unmatched_id(self, recwarn):
         spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
+            sheets=OrderedDict([
+                ('custom_main', [
                     {
                         'ocid': 1,
                         'id': 2,
                     }
-                ],
-                'sub': [
+                ]),
+                ('sub', [
                     {
                         'ocid': 1,
                         'id': 100,
@@ -224,9 +224,9 @@ class TestUnflatten(object):
                         'subField/0/id': 3,
                         'subField/0/testA': 5,
                     }
-                ]
-            },
-            main_sheet_name='custom_main')
+                ])
+            ])
+            )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
         assert unflattened == [
@@ -268,7 +268,6 @@ class TestUnflattenRollup(object):
                     }
                 ]
             },
-            main_sheet_name='main'
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -286,25 +285,25 @@ class TestUnflattenRollup(object):
 
     def test_conflicting_rollup(self, recwarn):
         spreadsheet_input = ListInput(
-            sheets={
-                'main': [
+            sheets=OrderedDict([
+                ('main', [
                     {
                         'ocid': 1,
                         'id': 2,
                         'testA/0/id': 3,
                         'testA/0/testB': 4
                     }
-                ],
-                'testA': [
+                ]),
+                ('testA', [
                     {
                         'ocid': 1,
                         'id': 2,
                         'testA/0/id': 3,
                         'testA/0/testB': 5,
                     }
-                ]
-            },
-            main_sheet_name='main'
+                ])
+            ])
+
         )
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -315,9 +314,7 @@ class TestUnflattenRollup(object):
                 'testA': [{
                     'id': 3,
                     'testB': 4
-                    # We currently know that testB will be 4 because the main
-                    # sheet is currently always parsed first, but this may change:
-                    # https://github.com/OpenDataServices/flatten-tool/issues/96
+                    # (Since sheets are parsed in the order they appear, and the first value is used).
                 }]
             }
         ]
@@ -341,8 +338,8 @@ class TestUnflattenEmpty(object):
                         'testD': '',
                     }
                 ]
-            },
-            main_sheet_name='custom_main')
+            }
+            )
         spreadsheet_input.read_sheets()
         output = list(spreadsheet_input.unflatten())
         assert len(output) == 0
@@ -366,7 +363,6 @@ class TestUnflattenCustomRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='custom')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -390,7 +386,6 @@ class TestUnflattenCustomRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='custom')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -399,31 +394,30 @@ class TestUnflattenCustomRootID(object):
 
     def test_basic_two_sub_sheets(self):
         spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
+            sheets=OrderedDict([
+                ('custom_main', [
                     OrderedDict([
                         ('custom', 1),
                         ('id', 2),
                     ])
-                ],
-                'sub1': [
+                ]),
+                ('sub1', [
                     {
                         'custom': 1,
                         'id': 2,
                         'sub1Field/0/id': 3,
                         'sub1Field/0/testA': 4,
                     }
-                ],
-                'sub2': [
+                ]),
+                ('sub2', [
                     {
                         'custom': 1,
                         'id': 2,
                         'sub1Field/0/id': 3,
                         'sub1Field/0/sub2Field/0/testB': 5,
                     }
-                ]
-            },
-            main_sheet_name='custom_main',
+                ])
+            ]),
             root_id='custom')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -460,7 +454,6 @@ class TestUnflattenNoRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -482,7 +475,6 @@ class TestUnflattenNoRootID(object):
                     }
                 ]
             },
-            main_sheet_name='custom_main',
             root_id='')
         spreadsheet_input.read_sheets()
         assert list(spreadsheet_input.unflatten()) == [
@@ -491,28 +483,27 @@ class TestUnflattenNoRootID(object):
 
     def test_basic_two_sub_sheets(self):
         spreadsheet_input = ListInput(
-            sheets={
-                'custom_main': [
+            sheets=OrderedDict([
+                ('custom_main', [
                     OrderedDict([
                         ('id', 2),
                     ])
-                ],
-                'sub1': [
+                ]),
+                ('sub1', [
                     {
                         'id': 2,
                         'sub1Field/0/id': 3,
                         'sub1Field/0/testA': 4,
                     }
-                ],
-                'sub2': [
+                ]),
+                ('sub2', [
                     {
                         'id': 2,
                         'sub1Field/0/id': 3,
                         'sub1Field/0/sub2Field/0/testB': 5,
                     }
-                ]
-            },
-            main_sheet_name='custom_main',
+                ])
+            ]),
             root_id='')
         spreadsheet_input.read_sheets()
         unflattened = list(spreadsheet_input.unflatten())
@@ -550,8 +541,8 @@ def test_with_schema():
                     'testR/testB': 4 # test that we can infer this an array from schema
                 }
             ]
-        },
-        main_sheet_name='custom_main')
+        }
+        )
     spreadsheet_input.read_sheets()
 
     parser = SchemaParser(
@@ -568,7 +559,6 @@ def test_with_schema():
                 },
             }
         },
-        main_sheet_name='custom_main',
         root_id='ocid',
         rollup=True
     )

@@ -9,7 +9,7 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='releases', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', use_titles=False, **_):
+def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', use_titles=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -17,7 +17,7 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
 
     """
 
-    parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=rollup, root_id=root_id, use_titles=use_titles)
+    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
@@ -38,7 +38,7 @@ def create_template(schema, output_name='releases', output_format='all', main_sh
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='releases', output_format='all', main_sheet_name='main', root_list_path='releases', rollup=False, root_id='ocid', use_titles=False, **_):
+def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main', root_list_path='main', rollup=False, root_id='ocid', use_titles=False, **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
@@ -49,8 +49,7 @@ def flatten(input_name, schema=None, output_name='releases', output_format='all'
             schema_filename=schema,
             rollup=rollup,
             root_id=root_id,
-            use_titles=use_titles,
-            main_sheet_name=main_sheet_name)
+            use_titles=use_titles)
         schema_parser.parse()
     else:
         schema_parser = None
@@ -58,7 +57,6 @@ def flatten(input_name, schema=None, output_name='releases', output_format='all'
         json_filename=input_name,
         root_list_path=root_list_path,
         schema_parser=schema_parser,
-        main_sheet_name=main_sheet_name,
         root_id=root_id,
         use_titles=use_titles)
     parser.parse()
@@ -102,8 +100,8 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='releases.json',
-              main_sheet_name='releases', encoding='utf8', timezone_name='UTC',
+def unflatten(input_name, base_json=None, input_format=None, output_name='unflattened.json',
+              root_list_path='main', encoding='utf8', timezone_name='UTC',
               root_id='ocid', schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, **_):
     """
@@ -119,11 +117,11 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
     spreadsheet_input = spreadsheet_input_class(
         input_name=input_name,
         timezone_name=timezone_name,
-        main_sheet_name=main_sheet_name,
+        root_list_path=root_list_path,
         root_id=root_id,
         convert_titles=convert_titles)
     if schema:
-        parser = SchemaParser(schema_filename=schema, main_sheet_name=main_sheet_name, rollup=True, root_id=root_id)
+        parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
         parser.parse()
         spreadsheet_input.parser = parser
     spreadsheet_input.encoding = encoding
@@ -135,7 +133,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
         base = OrderedDict()
     if WITH_CELLS:
         result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
-        base[main_sheet_name] = list(result)
+        base[root_list_path] = list(result)
         with codecs.open(output_name, 'w', encoding='utf-8') as fp:
             json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
         if cell_source_map:
@@ -146,7 +144,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='releas
                 json.dump(heading_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
     else:
         result = spreadsheet_input.unflatten()
-        base[main_sheet_name] = list(result)
+        base[root_list_path] = list(result)
         with codecs.open(output_name, 'w', encoding='utf-8') as fp:
             json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
 

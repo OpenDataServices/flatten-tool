@@ -13,6 +13,7 @@ def test_roundtrip(tmpdir, output_format):
         output_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_format=output_format,
         schema='flattentool/tests/fixtures/release-schema.json',
+        root_list_path='releases',
         main_sheet_name='releases')
     unflatten(
         input_name=tmpdir.join('flattened').strpath+'.'+output_format,
@@ -20,7 +21,7 @@ def test_roundtrip(tmpdir, output_format):
         input_format=output_format,
         base_json=base_name,
         schema='flattentool/tests/fixtures/release-schema.json',
-        main_sheet_name='releases')
+        root_list_path='releases')
     original_json = json.load(open(input_name))
     roundtripped_json = json.load(tmpdir.join('roundtrip.json'))
 
@@ -41,16 +42,15 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
         output_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_format=output_format,
         schema='flattentool/tests/fixtures/360-giving-schema.json',
-        main_sheet_name='grants',
         root_list_path='grants',
         root_id='',
-        use_titles=use_titles)
+        use_titles=use_titles,
+        main_sheet_name='releases')
     unflatten(
         input_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_name=tmpdir.join('roundtrip.json').strpath,
         input_format=output_format,
         schema='flattentool/tests/fixtures/360-giving-schema.json',
-        main_sheet_name='grants',
         root_list_path='grants',
         root_id='',
         convert_titles=use_titles)

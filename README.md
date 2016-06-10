@@ -56,8 +56,8 @@ Can be converted to/from a spreadsheet like [examples/simple/main.csv](examples/
 Using the commands:
 
 ```
-flatten-tool unflatten -f csv examples/simple --main-sheet-name main --root-id='' -o examples/simple.json
-flatten-tool flatten -f csv examples/simple.json --main-sheet-name main --root-list-path main -o examples/simple
+flatten-tool unflatten -f csv examples/simple --root-id='' -o examples/simple.json
+flatten-tool flatten -f csv examples/simple.json -o examples/simple
 ```
 
 
@@ -123,8 +123,8 @@ These are also the spreadsheets that flatten-tool's `flatten` (JSON to Spreadshe
 Commands used to generate this:
 
 ```
-flatten-tool unflatten -f csv examples/array_multisheet --main-sheet-name main --root-id='' -o examples/array_multisheet.json
-flatten-tool flatten -f csv examples/array.json --main-sheet-name main --root-list-path main -o examples/array_multisheet
+flatten-tool unflatten -f csv examples/array_multisheet --root-id='' -o examples/array_multisheet.json
+flatten-tool flatten -f csv examples/array.json -o examples/array_multisheet
 ```
 
 However, there are other "shapes" of spreadsheet that can produce the same JSON.
@@ -137,7 +137,7 @@ New columns for each item of the array:
 |7|8|9|10|11|12|
 
 ```
-flatten-tool unflatten -f csv examples/array_pointer --main-sheet-name main --root-id='' -o examples/array.json
+flatten-tool unflatten -f csv examples/array_pointer --root-id='' -o examples/array.json
 ```
 
 Repeated rows:
@@ -151,7 +151,7 @@ Repeated rows:
 
 
 ```
-flatten-tool unflatten -f csv examples/array_repeat_rows --main-sheet-name main --root-id='' -o examples/array.json
+flatten-tool unflatten -f csv examples/array_repeat_rows --root-id='' -o examples/array.json
 ```
 
 
@@ -367,20 +367,20 @@ And populate this with the package information for your release.
 
 Then, for a populated xlsx template in (in release_populated.xlsx):
 
-    flatten-tool unflatten release_populated.xlsx --base-json base.json --input-format xlsx --output-name release.json
+    flatten-tool unflatten release_populated.xlsx --base-json base.json --input-format xlsx --output-name release.json --root-list-path='releases'
 
 Or for populated CSV files (in the release_populated directory):
 
-    flatten-tool unflatten release_populated --base-json base.json --input-format csv --output-name release.json
+    flatten-tool unflatten release_populated --base-json base.json --input-format csv --output-name release.json --root-list-path='releases'
 
 These produce a release.json file based on the data in the spreadsheets.
 
 
 ### Converting a JSON file to a spreadsheet
 
-    flatten-tool flatten input.json --main-sheet-name releases --output-name unflattened
+    flatten-tool flatten input.json --main-sheet-name releases --output-name flattened --root-list-path='releases'
 
-This will create `unflattened.xlsx` and a `unflattened/` directory of csv files.
+This will create `flattened.xlsx` and a `flattened/` directory of csv files.
 
 ## Usage for 360Giving
 
@@ -392,7 +392,7 @@ to the current directory.
 
     flatten-tool create-template --root-id='' --output-format all --output-name 360giving-template --schema 360-giving-schema.json --main-sheet-name grants --rollup --use-titles
 
-    flatten-tool unflatten --root-id='' -o out.json -f xlsx --main-sheet-name=grants input.xlsx --schema 360-giving-schema.json --convert-titles
+    flatten-tool unflatten --root-id='' -o out.json -f xlsx input.xlsx --schema 360-giving-schema.json --convert-titles --root-list-path='grants'
 
 
 Running the tests
