@@ -9,8 +9,10 @@ Welcome to Flatten Tool's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
+   userguide
+   developerguide
 
 
 Indices and tables
