@@ -4,3 +4,4 @@ __pycache__
 .ve
 *.swp
 .coverage
+docs/_build
