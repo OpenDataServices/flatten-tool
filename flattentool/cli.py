@@ -83,7 +83,7 @@ def create_parser():
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
     parser_flatten.add_argument(
         "-r", "--root-id",
-        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
+        help="Root ID of the data format, e.g. ocid for OCDS")
     parser_flatten.add_argument(
         "--use-titles",
         action='store_true',

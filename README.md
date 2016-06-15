@@ -56,7 +56,7 @@ Can be converted to/from a spreadsheet like [examples/simple/main.csv](examples/
 Using the commands:
 
 ```
-flatten-tool unflatten -f csv examples/simple --root-id='' -o examples/simple.json
+flatten-tool unflatten -f csv examples/simple -o examples/simple.json
 flatten-tool flatten -f csv examples/simple.json -o examples/simple
 ```
 
@@ -123,7 +123,7 @@ These are also the spreadsheets that flatten-tool's `flatten` (JSON to Spreadshe
 Commands used to generate this:
 
 ```
-flatten-tool unflatten -f csv examples/array_multisheet --root-id='' -o examples/array_multisheet.json
+flatten-tool unflatten -f csv examples/array_multisheet -o examples/array_multisheet.json
 flatten-tool flatten -f csv examples/array.json -o examples/array_multisheet
 ```
 
@@ -137,7 +137,7 @@ New columns for each item of the array:
 |7|8|9|10|11|12|
 
 ```
-flatten-tool unflatten -f csv examples/array_pointer --root-id='' -o examples/array.json
+flatten-tool unflatten -f csv examples/array_pointer -o examples/array.json
 ```
 
 Repeated rows:
@@ -151,7 +151,7 @@ Repeated rows:
 
 
 ```
-flatten-tool unflatten -f csv examples/array_repeat_rows --root-id='' -o examples/array.json
+flatten-tool unflatten -f csv examples/array_repeat_rows -o examples/array.json
 ```
 
 
@@ -353,7 +353,7 @@ You can also upload the file to http://standard.open-contracting.org/validator/
 
 Download https://raw.githubusercontent.com/open-contracting/standard/1.0/standard/schema/release-schema.json to the current directory.
 
-    flatten-tool create-template --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
+    flatten-tool create-template --root-id=ocid --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
 
 This will create `template.xlsx` and a `template/` directory of csv files.
 
@@ -368,18 +368,18 @@ And populate this with the package information for your release.
 
 Then, for a populated xlsx template in (in release_populated.xlsx):
 
-    flatten-tool unflatten release_populated.xlsx --base-json base.json --input-format xlsx --output-name release.json --root-list-path='releases'
+    flatten-tool unflatten release_populated.xlsx --root-id=ocid --base-json base.json --input-format xlsx --output-name release.json --root-list-path='releases'
 
 Or for populated CSV files (in the release_populated directory):
 
-    flatten-tool unflatten release_populated --base-json base.json --input-format csv --output-name release.json --root-list-path='releases'
+    flatten-tool unflatten release_populated --root-id=ocid --base-json base.json --input-format csv --output-name release.json --root-list-path='releases'
 
 These produce a release.json file based on the data in the spreadsheets.
 
 
 ### Converting a JSON file to a spreadsheet
 
-    flatten-tool flatten input.json --main-sheet-name releases --output-name flattened --root-list-path='releases'
+    flatten-tool flatten input.json --root-id=ocid --main-sheet-name releases --output-name flattened --root-list-path='releases'
 
 This will create `flattened.xlsx` and a `flattened/` directory of csv files.
 
@@ -391,9 +391,9 @@ Download
 https://raw.githubusercontent.com/ThreeSixtyGiving/standard/master/schema/360-giving-schema.json
 to the current directory.
 
-    flatten-tool create-template --root-id='' --output-format all --output-name 360giving-template --schema 360-giving-schema.json --main-sheet-name grants --rollup --use-titles
+    flatten-tool create-template --output-format all --output-name 360giving-template --schema 360-giving-schema.json --main-sheet-name grants --rollup --use-titles
 
-    flatten-tool unflatten --root-id='' -o out.json -f xlsx input.xlsx --schema 360-giving-schema.json --convert-titles --root-list-path='grants'
+    flatten-tool unflatten -o out.json -f xlsx input.xlsx --schema 360-giving-schema.json --convert-titles --root-list-path='grants'
 
 
 Running the tests
