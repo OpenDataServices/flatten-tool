@@ -2,7 +2,7 @@ Spreadsheet Designer's Guide
 ++++++++++++++++++++++++++++
 
 Flatten Tool is a Python library and command line interface for converting
-spreadsheets containing one or more sheets to a JSON tree strucutre and back
+spreadsheets containing one or more sheets to a JSON tree structure and back
 again. Flatten Tool can make use of a JSON Schema to help with this process.
 
 In this guide you'll learn the various rules Flatten Tool uses to convert one
@@ -51,7 +51,7 @@ Let's try converting the sheet to the JSON above.
         ]
     }
 
-That's not too far off what we wanted. You can see the data strucutre we
+That's not too far off what we wanted. You can see the data structure we
 expected, but Flatten Tool has guessed that each row in the spreadsheet
 represents something that should be under a `main` key. That isn't quite right,
 so let's tell it that the rows are cafes and should come under a `cafe` key.
@@ -274,7 +274,7 @@ Multiple sheets
 So far, all the examples have just used one sheet. When multiple sheets are
 involved, the behaviour isn't much different. In effect, all Flatten Tool does
 is take the JSON structure produced after processing the first sheet, and use
-it as the base JSON for proecessing the next sheet.
+it as the base JSON for processing the next sheet.
 
 Once all the sheets have been processed the resulting JSON is returned.
 
@@ -348,7 +348,7 @@ Objects
 =======
 
 Now you know that the column headings are really just a JSON Pointer
-specification, and the index values are only treated as indeicators of the
+specification, and the index values are only treated as indicators of the
 presence of lists (and not their order) you can write some more sophisticated
 examples.
 
@@ -599,7 +599,7 @@ Typed fields
 
 In the table example above, the table numbers are produced as strings in the
 JSON. The JSON Pointer specification doesn't provide any way of telling you
-what type the value being pointed to is, so we can't get the infomation from
+what type the value being pointed to is, so we can't get the information from
 the column headings.
 
 There are two places we can get it from though:
@@ -688,7 +688,7 @@ The column headings `table/0/number`, `table/1/number` and `table/2/number` aren
 
 Flatten Tool supports this if you do the following:
 
-* Write a JSON Schema specifiying the titles being used and specify it with the `--schema` flag
+* Write a JSON Schema specifying the titles being used and specify it with the `--schema` flag
 * Use `:` characters instead of `/` characters in the headings
 * Specify the `--convert-titles` flag on the command line
 
@@ -807,7 +807,7 @@ Flatten Tool will merge objects as follows:
   being processed, effectively overwriting what is there already and generating a
   warning
 
-Single Sheet
+Single sheet
 ------------
 
 Here's an example that demonstrates these rules:
@@ -821,9 +821,9 @@ Let's run it and see what is generated:
 .. code-block:: bash
 
     $ flatten-tool unflatten -f csv examples/cafe/relationship-merge-single --root-list-path 'cafe'
-    /Users/james/repo/flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet data: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
+    .../flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet data: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
       key, id_info, debug_info.get('sheet_name'), base_value, value))
-    /Users/james/repo/flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet data: "3" != "4". If you were not expecting merging you may have a duplicate ID.
+    .../flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet data: "3" != "4". If you were not expecting merging you may have a duplicate ID.
       key, id_info, debug_info.get('sheet_name'), base_value, value))
 
 Notice the warnings above about values being over-written.
@@ -844,10 +844,10 @@ The actual JSON contains a single Cafe with `id` value `CAFE-HEALTH` and all the
     }
 
 
-Multiple Sheets
+Multiple sheets
 ---------------
 
-Here's an example that uses the same data as the single sheet example above, but spreads the rows over four sheets named `a.csv`, `b.csv`, `c.csv` and `d.csv`:
+Here's an example that uses the same data as the single sheet example above, but spreads the rows over four sheets named `a`, `b`, `c` and `d`:
 
 
 .. csv-table:: sheet: a
@@ -873,9 +873,9 @@ Here's an example that uses the same data as the single sheet example above, but
 .. code-block:: bash
 
     $ flatten-tool unflatten -f csv examples/cafe/relationship-merge-multiple/ --root-list-path 'cafe'
-    /Users/james/repo/flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet b: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
+    .../flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet b: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
       key, id_info, debug_info.get('sheet_name'), base_value, value))
-    /Users/james/repo/flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
+    .../flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
       key, id_info, debug_info.get('sheet_name'), base_value, value))
 
 And the rest of the output:
@@ -968,7 +968,7 @@ Index behaviour
 ---------------
 
 Within the list of tables for each cafe, you might have noticed that each table
-number has a JSON Pointer that ends inwith `/0/number`. Since they all have the
+number has a JSON Pointer that ends in with `/0/number`. Since they all have the
 same index, they are simply ordered within each cafe in the order of the rows
 in the sheet.
 
@@ -1065,7 +1065,7 @@ key before `tables`.
 If the sheets were processed the other way around the data would be the same,
 but the ordering different.
 
-Reciept System Example
+Receipt System Example
 ======================
 
 Now that you've seen some of the details of how Flatten Tool works we can work
