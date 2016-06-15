@@ -9,7 +9,7 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', use_titles=False, **_):
+def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id=None, use_titles=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -38,7 +38,7 @@ def create_template(schema, output_name='template', output_format='all', main_sh
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main', root_list_path='main', rollup=False, root_id='ocid', use_titles=False, **_):
+def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main', root_list_path='main', rollup=False, root_id=None, use_titles=False, **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
@@ -102,7 +102,7 @@ def decimal_default(o):
 
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path='main', encoding='utf8', timezone_name='UTC',
-              root_id='ocid', schema='', convert_titles=False, cell_source_map=None,
+              root_id=None, schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
