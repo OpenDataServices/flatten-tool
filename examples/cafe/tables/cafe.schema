@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "TableObject": {
+            "type": "object",
+            "properties": {
+                "number": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "table": {
+            "items": {
+                "$ref": "#/definitions/TableObject"
+            },
+            "type": "array"
+        }
+    }
+}
