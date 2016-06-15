@@ -6,20 +6,27 @@ spreadsheets containing one or more sheets to a JSON tree strucutre and back
 again. Flatten Tool can make use of a JSON Schema to help with this process.
 
 In this guide you'll learn the various rules Flatten Tool uses to convert one
-or more sheets in a spreadsheet into a the JSON tree by looking at lots of
+or more sheets in a spreadsheet into the JSON tree by looking at lots of
 different examples based around Cafes. Once you've understood how Flatten Tool
-works you should be able to design your own spreadsheet strucutres, debug
+works you should be able to design your own spreadsheet structures, debug
 problems in your spreadsheets and be able to make use of Flatten Tool's more
 advanced features.
 
-Before we get into too much detail though, let's get started by having a look
+Before we get into too much detail though, let's start by looking
 at the Command Line API.
 
 Command-Line API
 ================
 
-Let's start with the simplest possible example, a JSON structure for listing
-the names of cafes:
+To demonstrate the command line API you'll start with the simplest possible
+example, a sheet listing Cafe names:
+
+.. csv-table::
+   :file: ../examples/cafe/simple/data.csv
+   :header-rows: 1
+
+We'd like Flatten Tool to convert it to the following JSON structure for a list
+of cafes, with the name being the only information we want for each one:
 
 .. code-block:: json
 
@@ -31,20 +38,11 @@ the names of cafes:
         ]
     }
 
-Here's a sheet that Flatten Tool can convert:
-
-.. csv-table::
-   :file: ../examples/cafe/simple/data.csv
-   :header-rows: 1
-
-
-If you passed this to Flatten Tool it would produce something similar to the
-same document we have above. Let's try it. By default Flatten Tool writes
-output to `unflattened.json`, so we use this command:
+Let's try converting the sheet to the JSON above.
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id='' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id=''
     {
         "main": [
             {
@@ -53,11 +51,11 @@ output to `unflattened.json`, so we use this command:
         ]
     }
 
-That's not too far off. You can see the data strucutre we expected, but Flatten
-Tool has guessed that each row in the spreadsheet represents something that
-should be under a `main` key. That isn't quite right, so let's tell it that the
-rows are cafes and should come under a `cafe` key. You do that with a *root
-list path*.
+That's not too far off what we wanted. You can see the data strucutre we
+expected, but Flatten Tool has guessed that each row in the spreadsheet
+represents something that should be under a `main` key. That isn't quite right,
+so let's tell it that the rows are cafes and should come under a `cafe` key.
+You do that with a *root list path*.
 
 
 Root List Path
@@ -73,7 +71,7 @@ JSON we were expecting:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -89,28 +87,29 @@ That's what we expected. Great.
     Although `--root-list-path` sounds like it accepts a path such as
     `building/cafe`, it only accepts a single key.
 
-
-Stdout and Stdin Support
+Writing output to a file
 ------------------------
 
-TODO Not implemented yet
+By default, Flatten Tool now prints its output to stdout. If you want it to instead write its output to a file you can use the `-o` option.
 
-Flatten Tool doesn't print to stdout yet. This example writes to `unflattened.json` instead:
-
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/one-cafe --root-id=''
-
-You might also expect it to read from stdin like this:
+Here's the same example, this time writing its output to `unflattened.json`:
 
 .. code-block:: bash
 
-    cat << EOF | flatten-tool unflatten -f csv -
-    cafe/0/name,
-    Healthy Cafe,
-    EOF
+    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id='' --root-list-path 'cafe' -o unflattened.json
 
-But this is unsupported at the moment.
+Let's `cat` the output to check it is the same:
+
+.. code-block:: bash
+
+    $ cat unflattened.json
+    {
+        "cafe": [
+            {
+                "name": "Healthy Cafe"
+            }
+        ]
+    }
 
 
 Base JSON
@@ -136,7 +135,7 @@ too, you'll see this, with the spreadsheet rows merged in:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/one-cafe --root-id='' --root-list-path='cafe' --base-json=examples/cafe/one-cafe/base.json && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/one-cafe --root-id='' --root-list-path='cafe' --base-json=examples/cafe/one-cafe/base.json
     {
         "country": "England",
         "cafe": [
@@ -159,7 +158,7 @@ Let's consider our first example again:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/simple --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -219,7 +218,7 @@ Cafe` at `/cafe/1/name` producing this:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple-row --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/simple-row --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -255,7 +254,7 @@ The result is:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple-col --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/simple-col --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -306,7 +305,7 @@ When you run the example you get this:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/multiple --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/multiple --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -391,7 +390,7 @@ Let's try it:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/object --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/object --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -464,7 +463,7 @@ For example, consider this spreadsheet data:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/tables --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -503,7 +502,7 @@ We'd still expect 3 tables in the output, but we expect Flatten Tool to re-order
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables-index --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/tables-index --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -533,7 +532,7 @@ we'll specify it at the end:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables-index-reserved/ --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/tables-index-reserved/ --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -580,7 +579,7 @@ And the result:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/plain-list --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/plain-list --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -620,7 +619,7 @@ xlsx file.
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f xlsx examples/cafe/tables.xlsx --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f xlsx examples/cafe/tables.xlsx --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -651,7 +650,7 @@ Here's an example of a JSON Schema that can provide the typing information:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables --root-id='' --root-list-path 'cafe' --schema=examples/cafe/tables/cafe.schema && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/tables --root-id='' --root-list-path 'cafe' --schema=examples/cafe/tables/cafe.schema
     {
         "cafe": [
             {
@@ -709,7 +708,7 @@ Here's what we get when we run it:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables-human-1 --root-id='' --convert-titles --schema=examples/cafe/tables-human-1/cafe.schema --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/tables-human-1 --root-id='' --convert-titles --schema=examples/cafe/tables-human-1/cafe.schema --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -751,7 +750,7 @@ Here's what we get when we run this new data with this schema:
 
 .. code-block:: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables-human-2 --root-id='' --convert-titles --schema=examples/cafe/tables-human-1/cafe.schema --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/tables-human-2 --root-id='' --convert-titles --schema=examples/cafe/tables-human-1/cafe.schema --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -831,9 +830,8 @@ Notice the warnings above about values being over-written.
 
 The actual JSON contains a single Cafe with `id` value `CAFE-HEALTH` and all the values merged in:
 
-.. code-block:: bash
+.. code-block:: json
 
-    $ cat unflattened.json
     {
         "cafe": [
             {
@@ -880,9 +878,10 @@ Here's an example that uses the same data as the single sheet example above, but
     /Users/james/repo/flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
       key, id_info, debug_info.get('sheet_name'), base_value, value))
 
-.. code-block:: bash
+And the rest of the output:
 
-    $ cat unflattened.json
+.. code-block:: json
+
     {
         "cafe": [
             {
@@ -929,7 +928,7 @@ Let's run this example:
 
 ::
 
-    $ flatten-tool unflatten -f csv examples/cafe/relationship-lists-of-objects --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/relationship-lists-of-objects --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {
@@ -1025,7 +1024,7 @@ Since nothing depends on the dishes yet, they don't have to have an ID themselve
 
 ::
 
-    $ flatten-tool unflatten -f csv examples/cafe/relationship-multiple --root-id='' --root-list-path 'cafe' && cat unflattened.json
+    $ flatten-tool unflatten -f csv examples/cafe/relationship-multiple --root-id='' --root-list-path 'cafe'
     {
         "cafe": [
             {

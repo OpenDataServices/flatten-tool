@@ -100,7 +100,7 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='unflattened.json',
+def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path='main', encoding='utf8', timezone_name='UTC',
               root_id='ocid', schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, **_):
@@ -134,8 +134,11 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='unflat
     if WITH_CELLS:
         result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
         base[root_list_path] = list(result)
-        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        if output_name is None:
+            print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
+        else:
+            with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+                json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
         if cell_source_map:
             with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
                 json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
@@ -145,6 +148,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='unflat
     else:
         result = spreadsheet_input.unflatten()
         base[root_list_path] = list(result)
-        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        if output_name is None:
+            print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
+        else:
+            with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+                json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
 
