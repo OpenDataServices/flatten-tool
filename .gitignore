@@ -1,7 +1,10 @@
-*.pyc
-__pycache__
 *.egg-info
-.ve
+*.pyc
 *.swp
+.cache
 .coverage
+.coverage.*
+.ve
+__pycache__
 docs/_build
+examples/cafe/simple-file/unflattened.json

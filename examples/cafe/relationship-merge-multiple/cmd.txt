@@ -1,0 +1,1 @@
+$ flatten-tool unflatten -f=csv --root-list-path=cafe examples/cafe/relationship-merge-multiple/

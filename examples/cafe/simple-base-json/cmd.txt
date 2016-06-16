@@ -1,0 +1,1 @@
+$ flatten-tool unflatten -f=csv --root-list-path=cafe --base-json=examples/cafe/simple-base-json/base.json examples/cafe/simple-base-json/

@@ -15,6 +15,7 @@ advanced features.
 Before we get into too much detail though, let's start by looking
 at the Command Line API.
 
+
 Command-Line API
 ================
 
@@ -22,34 +23,21 @@ To demonstrate the command line API you'll start with the simplest possible
 example, a sheet listing Cafe names:
 
 .. csv-table::
-   :file: ../examples/cafe/simple/data.csv
+   :file: ../examples/cafe/too-simple/data.csv
    :header-rows: 1
 
 We'd like Flatten Tool to convert it to the following JSON structure for a list
 of cafes, with the name being the only information we want for each one:
 
-.. code-block:: json
-
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/simple/expected.json
+   :language: json
 
 Let's try converting the sheet to the JSON above.
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/simple
-    {
-        "main": [
-            {
-                "name": "Healthy Cafe"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/too-simple/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/too-simple/expected.json
+   :language: json
 
 That's not too far off what we wanted. You can see the data structure we
 expected, but Flatten Tool has guessed that each row in the spreadsheet
@@ -69,16 +57,10 @@ the last example.
 Let's set `--root-list-path` to `cafe` so that our original input generates the
 JSON we were expecting:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/simple --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/simple/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/simple/expected.json
+   :language: json
 
 That's what we expected. Great.
 
@@ -87,29 +69,19 @@ That's what we expected. Great.
     Although `--root-list-path` sounds like it accepts a path such as
     `building/cafe`, it only accepts a single key.
 
+
 Writing output to a file
 ------------------------
 
-By default, Flatten Tool now prints its output to stdout. If you want it to instead write its output to a file you can use the `-o` option.
+By default, Flatten Tool now prints its output to stdout. If you want it to
+instead write its output to a file you can use the `-o` option.
 
 Here's the same example, this time writing its output to `unflattened.json`:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/simple --root-list-path 'cafe' -o unflattened.json
-
-Let's `cat` the output to check it is the same:
-
-.. code-block:: bash
-
-    $ cat unflattened.json
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/simple-file/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/simple-file/expected.json
+   :language: json
 
 
 Base JSON
@@ -121,29 +93,22 @@ data into that file.
 
 For example, if `base.json` looks like this:
 
-.. literalinclude:: ../examples/cafe/one-cafe/base.json
+.. literalinclude:: ../examples/cafe/simple-base-json/base.json
    :language: json
 
 and the data looks like this:
 
 .. csv-table::
-   :file: ../examples/cafe/one-cafe/data.csv
+   :file: ../examples/cafe/simple-base-json/data.csv
    :header-rows: 1
 
 When you run this command on the same CSV file and using the `--base-json` flag
 too, you'll see this, with the spreadsheet rows merged in:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/one-cafe --root-list-path='cafe' --base-json=examples/cafe/one-cafe/base.json
-    {
-        "country": "England",
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/simple-base-json/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/simple-base-json/expected.json
+   :language: json
 
 .. caution ::
 
@@ -154,21 +119,17 @@ too, you'll see this, with the spreadsheet rows merged in:
 Understanding JSON Pointer and how Flatten Tool uses it
 =======================================================
 
-Let's consider our first example again:
+Let's consider our first example again and explore the algortim Flatten Tool
+uses to make it work:
 
-.. code-block:: bash
+.. csv-table::
+   :file: ../examples/cafe/simple/data.csv
+   :header-rows: 1
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            }
-        ]
-    }
-
-Although so far we've been using a very simple example, it is worth
-understanding a little about the algorithm being applied behind the scenes.
+.. literalinclude:: ../examples/cafe/simple/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/simple/expected.json
+   :language: json
 
 The key to understanding how Flatten Tool represents more complex examples in a
 spreadsheet lies in knowing about the `JSON Pointer specification
@@ -204,6 +165,7 @@ In this example there is only one sheet, and only one row, so when parsing that
 first row, `/cafe/0/` is appended to `name` to give the JSON pointer
 `/cafe/0/name`. Flatten Tool then writes `Health Cafe` in the correct position.
 
+
 Multiple rows
 -------------
 
@@ -216,19 +178,11 @@ Let's look at a multi-row example:
 This time `Healthy Cafe` would be placed at `/cafe/0/name` and `Vegetarian
 Cafe` at `/cafe/1/name` producing this:
 
-.. code-block:: bash
+.. literalinclude:: ../examples/cafe/simple-row/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/simple-row/expected.json
+   :language: json
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple-row --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            },
-            {
-                "name": "Vegetarian Cafe"
-            }
-        ]
-    }
 
 Multiple columns
 ----------------
@@ -238,7 +192,6 @@ Let's add the cafe address to the spreadsheet:
 .. csv-table::
    :header-rows: 1
    :file: ../examples/cafe/simple-col/data.csv
-
 
 .. note ::
 
@@ -252,21 +205,11 @@ placed at `/cafe/0/address`. `Vegetarian Cafe` at `/cafe/1/name` as before and
 
 The result is:
 
-.. code-block:: bash
+.. literalinclude:: ../examples/cafe/simple-col/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/simple-col/expected.json
+   :language: json
 
-    $ flatten-tool unflatten -f csv examples/cafe/simple-col --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "address": "123 City Street, London"
-            },
-            {
-                "name": "Vegetarian Cafe",
-                "address": "42 Town Road, Bristol"
-            }
-        ]
-    }
 
 Multiple sheets
 ---------------
@@ -295,31 +238,20 @@ sheets:
    :file: ../examples/cafe/multiple/data.csv
    :header-rows: 1
 
-
 .. csv-table:: sheet: other
    :file: ../examples/cafe/multiple/other.csv
    :header-rows: 1
 
-
 When you run the example you get this:
 
-.. code-block:: bash
+.. literalinclude:: ../examples/cafe/multiple/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/multiple/expected.json
+   :language: json
 
-    $ flatten-tool unflatten -f csv examples/cafe/multiple --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-            },
-            {
-                "name": "Vegetarian Cafe"
-            }
-        ]
-    }
-
-The order is because the `data` sheet was processed before the `other` sheet. The files are
-processed in the order returned by `os.listdir()` so you should name them in
-the order you would like them processed.
+The order is because the `data` sheet was processed before the `other` sheet.
+The files are processed in the order returned by `os.listdir()` so you should
+name them in the order you would like them processed.
 
 Index behaviour
 ~~~~~~~~~~~~~~~
@@ -355,26 +287,8 @@ examples.
 Rather than have the address just as string, we could represent it as an
 object. For example, imagine you'd like out output JSON in this structure:
 
-.. code-block:: json
-
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "address": {
-                    "street": "123 City Street",
-                    "city": "London"
-                }
-            },
-            {
-                "name": "Vegetarian Cafe",
-                "address": {
-                    "street": "42 Harbour Way",
-                    "city": "Bristol"
-                }
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/object/expected.json
+   :language: json
 
 You can do this by knowing that the JSON Pointer to "123 City Street" would be
 `/cafe/0/address/street` so that we would need to name the street column
@@ -388,29 +302,10 @@ Here's the data:
 
 Let's try it:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/object --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "address": {
-                    "street": "123 City Street",
-                    "city": "London"
-                }
-            },
-            {
-                "name": "Vegetarian Cafe",
-                "address": {
-                    "street": "42 Town Road",
-                    "city": "Bristol"
-                }
-            }
-        ]
-    }
-
-
+.. literalinclude:: ../examples/cafe/object/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/object/expected.json
+   :language: json
 
 Lists of Objects
 ================
@@ -427,27 +322,8 @@ object represents a table, and each table has a `number` key. Let's imagine the
 `Healthy Cafe` has three tables numbered 1, 2 and 3. We'd like to produce this
 structure:
 
-.. code-block:: json
-
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe"
-                "table": [
-                    {
-                        "number": "1",
-                    },
-                    {
-                        "number": "2",
-                    },
-                    {
-                        "number": "3",
-                    }
-                ]
-            }
-        ]
-    }
-
+.. literalinclude:: ../examples/cafe/list-of-objects/expected.json
+   :language: json
 
 In the relationships section later, we'll see other ways of arranging this data
 using *identifiers*, but for now we'll demonstrate an approach that puts all
@@ -460,37 +336,23 @@ For example, consider this spreadsheet data:
    :file: ../examples/cafe/one-table/data.csv
    :header-rows: 1
 
+.. literalinclude:: ../examples/cafe/list-of-objects/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/list-of-objects/expected.json
+   :language: json
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/tables --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": "1"
-                    },
-                    {
-                        "number": "2"
-                    },
-                    {
-                        "number": "3"
-                    }
-                ]
-            }
-        ]
-    }
+We'll use this example of tables (of the furniture variety) in subsequent
+examples.
 
 Index behaviour
 ---------------
 
-Just as in the multiple sheets example earlier, the exact numbers at the table index
-positions aren't too important to Flatten Tool. They just tell Flatten Tool
-that the value in the cell is part of an object in a list.
+Just as in the multiple sheets example earlier, the exact numbers at the table
+index positions aren't too important to Flatten Tool. They just tell Flatten
+Tool that the value in the cell is part of an object in a list.
 
-In this particular case though, Flatten Tool will keep columns in order implied by the indexes.
+In this particular case though, Flatten Tool will keep columns in order implied
+by the indexes.
 
 For example here the index values are such that the lowest number comes last:
 
@@ -498,60 +360,26 @@ For example here the index values are such that the lowest number comes last:
    :file: ../examples/cafe/tables-index/data.csv
    :header-rows: 1
 
-We'd still expect 3 tables in the output, but we expect Flatten Tool to re-order the columns so that table 3 comes first, then 2, then 1:
+We'd still expect 3 tables in the output, but we expect Flatten Tool to
+re-order the columns so that table 3 comes first, then 2, then 1:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/tables-index --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": "3"
-                    },
-                    {
-                        "number": "2"
-                    },
-                    {
-                        "number": "1"
-                    }
-                ]
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/tables-index/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/tables-index/expected.json
+   :language: json
 
 Child objects like these tables can, of course have more than one key. Let's
 add a `reserved` key to table number 1 but to try to confuse Flatten Tool,
 we'll specify it at the end:
 
 .. csv-table::
-   :file: ../examples/cafe/tables-index/data.csv
+   :file: ../examples/cafe/tables-index-reserved/data.csv
    :header-rows: 1
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/tables-index-reserved/ --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": "3"
-                    },
-                    {
-                        "number": "2"
-                    },
-                    {
-                        "number": "1",
-                        "reserved": "True"
-                    }
-                ]
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/tables-index-reserved/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/tables-index-reserved/expected.json
+   :language: json
 
 Notice that Flatten Tool correctly associated the `reserved` key with table 1
 because of the index numbered `30`, even though the columns weren't next to
@@ -577,30 +405,18 @@ Here's some example data:
 
 And the result:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/plain-list --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "tag": []
-            },
-            {
-                "name": "Vegetarian Cafe",
-                "tag": []
-            }
-        ]
-    }
-
+.. literalinclude:: ../examples/cafe/plain-list/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/plain-list/expected.json
+   :language: json
 
 Typed fields
 ============
 
-In the table example above, the table numbers are produced as strings in the
-JSON. The JSON Pointer specification doesn't provide any way of telling you
-what type the value being pointed to is, so we can't get the information from
-the column headings.
+In the table examples you've seen so far, the table numbers are produced as
+strings in the JSON. The JSON Pointer specification doesn't provide any way of
+telling you what type the value being pointed to is, so we can't get the
+information from the column headings.
 
 There are two places we can get it from though:
 
@@ -613,74 +429,44 @@ Using spreadsheet cell formatting
 CSV files only support string values, so the easiest way to get the example
 above to use integers would be to use a spreadsheet format such xlsx that
 supported integers and make sure the cell type was number. Flatten Tool would
-pass the cell value through to the JSON as a number in that case. Make sure you
-specify the correct format `-f xlsx` on the command line if you want to use an
-xlsx file.
+pass the cell value through to the JSON as a number in that case.
 
-.. code-block:: bash
+.. note ::
 
-    $ flatten-tool unflatten -f xlsx examples/cafe/tables.xlsx --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": 3
-                    },
-                    {
-                        "number": 2
-                    },
-                    {
-                        "number": 1
-                    }
-                ]
-            }
-        ]
-    }
+    Make sure you specify the correct format `-f=xlsx` on the command line if
+    you want to use an xlsx file.
 
+.. literalinclude:: ../examples/cafe/tables-typed-xlsx/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/tables-typed-xlsx/expected.json
+   :language: json
 
 Using a JSON Schema with types
 ------------------------------
 
 Here's an example of a JSON Schema that can provide the typing information:
 
-.. literalinclude:: ../examples/cafe/tables/cafe.schema
+.. literalinclude:: ../examples/cafe/tables-typed-schema/cafe.schema
    :language: json
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/tables --root-list-path 'cafe' --schema=examples/cafe/tables/cafe.schema
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": 1
-                    },
-                    {
-                        "number": 2
-                    },
-                    {
-                        "number": 3
-                    }
-                ]
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/tables-typed-schema/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/tables-typed-schema/expected.json
+   :language: json
 
 
 Human-friendly headings using a JSON Schema with titles
 =======================================================
 
-Let's take a closer look at the last example again:
+Let's take a closer look at the list of objects example from earlier again:
 
 .. csv-table::
-   :file: ../examples/cafe/tables/data.csv
+   :file: ../examples/cafe/list-of-objects/data.csv
    :header-rows: 1
 
-The column headings `table/0/number`, `table/1/number` and `table/2/number` aren't very human readable, wouldn't it be great if we could use headings like this:
+The column headings `table/0/number`, `table/1/number` and `table/2/number`
+aren't very human readable, wouldn't it be great if we could use headings like
+this:
 
 .. csv-table::
    :file: ../examples/cafe/tables-human-1/data.csv
@@ -701,46 +487,31 @@ Here's a new JSON schema for this example:
 .. literalinclude:: ../examples/cafe/tables-human-1/cafe.schema
    :language: json
 
-
 Notice that both `Table` and `Number` are specified as titles.
 
 Here's what we get when we run it:
 
-.. code-block:: bash
-
-    $ flatten-tool unflatten -f csv examples/cafe/tables-human-1 --convert-titles --schema=examples/cafe/tables-human-1/cafe.schema --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": 1
-                    },
-                    {
-                        "number": 2
-                    },
-                    {
-                        "number": 3
-                    }
-                ]
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/tables-human-1/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/tables-human-1/expected.json
+   :language: json
 
 
 Optional array indexes
 ----------------------
 
-Looking at the JSON Schema from the last example again you'll see that `table` is specified as an array type:
+Looking at the JSON Schema from the last example again you'll see that `table`
+is specified as an array type:
 
-.. literalinclude:: ../examples/cafe/tables-human-1/cafe.schema
+.. literalinclude:: ../examples/cafe/tables-human-2/cafe.schema
    :language: json
 
-This means that Flatten Tool can work out that
-any names specified in that column are part of that array. If you had an example with just one column representing each level of the tree, you could miss out the index in the heading when using `--convert-titles`.
+This means that Flatten Tool can work out that any names specified in that
+column are part of that array. If you had an example with just one column
+representing each level of the tree, you could miss out the index in the
+heading when using `--convert-titles`.
 
-Here's some example data:
+Here's a similar example, but with just one rolled up column:
 
 .. csv-table::
    :header-rows: 1
@@ -748,21 +519,11 @@ Here's some example data:
 
 Here's what we get when we run this new data with this schema:
 
-.. code-block:: bash
+.. literalinclude:: ../examples/cafe/tables-human-2/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/tables-human-2/expected.json
+   :language: json
 
-    $ flatten-tool unflatten -f csv examples/cafe/tables-human-2 --convert-titles --schema=examples/cafe/tables-human-1/cafe.schema --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": 1
-                    }
-                ]
-            }
-        ]
-    }
 
 Relationships using Identifiers
 ===============================
@@ -807,6 +568,7 @@ Flatten Tool will merge objects as follows:
   being processed, effectively overwriting what is there already and generating a
   warning
 
+
 Single sheet
 ------------
 
@@ -816,97 +578,77 @@ Here's an example that demonstrates these rules:
    :file: ../examples/cafe/relationship-merge-single/data.csv
    :header-rows: 1
 
-Let's run it and see what is generated:
+Let's run it:
 
-.. code-block:: bash
+.. literalinclude:: ../examples/cafe/relationship-merge-single/cmd.txt
+   :language: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/relationship-merge-single --root-list-path 'cafe'
-    .../flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet data: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
-      key, id_info, debug_info.get('sheet_name'), base_value, value))
-    .../flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet data: "3" != "4". If you were not expecting merging you may have a duplicate ID.
-      key, id_info, debug_info.get('sheet_name'), base_value, value))
+Notice the warnings above about values being over-written:
 
-Notice the warnings above about values being over-written.
+.. literalinclude:: ../examples/cafe/relationship-merge-single/expected_stderr.json
 
 The actual JSON contains a single Cafe with `id` value `CAFE-HEALTH` and all the values merged in:
 
-.. code-block:: json
-
-    {
-        "cafe": [
-            {
-                "id": "CAFE-HEALTH",
-                "name": "Vegetarian Cafe",
-                "number_of_tables": "3",
-                "address": "123 City Street, London"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/relationship-merge-single/expected.json
+   :language: json
 
 
 Multiple sheets
 ---------------
 
-Here's an example that uses the same data as the single sheet example above, but spreads the rows over four sheets named `a`, `b`, `c` and `d`:
-
+Here's an example that uses the same data as the single sheet example above,
+but spreads the rows over four sheets named `a`, `b`, `c` and `d`:
 
 .. csv-table:: sheet: a
    :file: ../examples/cafe/relationship-merge-multiple/a.csv
    :header-rows: 1
 
-
 .. csv-table:: sheet: b
    :file: ../examples/cafe/relationship-merge-multiple/b.csv
    :header-rows: 1
-
 
 .. csv-table:: sheet: c
    :file: ../examples/cafe/relationship-merge-multiple/c.csv
    :header-rows: 1
 
-
 .. csv-table:: sheet: d
    :file: ../examples/cafe/relationship-merge-multiple/d.csv
    :header-rows: 1
 
+Let's run it:
 
-.. code-block:: bash
+.. literalinclude:: ../examples/cafe/relationship-merge-multiple/cmd.txt
+   :language: bash
 
-    $ flatten-tool unflatten -f csv examples/cafe/relationship-merge-multiple/ --root-list-path 'cafe'
-    .../flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet b: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
-      key, id_info, debug_info.get('sheet_name'), base_value, value))
-    .../flattentool/flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
-      key, id_info, debug_info.get('sheet_name'), base_value, value))
+Notice the warnings above about values being over-written:
+
+.. literalinclude:: ../examples/cafe/relationship-merge-multiple/expected_stderr.json
 
 And the rest of the output:
 
-.. code-block:: json
-
-    {
-        "cafe": [
-            {
-                "id": "CAFE-HEALTH",
-                "name": "Vegetarian Cafe",
-                "number_of_tables": "3",
-                "address": "123 City Street, London"
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/relationship-merge-multiple/expected.json
+   :language: json
 
 The result is the same as before.
+
 
 Lists of Objects
 ----------------
 
-Things get much more interesting when you start dealing with lists of objects whose parents have an `id`. This enables you to split the parents and children up into multiple sheets rather than requiring everything sits one the same row.
+Things get much more interesting when you start dealing with lists of objects
+whose parents have an `id`. This enables you to split the parents and children
+up into multiple sheets rather than requiring everything sits one the same row.
 
 As an example, let's imagine that `Vegetarian Cafe` is arranged having two
 tables numbered `16` and `17` because they are share tables with another
 restaurant next door.
 
-From the knowledge you gained when learning about lists of objects without IDs earlier, you know that you can produce the correct structure with a CSV file like this:
+From the knowledge you gained when learning about lists of objects without IDs
+earlier, you know that you can produce the correct structure with a CSV file
+like this:
 
-::
+.. csv-table::
+   :header-rows: 1
 
     name,table/0/number,table/1/number,table/2/number
     Healthy Cafe,1,2,3
@@ -922,44 +664,16 @@ This time, we'll give both the Cafe's IDs and move the tables into a separate sh
    :file: ../examples/cafe/relationship-lists-of-objects/tables.csv
    :header-rows: 1
 
-By having the tables in a separate sheet, you can now support cafe's with as many tables as you like, just by adding more rows and making sure the `id` column for the table matches the `id` value for the cafe.
+By having the tables in a separate sheet, you can now support cafe's with as
+many tables as you like, just by adding more rows and making sure the `id`
+column for the table matches the `id` value for the cafe.
 
 Let's run this example:
 
-::
-
-    $ flatten-tool unflatten -f csv examples/cafe/relationship-lists-of-objects --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "id": "CAFE-HEALTH",
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "number": "1"
-                    },
-                    {
-                        "number": "2"
-                    },
-                    {
-                        "number": "3"
-                    }
-                ]
-            },
-            {
-                "id": "CAFE-VEG",
-                "name": "Vegetarian Cafe",
-                "table": [
-                    {
-                        "number": "16"
-                    },
-                    {
-                        "number": "17"
-                    }
-                ]
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/relationship-lists-of-objects/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/relationship-lists-of-objects/expected.json
+   :language: json
 
 By specifying an ID, the values in the tables sheet can be associated with the
 correct part of the tree created by the cafes sheet.
@@ -992,7 +706,8 @@ The problem with this approach is that the output is actually a tree, and not a
 normalised relational model. Have a think about how you would write the
 `table_dishes` sheet. You'd need to write something like this:
 
-::
+.. csv-table::
+   :header-rows: 1
 
     table/0/id,dish/0/id
     TABLE-1,DISH-fish-and-chips
@@ -1008,7 +723,8 @@ the dish. If a dish is used in multiple tables, you will have multiple rows,
 each with the same name in the name column. In this each way row contains the
 entire path to its position in the tree.
 
-Since nothing depends on the dishes yet, they don't have to have an ID themselves, they just need to reference their parent IDs:
+Since nothing depends on the dishes yet, they don't have to have an ID
+themselves, they just need to reference their parent IDs:
 
 .. csv-table:: sheet: cafes
    :file: ../examples/cafe/relationship-multiple/cafes.csv
@@ -1022,41 +738,12 @@ Since nothing depends on the dishes yet, they don't have to have an ID themselve
    :file: ../examples/cafe/relationship-multiple/dishes.csv
    :header-rows: 1
 
-::
+Here are the results:
 
-    $ flatten-tool unflatten -f csv examples/cafe/relationship-multiple --root-list-path 'cafe'
-    {
-        "cafe": [
-            {
-                "id": "CAFE-HEALTH",
-                "name": "Healthy Cafe",
-                "table": [
-                    {
-                        "id": "TABLE-1",
-                        "dish": [
-                            {
-                                "name": "Fish and Chips"
-                            }
-                        ],
-                        "number": "1"
-                    },
-                    {
-                        "id": "TABLE-3",
-                        "dish": [
-                            {
-                                "name": "Fish and Chips"
-                            }
-                        ],
-                        "number": "3"
-                    },
-                    {
-                        "id": "TABLE-2",
-                        "number": "2"
-                    }
-                ]
-            }
-        ]
-    }
+.. literalinclude:: ../examples/cafe/relationship-multiple/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/relationship-multiple/expected.json
+   :language: json
 
 Notice the ordering in this example. Because `dishes` is processed before
 `tables`, `TABLE-3` gets defined before `TABLE-2`, and `dish` gets added as a

@@ -1,0 +1,1 @@
+$ flatten-tool unflatten -f=csv --root-list-path=cafe --schema=examples/cafe/tables-typed-schema/cafe.schema examples/cafe/tables-typed-schema/

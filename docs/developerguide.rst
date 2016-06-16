@@ -22,9 +22,19 @@ errors is a lot more complex than programming a tool where the data strucutres
 are very predictable. Understanding this intention not to raise errors is key
 to understanding Flatten Tool's internal design.
 
-Helper Libraries
+Helper libraries
 ================
 
 As you'll have read in the :doc:`User Guide <userguide>`, Flatten Tool makes
 use of JSON Pointer, JSON Schema and JSON Ref standards. The Python libraries
 that support this are `jsonpointer`, `jsonschema` and `jsonref` respectively.
+
+Testing coverage of documentation examples
+==========================================
+
+.. code-block:: bash
+
+    rm -f .coverage # Remove the old coverage if it exists
+    python flattentool/tests/test_docs.py
+    coverage combine
+    coverage report --omit=flattentool/tests/**
