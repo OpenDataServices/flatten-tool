@@ -4,15 +4,18 @@ import subprocess
 import sys
 
 from os.path import join, getsize
+from six import text_type
 
 
 def test_cafe_examples_in_docs():
     tests_passed = 0
     for root, dirs, files in os.walk('examples/cafe'):
         for filename in files:
+            if 'xlsx' in root and sys.version_info[:2] < (3,4):
+                continue
             if 'cmd.txt' in filename:
                 with open(join(root, filename), 'rb') as fp:
-                    cmds = str(fp.read(), 'utf8').strip().split('\n')
+                    cmds = text_type(fp.read(), 'utf8').strip().split('\n')
                     actual_stdout = b''
                     actual_stderr = b''
                     for cmd in cmds:
@@ -41,20 +44,30 @@ def test_cafe_examples_in_docs():
                     if os.path.exists(join(root, 'expected_stderr.json')):
                         with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
                             data = fstderr.read()
-                            expected_stderr_lines = str(data, 'utf8').split('\n')
+                            expected_stderr_lines = text_type(data, 'utf8').split('\n')
                             for line in expected_stderr_lines:
                                 if line:
                                     if line.startswith('.../'):
-                                        line = str(os.getcwd()) + line[3:]
+                                        line = text_type(os.getcwd()) + line[3:]
                                     expected_stderr += (line + '\n').encode('utf8')
                                 else:
                                      expected_stderr += b'\n'
-                    # Don't worry about any extra blank lines at the end
-                    assert str(actual_stdout, 'utf8').rstrip('\n') == str(expected_stdout, 'utf8').rstrip('\n')
-                    assert str(actual_stderr, 'utf8').rstrip('\n') == str(expected_stderr, 'utf8').rstrip('\n')
+                    assert _strip(actual_stdout) == _strip(expected_stdout), cmds
+                    assert _strip(actual_stderr) == _strip(expected_stderr), cmds
                     tests_passed += 1
     # Check that the number of tests were run that we expected
-    assert tests_passed == 20
+    if sys.version_info[:2] < (3,4):
+        assert tests_passed == 19
+    else:
+        assert tests_passed == 20
+
+
+# Older versions of Python have an extra whitespace at the end compared to newer ones
+# https://bugs.python.org/issue16333
+def _strip(output):
+    # Don't worry about any extra blank lines at the end either
+    outstr = text_type(output, 'utf8').rstrip('\n')
+    return '\n'.join(line.rstrip(' ') for line in outstr.split('\n'))
 
 
 # Useful for a coverage check - see developer docs for how to run the check

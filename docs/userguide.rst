@@ -45,6 +45,11 @@ represents something that should be under a `main` key. That isn't quite right,
 so let's tell it that the rows are cafes and should come under a `cafe` key.
 You do that with a *root list path*.
 
+.. caution::
+
+   Older Python versions add a trailing space after `,` characters when
+   indenting JSON. This means that your output might have whitespace
+   differences compared to what is described here.
 
 Root List Path
 --------------
@@ -440,6 +445,11 @@ pass the cell value through to the JSON as a number in that case.
    :language: bash
 .. literalinclude:: ../examples/cafe/tables-typed-xlsx/expected.json
    :language: json
+
+.. caution::
+
+   Number formats in spreadsheets are ignored in Python 2.7 so this
+   example won't work. It does work in Python 3.4 and above though.
 
 Using a JSON Schema with types
 ------------------------------
