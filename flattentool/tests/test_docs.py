@@ -57,9 +57,9 @@ def test_cafe_examples_in_docs():
                     tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 19
+        assert tests_passed == 21
     else:
-        assert tests_passed == 20
+        assert tests_passed == 22
 
 
 # Older versions of Python have an extra whitespace at the end compared to newer ones

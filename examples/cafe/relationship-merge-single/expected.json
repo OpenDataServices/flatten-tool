@@ -2,7 +2,7 @@
     "cafe": [
         {
             "id": "CAFE-HEALTH",
-            "name": "Vegetarian Cafe",
+            "name": "Healthy Cafe",
             "number_of_tables": "3",
             "address": "123 City Street, London"
         }

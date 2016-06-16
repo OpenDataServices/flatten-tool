@@ -1,4 +1,4 @@
-.../flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet data: "Vegetarian Cafe" != "Health Cafe". If you were not expecting merging you may have a duplicate ID.
+.../flattentool/input.py:114: UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet data: "Healthy Cafe" != "Vegetarian Cafe". If you were not expecting merging you may have a duplicate ID.
   key, id_info, debug_info.get('sheet_name'), base_value, value))
 .../flattentool/input.py:114: UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet data: "3" != "4". If you were not expecting merging you may have a duplicate ID.
   key, id_info, debug_info.get('sheet_name'), base_value, value))

@@ -168,7 +168,7 @@ You can think of Flatten Tool doing the following as it parses a sheet:
 
 In this example there is only one sheet, and only one row, so when parsing that
 first row, `/cafe/0/` is appended to `name` to give the JSON pointer
-`/cafe/0/name`. Flatten Tool then writes `Health Cafe` in the correct position.
+`/cafe/0/name`. Flatten Tool then writes `Healthy Cafe` in the correct position.
 
 
 Multiple rows
@@ -451,6 +451,12 @@ pass the cell value through to the JSON as a number in that case.
    Number formats in spreadsheets are ignored in Python 2.7 so this
    example won't work. It does work in Python 3.4 and above though.
 
+Here's the sample data we'll use:
+
+.. csv-table::
+   :file: ../examples/cafe/tables-typed-schema/data.csv
+   :header-rows: 1
+
 Using a JSON Schema with types
 ------------------------------
 
@@ -550,6 +556,9 @@ In Flatten Tool, any field named `id` is considered special. Flatten Tool knows
 that any objects with the same `id` at the same level are the same object and
 that their values should be merged.
 
+ID-based object merge behaviour
+-------------------------------
+
 The merge behaviour happens whether the two IDs are specified in:
 
 * different rows in the same sheet
@@ -566,21 +575,28 @@ it is, it will merge it. If not, it will just append a new object to the list.
    will think they are the same and merge them.
 
 
-Flatten Tool will merge objects as follows:
+Flatten Tool will merge an existing and new object as follows:
 
-* Any fields that exist in the existing object, but not in the object being
-  processed are kept as they are in the existing object
+* Any fields in new object that are missing in the existing one are added
 
-* Any fields that exist in the object being processed but, not in the existing
-  object are kept as they are in the existing object being processed
+* Any fields in the existing object that aren't in the new one are left as
+  they are
 
-* Any fields that existing on both are kept as they are in the existing object
-  being processed, effectively overwriting what is there already and generating a
-  warning
+* If there are fields that are in both that have the same value, that value
+  is kept
+
+* If there are fields that are in both with different values, the existing
+  values are kept and conflict warnings issued
+
+This means that values in later rows do not overwrite existing conflicting
+values.
+
+Let's have a look at these rules in action in the next two sections with an
+example from a single sheet, and one from multiple sheets.
 
 
-Single sheet
-------------
+ID-based object merge in a single sheet
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here's an example that demonstrates these rules:
 
@@ -597,14 +613,15 @@ Notice the warnings above about values being over-written:
 
 .. literalinclude:: ../examples/cafe/relationship-merge-single/expected_stderr.json
 
-The actual JSON contains a single Cafe with `id` value `CAFE-HEALTH` and all the values merged in:
+The actual JSON contains a single Cafe with `id` value `CAFE-HEALTH` and all
+the values merged in:
 
 .. literalinclude:: ../examples/cafe/relationship-merge-single/expected.json
    :language: json
 
 
-Multiple sheets
----------------
+ID-based object merge in multiple sheets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here's an example that uses the same data as the single sheet example above,
 but spreads the rows over four sheets named `a`, `b`, `c` and `d`:
@@ -642,8 +659,8 @@ And the rest of the output:
 The result is the same as before.
 
 
-Lists of Objects
-----------------
+Parent-child relationships (lists of objects)
+---------------------------------------------
 
 Things get much more interesting when you start dealing with lists of objects
 whose parents have an `id`. This enables you to split the parents and children
@@ -653,18 +670,19 @@ As an example, let's imagine that `Vegetarian Cafe` is arranged having two
 tables numbered `16` and `17` because they are share tables with another
 restaurant next door.
 
+.. literalinclude:: ../examples/cafe/relationship-lists-of-objects-simple/expected.json
+   :language: json
+
 From the knowledge you gained when learning about lists of objects without IDs
 earlier, you know that you can produce the correct structure with a CSV file
 like this:
 
-.. csv-table::
+.. csv-table:: sheet: cafes
+   :file: ../examples/cafe/relationship-lists-of-objects-simple/data.csv
    :header-rows: 1
 
-    name,table/0/number,table/1/number,table/2/number
-    Healthy Cafe,1,2,3
-    Vegetarian Cafe,16,17,
-
-This time, we'll give both the Cafe's IDs and move the tables into a separate sheet:
+This time, we'll give both the Cafe's IDs and move the tables into a separate
+sheet:
 
 .. csv-table:: sheet: cafes
    :file: ../examples/cafe/relationship-lists-of-objects/cafes.csv
@@ -696,8 +714,8 @@ number has a JSON Pointer that ends in with `/0/number`. Since they all have the
 same index, they are simply ordered within each cafe in the order of the rows
 in the sheet.
 
-Multiple Relationships
-----------------------
+Grandchild relationships
+------------------------
 
 In future we might like to extend this example so that we can track the dishes
 ordered by each table so we can generate a bill.
@@ -762,23 +780,192 @@ key before `tables`.
 If the sheets were processed the other way around the data would be the same,
 but the ordering different.
 
+.. tip::
+
+   Flatten Tool supports producing JSON heirachies of arbitrary depth, not just
+   the parent-child and parent-child-grandchild relationships you've seen in the
+   examples so far. Just make sure that however deep an object is, it always has
+   the IDs of *all* of its parents in the same row as it, as the tables and dishes
+   sheets do.
+
+
+Missing IDs
+-----------
+
+You might be wondering what happens if IDs are accidentally missing. There are
+two cases where this can happen:
+
+* The ID is missing but no child objects reference it anyway
+* The ID is missing and so children can't be added
+
+To demonstrate both of these in one example consider the following example. In particular notice that:
+
+* `CAFE-VEG` is missing from the `cafes` sheet
+* `CAFE-VEG` is missing from the last row in the `tables` sheet
+
+.. csv-table:: sheet: cafes
+   :file: ../examples/cafe/relationship-missing-ids/cafes.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: tables
+   :file: ../examples/cafe/relationship-missing-ids/tables.csv
+   :header-rows: 1
+
+
+Let's run this example:
+
+.. literalinclude:: ../examples/cafe/relationship-missing-ids/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/relationship-missing-ids/expected.json
+   :language: json
+
+You'll notice that all the data and tables for `CAFE-HEALTH` are output
+correctly in the first object. This is what we'd expect because all the IDs
+were present.
+
+.. code-block:: text
+
+        {
+            "id": "CAFE-HEALTH",
+            "name": "Healthy Cafe",
+            "address": "123 City Street, London",
+            "table": [
+                {
+                    "number": "1"
+                },
+                {
+                    "number": "2"
+                },
+                {
+                    "number": "3"
+                }
+            ]
+        },
+
+Next is this cafe:
+
+.. code-block:: text
+
+        {
+            "name": "Vegetarian Cafe",
+            "address": "42 Town Road, Bristol"
+        },
+
+This is as much information as Flatten Tool can work out from the second row of
+the `cafes` sheet because the ID is missing. Flatten Tool just appends a new
+cafe with the data it has.
+
+Next, Flatten Tool works through the `tables` sheet, it finds table 16 and
+knows it must be associated with a cafe called `CAFE-VEG` that is specified in
+the `id` column, but because this `id` is present in the `cafes` sheet, it
+can't merge it in. Instead it just appends data for the cafe:
+
+.. code-block:: text
+
+        {
+            "id": "CAFE-VEG",
+            "table": [
+                {
+                    "number": "16"
+                }
+            ]
+        },
+
+Finally, Flatten Tool finds table 17 in the `tables` sheet. It doesn't know
+which Cafe this is for, but it knows tables are part of cafes so it adds
+another unnamed cafe:
+
+.. code-block:: text
+
+        {
+            "table": [
+                {
+                    "number": "17"
+                }
+            ]
+        }
+
+
+Index behaviour
+---------------
+
+Within the list of tables for each cafe, you might have noticed that each table
+number has a JSON Pointer that ends in with `/0/number`. Since they all have the
+same index, they are simply ordered within each cafe in the order of the rows
+in the sheet.
+
+
+
+
+
+Missing Parents
+---------------
+
+You might be wondering what happens if an object has a column representing a parent ID, but that parent ID doesn't exist?
+
+Also, what happens if the sheets are processed the wrong way around?
+
+
+id,name
+CAFE-HEALTH,Vegetarian Cafe
+
+
+column and others don't? How does Flatten Tool deal with the gaps?
+
+Well the answer is simpler than you might think. If an object is linked to a
+parent ID but that ID doesn't exist, the object is just appended to the list.
+
+
 Receipt System Example
 ======================
 
 Now that you've seen some of the details of how Flatten Tool works we can work
 through a whole example.
 
-Imagine that you Health Cafe and Vegetarian Cafe are both part of a chain and
+Imagine that you Healthy Cafe and Vegetarian Cafe are both part of a chain and
 you have to create a receipt system for them. You need to track which dishes
 are ordered at which tables in which cafes.
 
 The JSON you would like to produce from the sheets the waiters write as they
 take orders looks like this:
 
-XXX
+.. literalinclude:: ../examples/receipt/normalised/expected.json
+   :language: json
 
+There are four ways we could arrange this data:
 
-There are three ways we could arrange this data.
+* cafes, tables and dishes all separate
+* cafes and tables together, dishes separate
+* tables and dishes combined, cafes separate
+* cafes, tables and dishes all combined
+
+Separate sheet for each object
+------------------------------
+
+Here's the first way of doing this with everything separate:
+
+.. csv-table:: Sheet: cafes
+   :file: ../examples/receipt/normalised/cafes.csv 
+   :header-rows: 1
+
+.. csv-table:: Sheet: tables
+   :file: ../examples/receipt/normalised/tables.csv 
+   :header-rows: 1
+
+.. csv-table:: Sheet: dishes
+   :file: ../examples/receipt/normalised/dishes.csv 
+   :header-rows: 1
+
+You can run the example with this:
+
+.. literalinclude:: ../examples/receipt/normalised/cmd.txt
+   :language: bash
+
+You should see the same JSON as shown at the top of the section.
+
+The advantage of this set up is that it allows any number of cafes, tables and
+dishes. The disadvantage is that it requires three sheets, making data a bit
+harder to find.
 
 XXX Re-write end-to-end tests with the cafe example here to demonstrate the
 different shapes.
