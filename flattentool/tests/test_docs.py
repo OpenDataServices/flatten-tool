@@ -9,7 +9,7 @@ from six import text_type
 
 def test_cafe_examples_in_docs():
     tests_passed = 0
-    for root, dirs, files in os.walk('examples/cafe'):
+    for root, dirs, files in os.walk('examples'):
         for filename in files:
             if 'xlsx' in root and sys.version_info[:2] < (3,4):
                 continue
@@ -38,8 +38,12 @@ def test_cafe_examples_in_docs():
                         assert process.returncode == 0, cmd
                         actual_stdout += (cmd_actual_stdout or b'')
                         actual_stderr += (cmd_actual_stderr or b'')
-                    with open(join(root, 'expected.json'), 'rb') as fstdout:
-                        expected_stdout = fstdout.read()
+                    if os.path.exists(join(root, 'expected.txt')):
+                        with open(join(root, 'expected.txt'), 'rb') as fstdout:
+                            expected_stdout = fstdout.read()
+                    else:
+                        with open(join(root, 'expected.json'), 'rb') as fstdout:
+                            expected_stdout = fstdout.read()
                     expected_stderr = b''
                     if os.path.exists(join(root, 'expected_stderr.json')):
                         with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
@@ -57,9 +61,9 @@ def test_cafe_examples_in_docs():
                     tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 21
+        assert tests_passed == 27
     else:
-        assert tests_passed == 22
+        assert tests_passed == 28
 
 
 # Older versions of Python have an extra whitespace at the end compared to newer ones

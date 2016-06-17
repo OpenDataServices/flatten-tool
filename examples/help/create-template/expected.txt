@@ -1,0 +1,26 @@
+usage: flatten-tool create-template [-h] -s SCHEMA [-f OUTPUT_FORMAT]
+                                    [-m MAIN_SHEET_NAME] [-o OUTPUT_NAME]
+                                    [--rollup] [-r ROOT_ID] [--use-titles]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SCHEMA, --schema SCHEMA
+                        Path to the schema file you want to use to create the
+                        template
+  -f OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
+                        Type of template you want to create. Defaults to all
+                        available options
+  -m MAIN_SHEET_NAME, --main-sheet-name MAIN_SHEET_NAME
+                        The name of the main sheet, as seen in the first tab
+                        of the spreadsheet for example. Defaults to main
+  -o OUTPUT_NAME, --output-name OUTPUT_NAME
+                        Name of the outputted file. Will have an extension
+                        appended if format is all.
+  --rollup              "Roll up" columns from subsheets into the main sheet
+                        if they are specified in a rollUp attribute in the
+                        schema.
+  -r ROOT_ID, --root-id ROOT_ID
+                        Root ID of the data format, e.g. ocid for OCDS and
+                        blank for 360Giving (use --root-id=''). Defaults to
+                        ocid.
+  --use-titles          Convert titles. Requires a schema to be specified.

@@ -1,0 +1,43 @@
+usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [-b BASE_JSON]
+                              [-m ROOT_LIST_PATH] [-e ENCODING]
+                              [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
+                              [-a HEADING_SOURCE_MAP]
+                              [--timezone-name TIMEZONE_NAME] [-r ROOT_ID]
+                              [-s SCHEMA] [--convert-titles]
+                              input_name
+
+positional arguments:
+  input_name            Name of the input file or directory.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f INPUT_FORMAT, --input-format INPUT_FORMAT
+                        File format of input file or directory.
+  -b BASE_JSON, --base-json BASE_JSON
+                        A base json file to populate with the unflattened
+                        data.
+  -m ROOT_LIST_PATH, --root-list-path ROOT_LIST_PATH
+                        The path in the JSON that will contain the unflattened
+                        list. Defaults to main.
+  -e ENCODING, --encoding ENCODING
+                        Encoding of the input file(s) (only relevant for CSV).
+                        Defaults to utf8.
+  -o OUTPUT_NAME, --output-name OUTPUT_NAME
+                        Name of the outputted file. Will have an extension
+                        appended as appropriate. Defaults to unflattened.json
+  -c CELL_SOURCE_MAP, --cell-source-map CELL_SOURCE_MAP
+                        Path to write a cell source map to. Will have an
+                        extension appended as appropriate.
+  -a HEADING_SOURCE_MAP, --heading-source-map HEADING_SOURCE_MAP
+                        Path to write a heading source map to. Will have an
+                        extension appended as appropriate.
+  --timezone-name TIMEZONE_NAME
+                        Name of the timezone, defaults to UTC. Should be in
+                        tzdata format, e.g. Europe/London
+  -r ROOT_ID, --root-id ROOT_ID
+                        Root ID of the data format, e.g. ocid for OCDS and
+                        blank for 360Giving (use --root-id=''). Defaults to
+                        ocid.
+  -s SCHEMA, --schema SCHEMA
+                        Path to a relevant schema.
+  --convert-titles      Convert titles. Requires a schema to be specified.

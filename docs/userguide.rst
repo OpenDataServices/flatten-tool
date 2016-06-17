@@ -1,19 +1,15 @@
 Spreadsheet Designer's Guide
 ++++++++++++++++++++++++++++
 
-Flatten Tool is a Python library and command line interface for converting
-spreadsheets containing one or more sheets to a JSON tree structure and back
-again. Flatten Tool can make use of a JSON Schema to help with this process.
-
 In this guide you'll learn the various rules Flatten Tool uses to convert one
-or more sheets in a spreadsheet into the JSON tree by looking at lots of
+or more sheets in a spreadsheet into the JSON document by looking at lots of
 different examples based around Cafes. Once you've understood how Flatten Tool
 works you should be able to design your own spreadsheet structures, debug
 problems in your spreadsheets and be able to make use of Flatten Tool's more
 advanced features.
 
 Before we get into too much detail though, let's start by looking
-at the Command Line API.
+at the Command Line API for unflattening a spreadsheet.
 
 
 Command-Line API
@@ -121,15 +117,37 @@ too, you'll see this, with the spreadsheet rows merged in:
    then Flatten Tool will overwrite its value.
 
 
+All unflatten options
+---------------------
+
+You can see all the options available for unflattening by running:
+
+.. literalinclude:: ../examples/help/unflatten/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/help/unflatten/expected.txt
+   :language: text
+
+As you can see, some of the documentation is specific to two projects that
+use Flatten Tool:
+
+* OCDS - http://standard.open-contracting.org/validator/
+* 360Giving - http://www.threesixtygiving.org/standard/reference/
+
+Other options such as `--cell-source-map` and `--heading-source-map` will be
+described in the Developer Guide once the features stabilise.
+
+
 Understanding JSON Pointer and how Flatten Tool uses it
 =======================================================
 
-Let's consider our first example again and explore the algortim Flatten Tool
+Let's consider our first example again and explore the algorithm Flatten Tool
 uses to make it work:
 
 .. csv-table::
    :file: ../examples/cafe/simple/data.csv
    :header-rows: 1
+
+
 
 .. literalinclude:: ../examples/cafe/simple/cmd.txt
    :language: bash
@@ -220,9 +238,17 @@ Multiple sheets
 ---------------
 
 So far, all the examples have just used one sheet. When multiple sheets are
-involved, the behaviour isn't much different. In effect, all Flatten Tool does
-is take the JSON structure produced after processing the first sheet, and use
-it as the base JSON for processing the next sheet.
+involved, the behaviour isn't much different.
+
+In effect, all Flatten Tool does is:
+
+* take the JSON structure produced after processing the previous sheets and use
+  it as the base JSON for processing the next sheet
+
+* keep track of the index numbers of existing objects and generate JSON
+  pointers that point to the next free index at any existing locations (with the
+  effect of having new objects appended to any existing ones at the same
+  location)
 
 Once all the sheets have been processed the resulting JSON is returned.
 
@@ -312,8 +338,8 @@ Let's try it:
 .. literalinclude:: ../examples/cafe/object/expected.json
    :language: json
 
-Lists of Objects
-================
+Lists of Objects (without IDs)
+==============================
 
 The cafe's that have made up our examples so far also have tables, and the
 tables have a table number so that the waiters know where the food has to be
@@ -330,10 +356,10 @@ structure:
 .. literalinclude:: ../examples/cafe/list-of-objects/expected.json
    :language: json
 
-In the relationships section later, we'll see other ways of arranging this data
-using *identifiers*, but for now we'll demonstrate an approach that puts all
-the table information in the same row as the cafe itself. This is called
-*Rolling up* data in Flatten Tool terminology.
+In the relationships section later, we'll see other (often better) ways of
+arranging this data using *identifiers*, but for now we'll demonstrate an
+approach that puts all the table information in the same row as the cafe
+itself.
 
 For example, consider this spreadsheet data:
 
@@ -415,6 +441,7 @@ And the result:
 .. literalinclude:: ../examples/cafe/plain-list/expected.json
    :language: json
 
+
 Typed fields
 ============
 
@@ -427,6 +454,13 @@ There are two places we can get it from though:
 
 * The spreadsheet cell (if the underlying spreadsheet type supports it)
 * An external JSON Schema describing the data
+
+Here is the sample data we'll use for the examples in the next two sections:
+
+.. csv-table::
+   :file: ../examples/cafe/tables-typed-schema/data.csv
+   :header-rows: 1
+
 
 Using spreadsheet cell formatting
 ---------------------------------
@@ -451,11 +485,9 @@ pass the cell value through to the JSON as a number in that case.
    Number formats in spreadsheets are ignored in Python 2.7 so this
    example won't work. It does work in Python 3.4 and above though.
 
-Here's the sample data we'll use:
+   If you look at Flatten Tool's source code you'll see the in `test_docs.py`
+   that the above example is skipped on older Python versions.
 
-.. csv-table::
-   :file: ../examples/cafe/tables-typed-schema/data.csv
-   :header-rows: 1
 
 Using a JSON Schema with types
 ------------------------------
@@ -469,6 +501,12 @@ Here's an example of a JSON Schema that can provide the typing information:
    :language: bash
 .. literalinclude:: ../examples/cafe/tables-typed-schema/expected.json
    :language: json
+
+.. tip::
+
+   Although this example is too simple to demonstrate it, Flatten Tool ignores
+   the order of individual properties in a JSON schema when producing JSON output,
+   and instead follows the order of the columns in the sheets.
 
 
 Human-friendly headings using a JSON Schema with titles
@@ -490,13 +528,15 @@ this:
 
 Flatten Tool supports this if you do the following:
 
-* Write a JSON Schema specifying the titles being used and specify it with the `--schema` flag
+* Write a JSON Schema specifying the titles being used and
+  specify it with the `--schema` flag
 * Use `:` characters instead of `/` characters in the headings
 * Specify the `--convert-titles` flag on the command line
 
 .. caution::
 
-   If you forget any of these, Flatten Tool might produce incorrect JSON rather than failing.
+   If you forget any of these, Flatten Tool might produce incorrect JSON rather
+   than failing.
 
 Here's a new JSON schema for this example:
 
@@ -525,7 +565,7 @@ is specified as an array type:
 This means that Flatten Tool can work out that any names specified in that
 column are part of that array. If you had an example with just one column
 representing each level of the tree, you could miss out the index in the
-heading when using `--convert-titles`.
+heading when using `--schema` and `--convert-titles`.
 
 Here's a similar example, but with just one rolled up column:
 
@@ -555,6 +595,9 @@ JSON.
 In Flatten Tool, any field named `id` is considered special. Flatten Tool knows
 that any objects with the same `id` at the same level are the same object and
 that their values should be merged.
+
+
+
 
 ID-based object merge behaviour
 -------------------------------
@@ -782,7 +825,7 @@ but the ordering different.
 
 .. tip::
 
-   Flatten Tool supports producing JSON heirachies of arbitrary depth, not just
+   Flatten Tool supports producing JSON hierarchies of arbitrary depth, not just
    the parent-child and parent-child-grandchild relationships you've seen in the
    examples so far. Just make sure that however deep an object is, it always has
    the IDs of *all* of its parents in the same row as it, as the tables and dishes
@@ -810,7 +853,6 @@ To demonstrate both of these in one example consider the following example. In p
 .. csv-table:: sheet: tables
    :file: ../examples/cafe/relationship-missing-ids/tables.csv
    :header-rows: 1
-
 
 Let's run this example:
 
@@ -885,42 +927,32 @@ another unnamed cafe:
             ]
         }
 
+Relationships with JSON Schema
+------------------------------
 
-Index behaviour
----------------
+If you want to use Flatten Tool's support for JSON Schema to extend to relationships
+you need to amend your JSON Schema to tell it about the `id` fields:
 
-Within the list of tables for each cafe, you might have noticed that each table
-number has a JSON Pointer that ends in with `/0/number`. Since they all have the
-same index, they are simply ordered within each cafe in the order of the rows
-in the sheet.
+#. Make sure that the `id` field is specified for every object in the hierarchy
+   (although this isn't necessary for objects right at the bottom of the hierarchy)
 
+#. Give the `id` field a title of `Identifier`
 
+With these two things in place, Flatten Tool will correctly handle relationships.
 
+.. caution ::
 
+   If you forget to add the `id` field, Flatten Tool will not know anything
+   about it when generating templates or converting titles.
 
-Missing Parents
----------------
+Sheet Shapes
+============
 
-You might be wondering what happens if an object has a column representing a parent ID, but that parent ID doesn't exist?
+Now that you've seen some of the details of how Flatten Tool works we can look
+in more detail at the different shapes your data can have in the sheets.
 
-Also, what happens if the sheets are processed the wrong way around?
-
-
-id,name
-CAFE-HEALTH,Vegetarian Cafe
-
-
-column and others don't? How does Flatten Tool deal with the gaps?
-
-Well the answer is simpler than you might think. If an object is linked to a
-parent ID but that ID doesn't exist, the object is just appended to the list.
-
-
-Receipt System Example
-======================
-
-Now that you've seen some of the details of how Flatten Tool works we can work
-through a whole example.
+To discuss the pros and cons of the different shapes, we'll work through a whole
+example.
 
 Imagine that you Healthy Cafe and Vegetarian Cafe are both part of a chain and
 you have to create a receipt system for them. You need to track which dishes
@@ -935,25 +967,39 @@ take orders looks like this:
 There are four ways we could arrange this data:
 
 * cafes, tables and dishes all separate
-* cafes and tables together, dishes separate
-* tables and dishes combined, cafes separate
-* cafes, tables and dishes all combined
+
+* cafes and tables together, dishes separate, with one row per table in the cafes and tables sheet
+
+* cafes and tables together, dishes separate, with one row per cafe in the cafes and tables sheet
+
+* tables and dishes together, cafes separate, with one row per table in the tables and dishes sheet
+
+* tables and dishes together, cafes separate, with one row per dish in the tables and dishes sheet
+
+Let's take a look at the first three cases. Combining tables and dishes into
+one sheet follows the same principles as combining cafes and tables, so we
+won't demonstrate those examples too.
+
 
 Separate sheet for each object
 ------------------------------
 
-Here's the first way of doing this with everything separate:
+Here's the first way of doing this with everything in its own sheet. This is
+the recommended approach unless you have a good reason to move some parts of a
+table into another one. It is also the default you will get when using Flatten
+Tool to flatten or generate a template for a JSON structure. You'll learn about
+that later.
 
 .. csv-table:: Sheet: cafes
-   :file: ../examples/receipt/normalised/cafes.csv 
+   :file: ../examples/receipt/normalised/cafes.csv
    :header-rows: 1
 
 .. csv-table:: Sheet: tables
-   :file: ../examples/receipt/normalised/tables.csv 
+   :file: ../examples/receipt/normalised/tables.csv
    :header-rows: 1
 
 .. csv-table:: Sheet: dishes
-   :file: ../examples/receipt/normalised/dishes.csv 
+   :file: ../examples/receipt/normalised/dishes.csv
    :header-rows: 1
 
 You can run the example with this:
@@ -967,5 +1013,67 @@ The advantage of this set up is that it allows any number of cafes, tables and
 dishes. The disadvantage is that it requires three sheets, making data a bit
 harder to find.
 
-XXX Re-write end-to-end tests with the cafe example here to demonstrate the
-different shapes.
+Combining objects
+-----------------
+
+Now let's imagine that all your cafe's are small and they never have more than
+three tables. In this case we can combine tables into cafes so that we just
+have two sheets.
+
+Table per row
+~~~~~~~~~~~~~
+
+Here's what it looks like when you want to use one row per table:
+
+.. csv-table:: Sheet: cafes and tables
+   :file: ../examples/receipt/combine-table-into-cafe/cafes_and_tables.csv
+   :header-rows: 1
+
+.. csv-table:: Sheet: dishes
+   :file: ../examples/receipt/combine-table-into-cafe/dishes.csv
+   :header-rows: 1
+
+You can run the example with this:
+
+.. literalinclude:: ../examples/receipt/combine-table-into-cafe/cmd.txt
+   :language: bash
+
+If you do run it you'll see the JSON is exactly the same as before.
+
+Unlike a database, Flatten Tool won't complain if different Cafe names are
+associated with the same Cafe ID in the same table, instead you'll just get a
+warning.
+
+Combining sheets works best when:
+
+* the child (the object being combined in to the parent) doesn't have that many properties
+* you can be sure there won't be too many children for each parent
+* there is a low risk of typos being made in the duplicated data
+
+Cafe per row
+~~~~~~~~~~~~
+
+There's another variant of this shape that we can use. If we just want to use one row per cafe.
+
+.. csv-table:: Sheet: cafes and tables
+   :file: ../examples/receipt/combine-table-into-cafe-2/cafes_and_tables.csv
+   :header-rows: 1
+
+.. csv-table:: Sheet: dishes
+   :file: ../examples/receipt/combine-table-into-cafe-2/dishes.csv
+   :header-rows: 1
+
+You can run the example with this:
+
+.. literalinclude:: ../examples/receipt/combine-table-into-cafe-2/cmd.txt
+   :language: bash
+
+The JSON is the same as before, as you would expect.
+
+Schema
+------
+
+If you'd like to explore this example yourself you can also use this schema:
+
+.. literalinclude:: ../examples/receipt/cafe.schema
+   :language: json
