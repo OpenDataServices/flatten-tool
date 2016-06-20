@@ -1,6 +1,6 @@
 """
 
-This file contains code that takes an OCDS JSON release file as input (not a
+This file contains code that takes an instace of a JSON file as input (not a
 JSON schema, for that see schema.py).
 
 """

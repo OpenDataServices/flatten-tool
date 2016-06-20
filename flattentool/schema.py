@@ -62,7 +62,7 @@ class TitleLookup(UserDict):
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id='ocid', use_titles=False):
+    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
