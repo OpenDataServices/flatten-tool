@@ -2,11 +2,12 @@ Spreadsheet Designer's Guide
 ++++++++++++++++++++++++++++
 
 In this guide you'll learn the various rules Flatten Tool uses to convert one
-or more sheets in a spreadsheet into the JSON document by looking at lots of
-different examples based around Cafes. Once you've understood how Flatten Tool
-works you should be able to design your own spreadsheet structures, debug
-problems in your spreadsheets and be able to make use of Flatten Tool's more
-advanced features.
+or more sheets in a spreadsheet into a JSON document. These rules are
+documented with examples based around a cafe theme.
+
+Once you've understood how Flatten Tool works you should be able to design your
+own spreadsheet structures, debug problems in your spreadsheets and be able to
+make use of Flatten Tool's more advanced features.
 
 Before we get into too much detail though, let's start by looking
 at the Command Line API for unflattening a spreadsheet.
@@ -22,8 +23,8 @@ example, a sheet listing Cafe names:
    :file: ../examples/cafe/too-simple/data.csv
    :header-rows: 1
 
-We'd like Flatten Tool to convert it to the following JSON structure for a list
-of cafes, with the name being the only information we want for each one:
+We'd like Flatten Tool to convert it to the following JSON structure for an array
+of cafes, with the cafe name being the only property we want for each cafe:
 
 .. literalinclude:: ../examples/cafe/simple/expected.json
    :language: json
@@ -35,25 +36,25 @@ Let's try converting the sheet to the JSON above.
 .. literalinclude:: ../examples/cafe/too-simple/expected.json
    :language: json
 
-That's not too far off what we wanted. You can see the data structure we
-expected, but Flatten Tool has guessed that each row in the spreadsheet
-represents something that should be under a `main` key. That isn't quite right,
-so let's tell it that the rows are cafes and should come under a `cafe` key.
-You do that with a *root list path*.
+That's not too far off what we wanted. You can see the array of cafes, but the
+key is named `main` instead of `cafe`.  You can tell Flatten Tool that that the
+rows in the spreadsheet are cafes and should come under a `cafe` key by
+specifying a *root list path*, described next.
 
 .. caution::
 
    Older Python versions add a trailing space after `,` characters when
-   indenting JSON. This means that your output might have whitespace
+   outputting indented JSON. This means that your output might have whitespace
    differences compared to what is described here.
 
 Root List Path
 --------------
 
-The *root list path* is the key which Flatten Tool should add a list of objects
-representing each row to. You can specify it with the `--root-list-path`
-option. If you don't specify it, `main` is used as the default as you saw in
-the last example.
+The *root list path* is the key under which Flatten Tool should add an array of
+objects representing each row of the main sheet.
+
+You specify the root list path with `--root-list-path` option. If you don't
+specify it, `main` is used as the default as you saw in the last example.
 
 Let's set `--root-list-path` to `cafe` so that our original input generates the
 JSON we were expecting:
@@ -65,7 +66,7 @@ JSON we were expecting:
 
 That's what we expected. Great.
 
-.. note ::
+.. note::
 
     Although `--root-list-path` sounds like it accepts a path such as
     `building/cafe`, it only accepts a single key.
@@ -75,7 +76,7 @@ Writing output to a file
 ------------------------
 
 By default, Flatten Tool now prints its output to stdout. If you want it to
-instead write its output to a file you can use the `-o` option.
+write its output to a file instead, you can use the `-o` option.
 
 Here's the same example, this time writing its output to `unflattened.json`:
 
@@ -89,8 +90,8 @@ Base JSON
 ---------
 
 If you want the resulting JSON to also include other keys that you know in
-advance, you can specify them as `base.json` and Flatten Tool will merge its
-data into that file.
+advance, you can specify them in a separate *base JSON* file and Flatten Tool
+will merge the data from your spreadsheet into that file.
 
 For example, if `base.json` looks like this:
 
@@ -103,15 +104,15 @@ and the data looks like this:
    :file: ../examples/cafe/simple-base-json/data.csv
    :header-rows: 1
 
-When you run this command on the same CSV file and using the `--base-json` flag
-too, you'll see this, with the spreadsheet rows merged in:
+you can run this command using the `--base-json` option to see the `base.json`
+data with the with the spreadsheet rows merged in:
 
 .. literalinclude:: ../examples/cafe/simple-base-json/cmd.txt
    :language: bash
 .. literalinclude:: ../examples/cafe/simple-base-json/expected.json
    :language: json
 
-.. caution ::
+.. warning::
 
    If you give the base JSON the same key as you specify in `--root-list-path`
    then Flatten Tool will overwrite its value.
@@ -140,14 +141,14 @@ described in the Developer Guide once the features stabilise.
 Understanding JSON Pointer and how Flatten Tool uses it
 =======================================================
 
-Let's consider our first example again and explore the algorithm Flatten Tool
+Let's consider this data again and explore the algorithm Flatten Tool
 uses to make it work:
 
 .. csv-table::
    :file: ../examples/cafe/simple/data.csv
    :header-rows: 1
 
-
+Here's a command to unflatten it and the resulting JSON:
 
 .. literalinclude:: ../examples/cafe/simple/cmd.txt
    :language: bash
@@ -156,16 +157,33 @@ uses to make it work:
 
 The key to understanding how Flatten Tool represents more complex examples in a
 spreadsheet lies in knowing about the `JSON Pointer specification
-<https://tools.ietf.org/html/rfc6901>`_.  This specification describes a way to
-reference values in a JSON document. For example `/cafe/0/name` would point to
-value `Healthy Cafe` in the JSON Document above
+<https://tools.ietf.org/html/rfc6901>`_.  This specification describes a fairly
+intuitive way to reference values in a JSON document.
 
-.. note ::
+To breifly describe how it works, each `/` character after the first one drills
+down into a JSON strucutre. If they value after the `/` is a string, then a key
+is looked up, if it is an integer then an array index is taken.
 
-   JSON pointer starts array indexes at 0, hence the first cafe is at index 0.
+For example, in the JSON pointer `/cafe/0/name` is equivalent to taking the
+following value out of a JSON document named `document`:
 
-Flatten Tool uses JSON Pointer as a way of describing how to move values out of
-a spreadsheet and into a JSON document.
+.. code-block:: python
+
+    >>> document['cafe'][0]['name']
+
+In JSON document above, the JSON pointer `/cafe/0/name` would return `Healthy Cafe`.
+
+.. note::
+
+   JSON pointer array indexes start at 0, just like lists in Python, hence the
+   first cafe is at index 0.
+
+Whilst JSON pointer is designed as a way for getting data *out* of a JSON
+document, Flatten Tool uses JSON Pointer as a way of describing how to move
+values *into* a JSON document from a spreadsheet.
+
+To do this, as it comes across JSON pointers, it automatically creates the
+objects and arrays required.
 
 You can think of Flatten Tool doing the following as it parses a sheet:
 
@@ -189,6 +207,43 @@ first row, `/cafe/0/` is appended to `name` to give the JSON pointer
 `/cafe/0/name`. Flatten Tool then writes `Healthy Cafe` in the correct position.
 
 
+Index behaviour
+---------------
+
+There is one subtlety you need to be aware of though before you see some examples.
+
+Although Flatten Tool always uses strings in a JSON pointer as object keys, it
+only takes numbers it comes across as an *indication* of the array position.
+
+For example, if you gave it the JSON pointer `/cafe/1503/name`, there is no
+guarantee that the `name` would be placed in an object at index position 1503.
+
+Instead Flatten Tool uses numbers in the same sheet that are at the same parent
+JSON pointer path (`/cafe/` in this case), as being the sort order the child
+objects should appear in, but not the literal index positions.
+
+If two objects use the same index at the same base JSON pointer path, Flatten
+Tool will keep both but the one it comes across first will come before the
+other.
+
+This behaviour has two advantages:
+
+* data won't be lost if for some reason the index wasn't specified correctly
+
+* the data in the generated JSON will be in the same order as it was specified
+  in the sheets which is likely to be what the person putting data into the
+  spreadsheet would expect
+
+This behaviour is also important when you learn about Lists of Objects (without
+IDs) later.
+
+.. tip::
+
+   You'll see later in the relationships section, that special `id` values can
+   alter the index behavior described here and allow Flatten Tool to merge rows
+   from multiple sheets.
+
+
 Multiple rows
 -------------
 
@@ -206,6 +261,11 @@ Cafe` at `/cafe/1/name` producing this:
 .. literalinclude:: ../examples/cafe/simple-row/expected.json
    :language: json
 
+Although both `Healthy Cafe` and `Vegetarian Cafe` are under a column that
+resolves to `/cafe/0/name`, the rules described in the previous section explain
+why noth are present in the output and why `Healthy Cafe` comes before
+`Vegetarian Cafe`.
+
 
 Multiple columns
 ----------------
@@ -216,7 +276,7 @@ Let's add the cafe address to the spreadsheet:
    :header-rows: 1
    :file: ../examples/cafe/simple-col/data.csv
 
-.. note ::
+.. note::
 
    CSV files require cells containing `,` characters to be escaped by wrapping
    them in double quotes. That's why if you look at the source CSV, the addresses
@@ -252,7 +312,7 @@ In effect, all Flatten Tool does is:
 
 Once all the sheets have been processed the resulting JSON is returned.
 
-.. note ::
+.. note::
 
    The CSV specification doesn't support multiple sheets. To work around this,
    Flatten Tool treats a directory of CSV files as a single spreadsheet with
@@ -281,30 +341,11 @@ When you run the example you get this:
    :language: json
 
 The order is because the `data` sheet was processed before the `other` sheet.
-The files are processed in the order returned by `os.listdir()` so you should
-name them in the order you would like them processed.
 
-Index behaviour
-~~~~~~~~~~~~~~~
+.. tip::
 
-If you think about what's going on in the previous example you might have
-expected that `Vegetarian Cafe` would have over-written `Healthy Cafe` since
-both are represented by the JSON pointer `/cafe/0/name`.
-
-The reason this doesn't happen is that when there is a conflict in index
-values, Flatten Tool simply appends the next item after the previous one with
-that index. (Although as you'll see later in the relationships section, special
-`id` values can alter this behaviour).
-
-This behaviour has two advantages:
-
-* data won't be lost if for some reason the index wasn't specified correctly
-
-* the data in the generated JSON will be in the same order as it was specified
-  in the sheets which is likely to be what the person putting data into the
-  spreadsheet would expect
-
-This behaviour is also important when you learn about Lists of Objects later.
+    CSV file sheets are processed in the order returned by `os.listdir()` so
+    you should name them in the order you would like them processed.
 
 
 Objects
@@ -312,8 +353,7 @@ Objects
 
 Now you know that the column headings are really just a JSON Pointer
 specification, and the index values are only treated as indicators of the
-presence of lists (and not their order) you can write some more sophisticated
-examples.
+presence of arrays you can write some more sophisticated examples.
 
 Rather than have the address just as string, we could represent it as an
 object. For example, imagine you'd like out output JSON in this structure:
@@ -338,6 +378,7 @@ Let's try it:
 .. literalinclude:: ../examples/cafe/object/expected.json
    :language: json
 
+
 Lists of Objects (without IDs)
 ==============================
 
@@ -348,7 +389,7 @@ taken to.
 Each cafe has many tables, so this is an example of a one-to-many relationship
 if you are used to working with relational databases.
 
-We can represent the table information in JSON as a list of objects, where each
+You can represent the table information in JSON as a array of objects, where each
 object represents a table, and each table has a `number` key. Let's imagine the
 `Healthy Cafe` has three tables numbered 1, 2 and 3. We'd like to produce this
 structure:
@@ -375,12 +416,13 @@ For example, consider this spreadsheet data:
 We'll use this example of tables (of the furniture variety) in subsequent
 examples.
 
+
 Index behaviour
 ---------------
 
 Just as in the multiple sheets example earlier, the exact numbers at the table
 index positions aren't too important to Flatten Tool. They just tell Flatten
-Tool that the value in the cell is part of an object in a list.
+Tool that the value in the cell is part of an object in an array.
 
 In this particular case though, Flatten Tool will keep columns in order implied
 by the indexes.
@@ -416,17 +458,18 @@ Notice that Flatten Tool correctly associated the `reserved` key with table 1
 because of the index numbered `30`, even though the columns weren't next to
 each other.
 
-For a much richer way of organising lists of objects, see the Relationships
+For a much richer way of organising arrays of objects, see the Relationships
 section.
+
 
 Plain Lists (Unsupported)
 -------------------------
 
-Flatten Tool doesn't support lists of JSON values other than objects (just
+Flatten Tool doesn't support arrays of JSON values other than objects (just
 described in the previous section).
 
 As a result heading names such as `tag/0` and `tag/1` would be ignored and an
-empty list would be put into the JSON.
+empty array would be put into the JSON.
 
 Here's some example data:
 
@@ -470,7 +513,7 @@ above to use integers would be to use a spreadsheet format such xlsx that
 supported integers and make sure the cell type was number. Flatten Tool would
 pass the cell value through to the JSON as a number in that case.
 
-.. note ::
+.. note::
 
     Make sure you specify the correct format `-f=xlsx` on the command line if
     you want to use an xlsx file.
@@ -512,7 +555,7 @@ Here's an example of a JSON Schema that can provide the typing information:
 Human-friendly headings using a JSON Schema with titles
 =======================================================
 
-Let's take a closer look at the list of objects example from earlier again:
+Let's take a closer look at the array of objects example from earlier again:
 
 .. csv-table::
    :file: ../examples/cafe/list-of-objects/data.csv
@@ -529,9 +572,9 @@ this:
 Flatten Tool supports this if you do the following:
 
 * Write a JSON Schema specifying the titles being used and
-  specify it with the `--schema` flag
+  specify it with the `--schema` option
 * Use `:` characters instead of `/` characters in the headings
-* Specify the `--convert-titles` flag on the command line
+* Specify the `--convert-titles` option on the command line
 
 .. caution::
 
@@ -597,8 +640,6 @@ that any objects with the same `id` at the same level are the same object and
 that their values should be merged.
 
 
-
-
 ID-based object merge behaviour
 -------------------------------
 
@@ -608,10 +649,10 @@ The merge behaviour happens whether the two IDs are specified in:
 * two rows in two different sheets
 
 Basically, any time Flatten Tool comes across a row with an `id` in it, it will
-lookup any other objects in the list to see if that `id` is already used and if
-it is, it will merge it. If not, it will just append a new object to the list.
+lookup any other objects in the array to see if that `id` is already used and if
+it is, it will merge it. If not, it will just append a new object to the array.
 
-.. caution ::
+.. caution::
 
    It is important to make sure your `id` values really are unique. If you
    accidentally use the same `id` for two different objects, Flatten Tool
@@ -702,10 +743,10 @@ And the rest of the output:
 The result is the same as before.
 
 
-Parent-child relationships (lists of objects)
----------------------------------------------
+Parent-child relationships (arrays of objects)
+----------------------------------------------
 
-Things get much more interesting when you start dealing with lists of objects
+Things get much more interesting when you start dealing with arrays of objects
 whose parents have an `id`. This enables you to split the parents and children
 up into multiple sheets rather than requiring everything sits one the same row.
 
@@ -716,7 +757,7 @@ restaurant next door.
 .. literalinclude:: ../examples/cafe/relationship-lists-of-objects-simple/expected.json
    :language: json
 
-From the knowledge you gained when learning about lists of objects without IDs
+From the knowledge you gained when learning about arrays of objects without IDs
 earlier, you know that you can produce the correct structure with a CSV file
 like this:
 
@@ -749,13 +790,15 @@ Let's run this example:
 By specifying an ID, the values in the tables sheet can be associated with the
 correct part of the tree created by the cafes sheet.
 
+
 Index behaviour
 ---------------
 
-Within the list of tables for each cafe, you might have noticed that each table
+Within the array of tables for each cafe, you might have noticed that each table
 number has a JSON Pointer that ends in with `/0/number`. Since they all have the
 same index, they are simply ordered within each cafe in the order of the rows
 in the sheet.
+
 
 Grandchild relationships
 ------------------------
@@ -927,6 +970,7 @@ another unnamed cafe:
             ]
         }
 
+
 Relationships with JSON Schema
 ------------------------------
 
@@ -940,10 +984,11 @@ you need to amend your JSON Schema to tell it about the `id` fields:
 
 With these two things in place, Flatten Tool will correctly handle relationships.
 
-.. caution ::
+.. caution::
 
    If you forget to add the `id` field, Flatten Tool will not know anything
    about it when generating templates or converting titles.
+
 
 Sheet Shapes
 ============
@@ -1013,12 +1058,14 @@ The advantage of this set up is that it allows any number of cafes, tables and
 dishes. The disadvantage is that it requires three sheets, making data a bit
 harder to find.
 
+
 Combining objects
 -----------------
 
 Now let's imagine that all your cafe's are small and they never have more than
 three tables. In this case we can combine tables into cafes so that we just
 have two sheets.
+
 
 Table per row
 ~~~~~~~~~~~~~
@@ -1050,6 +1097,7 @@ Combining sheets works best when:
 * you can be sure there won't be too many children for each parent
 * there is a low risk of typos being made in the duplicated data
 
+
 Cafe per row
 ~~~~~~~~~~~~
 
@@ -1069,6 +1117,7 @@ You can run the example with this:
    :language: bash
 
 The JSON is the same as before, as you would expect.
+
 
 Schema
 ------
