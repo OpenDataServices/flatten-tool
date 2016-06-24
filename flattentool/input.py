@@ -8,22 +8,22 @@ from __future__ import unicode_literals
 import sys
 from decimal import Decimal, InvalidOperation
 import os
+import codecs
 from collections import OrderedDict
+
 import openpyxl
 from six import text_type
 from warnings import warn
 import traceback
 import datetime
+import json
 import pytz
 from openpyxl.utils import _get_column_letter, column_index_from_string
+from flattentool.lib import decimal_default, Cell
+import tempfile
 
 WITH_CELLS = True
 
-class Cell:
-    def __init__(self, cell_value, cell_location):
-        self.cell_value = cell_value
-        self.cell_location = cell_location
-        self.sub_cells = []
 
 # The "pylint: disable" lines exist to ignore warnings about the imports we expect not to work not working
 
@@ -231,26 +231,41 @@ class SpreadsheetInput(object):
                 else:
                     main_sheet_by_ocid[root_id_or_none].append(unflattened)
         temporarydicts_to_lists(main_sheet_by_ocid)
+
         return sum(main_sheet_by_ocid.values(), [])
 
-    def unflatten(self):
-        result = self.do_unflatten()
-        if WITH_CELLS:
-            result = extract_list_to_value(result)
-        return result
 
-    def fancy_unflatten(self):
+    def unflatten(self):
+        if WITH_CELLS:
+            tmp_directory = tempfile.mkdtemp()
+            file_name = os.path.join(tmp_directory, 'unflattened.json')
+            self.results_from_cell_tree({}, 'main', file_name)
+            with open(file_name) as unflattened:
+                return json.load(unflattened, object_pairs_hook=OrderedDict)['main']
+        return self.do_unflatten()
+
+
+    def extract_error_path(self, cell_tree):
+        return sorted(extract_list_to_error_path([self.root_list_path], cell_tree).items())
+
+
+    def results_from_cell_tree(self, base, main_sheet_name, output_name):
+        cell_tree = self.do_unflatten()
+        base[main_sheet_name] = cell_tree
+        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        return self.extract_error_path(cell_tree)
+
+
+    def fancy_unflatten(self, base, main_sheet_name, output_name, cell_source_map, heading_source_map):
         if not WITH_CELLS:
             raise Exception('Can only do a fancy_unflatten() if WITH_CELLS=True')
-        cell_tree = self.do_unflatten()
-        result = extract_list_to_value(cell_tree)
-        cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
-        ordered_items = sorted(cell_source_map.items())
-        ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
+        ordered_items = self.results_from_cell_tree(base, main_sheet_name, output_name)
+        if not cell_source_map and not heading_source_map:
+            return
         row_source_map = OrderedDict()
-        heading_source_map = OrderedDict()
-        for path, _ in ordered_items:
-            cells = cell_source_map[path]
+        heading_source_map_data = OrderedDict()
+        for path, cells in ordered_items:
             # Prepare row_source_map key
             key = '/'.join(str(x) for x in path[:-1])
             if not key in row_source_map:
@@ -263,19 +278,28 @@ class SpreadsheetInput(object):
                 except:
                     header_path_parts.append(x)
             header_path = '/'.join(header_path_parts)
-            if header_path not in heading_source_map:
-                heading_source_map[header_path] = []
+            if header_path not in heading_source_map_data:
+                heading_source_map_data[header_path] = []
             # Populate the row and header source maps
             for cell in cells:
                 sheet, col, row, header = cell
                 if (sheet, row) not in row_source_map[key]:
                     row_source_map[key].append((sheet, row))
-                if (sheet, header) not in heading_source_map[header_path]:
-                    heading_source_map[header_path].append((sheet, header))
+                if (sheet, header) not in heading_source_map_data[header_path]:
+                    heading_source_map_data[header_path].append((sheet, header))
         for key in row_source_map:
-            assert key not in ordered_cell_source_map, 'Row/cell collision: {}'.format(key)
-            ordered_cell_source_map[key] = row_source_map[key]
-        return result, ordered_cell_source_map, heading_source_map
+            ordered_items.append((key.split('/'), row_source_map[key]))
+
+        if cell_source_map:
+            with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
+                json.dump(
+                    OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items),
+                    fp, default=decimal_default, ensure_ascii=False, indent=4
+                )
+        if heading_source_map:
+            with codecs.open(heading_source_map, 'w', encoding='utf-8') as fp:
+                json.dump(heading_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
+
 
 def extract_list_to_error_path(path, input):
     output = {}
@@ -310,24 +334,6 @@ def extract_dict_to_error_path(path, input):
             raise Exception('Unexpected result type in the JSON cell tree: {}'.format(input[k]))
     return output
 
-def extract_list_to_value(input):
-    output = []
-    for item in input:
-        output.append(extract_dict_to_value(item))
-    return output
-
-def extract_dict_to_value(input):
-    output = OrderedDict()
-    for k in input:
-        if isinstance(input[k], list):
-            output[k] = extract_list_to_value(input[k])
-        elif isinstance(input[k], dict):
-            output[k] = extract_dict_to_value(input[k])
-        elif isinstance(input[k], Cell):
-            output[k] = input[k].cell_value
-        else:
-            raise Exception('Unexpected result type in the JSON cell tree: {}'.format(input[k]))
-    return output
 
 class CSVInput(SpreadsheetInput):
     encoding = 'utf-8'
@@ -538,6 +544,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, to
 
 
 class TemporaryDict(UserDict):
+    __slots__ = ['keyfield', 'items_no_keyfield', 'data', 'top_sheet']
     def __init__(self, keyfield, top_sheet=False):
         self.keyfield = keyfield
         self.items_no_keyfield = []
