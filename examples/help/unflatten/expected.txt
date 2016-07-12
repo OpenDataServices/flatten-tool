@@ -35,9 +35,7 @@ optional arguments:
                         Name of the timezone, defaults to UTC. Should be in
                         tzdata format, e.g. Europe/London
   -r ROOT_ID, --root-id ROOT_ID
-                        Root ID of the data format, e.g. ocid for OCDS and
-                        blank for 360Giving (use --root-id=''). Defaults to
-                        ocid.
+                        Root ID of the data format, e.g. ocid for OCDS
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.
   --convert-titles      Convert titles. Requires a schema to be specified.
