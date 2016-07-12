@@ -21,7 +21,7 @@ else:
 class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
-    def __init__(self, parser, main_sheet_name='main', output_name='release'):
+    def __init__(self, parser, main_sheet_name='main', output_name='unflattened'):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
