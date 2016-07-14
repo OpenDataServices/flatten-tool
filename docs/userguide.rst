@@ -878,7 +878,7 @@ but the ordering different.
 Arbitrary-depth in a single table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also structutre all the data into a single table. It is only
+You can also structure all the data into a single table. It is only
 recommended to do this if you have a very simple data structure where there is
 only one object at each part of the hierarchy.
 
@@ -891,12 +891,7 @@ Here's the data:
    :file: ../examples/cafe/relationship-grandchild/cafes.csv
    :header-rows: 1
 
-When we run this command:
-
-.. literalinclude:: ../examples/cafe/relationship-grandchild/cmd.txt
-   :language: bash
-
-We get these results:
+Let's unflatten this table:
 
 .. literalinclude:: ../examples/cafe/relationship-grandchild/cmd.txt
    :language: bash
