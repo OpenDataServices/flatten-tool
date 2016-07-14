@@ -188,6 +188,54 @@ class SpreadsheetInput(object):
             sheet_name, lines = sheet
             try:
                 actual_headings = self.get_sheet_headings(sheet_name)
+                found = OrderedDict()
+                last_col = len(actual_headings)
+                # We want to ignore data in earlier columns, so we look
+                # through the data backwards
+                for i, actual_heading in enumerate(reversed(actual_headings)):
+                    if actual_heading in found:
+                        found[actual_heading].append((last_col-i)-1)
+                    else:
+                        found[actual_heading] = [i]
+                for actual_heading in reversed(found):
+                    if len(found[actual_heading]) > 1:
+                        keeping = found[actual_heading][0]
+                        ignoring = found[actual_heading][1:]
+                        ignoring.reverse()
+                        if len(ignoring) >= 3:
+                            warn(
+                                (
+                                    'Duplicate heading "{}" found, ignoring '
+                                    'the data in columns {} and {}.'
+                                ).format(
+                                    actual_heading,
+                                    ', '.join(
+                                        [_get_column_letter(x+1) for x in ignoring[:-1]]
+                                    ),
+                                    _get_column_letter(ignoring[-1] + 1),
+                                )
+                            )
+                        elif len(found[actual_heading]) == 3:
+                            warn(
+                                (
+                                    'Duplicate heading "{}" found, ignoring '
+                                    'the data in columns {} and {}.'
+                                ).format(
+                                    actual_heading,
+                                    _get_column_letter(ignoring[0] + 1),
+                                    _get_column_letter(ignoring[1] + 1),
+                                )
+                            )
+                        else:
+                            warn(
+                                (
+                                    'Duplicate heading "{}" found, ignoring '
+                                    'the data in column {}.'
+                                ).format(
+                                    actual_heading,
+                                    _get_column_letter(ignoring[0]+1),
+                                )
+                            )
             except NotImplementedError:
                 # The ListInput type used in the tests doesn't support getting headings.
                 actual_headings = None
