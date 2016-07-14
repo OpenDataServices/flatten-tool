@@ -1,0 +1,58 @@
+{
+    "cafe": [
+        {
+            "id": "CAFE-HEALTH",
+            "name": "Healthy Cafe",
+            "table": [
+                {
+                    "id": "TABLE-1",
+                    "number": "1",
+                    "dish": [
+                        {
+                            "name": "Fish and Chips",
+                            "cost": "9.95"
+                        },
+                        {
+                            "name": "Pesto Pasta Salad",
+                            "cost": "6.95"
+                        }
+                    ]
+                },
+                {
+                    "id": "TABLE-2",
+                    "number": "2"
+                },
+                {
+                    "id": "TABLE-3",
+                    "number": "3",
+                    "dish": [
+                        {
+                            "name": "Fish and Chips",
+                            "cost": "9.95"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CAFE-VEG",
+            "name": "Vegetarian Cafe",
+            "table": [
+                {
+                    "id": "TABLE-16",
+                    "number": "16",
+                    "dish": [
+                        {
+                            "name": "Large Glass Sauvignon",
+                            "cost": "5.95"
+                        }
+                    ]
+                },
+                {
+                    "id": "TABLE-17",
+                    "number": "17"
+                }
+            ]
+        }
+    ]
+}

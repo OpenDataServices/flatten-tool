@@ -329,7 +329,7 @@ Installation
 
     git clone https://github.com/OpenDataServices/flatten-tool.git
     cd flatten-tool
-    python3 -m virtualenv -p $(which python3) .ve
+    virtualenv -p $(which python3) .ve
     source .ve/bin/activate
     pip install -r requirements_dev.txt
 

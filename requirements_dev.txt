@@ -3,3 +3,5 @@ pytest
 pytest-cov
 coveralls
 pytest-localserver
+sphinx
+sphinx_rtd_theme
