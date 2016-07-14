@@ -96,10 +96,10 @@ class NumberStr(float):
 
 def decimal_default(o):
     if isinstance(o, Decimal):
-       if int(o) == o:
-           return int(o)
-       else:
-           return NumberStr(o)
+        if int(o) == o:
+            return int(o)
+        else:
+            return NumberStr(o)
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
