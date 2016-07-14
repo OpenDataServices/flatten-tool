@@ -5,7 +5,7 @@
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "integer",
+                    "type": "string",
                     "title": "Identifier"
                 },
                 "number": {
@@ -25,7 +25,7 @@
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "integer",
+                    "type": "string",
                     "title": "Identifier"
                 },
                 "name": {
@@ -33,7 +33,7 @@
                     "title": "Name"
                 },
                 "cost": {
-                    "type": "integer",
+                    "type": "number",
                     "title": "Cost"
                 }
             }
@@ -42,7 +42,7 @@
     "type": "object",
     "properties": {
         "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Identifier"
         },
         "name": {

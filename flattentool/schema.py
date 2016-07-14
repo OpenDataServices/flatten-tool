@@ -135,7 +135,7 @@ class SchemaParser(object):
                         )
 
                 elif 'array' in property_type_set:
-                    self.flattened[parent_path+property_name] = "array"
+                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "array"
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set:
                         self.flattened[parent_path+property_name] = "string_array"

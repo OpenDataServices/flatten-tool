@@ -875,6 +875,36 @@ but the ordering different.
    sheets do.
 
 
+Arbitrary-depth in a single table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can also structure all the data into a single table. It is only
+recommended to do this if you have a very simple data structure where there is
+only one object at each part of the hierarchy.
+
+In this example we'll use a JSON Schema to infer the structure, allowing us to
+use human-readable column titles.
+
+Here's the data:
+
+.. csv-table:: sheet: dishes
+   :file: ../examples/cafe/relationship-grandchild/cafes.csv
+   :header-rows: 1
+
+Let's unflatten this table:
+
+.. literalinclude:: ../examples/cafe/relationship-grandchild/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/relationship-grandchild/expected.json
+   :language: json
+
+If you'd like to explore this example yourself, here's the schema used in the
+example above:
+
+.. literalinclude:: ../examples/receipt/cafe.schema
+   :language: json
+
+
 Missing IDs
 -----------
 
@@ -1101,7 +1131,8 @@ Combining sheets works best when:
 Cafe per row
 ~~~~~~~~~~~~
 
-There's another variant of this shape that we can use. If we just want to use one row per cafe.
+There's another variant of this shape that we can use. If we just want to use
+one row per cafe.
 
 .. csv-table:: Sheet: cafes and tables
    :file: ../examples/receipt/combine-table-into-cafe-2/cafes_and_tables.csv
@@ -1119,10 +1150,18 @@ You can run the example with this:
 The JSON is the same as before, as you would expect.
 
 
-Schema
-------
+All in one table
+~~~~~~~~~~~~~~~~
 
-If you'd like to explore this example yourself you can also use this schema:
+It would also be possible to put all the data in a single table, but this would
+look quite complicated since there is more than one table in each cafe and more
+than one dish at each table.
 
-.. literalinclude:: ../examples/receipt/cafe.schema
-   :language: json
+To understand the approach, have a look at the "Arbitrary-depth in a single
+table" section earlier.
+
+.. tip ::
+
+   If you'd like to explore these examples yourself using human-readable column
+   titles, you can use the schema in the "Arbitrary-depth in a single
+   table" section too.
