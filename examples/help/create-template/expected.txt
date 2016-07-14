@@ -20,7 +20,5 @@ optional arguments:
                         if they are specified in a rollUp attribute in the
                         schema.
   -r ROOT_ID, --root-id ROOT_ID
-                        Root ID of the data format, e.g. ocid for OCDS and
-                        blank for 360Giving (use --root-id=''). Defaults to
-                        ocid.
+                        Root ID of the data format, e.g. ocid for OCDS
   --use-titles          Convert titles. Requires a schema to be specified.
