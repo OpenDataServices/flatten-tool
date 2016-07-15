@@ -1,1 +1,1 @@
-Identifier,Table:Identifier,Table:Dish:Identifier,Table:Dish:Name,Table:Dish:Cost
+id,table/0/id,table/0/dish/0/id,table/0/dish/0/name,table/0/dish/0/cost

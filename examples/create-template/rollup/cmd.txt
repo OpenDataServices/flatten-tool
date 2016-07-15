@@ -1,0 +1,1 @@
+$ flatten-tool create-template --use-titles --main-sheet-name=cafe --schema=examples/receipt/cafe-rollup.schema --rollup -f csv -o examples/create-template/rollup/actual

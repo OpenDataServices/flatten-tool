@@ -67,6 +67,12 @@ Unflatten function
    be correctly serailised by a serialiser later (e.g. dates). Returns a cell
    tree.
 
+   .. tip ::
+
+      Take a look at the `run()` function in
+      `flattentool/tests/test_headings.py` to see a function that behaves a
+      little like a pure Python entry point to Flatten Tool's functionality.
+
 Serialisers
 
    Take a cell tree and serialise it to either a JSON tree, a source map, or both
@@ -82,19 +88,28 @@ Explicit float support
 The existing implementation makes a special effort to correctly handle decimal
 types such as currency.
 
-It will be important for the unflatten function to support the `float` type
-explicitly, rather than treating it as a `Decimal` in order to make sure the
-values are perfectly handled in JSON. This is due to this quirk of Python's
-behaviour:
+This special effort also means that Flatten Tool treats float values as
+`Decimal` too.
+
+Most of the time this is perfectly fine, since Python correctly treats a
+`Decimal` generated from a float as being equal to the float itself:
 
 .. code-block:: python
 
    >>> from decimal import Decimal
+   >>> Decimal(1.3) == 1.3
+   True
+
+Do be aware of this small quirk of Python's behaviour though. Python doesn't
+treat a `Decimal` obtained from `'1.3'` as being the same as one generated from
+`1.3`:
+
+.. code-block:: python
+
    >>> Decimal('1.3') == Decimal(1.3)
    False
    >>> Decimal(1.3)
    Decimal('1.3000000000000000444089209850062616169452667236328125')
-
 
 Stdin support
 -------------

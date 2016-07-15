@@ -1,6 +1,6 @@
-Identifier,Table:Identifier,Table:Number,id,table/0/id,table/0/number
-,,,CAFE-HEALTH,TABLE-1,1
-,,,CAFE-HEALTH,TABLE-2,2
-,,,CAFE-HEALTH,TABLE-3,3
-,,,CAFE-VEG,TABLE-16,16
-,,,CAFE-VEG,TABLE-17,17
+id,table/0/id,table/0/number
+CAFE-HEALTH,TABLE-1,1
+CAFE-HEALTH,TABLE-2,2
+CAFE-HEALTH,TABLE-3,3
+CAFE-VEG,TABLE-16,16
+CAFE-VEG,TABLE-17,17

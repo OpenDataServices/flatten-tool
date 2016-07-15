@@ -1,3 +1,3 @@
-Identifier,Name,Address,id,name
-,,,CAFE-HEALTH,Healthy Cafe
-,,,CAFE-VEG,Vegetarian Cafe
+id,name,address
+CAFE-HEALTH,Healthy Cafe,
+CAFE-VEG,Vegetarian Cafe,

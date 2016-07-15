@@ -52,8 +52,6 @@ its own sheet.
 Rolling up
 ----------
 
-XXX Add an example.
-
 If you have a JSON schema where objects are modeled as lists of objects but
 actually represent one to one relationships, you can *roll up* certain
 properties.
@@ -68,15 +66,38 @@ To enable roll up behaviour you have to:
 * Add the `rollUp` key to the JSON Schema to the child object with a value that
   is an array of the fields to roll up
 
-Since all the examples so far are actually one-to-many relationships, there is
-no example to demonstrate roll up on yet.
+Here are the changes we make to the schema:
 
-If you try to roll up multiple values you'll get a warning like this:
+.. literalinclude:: ../examples/receipt/cafe-rollup.schema
+   :diff: ../examples/receipt/cafe.schema
 
-.. code-block:: bash
+Here's the command we run:
 
-    .../flattentool/flattentool/json_input.py:152: UserWarning: More than one value supplied for "table". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.
-      warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
+.. literalinclude:: ../examples/create-template/rollup/cmd.txt
+   :language: bash
+
+Here are the resulting sheets:
+
+.. csv-table:: sheet: cafe.csv
+   :file: ../examples/create-template/rollup/expected/cafe.csv
+
+.. csv-table:: sheet: table.csv
+   :file: ../examples/create-template/rollup/expected/table.csv
+
+.. csv-table:: sheet: tab_dish.csv
+   :file: ../examples/create-template/rollup/expected/tab_dish.csv
+
+
+Notice how `Table: Number` has now been moved into the `cafe.csv` file.
+
+.. caution ::
+
+   If you try to roll up multiple values you'll get a warning like this:
+
+   .. code-block:: bash
+
+       UserWarning: More than one value supplied for "table". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.
+         warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
 
 
 Empty objects

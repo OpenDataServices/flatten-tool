@@ -1079,7 +1079,7 @@ that later.
 
 .. note ::
 
-   Notice that this time the CSV sheets are prefixed with an integer to make 
+   Notice that this time the CSV sheets are prefixed with an integer to make
    sure they are processed in the right order. If the prefixes weren't there,
    the order of the tables in the resulting JSON might be different.
 
@@ -1296,3 +1296,7 @@ using in this section:
 
 .. literalinclude:: ../examples/receipt/source-map/expected/heading_source_map.json
    :language: json
+
+The heading source map is generated separately from the cell source map, so
+headings can be found even if they have no corresponding data in the resulting
+JSON.

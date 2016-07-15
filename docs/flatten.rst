@@ -45,8 +45,7 @@ CSV files for you, populated with the data from the input JSON file.
 
 .. warning ::
 
-   This example clearly isn't behaving itself correctly. Please don't use the
-   flatten functionality for deeply-nested examples yet.
+   You can't use `--use-titles` with flatten.
 
 .. csv-table:: sheet: cafe.csv
    :file: ../examples/flatten/simple/expected/cafe.csv
