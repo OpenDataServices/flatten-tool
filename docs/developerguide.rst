@@ -27,7 +27,7 @@ to understanding Flatten Tool's internal design.
 Helper libraries
 ================
 
-As you'll have read in the :doc:`User Guide <userguide>`, Flatten Tool makes
+As you'll have read in the :doc:`User Guide <unflatten>`, Flatten Tool makes
 use of JSON Pointer, JSON Schema and JSON Ref standards. The Python libraries
 that support this are `jsonpointer`, `jsonschema` and `jsonref` respectively.
 

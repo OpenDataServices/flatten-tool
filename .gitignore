@@ -8,3 +8,7 @@
 __pycache__
 docs/_build
 examples/cafe/simple-file/unflattened.json
+examples/create-template/simple/actual
+examples/create-template/simple/actual.*
+examples/flatten/simple/actual
+examples/flatten/simple/actual.*

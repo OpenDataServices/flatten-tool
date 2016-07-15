@@ -32,7 +32,8 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
-   userguide
+   unflatten
+   create-template
    flatten
    developerguide
 

@@ -2,6 +2,7 @@ import os
 import shlex
 import subprocess
 import sys
+import uuid
 
 from os.path import join, getsize
 from six import text_type
@@ -14,6 +15,8 @@ def test_cafe_examples_in_docs():
             if 'xlsx' in root and sys.version_info[:2] < (3,4):
                 continue
             if 'cmd.txt' in filename:
+                if os.path.exists(join(root, 'actual')) and os.path.isdir(join(root, 'actual')):
+                    os.rename(join(root, 'actual'), join(root, 'actual.'+text_type(uuid.uuid4())))
                 with open(join(root, filename), 'rb') as fp:
                     cmds = text_type(fp.read(), 'utf8').strip().split('\n')
                     actual_stdout = b''
@@ -38,31 +41,40 @@ def test_cafe_examples_in_docs():
                         assert process.returncode == 0, cmd
                         actual_stdout += (cmd_actual_stdout or b'')
                         actual_stderr += (cmd_actual_stderr or b'')
-                    if os.path.exists(join(root, 'expected.txt')):
-                        with open(join(root, 'expected.txt'), 'rb') as fstdout:
-                            expected_stdout = fstdout.read()
-                    else:
-                        with open(join(root, 'expected.json'), 'rb') as fstdout:
-                            expected_stdout = fstdout.read()
-                    expected_stderr = b''
-                    if os.path.exists(join(root, 'expected_stderr.json')):
-                        with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
-                            data = fstderr.read()
-                            expected_stderr_lines = text_type(data, 'utf8').split('\n')
-                            for line in expected_stderr_lines:
-                                if line:
-                                    expected_stderr += (line + '\n').encode('utf8')
-                                else:
-                                     expected_stderr += b'\n'
+                if os.path.exists(join(root, 'expected')) and os.path.isdir(join(root, 'expected')):
+                    # Create case
+                    assert len(os.listdir(join(root, 'expected'))) == len(os.listdir(join(root, 'actual'))), "Different number of files"
+                    for expected_filename in os.listdir(join(root, 'expected')):
+                        assert os.path.exists(join(root, 'actual', expected_filename)), "File {} was not generated".format(expected_filename)
+                        with open(join(root, 'expected', expected_filename), 'rb') as fp_expected:
+                            with open(join(root, 'actual', expected_filename), 'rb') as fp_actual:
+                                assert fp_actual.read() == fp_expected.read(), "File {} has unexpected contnet".format(expected_filename)
+                    expected_stdout = b''
+                # Flatten case
+                if os.path.exists(join(root, 'expected.txt')):
+                    with open(join(root, 'expected.txt'), 'rb') as fstdout:
+                        expected_stdout = fstdout.read()
+                elif os.path.exists(join(root, 'expected.json')):
+                    with open(join(root, 'expected.json'), 'rb') as fstdout:
+                        expected_stdout = fstdout.read()
+                assert _strip(actual_stdout) == _strip(expected_stdout), "Different stdout: {}".format(cmds)
+                expected_stderr = b''
+                if os.path.exists(join(root, 'expected_stderr.json')):
+                    with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
+                        data = fstderr.read()
+                        expected_stderr_lines = text_type(data, 'utf8').split('\n')
+                        for line in expected_stderr_lines:
+                            if line:
+                                expected_stderr += (line + '\n').encode('utf8')
+                            else:
+                                 expected_stderr += b'\n'
                     assert _simplify_warnings(_strip(actual_stderr)) == _simplify_warnings(_strip(expected_stderr)), "Different stderr: {}".format(cmds)
-                    assert _strip(actual_stdout) == _strip(expected_stdout), "Different stdout: {}".format(cmds)
-                    assert _simplify_warnings(_strip(actual_stderr)) == _simplify_warnings(_strip(expected_stderr)), "Different stderr: {}".format(cmds)
-                    tests_passed += 1
+                tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 28
+        assert tests_passed == 30
     else:
-        assert tests_passed == 29
+        assert tests_passed == 31
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
