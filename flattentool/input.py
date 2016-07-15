@@ -257,40 +257,46 @@ class SpreadsheetInput(object):
         result = extract_list_to_value(result)
         return result
 
-    def fancy_unflatten(self):
+    def fancy_unflatten(self, with_cell_source_map, with_heading_source_map):
         cell_tree = self.do_unflatten()
         result = extract_list_to_value(cell_tree)
-        cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
-        ordered_items = sorted(cell_source_map.items())
-        ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
-        row_source_map = OrderedDict()
-        heading_source_map = OrderedDict()
-        for path, _ in ordered_items:
-            cells = cell_source_map[path]
-            # Prepare row_source_map key
-            key = '/'.join(str(x) for x in path[:-1])
-            if not key in row_source_map:
-                row_source_map[key] = []
-            # Prepeare header_source_map key
-            header_path_parts = []
-            for x in path:
-                try:
-                    int(x)
-                except:
-                    header_path_parts.append(x)
-            header_path = '/'.join(header_path_parts)
-            if header_path not in heading_source_map:
-                heading_source_map[header_path] = []
-            # Populate the row and header source maps
-            for cell in cells:
-                sheet, col, row, header = cell
-                if (sheet, row) not in row_source_map[key]:
-                    row_source_map[key].append((sheet, row))
-                if (sheet, header) not in heading_source_map[header_path]:
-                    heading_source_map[header_path].append((sheet, header))
-        for key in row_source_map:
-            assert key not in ordered_cell_source_map, 'Row/cell collision: {}'.format(key)
-            ordered_cell_source_map[key] = row_source_map[key]
+        ordered_cell_source_map = None
+        heading_source_map = None
+        if with_cell_source_map or with_heading_source_map:
+            cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
+            ordered_items = sorted(cell_source_map.items())
+            row_source_map = OrderedDict()
+            heading_source_map = OrderedDict()
+            for path, _ in ordered_items:
+                cells = cell_source_map[path]
+                # Prepare row_source_map key
+                key = '/'.join(str(x) for x in path[:-1])
+                if not key in row_source_map:
+                    row_source_map[key] = []
+                if with_heading_source_map:
+                    # Prepeare header_source_map key
+                    header_path_parts = []
+                    for x in path:
+                        try:
+                            int(x)
+                        except:
+                            header_path_parts.append(x)
+                    header_path = '/'.join(header_path_parts)
+                    if header_path not in heading_source_map:
+                        heading_source_map[header_path] = []
+                # Populate the row and header source maps
+                for cell in cells:
+                    sheet, col, row, header = cell
+                    if (sheet, row) not in row_source_map[key]:
+                        row_source_map[key].append((sheet, row))
+                    if with_heading_source_map:
+                        if (sheet, header) not in heading_source_map[header_path]:
+                            heading_source_map[header_path].append((sheet, header))
+        if with_cell_source_map:
+            ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
+            for key in row_source_map:
+                assert key not in ordered_cell_source_map, 'Row/cell collision: {}'.format(key)
+                ordered_cell_source_map[key] = row_source_map[key]
         return result, ordered_cell_source_map, heading_source_map
 
 def extract_list_to_error_path(path, input):

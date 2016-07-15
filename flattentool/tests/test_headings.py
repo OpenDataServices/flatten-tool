@@ -105,7 +105,7 @@ def run(sheets, schema=None, source_maps=False):
         )
     spreadsheet_input.read_sheets()
     if source_maps:
-        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
-        return result, cell_source_map_data, heading_source_map_data
+        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten(True, True)
     else:
-        return spreadsheet_input.unflatten(), None, None
+        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten(False, False)
+    return result, cell_source_map_data, heading_source_map_data
