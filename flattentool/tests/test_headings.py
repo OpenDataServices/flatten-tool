@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from flattentool.input import SpreadsheetInput, WITH_CELLS
+from flattentool.input import SpreadsheetInput
 from flattentool.schema import SchemaParser
 from jsonref import JsonRef
 import pytest
@@ -72,8 +72,6 @@ class HeadingListInput(SpreadsheetInput):
 
 
 def run(sheets, schema=None, source_maps=False):
-    if not WITH_CELLS:
-        source_maps = False
     input_headings = OrderedDict()
     input_sheets = OrderedDict()
     for sheet in sheets:

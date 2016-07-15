@@ -51,13 +51,12 @@ def test_cafe_examples_in_docs():
                             expected_stderr_lines = text_type(data, 'utf8').split('\n')
                             for line in expected_stderr_lines:
                                 if line:
-                                    if line.startswith('.../'):
-                                        line = text_type(os.getcwd()) + line[3:]
                                     expected_stderr += (line + '\n').encode('utf8')
                                 else:
                                      expected_stderr += b'\n'
-                    assert _strip(actual_stdout) == _strip(expected_stdout), cmds
-                    assert _strip(actual_stderr) == _strip(expected_stderr), cmds
+                    assert _simplify_warnings(_strip(actual_stderr)) == _simplify_warnings(_strip(expected_stderr)), "Different stderr: {}".format(cmds)
+                    assert _strip(actual_stdout) == _strip(expected_stdout), "Different stdout: {}".format(cmds)
+                    assert _simplify_warnings(_strip(actual_stderr)) == _simplify_warnings(_strip(expected_stderr)), "Different stderr: {}".format(cmds)
                     tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
@@ -65,6 +64,13 @@ def test_cafe_examples_in_docs():
     else:
         assert tests_passed == 29
 
+def _simplify_warnings(lines):
+    return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
+
+def _simplify_line(line):
+    if 'UserWarning: ' in line:
+        return line[line.find('UserWarning: '):]
+    return line
 
 # Older versions of Python have an extra whitespace at the end compared to newer ones
 # https://bugs.python.org/issue16333

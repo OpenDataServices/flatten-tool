@@ -17,7 +17,6 @@ import datetime
 import pytz
 from openpyxl.utils import _get_column_letter, column_index_from_string
 
-WITH_CELLS = True
 
 class Cell:
     def __init__(self, cell_value, cell_location):
@@ -85,7 +84,7 @@ def merge(base, mergee, debug_info=None):
     if not debug_info:
         debug_info = {}
     for key, v in mergee.items():
-        if WITH_CELLS and isinstance(v, Cell):
+        if isinstance(v, Cell):
             value = v.cell_value
         else:
             value = v
@@ -102,10 +101,7 @@ def merge(base, mergee, debug_info=None):
             elif isinstance(value, dict) and isinstance(base[key], dict):
                 merge(base[key], value, debug_info)
             else:
-                if WITH_CELLS:
-                    base_value = base[key].cell_value
-                else:
-                    base_value = base[key]
+                base_value = base[key].cell_value
                 if base_value != value:
                     id_info = 'id "{}"'.format(debug_info.get('id'))
                     if debug_info.get('root_id'):
@@ -113,14 +109,10 @@ def merge(base, mergee, debug_info=None):
                     warn('Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
                         key, id_info, debug_info.get('sheet_name'), base_value, value))
                 else:
-                    if WITH_CELLS:
-                        base[key].sub_cells.append(v)
+                    base[key].sub_cells.append(v)
         else:
             # This happens when a parent record finds the first a child record of a known type
-            if WITH_CELLS: # Either way, we still want to pass back either the cell or the value
-                base[key] = v
-            else:
-                base[key] = v
+            base[key] = v
 
 class SpreadsheetInput(object):
     """
@@ -168,18 +160,6 @@ class SpreadsheetInput(object):
 
     def read_sheets(self):
         raise NotImplementedError
-
-    # XXX This method does not appear to get called, could it be deleted?
-    def convert_types(self, in_dict):
-        out_dict = OrderedDict()
-        for key, value in in_dict.items():
-            parts = key.split(':')
-            if len(parts) > 1:
-                out_dict[parts[0]] = convert_type(parts[1], value, self.timezone)
-            else:
-                out_dict[parts[0]] = convert_type('', value, self.timezone)
-        return out_dict
-
 
     def do_unflatten(self):
         main_sheet_by_ocid = OrderedDict()
@@ -244,28 +224,19 @@ class SpreadsheetInput(object):
                 #if all(x == '' for x in line.values()):
                     continue
                 root_id_or_none = line[self.root_id] if self.root_id else None
-                if WITH_CELLS:
-                    cells = OrderedDict()
-                    for k, header in enumerate(line):
-                        if actual_headings:
-                            cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, actual_headings[k]))
-                        else:
-                            cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
-                    unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone)
-                else:
-                    unflattened = unflatten_main_with_parser(self.parser, line, self.timezone)
+                cells = OrderedDict()
+                for k, header in enumerate(line):
+                    if actual_headings:
+                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, actual_headings[k]))
+                    else:
+                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
+                unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone)
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
                 def inthere(unflattened, id_name):
-                    if WITH_CELLS:
-                        return unflattened[id_name].cell_value
-                    else:
-                        return unflattened[id_name]
+                    return unflattened[id_name].cell_value
                 if 'id' in unflattened and inthere(unflattened, 'id') in main_sheet_by_ocid[root_id_or_none]:
-                    if WITH_CELLS:
-                        unflattened_id = unflattened.get('id').cell_value
-                    else:
-                        unflattened_id = unflattened.get('id')
+                    unflattened_id = unflattened.get('id').cell_value
                     merge(
                         main_sheet_by_ocid[root_id_or_none][unflattened_id],
                         unflattened,
@@ -283,13 +254,10 @@ class SpreadsheetInput(object):
 
     def unflatten(self):
         result = self.do_unflatten()
-        if WITH_CELLS:
-            result = extract_list_to_value(result)
+        result = extract_list_to_value(result)
         return result
 
     def fancy_unflatten(self):
-        if not WITH_CELLS:
-            raise Exception('Can only do a fancy_unflatten() if WITH_CELLS=True')
         cell_tree = self.do_unflatten()
         result = extract_list_to_value(cell_tree)
         cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
@@ -441,15 +409,6 @@ FORMATS = {
 }
 
 
-def unflatten_line(line):
-    unflattened = OrderedDict()
-    for k, v in line.items():
-        if v is None:
-            continue
-        fields = k.split('/')
-        path_search(unflattened, fields[:-1], top_sheet=True)[fields[-1]] = v
-    return unflattened
-
 def isint(string):
     try:
         int(string)
@@ -462,7 +421,7 @@ class ListAsDict(dict):
 
 def list_as_dicts_to_temporary_dicts(unflattened):
     for key, value in list(unflattened.items()):
-        if WITH_CELLS and isinstance(value, Cell):
+        if isinstance(value, Cell):
             continue
         if hasattr(value, 'items'):
             if not value:
@@ -480,14 +439,9 @@ def unflatten_main_with_parser(parser, line, timezone):
     unflattened = OrderedDict()
     for path, input in line.items():
         # Skip blank cells
-        if WITH_CELLS:
-            cell = input
-            if cell.cell_value is None or cell.cell_value == '':
-                continue
-        else:
-            value = input
-            if value is None or value == '':
-                continue
+        cell = input
+        if cell.cell_value is None or cell.cell_value == '':
+            continue
         current_path = unflattened
         path_list = [item.rstrip('[]') for item in path.split('/')]
         for num, path_item in enumerate(path_list):
@@ -534,16 +488,11 @@ def unflatten_main_with_parser(parser, line, timezone):
                 raise ValueError("There is an object or list at '{}' but it should be an {}".format(path_till_now, current_type))
 
             ## Other Types
-            if WITH_CELLS:
-                value = cell.cell_value
-                converted_value = convert_type(current_type or '', value, timezone)
-                cell.cell_value = converted_value
-                if converted_value is not None and converted_value != '':
-                    current_path[path_item] = cell
-            else:
-                converted_value = convert_type(current_type or '', value, timezone)
-                if converted_value is not None and converted_value != '':
-                    current_path[path_item] = converted_value
+            value = cell.cell_value
+            converted_value = convert_type(current_type or '', value, timezone)
+            cell.cell_value = converted_value
+            if converted_value is not None and converted_value != '':
+                current_path[path_item] = cell
 
     unflattened = list_as_dicts_to_temporary_dicts(unflattened)
     return unflattened
@@ -597,7 +546,7 @@ class TemporaryDict(UserDict):
 
     def append(self, item):
         if self.keyfield in item:
-            if WITH_CELLS and isinstance(item[self.keyfield], Cell):
+            if isinstance(item[self.keyfield], Cell):
                 key = item[self.keyfield].cell_value
             else:
                 key = item[self.keyfield]
@@ -629,13 +578,3 @@ def temporarydicts_to_lists(nested_dict):
 
 class ConflictingIDFieldsError(ValueError):
     pass
-
-
-def find_deepest_id_field(id_fields):
-    split_id_fields = [x.split('/') for x in id_fields]
-    deepest_id_field = max(split_id_fields, key=len)
-    for split_id_field in split_id_fields:
-        if not all(deepest_id_field[i] == x for i, x in enumerate(split_id_field[:-1])):
-            raise ConflictingIDFieldsError()
-    return '/'.join(deepest_id_field)
-
