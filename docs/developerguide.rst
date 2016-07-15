@@ -96,15 +96,6 @@ behaviour:
    Decimal('1.3000000000000000444089209850062616169452667236328125')
 
 
-Clean up of code
-----------------
-
-Now that we are happy with the approach the code takes internally, we can
-remove functions that we no longer need. In particular we can remove code
-branches where `WITH_CELLS` is `False` because we are happy with the cell
-source map implementation.
-
-
 Stdin support
 -------------
 
