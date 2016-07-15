@@ -1,0 +1,1 @@
+$ flatten-tool unflatten -f=csv --root-list-path=cafe --cell-source-map examples/receipt/source-map/actual/cell_source_map.json --heading-source-map examples/receipt/source-map/actual/heading_source_map.json examples/receipt/source-map/input/

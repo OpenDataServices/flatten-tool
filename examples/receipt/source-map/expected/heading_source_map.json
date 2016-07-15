@@ -1,0 +1,50 @@
+{
+    "cafe/id": [
+        [
+            "1_cafes",
+            "id"
+        ],
+        [
+            "2_tables",
+            "id"
+        ],
+        [
+            "3_dishes",
+            "id"
+        ]
+    ],
+    "cafe/name": [
+        [
+            "1_cafes",
+            "name"
+        ]
+    ],
+    "cafe/table/dish/cost": [
+        [
+            "3_dishes",
+            "table/0/dish/0/cost"
+        ]
+    ],
+    "cafe/table/dish/name": [
+        [
+            "3_dishes",
+            "table/0/dish/0/name"
+        ]
+    ],
+    "cafe/table/id": [
+        [
+            "2_tables",
+            "table/0/id"
+        ],
+        [
+            "3_dishes",
+            "table/0/id"
+        ]
+    ],
+    "cafe/table/number": [
+        [
+            "2_tables",
+            "table/0/number"
+        ]
+    ]
+}

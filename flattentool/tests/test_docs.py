@@ -9,6 +9,16 @@ from six import text_type
 
 
 def test_cafe_examples_in_docs():
+
+    with open('examples/receipt/source-map/expected.json', 'rb') as fp:
+        expected = fp.read()
+        for expected_filename in [
+            'normalised/expected.json',
+            'combine-table-into-cafe/expected.json',
+            'combine-table-into-cafe-2/expected.json',
+        ]:
+            with open('examples/receipt/'+expected_filename, 'rb') as fp2:
+                assert fp2.read() == expected, "Files differ: examples/receipt/source-map/expected.json, examples/receipt/{}".format(expected_filename)
     tests_passed = 0
     for root, dirs, files in os.walk('examples'):
         for filename in files:
@@ -17,6 +27,7 @@ def test_cafe_examples_in_docs():
             if 'cmd.txt' in filename:
                 if os.path.exists(join(root, 'actual')) and os.path.isdir(join(root, 'actual')):
                     os.rename(join(root, 'actual'), join(root, 'actual.'+text_type(uuid.uuid4())))
+                os.mkdir(join(root, 'actual'))
                 with open(join(root, filename), 'rb') as fp:
                     cmds = text_type(fp.read(), 'utf8').strip().split('\n')
                     actual_stdout = b''
@@ -24,7 +35,7 @@ def test_cafe_examples_in_docs():
                     for cmd in cmds:
                         assert (
                             cmd.startswith('$ flatten-tool ') or cmd.startswith('$ cat ')
-                        ), "Expected commands to start with '$ flatten-tool'"
+                        ), "Expected commands to start with '$ flatten-tool'. This doesn't: {}".format(cmd)
                         # Since we are defining all the commands ourselves, this is reasonably safe
                         cmd_parts = shlex.split(cmd[len('$ '):])
                         # Include coverage output in the results
@@ -43,12 +54,12 @@ def test_cafe_examples_in_docs():
                         actual_stderr += (cmd_actual_stderr or b'')
                 if os.path.exists(join(root, 'expected')) and os.path.isdir(join(root, 'expected')):
                     # Create case
-                    assert len(os.listdir(join(root, 'expected'))) == len(os.listdir(join(root, 'actual'))), "Different number of files"
+                    assert len(os.listdir(join(root, 'expected'))) == len(os.listdir(join(root, 'actual'))), "Different number of files. {}".format(cmds)
                     for expected_filename in os.listdir(join(root, 'expected')):
-                        assert os.path.exists(join(root, 'actual', expected_filename)), "File {} was not generated".format(expected_filename)
+                        assert os.path.exists(join(root, 'actual', expected_filename)), "File {} was not generated {}".format(expected_filename, cmds)
                         with open(join(root, 'expected', expected_filename), 'rb') as fp_expected:
                             with open(join(root, 'actual', expected_filename), 'rb') as fp_actual:
-                                assert fp_actual.read() == fp_expected.read(), "File {} has unexpected contnet".format(expected_filename)
+                                assert _strip(fp_actual.read()) == _strip(fp_expected.read()), "File {} has unexpected content. {}".format(expected_filename, cmds)
                     expected_stdout = b''
                 # Flatten case
                 if os.path.exists(join(root, 'expected.txt')):
@@ -72,9 +83,9 @@ def test_cafe_examples_in_docs():
                 tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 30
-    else:
         assert tests_passed == 31
+    else:
+        assert tests_passed == 32
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
