@@ -32,6 +32,18 @@ use of JSON Pointer, JSON Schema and JSON Ref standards. The Python libraries
 that support this are `jsonpointer`, `jsonschema` and `jsonref` respectively.
 
 
+Running the tests
+=================
+
+After following the installation above, run ``py.test``.
+
+Note that the tests require the Python testsuite. This should come with python,
+but some distros split it out. On Ubuntu you will need to install a package
+like ``libpython3.4-testsuite`` (depending on which Python version you are
+using).
+
+
+
 Testing coverage of documentation examples
 ==========================================
 
