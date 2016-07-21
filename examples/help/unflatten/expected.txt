@@ -21,6 +21,7 @@ optional arguments:
                         list. Defaults to main.
   -e ENCODING, --encoding ENCODING
                         Encoding of the input file(s) (only relevant for CSV).
+                        This can be any encoding recognised by Python.
                         Defaults to utf8.
   -o OUTPUT_NAME, --output-name OUTPUT_NAME
                         Name of the outputted file. Will have an extension

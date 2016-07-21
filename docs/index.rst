@@ -32,10 +32,15 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
+   introduction
+   examples
+   getting-started
    unflatten
    create-template
    flatten
    developerguide
+   usage-ocds
+   usage-360
 
 Get started by reading the Spreadsheet Designer's Guide to understand the core
 concepts, how to use the `flatten-tool` command and how to structure your own
