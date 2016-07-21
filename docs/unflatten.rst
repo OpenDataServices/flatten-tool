@@ -1039,7 +1039,7 @@ take orders looks like this:
 .. literalinclude:: ../examples/receipt/normalised/expected.json
    :language: json
 
-There are four ways we could arrange this data:
+There are many ways we could arrange this data:
 
 * cafes, tables and dishes all separate
 
@@ -1065,17 +1065,27 @@ table into another one. It is also the default you will get when using Flatten
 Tool to flatten or generate a template for a JSON structure. You'll learn about
 that later.
 
-.. csv-table:: Sheet: cafes
-   :file: ../examples/receipt/normalised/cafes.csv
+.. csv-table:: Sheet: 1_cafes
+   :file: ../examples/receipt/normalised/1_cafes.csv
    :header-rows: 1
 
-.. csv-table:: Sheet: tables
-   :file: ../examples/receipt/normalised/tables.csv
+.. csv-table:: Sheet: 2_tables
+   :file: ../examples/receipt/normalised/2_tables.csv
    :header-rows: 1
 
-.. csv-table:: Sheet: dishes
-   :file: ../examples/receipt/normalised/dishes.csv
+.. csv-table:: Sheet: 3_dishes
+   :file: ../examples/receipt/normalised/3_dishes.csv
    :header-rows: 1
+
+.. note ::
+
+   Notice that this time the CSV sheets are prefixed with an integer to make
+   sure they are processed in the right order. If the prefixes weren't there,
+   the order of the tables in the resulting JSON might be different.
+
+   If you were using an XLSX file, Flatten Tool would process the sheets in
+   the order they appeared, regardless of their names, so the prefix
+   wouldn't be needed.
 
 You can run the example with this:
 
@@ -1165,3 +1175,128 @@ table" section earlier.
    If you'd like to explore these examples yourself using human-readable column
    titles, you can use the schema in the "Arbitrary-depth in a single
    table" section too.
+
+Source maps
+===========
+
+Once you have unflattened a spreadsheet into a JSON document you will usually
+pass the document to a JSON Schema validator to make sure all the data is
+valid.
+
+If there are any errors in the JSON, it is very useful to be able to point the
+user back to the corresponding place in the original spreadsheet. Flatten Tool
+provides *source maps* for exactly this purpose.
+
+There are two types of source map:
+
+* Cell source map - points from a JSON pointer path to a cell (or row) in the
+  original spreadsheet
+* Heading source map - specifies the column for each heading
+
+Here's an example where we unflatten a normalised spreadsheet, but generate
+both a cell and a heading source map as we do.
+
+.. literalinclude:: ../examples/receipt/source-map/cmd.txt
+   :language: bash
+
+Here's the source data:
+
+.. csv-table:: sheet: 1_cafes.csv
+   :file: ../examples/receipt/source-map/input/1_cafes.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: 2_tables.csv
+   :file: ../examples/receipt/source-map/input/2_tables.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: 3_dishes.csv
+   :file: ../examples/receipt/source-map/input/3_dishes.csv
+   :header-rows: 1
+
+Here's the resulting JSON document (the same as before):
+
+.. literalinclude:: ../examples/receipt/source-map/expected.json
+   :language: json
+
+Let's look in detail at the cell source map and heading source map for this example.
+
+Cell source map
+---------------
+
+A cell source map maps each JSON pointer in the document above back to the
+cells where that value is referenced.
+
+Using the example you've just seen, let's look at the very last value in the
+spreadsheet for the number of `TABLE-17` in `CAFE-VEG`. The JSON pointer is
+`cafe/1/table/1/number` and the value itself is `17`.
+
+Looking back at the source sheets you can see the only place this value appears
+is in `2_tables.csv`. It appears in column C (the third column), row 6 (row 1
+is treated as the heading so the values start at row 2). The heading of this
+column in `table/0/number` (which happens to be a JSON pointer, but if we were
+using human readable headings, those headings would be used instead). We'd
+therefore expect the cell source map to have just one entry for
+`cafe/1/table/1/number` that points to cell `C2` like this:
+
+::
+
+    "cafe/1/table/1/number": [
+        [
+            "2_tables",
+            "C",
+            6,
+            "table/0/number"
+        ]
+    ],
+
+Here's the actual cell source map and as you can see, the entry for
+`cafe/1/table/1/number` is as we expect (it is near the end):
+
+.. literalinclude:: ../examples/receipt/source-map/expected/cell_source_map.json
+   :language: json
+
+You'll notice that some JSON pointers map to multiple source cells. This
+happens when data appears in multiple places, such as when the cell refers to
+an identifier.
+
+You'll also notice that after all the JSON pointers that point to values such
+as `cafe/0/id` or `cafe/1/table/1/number` there are a set of JSON pointers that
+point to objects rather than cells. For example `cafe/0` or `cafe/1/table/1`.
+These JSON pointers refer back to the rows which contain values that make up
+the object. For example `cafe/1/table/1` looks like this:
+
+::
+
+    "cafe/1/table/1": [
+        [
+            "2_tables",
+            6
+        ]
+    ]
+
+This tells us that the data that makes up that table in the final JSON was all
+defined in the `2_tables` sheet, row 6 (remembering that rows start at 2
+because the header row is row 1). Again, if data from multiple rows goes to
+make up the object, there may be multiple arrays in the JSON pointer result.
+
+This second kind of entry in the cell source map is useful when a JSON schema
+validator gives errors to describe a missing value since it is likely that
+you will need to add the value on one for the rows where the other values are
+defined.
+
+Heading source map
+------------------
+
+The heading source map maps a JSON pointer with all numbers removed, back to
+the column heading at the top of the columns where corresponding values have
+been placed.
+
+Here's the heading source map that was generated in the example we've been
+using in this section:
+
+.. literalinclude:: ../examples/receipt/source-map/expected/heading_source_map.json
+   :language: json
+
+The heading source map is generated separately from the cell source map, so
+headings can be found even if they have no corresponding data in the resulting
+JSON.
