@@ -495,8 +495,11 @@ information from the column headings.
 
 There are two places we can get it from though:
 
-* The spreadsheet cell (if the underlying spreadsheet type supports it)
+* The spreadsheet cell (if the underlying spreadsheet type supports it, e.g.
+  CSV doesn't but XLSX does)
 * An external JSON Schema describing the data
+
+If we can't get any type information we fall back to assuming strings.
 
 Here is the sample data we'll use for the examples in the next two sections:
 

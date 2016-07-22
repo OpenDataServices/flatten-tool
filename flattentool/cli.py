@@ -107,7 +107,7 @@ def create_parser():
         help="The path in the JSON that will contain the unflattened list. Defaults to main.")
     parser_unflatten.add_argument(
         "-e", "--encoding",
-        help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
+        help="Encoding of the input file(s) (only relevant for CSV). This can be any encoding recognised by Python. Defaults to utf8.")
     parser_unflatten.add_argument(
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to unflattened.json")
