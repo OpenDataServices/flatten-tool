@@ -1,5 +1,5 @@
-Usage for 360Giving
-===================
+Flatten-Tool for 360Giving
+==========================
 
 You can also upload the file to http://cove.opendataservices.coop/360
 
