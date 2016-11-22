@@ -149,6 +149,58 @@ testdata = [
             'ROOT_ID': 1
         }]
     ),
+# Previously this caused the error: TypeError: unorderable types: str() < int()
+# Now one of the columns is ignored
+    (
+        'Mismatch of dict/array for field not in schema',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('newtest/a', 3),
+            ('newtest/0/a', 4),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': {
+                'a': 3,
+            }
+        }]
+    ),
+# Previously this caused the error: TypeError: unorderable types: str() < int()
+# Now one of the columns is ignored
+    (
+        'Mismatch of dict/array for field not in schema',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('newtest/0/a', 4),
+            ('newtest/a', 3),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': [
+                {'a': 4}
+            ]
+        }]
+    ),
+# Previously this caused the error: 'Cell' object has no attribute 'get'
+# Now one of the columns is ignored
+    (
+        'str / array mixing',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('newtest', 3),
+            ('newtest/0/a', 4),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': 3
+        }]
+    ),
 # Previously this caused the error: KeyError('ocid',)
 # Now it works, but probably not as intended
 # The missing Root ID should be picked up in schema validation

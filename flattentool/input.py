@@ -437,9 +437,8 @@ def list_as_dicts_to_temporary_dicts(unflattened):
 
 def unflatten_main_with_parser(parser, line, timezone):
     unflattened = OrderedDict()
-    for path, input in line.items():
+    for path, cell in line.items():
         # Skip blank cells
-        cell = input
         if cell.cell_value is None or cell.cell_value == '':
             continue
         current_path = unflattened
@@ -469,6 +468,8 @@ def unflatten_main_with_parser(parser, line, timezone):
                 if list_as_dict is None:
                     list_as_dict = ListAsDict()
                     current_path[path_item] = list_as_dict
+                elif type(list_as_dict) is not ListAsDict:
+                    break
                 new_path = list_as_dict.get(list_index)
                 if new_path is None:
                     new_path = OrderedDict()
@@ -482,6 +483,8 @@ def unflatten_main_with_parser(parser, line, timezone):
                 if new_path is None:
                     new_path = OrderedDict()
                     current_path[path_item] = new_path
+                elif type(new_path) is ListAsDict:
+                    break
                 current_path = new_path
                 continue
             if current_type and current_type != 'object' and next_path_item:
