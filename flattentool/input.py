@@ -499,10 +499,6 @@ def unflatten_main_with_parser(parser, line, timezone):
 
 
 
-class IDFieldMissing(KeyError):
-    pass
-
-
 def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, top_sheet=False):
     if not path_list:
         return nested_dict
@@ -574,7 +570,3 @@ def temporarydicts_to_lists(nested_dict):
             nested_dict[key] = value.to_list()
         elif hasattr(value, 'items'):
             temporarydicts_to_lists(value)
-
-
-class ConflictingIDFieldsError(ValueError):
-    pass
