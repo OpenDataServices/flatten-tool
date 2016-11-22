@@ -223,7 +223,7 @@ class SpreadsheetInput(object):
                 if all(x is None or x == '' for x in line.values()):
                 #if all(x == '' for x in line.values()):
                     continue
-                root_id_or_none = line[self.root_id] if self.root_id else None
+                root_id_or_none = line.get(self.root_id) if self.root_id else None
                 cells = OrderedDict()
                 for k, header in enumerate(line):
                     if actual_headings:

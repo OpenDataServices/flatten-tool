@@ -148,9 +148,26 @@ testdata = [
         [{
             'ROOT_ID': 1
         }]
-    )
+    ),
+# Previously this caused the error: KeyError('ocid',)
+# Now it works, but probably not as intended
+# The missing Root ID should be picked up in schema validation
+# (Cove will do this automatically).
+    (
+        'Root ID is missing',
+        [OrderedDict([
+            ('id', 2),
+            ('testA', 3),
+        ])],
+        [{
+            'id': 2,
+            'testA': 3
+        }]
+    ),
 ]
 
+# Test cases that require our schema aware JSON pointer logic, so must be run
+# with the relevant schema
 testdata_pointer = [
     (
         'Single item array without json numbering',
