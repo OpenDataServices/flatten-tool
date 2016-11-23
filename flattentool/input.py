@@ -484,7 +484,7 @@ def unflatten_main_with_parser(parser, line, timezone):
                 if new_path is None:
                     new_path = OrderedDict()
                     current_path[path_item] = new_path
-                elif type(new_path) is ListAsDict:
+                elif type(new_path) is ListAsDict or not hasattr(new_path, 'items'):
                     warn('Column {} has been ignored, because it treats {} as an object, but another column does not.'.format(path, path_till_now))
                     break
                 current_path = new_path
