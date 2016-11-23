@@ -52,7 +52,8 @@ testdata = [
                 'ROOT_ID': '1',
                 'id': 2,
                 'testA': 3
-        }]
+        }],
+        []
     ),
     (
         'Basic with zero',
@@ -65,7 +66,8 @@ testdata = [
                 'ROOT_ID': '1',
                 'id': 2,
                 'testA': 0
-        }]
+        }],
+        []
     ),
     (
         'Nested',
@@ -79,7 +81,8 @@ testdata = [
             'ROOT_ID': '1',
             'id': 2,
             'testO': {'testB': 3, 'testC': 4}
-        }]
+        }],
+        []
     ),
     (
         'Unicode',
@@ -90,7 +93,8 @@ testdata = [
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
             'testU': UNICODE_TEST_STRING
-        }]
+        }],
+        []
     ),
     (
         'Single item array',
@@ -103,8 +107,9 @@ testdata = [
         [{
             'ROOT_ID': '1', 'id': 2, 'testL': [{
                 'id': 3, 'testB': 4
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         'Single item array without parent ID',
@@ -118,8 +123,9 @@ testdata = [
             'testL': [{
                 'id': '2',
                 'testB': '3'
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         'Empty',
@@ -132,6 +138,7 @@ testdata = [
             'testD': '',
             'testE': '',
         }],
+        [],
         []
     ),
     (
@@ -147,12 +154,13 @@ testdata = [
         }],
         [{
             'ROOT_ID': 1
-        }]
+        }],
+        []
     ),
 # Previously this caused the error: TypeError: unorderable types: str() < int()
 # Now one of the columns is ignored
     (
-        'Mismatch of dict/array for field not in schema',
+        'Mismatch of object/array for field not in schema',
         [OrderedDict([
             ('ROOT_ID', 1),
             ('id', 2),
@@ -165,12 +173,13 @@ testdata = [
             'newtest': {
                 'a': 3,
             }
-        }]
+        }],
+        ['Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not.']
     ),
 # Previously this caused the error: TypeError: unorderable types: str() < int()
 # Now one of the columns is ignored
     (
-        'Mismatch of dict/array for field not in schema',
+        'Mismatch of array/object for field not in schema',
         [OrderedDict([
             ('ROOT_ID', 1),
             ('id', 2),
@@ -183,7 +192,8 @@ testdata = [
             'newtest': [
                 {'a': 4}
             ]
-        }]
+        }],
+        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.']
     ),
 # Previously this caused the error: 'Cell' object has no attribute 'get'
 # Now one of the columns is ignored
@@ -199,7 +209,8 @@ testdata = [
             'ROOT_ID': 1,
             'id': 2,
             'newtest': 3
-        }]
+        }],
+        ['Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not.']
     ),
 # Previously this caused the error: KeyError('ocid',)
 # Now it works, but probably not as intended
@@ -214,7 +225,8 @@ testdata = [
         [{
             'id': 2,
             'testA': 3
-        }]
+        }],
+        []
     ),
 ]
 
@@ -235,8 +247,9 @@ testdata_pointer = [
                 'id': '2',
                 'testB': '3',
                 'testX': '3'
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         'Multi item array one with varied numbering ',
@@ -270,7 +283,8 @@ testdata_pointer = [
                 'testX': '6'
             }
             ]
-        }]
+        }],
+        []
     ),
 ]
 
@@ -358,7 +372,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testA': 3
-        }]
+        }],
+        []
     ),
     (
         'Nested',
@@ -372,7 +387,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testB': {'testC': 3, 'testD': 4}
-        }]
+        }],
+        []
     ),
     (
         'Nested titles should be converted individually',
@@ -386,7 +402,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testB': {'testC': 3, 'Not in schema': 4}
-        }]
+        }],
+        []
     ),
     (
         'Should be space and case invariant',
@@ -400,7 +417,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testB': {'testC': 3, 'Not in schema': 4}
-        }]
+        }],
+        []
     ),
     (
         'Unicode',
@@ -411,7 +429,8 @@ testdata_titles = [
         [{
             'ROOT_ID': UNICODE_TEST_STRING,
             'testU': UNICODE_TEST_STRING
-        }]
+        }],
+        []
     ),
    (
         'Single item array',
@@ -426,8 +445,9 @@ testdata_titles = [
             'id': 2,
             'testR': [{
                 'id': '3', 'testB': '4'
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         'Single item array without parent ID',
@@ -441,8 +461,9 @@ testdata_titles = [
             'testR': [{
                 'id': '2',
                 'testB': '3'
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         '''
@@ -461,8 +482,9 @@ testdata_titles = [
             'testR': [{
                 'id': '3',
                 'testC': '4'
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         'Single item array, titles should be converted individually',
@@ -478,8 +500,9 @@ testdata_titles = [
             'testR': [{
                 'testC': '3',
                 'Not in schema': 4
-            }]
-        }]
+            }],
+        }],
+        []
     ),
     (
         'Multi item array, allow numbering',
@@ -509,7 +532,8 @@ testdata_titles = [
                 'Not in schema': 8
             }
             ]
-        }]
+        }],
+        []
     ),
     (
         'Empty',
@@ -522,6 +546,7 @@ testdata_titles = [
             'D title': '',
             'E title': '',
         }],
+        [],
         []
     ),
     (
@@ -537,7 +562,8 @@ testdata_titles = [
         }],
         [{
             'ROOT_ID': 1
-        }]
+        }],
+        []
     ),
     (
         'Test arrays of strings (1 item)',
@@ -550,7 +576,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testSA': [ 'a' ],
-        }]
+        }],
+        []
     ),
     (
         'Test arrays of strings (2 items)',
@@ -563,7 +590,8 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testSA': [ 'a', 'b' ],
-        }]
+        }],
+        []
     ),
 ]
 
@@ -580,8 +608,8 @@ ROOT_ID_PARAMS =     [
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('use_schema', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,input_list,expected_output_list', testdata)
-def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment):
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warnings', testdata)
+def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warnings):
     extra_kwargs = {'convert_titles': convert_titles}
     extra_kwargs.update(root_id_kwargs)
     spreadsheet_input = ListInput(
@@ -610,19 +638,19 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
     assert list(spreadsheet_input.unflatten()) == expected_output_list
     # We expect no warnings
     if not convert_titles: # TODO what are the warnings here
-        assert recwarn.list == []
+        assert [str(x.message) for x in recwarn.list] == warnings
 
 
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,input_list,expected_output_list', testdata_pointer)
-def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment):
-    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment)
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warnings', testdata_pointer)
+def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warnings):
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warnings=warnings)
 
 
-@pytest.mark.parametrize('comment,input_list,expected_output_list', testdata_titles)
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warnings', testdata_titles)
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment):
+def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warnings):
     """
     Essentially the same as test unflatten, except that convert_titles and
     use_schema are always true, as both of these are needed to convert titles
@@ -632,6 +660,6 @@ def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_l
         # Skip all tests with a root ID for now, as this is broken
         # https://github.com/OpenDataServices/flatten-tool/issues/84
         pytest.skip()
-    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment)
+    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warnings=warnings)
 
 

@@ -469,6 +469,7 @@ def unflatten_main_with_parser(parser, line, timezone):
                     list_as_dict = ListAsDict()
                     current_path[path_item] = list_as_dict
                 elif type(list_as_dict) is not ListAsDict:
+                    warn('Column {} has been ignored, because it treats {} as an array, but another column does not.'.format(path, path_till_now))
                     break
                 new_path = list_as_dict.get(list_index)
                 if new_path is None:
@@ -484,6 +485,7 @@ def unflatten_main_with_parser(parser, line, timezone):
                     new_path = OrderedDict()
                     current_path[path_item] = new_path
                 elif type(new_path) is ListAsDict:
+                    warn('Column {} has been ignored, because it treats {} as an object, but another column does not.'.format(path, path_till_now))
                     break
                 current_path = new_path
                 continue
