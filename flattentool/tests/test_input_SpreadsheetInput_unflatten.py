@@ -623,8 +623,13 @@ ROOT_ID_PARAMS =     [
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('use_schema', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,input_list,expected_output_list,warnings', testdata)
-def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warnings):
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages', testdata)
+def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages):
+    # Not sure why, but this seems to be necessary to have warnings picked up
+    # on Python 2.7 and 3.3, but 3.4 and 3.5 are fine without it
+    import warnings
+    warnings.simplefilter('always')
+
     extra_kwargs = {'convert_titles': convert_titles}
     extra_kwargs.update(root_id_kwargs)
     spreadsheet_input = ListInput(
@@ -651,21 +656,21 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
         # We don't expect an empty dictionary
         expected_output_list = []
     assert list(spreadsheet_input.unflatten()) == expected_output_list
-    # We expect no warnings
-    if not convert_titles: # TODO what are the warnings here
-        assert [str(x.message) for x in recwarn.list] == warnings
+    # We expect no warning_messages
+    if not convert_titles: # TODO what are the warning_messages here
+        assert [str(x.message) for x in recwarn.list] == warning_messages
 
 
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,input_list,expected_output_list,warnings', testdata_pointer)
-def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warnings):
-    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warnings=warnings)
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages', testdata_pointer)
+def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages):
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages)
 
 
-@pytest.mark.parametrize('comment,input_list,expected_output_list,warnings', testdata_titles)
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages', testdata_titles)
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warnings):
+def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages):
     """
     Essentially the same as test unflatten, except that convert_titles and
     use_schema are always true, as both of these are needed to convert titles
@@ -675,6 +680,6 @@ def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_l
         # Skip all tests with a root ID for now, as this is broken
         # https://github.com/OpenDataServices/flatten-tool/issues/84
         pytest.skip()
-    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warnings=warnings)
+    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages)
 
 
