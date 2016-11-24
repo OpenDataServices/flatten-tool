@@ -223,7 +223,7 @@ class SpreadsheetInput(object):
                 if all(x is None or x == '' for x in line.values()):
                 #if all(x == '' for x in line.values()):
                     continue
-                root_id_or_none = line[self.root_id] if self.root_id else None
+                root_id_or_none = line.get(self.root_id) if self.root_id else None
                 cells = OrderedDict()
                 for k, header in enumerate(line):
                     if actual_headings:
@@ -437,9 +437,8 @@ def list_as_dicts_to_temporary_dicts(unflattened):
 
 def unflatten_main_with_parser(parser, line, timezone):
     unflattened = OrderedDict()
-    for path, input in line.items():
+    for path, cell in line.items():
         # Skip blank cells
-        cell = input
         if cell.cell_value is None or cell.cell_value == '':
             continue
         current_path = unflattened
@@ -469,6 +468,9 @@ def unflatten_main_with_parser(parser, line, timezone):
                 if list_as_dict is None:
                     list_as_dict = ListAsDict()
                     current_path[path_item] = list_as_dict
+                elif type(list_as_dict) is not ListAsDict:
+                    warn('Column {} has been ignored, because it treats {} as an array, but another column does not.'.format(path, path_till_now))
+                    break
                 new_path = list_as_dict.get(list_index)
                 if new_path is None:
                     new_path = OrderedDict()
@@ -482,6 +484,9 @@ def unflatten_main_with_parser(parser, line, timezone):
                 if new_path is None:
                     new_path = OrderedDict()
                     current_path[path_item] = new_path
+                elif type(new_path) is ListAsDict or not hasattr(new_path, 'items'):
+                    warn('Column {} has been ignored, because it treats {} as an object, but another column does not.'.format(path, path_till_now))
+                    break
                 current_path = new_path
                 continue
             if current_type and current_type != 'object' and next_path_item:
@@ -497,10 +502,6 @@ def unflatten_main_with_parser(parser, line, timezone):
     unflattened = list_as_dicts_to_temporary_dicts(unflattened)
     return unflattened
 
-
-
-class IDFieldMissing(KeyError):
-    pass
 
 
 def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, top_sheet=False):
@@ -574,7 +575,3 @@ def temporarydicts_to_lists(nested_dict):
             nested_dict[key] = value.to_list()
         elif hasattr(value, 'items'):
             temporarydicts_to_lists(value)
-
-
-class ConflictingIDFieldsError(ValueError):
-    pass
