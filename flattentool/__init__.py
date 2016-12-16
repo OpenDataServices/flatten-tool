@@ -3,6 +3,7 @@ from flattentool.json_input import JSONParser
 from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS
+from flattentool.xml_output import toxml
 import json
 import codecs
 from decimal import Decimal
@@ -106,7 +107,7 @@ def decimal_default(o):
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path='main', encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
-              heading_source_map=None, **_):
+              heading_source_map=None, xml=False, **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
 
@@ -136,11 +137,18 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         base = OrderedDict()
     result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
     base[root_list_path] = list(result)
-    if output_name is None:
-        print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
+    if xml:
+        if output_name is None:
+            print(toxml(base))
+        else:
+            with codecs.open(output_name, 'wb') as fp:
+                fp.write(toxml(base))
     else:
-        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        if output_name is None:
+            print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
+        else:
+            with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+                json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
     if cell_source_map:
         with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
             json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)

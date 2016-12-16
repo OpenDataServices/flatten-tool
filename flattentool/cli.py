@@ -100,6 +100,10 @@ def create_parser():
         help="File format of input file or directory.",
         required=True)
     parser_unflatten.add_argument(
+        "--xml",
+        action='store_true',
+        help="Use XML as the output format")
+    parser_unflatten.add_argument(
         "-b", "--base-json",
         help="A base json file to populate with the unflattened data.")
     parser_unflatten.add_argument(
