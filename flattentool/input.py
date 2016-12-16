@@ -103,7 +103,7 @@ def merge(base, mergee, debug_info=None):
             else:
                 base_value = base[key].cell_value
                 if base_value != value:
-                    id_info = 'id "{}"'.format(debug_info.get('id'))
+                    id_info = 'id "{}"'.format(debug_info.get('iati-identifier'))
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
                     warn('Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
@@ -232,11 +232,11 @@ class SpreadsheetInput(object):
                         cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
                 unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone)
                 if root_id_or_none not in main_sheet_by_ocid:
-                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
+                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict('iati-identifier')
                 def inthere(unflattened, id_name):
                     return unflattened[id_name].cell_value
-                if 'id' in unflattened and inthere(unflattened, 'id') in main_sheet_by_ocid[root_id_or_none]:
-                    unflattened_id = unflattened.get('id').cell_value
+                if 'iati-identifier' in unflattened and inthere(unflattened, 'iati-identifier') in main_sheet_by_ocid[root_id_or_none]:
+                    unflattened_id = unflattened.get('iati-identifier').cell_value
                     merge(
                         main_sheet_by_ocid[root_id_or_none][unflattened_id],
                         unflattened,
@@ -244,7 +244,7 @@ class SpreadsheetInput(object):
                             'sheet_name': sheet_name,
                             'root_id': self.root_id,
                             'root_id_or_none': root_id_or_none,
-                            'id': unflattened_id
+                            'iati-identifier': unflattened_id
                         }
                     )
                 else:
@@ -428,7 +428,7 @@ def list_as_dicts_to_temporary_dicts(unflattened):
                 unflattened.pop(key)
             list_as_dicts_to_temporary_dicts(value)
         if isinstance(value, ListAsDict):
-            temporarydict = TemporaryDict("id")
+            temporarydict = TemporaryDict("iati-identifier")
             for index in sorted(value.keys()):
                 temporarydict.append(value[index])
             unflattened[key] = temporarydict
@@ -516,7 +516,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, to
         if parent_field.endswith('[]'):
             parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
-            nested_dict[parent_field] = TemporaryDict(keyfield='id', top_sheet=top_sheet)
+            nested_dict[parent_field] = TemporaryDict(keyfield='iati-identifier', top_sheet=top_sheet)
         sub_sheet_id = id_fields.get(path+'/id')
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
