@@ -234,9 +234,9 @@ class SpreadsheetInput(object):
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict('iati-identifier')
                 def inthere(unflattened, id_name):
-                    return unflattened[id_name].cell_value
+                    return unflattened[id_name]['text()'].cell_value
                 if 'iati-identifier' in unflattened and inthere(unflattened, 'iati-identifier') in main_sheet_by_ocid[root_id_or_none]:
-                    unflattened_id = unflattened.get('iati-identifier').cell_value
+                    unflattened_id = unflattened.get('iati-identifier')['text()'].cell_value
                     merge(
                         main_sheet_by_ocid[root_id_or_none][unflattened_id],
                         unflattened,
@@ -497,7 +497,13 @@ def unflatten_main_with_parser(parser, line, timezone):
             converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != '':
-                current_path[path_item] = cell
+                if path_item.startswith('@'):
+                    current_path[path_item] = cell
+                else:
+                    if path_item not in current_path:
+                        current_path[path_item] = {'text()': cell}
+                    else:
+                        current_path[path_item]['text()'] = cell
 
     unflattened = list_as_dicts_to_temporary_dicts(unflattened)
     return unflattened
@@ -547,10 +553,10 @@ class TemporaryDict(UserDict):
 
     def append(self, item):
         if self.keyfield in item:
-            if isinstance(item[self.keyfield], Cell):
-                key = item[self.keyfield].cell_value
+            if isinstance(item[self.keyfield]['text()'], Cell):
+                key = item[self.keyfield]['text()'].cell_value
             else:
-                key = item[self.keyfield]
+                key = item[self.keyfield]['text()']
             if key not in self.data:
                 self.data[key] = item
             else:
