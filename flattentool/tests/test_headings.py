@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from flattentool.input import SpreadsheetInput
 from flattentool.schema import SchemaParser
+from flattentool.warnings import DataErrorWarning
 from jsonref import JsonRef
 import pytest
 
@@ -45,7 +46,7 @@ def test_duplicate_headings_give_warning(headings, rows, expected_warnings, expe
             'rows': rows,
         }
     ]
-    with pytest.warns(UserWarning) as type_warnings:
+    with pytest.warns(DataErrorWarning) as type_warnings:
         result = run(sheets)
     # Check that only one warning was raised
     assert len(type_warnings) == len(expected_warnings)

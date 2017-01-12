@@ -11,6 +11,7 @@ import os
 import sys
 from warnings import warn
 import six
+from flattentool.warnings import DataErrorWarning
 
 if sys.version > '3':
     import csv
@@ -61,7 +62,8 @@ class XLSXOutput(SpreadsheetOutput):
                 if isinstance(value, six.text_type):
                     new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
                     if new_value != value:
-                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value))
+                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
+                            DataErrorWarning)
                     value = new_value
                 line.append(value)
             worksheet.append(line)
