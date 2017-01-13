@@ -16,7 +16,7 @@ import traceback
 import datetime
 import pytz
 from openpyxl.utils import _get_column_letter, column_index_from_string
-from flattentool.warnings import DataErrorWarning
+from flattentool.exceptions import DataErrorWarning
 
 
 class Cell:

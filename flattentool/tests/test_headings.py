@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from flattentool.input import SpreadsheetInput
 from flattentool.schema import SchemaParser
-from flattentool.warnings import DataErrorWarning
+from flattentool.exceptions import DataErrorWarning
 from jsonref import JsonRef
 import pytest
 

@@ -11,7 +11,7 @@ import os
 import sys
 from warnings import warn
 import six
-from flattentool.warnings import DataErrorWarning
+from flattentool.exceptions import DataErrorWarning
 
 if sys.version > '3':
     import csv
