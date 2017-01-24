@@ -91,8 +91,8 @@ def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
 
 def _simplify_line(line):
-    if 'UserWarning: ' in line:
-        return line[line.find('UserWarning: '):]
+    if 'DataErrorWarning: ' in line:
+        return line[line.find('DataErrorWarning: '):]
     return line
 
 # Older versions of Python have an extra whitespace at the end compared to newer ones

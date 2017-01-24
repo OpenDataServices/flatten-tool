@@ -1,4 +1,4 @@
-... UserWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet b: "Healthy Cafe" != "Incorrect value". If you were not expecting merging you may have a duplicate ID.
-  key, id_info, debug_info.get('sheet_name'), base_value, value))
-... UserWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
-  key, id_info, debug_info.get('sheet_name'), base_value, value))
+... DataErrorWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet b: "Healthy Cafe" != "Incorrect value". If you were not expecting merging you may have a duplicate ID.
+  DataErrorWarning)
+... DataErrorWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
+  DataErrorWarning)
