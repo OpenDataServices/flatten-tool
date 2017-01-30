@@ -66,7 +66,8 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
             warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value),
                 DataErrorWarning)
             return text_type(value)
-    elif type_string in ('array', 'array_array', 'string_array'):
+    elif type_string in ('array', 'array_array', 'string_array', 'number_array'):
+        # FIXME actually cast numbers
         value = text_type(value)
         if ',' in value:
             return [x.split(',') for x in value.split(';')]

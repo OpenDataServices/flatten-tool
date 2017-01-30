@@ -10,7 +10,7 @@ from flattentool.sheet import Sheet
 import codecs
 
 def get_property_type_set(property_schema_dict):
-    property_type = property_schema_dict.get('type')
+    property_type = property_schema_dict.get('type', [])
     if not isinstance(property_type, list):
         return set([property_type])
     else:
@@ -127,7 +127,7 @@ class SchemaParser(object):
                             property_schema_dict,
                             parent_id_fields=id_fields,
                             title_lookup=title_lookup.get(title),
-                            parent_title=parent_title+title+':' if title else None):
+                            parent_title=parent_title+title+':' if parent_title is not None and title else None):
                         yield (
                             property_name+'/'+field,
                             # TODO ambiguous use of "title"
@@ -137,8 +137,11 @@ class SchemaParser(object):
                 elif 'array' in property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "array"
                     type_set = get_property_type_set(property_schema_dict['items'])
-                    if 'string' in type_set:
+                    if 'string' in type_set or not type_set:
                         self.flattened[parent_path+property_name] = "string_array"
+                        yield property_name, title
+                    elif 'number' in type_set:
+                        self.flattened[parent_path+property_name] = "number_array"
                         yield property_name, title
                     elif 'array' in type_set:
                         self.flattened[parent_path+property_name] = "array_array"
@@ -166,7 +169,7 @@ class SchemaParser(object):
                                 property_schema_dict['items'],
                                 parent_id_fields=id_fields,
                                 title_lookup=title_lookup.get(title),
-                                parent_title=parent_title+title+':' if title else None)
+                                parent_title=parent_title+title+':' if parent_title is not None and title else None)
 
                         rolledUp = set()
 
@@ -176,9 +179,12 @@ class SchemaParser(object):
                                     warn('Field {} does not have a title, skipping.'.format(field))
                                 elif not title:
                                     warn('Field {} does not have a title, skipping it and all its children.'.format(property_name))
-                                else:
+                                elif parent_title is not None:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
                                     sub_sheet.add_field(parent_title+title+':'+child_title)
+                                else:
+                                    pass
+                                    # Warning should have been emitted for the parent already
                             else:
                                 sub_sheet.add_field(parent_path+property_name+'/0/'+field)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
@@ -192,7 +198,7 @@ class SchemaParser(object):
                                 warn('{} in rollUp but not in schema'.format(', '.join(missedRollUp)))
                     else:
                         raise ValueError
-                elif 'string' in property_type_set:
+                elif 'string' in property_type_set or not property_type_set:
                     self.flattened[parent_path.replace('/0/', '/')+property_name] = "string"
                     yield property_name, title
                 elif 'number' in property_type_set:
