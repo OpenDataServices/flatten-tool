@@ -135,16 +135,17 @@ class SchemaParser(object):
                         )
 
                 elif 'array' in property_type_set:
-                    self.flattened[parent_path.replace('/0/', '/')+property_name] = "array"
+                    flattened_key = parent_path.replace('/0/', '/')+property_name
+                    self.flattened[flattened_key] = "array"
                     type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set or not type_set:
-                        self.flattened[parent_path+property_name] = "string_array"
+                        self.flattened[flattened_key] = "string_array"
                         yield property_name, title
                     elif 'number' in type_set:
-                        self.flattened[parent_path+property_name] = "number_array"
+                        self.flattened[flattened_key] = "number_array"
                         yield property_name, title
                     elif 'array' in type_set:
-                        self.flattened[parent_path+property_name] = "array_array"
+                        self.flattened[flattened_key] = "array_array"
                         nested_type_set = get_property_type_set(property_schema_dict['items']['items'])
                         if 'string' in nested_type_set or 'number' in nested_type_set:
                             yield property_name, title

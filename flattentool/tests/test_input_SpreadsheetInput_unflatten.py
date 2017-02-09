@@ -350,6 +350,13 @@ def create_schema(root_id):
                             'title': 'C title',
                             'type': 'string',
                         },
+                        'testSA': {
+                            'title': 'SA title',
+                            'type': 'array',
+                            'items': {
+                                'type': 'string'
+                            }
+                        }
                     }
                 }
             },
@@ -605,6 +612,38 @@ testdata_titles = [
             'ROOT_ID': 1,
             'id': 2,
             'testSA': [ 'a', 'b' ],
+        }],
+        []
+    ),
+    (
+        'Test arrays of strings within an object array (1 item)',
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'R title:SA title': 'a',
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': [{
+                'testSA': [ 'a' ],
+            }]
+        }],
+        []
+    ),
+    (
+        'Test arrays of strings within an object array (2 items)',
+        [{
+            'ROOT_ID_TITLE': 1,
+            'Identifier': 2,
+            'R title:SA title': 'a;b',
+        }],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'testR': [{
+                'testSA': [ 'a', 'b' ],
+            }]
         }],
         []
     ),
