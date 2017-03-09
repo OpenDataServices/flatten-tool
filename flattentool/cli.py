@@ -137,6 +137,10 @@ def create_parser():
         "--convert-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_unflatten.add_argument(
+        "--vertical-orientation",
+        action='store_true',
+        help="Read spreadsheet so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
 
     return parser
 

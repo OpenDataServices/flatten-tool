@@ -150,7 +150,7 @@ class SpreadsheetInput(object):
             else:
                 yield d
 
-    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False, id_name='id', xml=False):
+    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False, vertical_orientation=False, id_name='id', xml=False):
         self.input_name = input_name
         self.root_list_path = root_list_path
         self.sub_sheet_names = []
@@ -160,6 +160,7 @@ class SpreadsheetInput(object):
         self.id_name = id_name
         self.xml = xml
         self.parser = None
+        self.vertical_orientation = vertical_orientation
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -246,10 +247,11 @@ class SpreadsheetInput(object):
                 root_id_or_none = line.get(self.root_id) if self.root_id else None
                 cells = OrderedDict()
                 for k, header in enumerate(line):
-                    if actual_headings:
-                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, actual_headings[k]))
+                    headings = actual_headings[k] if actual_headings else header
+                    if self.vertical_orientation:
+                        cells[header] = Cell(line[header], (sheet_name, str(k+1), j+2, headings))
                     else:
-                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
+                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, headings))
                 unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone, self.xml, self.id_name)
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict(self.id_name, xml=self.xml)
@@ -425,12 +427,21 @@ class XLSXInput(SpreadsheetInput):
 
     def get_sheet_headings(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+
+        if self.vertical_orientation:
+            return [cell.value for cell in worksheet.columns[0]]
+
         return [cell.value for cell in worksheet.rows[0]]
 
     def get_sheet_lines(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
-        header_row = worksheet.rows[0]
-        remaining_rows = worksheet.rows[1:]
+        if self.vertical_orientation:
+            header_row = worksheet.columns[0]
+            remaining_rows = worksheet.columns[1:]
+        else:
+            header_row = worksheet.rows[0]
+            remaining_rows = worksheet.rows[1:]
+
         coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
         for row in remaining_rows:
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
