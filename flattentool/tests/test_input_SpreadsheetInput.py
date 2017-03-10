@@ -72,6 +72,25 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
+    def test_xlsx_include_ignore(self):
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic_meta.xlsx', 
+                              include_sheets=['Meta'], vertical_orientation=True
+                             )
+        xlsxinput.read_sheets()
+        assert xlsxinput.sub_sheet_names == ['Meta']
+        assert list(xlsxinput.get_sheet_lines('Meta')) == \
+            [{'a': 'a1', 'b': 'b1', 'c': 'c1'}]
+
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic_meta.xlsx', 
+                              exclude_sheets=['Meta'])
+        xlsxinput.read_sheets()
+
+        assert xlsxinput.sub_sheet_names == ['main', 'subsheet']
+        assert list(xlsxinput.get_sheet_lines('main')) == \
+            [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+        assert list(xlsxinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
     def test_xlsx_input_integer(self):
         xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer.xlsx')
 

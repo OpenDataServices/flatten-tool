@@ -150,7 +150,18 @@ class SpreadsheetInput(object):
             else:
                 yield d
 
-    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False, vertical_orientation=False, id_name='id', xml=False):
+    def __init__(self,
+                 input_name='',
+                 root_list_path='main',
+                 timezone_name='UTC',
+                 root_id='ocid',
+                 convert_titles=False,
+                 vertical_orientation=False,
+                 include_sheets=[],
+                 exclude_sheets=[],
+                 id_name='id',
+                 xml=False
+                ):
         self.input_name = input_name
         self.root_list_path = root_list_path
         self.sub_sheet_names = []
@@ -161,6 +172,8 @@ class SpreadsheetInput(object):
         self.xml = xml
         self.parser = None
         self.vertical_orientation = vertical_orientation
+        self.include_sheets = include_sheets
+        self.exclude_sheets = exclude_sheets
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -399,7 +412,17 @@ class CSVInput(SpreadsheetInput):
 
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
-        self.sub_sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
+        sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
+        if self.include_sheets:
+            for sheet in list(sheet_names):
+                if sheet not in self.include_sheets:
+                    sheet_names.remove(sheet)
+        for sheet in list(self.exclude_sheets) or []:
+            try:
+                sheet_names.remove(sheet)
+            except ValueError:
+                pass
+        self.sub_sheet_names = sheet_names
 
     def get_sheet_lines(self, sheet_name):
         if sys.version > '3':  # If Python 3 or greater
@@ -421,8 +444,14 @@ class XLSXInput(SpreadsheetInput):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
         self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.get_sheet_names())
+        if self.include_sheets:
+            for sheet in list(self.sheet_names_map):
+                if sheet not in self.include_sheets:
+                    self.sheet_names_map.pop(sheet)
+        for sheet in list(self.exclude_sheets) or []:
+            self.sheet_names_map.pop(sheet, None)
 
-        sheet_names = list(self.sheet_names_map.keys())
+        sheet_names = list(sheet for sheet in self.sheet_names_map.keys())
         self.sub_sheet_names = sheet_names
 
     def get_sheet_headings(self, sheet_name):

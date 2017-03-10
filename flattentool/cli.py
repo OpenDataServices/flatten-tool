@@ -141,6 +141,19 @@ def create_parser():
         "--vertical-orientation",
         action='store_true',
         help="Read spreadsheet so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--metatab-name",
+        help="If supplied will assume there is a metadata tab with the given name")
+    parser_unflatten.add_argument(
+        "--metatab-schema",
+        help="The jsonschema of the metadata tab")
+    parser_unflatten.add_argument(
+        "--metatab-only",
+        help="Parse the metatab and nothing else")
+    parser_unflatten.add_argument(
+        "--metatab-vertical-orientation",
+        action='store_true',
+        help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
 
     return parser
 
