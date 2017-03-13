@@ -104,6 +104,9 @@ def create_parser():
         action='store_true',
         help="Use XML as the output format")
     parser_unflatten.add_argument(
+        "--id-name",
+        help="String to use for the identifier key, defaults to 'id'")
+    parser_unflatten.add_argument(
         "-b", "--base-json",
         help="A base json file to populate with the unflattened data.")
     parser_unflatten.add_argument(

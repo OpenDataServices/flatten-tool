@@ -103,7 +103,7 @@ def merge(base, mergee, debug_info=None):
             else:
                 base_value = base[key].cell_value
                 if base_value != value:
-                    id_info = 'id "{}"'.format(debug_info.get('iati-identifier'))
+                    id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
                     warn('Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
@@ -135,13 +135,15 @@ class SpreadsheetInput(object):
             else:
                 yield d
 
-    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False):
+    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False, id_name='id', xml=False):
         self.input_name = input_name
         self.root_list_path = root_list_path
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
         self.convert_titles = convert_titles
+        self.id_name = id_name
+        self.xml = xml
         self.parser = None
 
     def get_sub_sheets_lines(self):
@@ -230,13 +232,19 @@ class SpreadsheetInput(object):
                         cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, actual_headings[k]))
                     else:
                         cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
-                unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone)
+                unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone, self.xml, self.id_name)
                 if root_id_or_none not in main_sheet_by_ocid:
-                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict('iati-identifier')
+                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict(self.id_name, xml=self.xml)
                 def inthere(unflattened, id_name):
-                    return unflattened[id_name]['text()'].cell_value
-                if 'iati-identifier' in unflattened and inthere(unflattened, 'iati-identifier') in main_sheet_by_ocid[root_id_or_none]:
-                    unflattened_id = unflattened.get('iati-identifier')['text()'].cell_value
+                    if self.xml:
+                        return unflattened[id_name]['text()'].cell_value
+                    else:
+                        return unflattened[id_name].cell_value
+                if self.id_name in unflattened and inthere(unflattened, self.id_name) in main_sheet_by_ocid[root_id_or_none]:
+                    if self.xml:
+                        unflattened_id = unflattened.get(self.id_name)['text()'].cell_value
+                    else:
+                        unflattened_id = unflattened.get(self.id_name).cell_value
                     merge(
                         main_sheet_by_ocid[root_id_or_none][unflattened_id],
                         unflattened,
@@ -244,7 +252,8 @@ class SpreadsheetInput(object):
                             'sheet_name': sheet_name,
                             'root_id': self.root_id,
                             'root_id_or_none': root_id_or_none,
-                            'iati-identifier': unflattened_id
+                            'id_name': self.id_name,
+                            self.id_name: unflattened_id
                         }
                     )
                 else:
@@ -419,23 +428,23 @@ def isint(string):
 class ListAsDict(dict):
     pass
 
-def list_as_dicts_to_temporary_dicts(unflattened):
+def list_as_dicts_to_temporary_dicts(unflattened, id_name, xml):
     for key, value in list(unflattened.items()):
         if isinstance(value, Cell):
             continue
         if hasattr(value, 'items'):
             if not value:
                 unflattened.pop(key)
-            list_as_dicts_to_temporary_dicts(value)
+            list_as_dicts_to_temporary_dicts(value, id_name, xml)
         if isinstance(value, ListAsDict):
-            temporarydict = TemporaryDict("iati-identifier")
+            temporarydict = TemporaryDict(id_name, xml=xml)
             for index in sorted(value.keys()):
                 temporarydict.append(value[index])
             unflattened[key] = temporarydict
     return unflattened
 
 
-def unflatten_main_with_parser(parser, line, timezone):
+def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
     unflattened = OrderedDict()
     for path, cell in line.items():
         # Skip blank cells
@@ -497,15 +506,18 @@ def unflatten_main_with_parser(parser, line, timezone):
             converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != '':
-                if path_item.startswith('@'):
-                    current_path[path_item] = cell
-                else:
-                    if path_item not in current_path:
-                        current_path[path_item] = {'text()': cell}
+                if xml:
+                    if path_item.startswith('@'):
+                        current_path[path_item] = cell
                     else:
-                        current_path[path_item]['text()'] = cell
+                        if path_item not in current_path:
+                            current_path[path_item] = {'text()': cell}
+                        else:
+                            current_path[path_item]['text()'] = cell
+                else:
+                    current_path[path_item] = cell
 
-    unflattened = list_as_dicts_to_temporary_dicts(unflattened)
+    unflattened = list_as_dicts_to_temporary_dicts(unflattened, id_name, xml)
     return unflattened
 
 
@@ -522,7 +534,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, to
         if parent_field.endswith('[]'):
             parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
-            nested_dict[parent_field] = TemporaryDict(keyfield='iati-identifier', top_sheet=top_sheet)
+            nested_dict[parent_field] = TemporaryDict(keyfield=id_name, top_sheet=top_sheet, xml=xml)
         sub_sheet_id = id_fields.get(path+'/id')
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
@@ -542,21 +554,28 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, to
 
 
 class TemporaryDict(UserDict):
-    def __init__(self, keyfield, top_sheet=False):
+    def __init__(self, keyfield, top_sheet=False, xml=False):
         self.keyfield = keyfield
         self.items_no_keyfield = []
         self.data = OrderedDict()
         self.top_sheet = top_sheet
+        self.xml = xml
 
     def __repr__(self):
         return 'TemporaryDict(keyfield={}, items_no_keyfield={}, data={})'.format(repr(self.keyfield), repr(self.items_no_keyfield), repr(self.data))
 
     def append(self, item):
         if self.keyfield in item:
-            if isinstance(item[self.keyfield]['text()'], Cell):
-                key = item[self.keyfield]['text()'].cell_value
+            if self.xml:
+                if isinstance(item[self.keyfield]['text()'], Cell):
+                    key = item[self.keyfield]['text()'].cell_value
+                else:
+                    key = item[self.keyfield]['text()']
             else:
-                key = item[self.keyfield]['text()']
+                if isinstance(item[self.keyfield], Cell):
+                    key = item[self.keyfield].cell_value
+                else:
+                    key = item[self.keyfield]
             if key not in self.data:
                 self.data[key] = item
             else:

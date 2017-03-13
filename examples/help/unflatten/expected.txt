@@ -1,5 +1,5 @@
-usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [-b BASE_JSON]
-                              [-m ROOT_LIST_PATH] [-e ENCODING]
+usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
+                              [-b BASE_JSON] [-m ROOT_LIST_PATH] [-e ENCODING]
                               [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
                               [-a HEADING_SOURCE_MAP]
                               [--timezone-name TIMEZONE_NAME] [-r ROOT_ID]
@@ -14,6 +14,7 @@ optional arguments:
   -f INPUT_FORMAT, --input-format INPUT_FORMAT
                         File format of input file or directory.
   --xml                 Use XML as the output format
+  --id-name ID_NAME     String to use for the identifier key, defaults to 'id'
   -b BASE_JSON, --base-json BASE_JSON
                         A base json file to populate with the unflattened
                         data.

@@ -107,7 +107,7 @@ def decimal_default(o):
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path='main', encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
-              heading_source_map=None, xml=False, **_):
+              heading_source_map=None, id_name='id', xml=False, **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
 
@@ -123,7 +123,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         timezone_name=timezone_name,
         root_list_path=root_list_path,
         root_id=root_id,
-        convert_titles=convert_titles)
+        convert_titles=convert_titles,
+        id_name=id_name,
+        xml=xml)
     if schema:
         parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
         parser.parse()
