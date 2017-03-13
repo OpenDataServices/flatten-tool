@@ -6,9 +6,9 @@ def child_to_xml(parent_el, tagname, child):
         parent_el.append(dict_to_xml(child, tagname))
     else:
         if tagname.startswith('@'):
-            parent_el.attrib[tagname[1:]] = child
+            parent_el.attrib[tagname[1:]] = str(child)
         elif tagname == 'text()':
-            parent_el.text = child
+            parent_el.text = str(child)
         else:
             raise('Everything should end with text() or an attirbute!')
 
