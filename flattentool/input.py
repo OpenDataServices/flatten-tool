@@ -16,6 +16,7 @@ import traceback
 import datetime
 import pytz
 from openpyxl.utils import _get_column_letter, column_index_from_string
+from flattentool.exceptions import DataErrorWarning
 
 
 class Cell:
@@ -45,13 +46,15 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         try:
             return Decimal(value)
         except (TypeError, ValueError, InvalidOperation):
-            warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value))
+            warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value),
+                DataErrorWarning)
             return text_type(value)
     elif type_string == 'integer':
         try:
             return int(value)
         except (TypeError, ValueError):
-            warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value))
+            warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value),
+                DataErrorWarning)
             return text_type(value)
     elif type_string == 'boolean':
         value = text_type(value)
@@ -60,10 +63,20 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         elif value.lower() in ['false', '0']:
             return False
         else:
-            warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value))
+            warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value),
+                DataErrorWarning)
             return text_type(value)
-    elif type_string in ('array', 'array_array', 'string_array'):
+    elif type_string in ('array', 'array_array', 'string_array', 'number_array'):
         value = text_type(value)
+        if type_string == 'number_array':
+            try:
+                if ',' in value:
+                    return [[Decimal(y) for y in x.split(',')] for x in value.split(';')]
+                else:
+                    return [Decimal(x) for x in value.split(';')]
+            except (TypeError, ValueError, InvalidOperation):
+                warn('Non-numeric value "{}" found in number array column, returning as string array instead.'.format(value),
+                    DataErrorWarning)
         if ',' in value:
             return [x.split(',') for x in value.split(';')]
         else:
@@ -106,8 +119,10 @@ def merge(base, mergee, debug_info=None):
                     id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
-                    warn('Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
-                        key, id_info, debug_info.get('sheet_name'), base_value, value))
+                    warn(
+                        'Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
+                            key, id_info, debug_info.get('sheet_name'), base_value, value),
+                        DataErrorWarning)
                 else:
                     base[key].sub_cells.append(v)
         else:
@@ -195,7 +210,8 @@ class SpreadsheetInput(object):
                                         [_get_column_letter(x+1) for x in ignoring[:-1]]
                                     ),
                                     _get_column_letter(ignoring[-1] + 1),
-                                )
+                                ),
+                                DataErrorWarning
                             )
                         elif len(found[actual_heading]) == 3:
                             warn(
@@ -206,7 +222,8 @@ class SpreadsheetInput(object):
                                     actual_heading,
                                     _get_column_letter(ignoring[0] + 1),
                                     _get_column_letter(ignoring[1] + 1),
-                                )
+                                ),
+                                DataErrorWarning
                             )
                         else:
                             warn(
@@ -216,7 +233,8 @@ class SpreadsheetInput(object):
                                 ).format(
                                     actual_heading,
                                     _get_column_letter(ignoring[0]+1),
-                                )
+                                ),
+                                DataErrorWarning
                             )
             except NotImplementedError:
                 # The ListInput type used in the tests doesn't support getting headings.
@@ -478,7 +496,8 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     list_as_dict = ListAsDict()
                     current_path[path_item] = list_as_dict
                 elif type(list_as_dict) is not ListAsDict:
-                    warn('Column {} has been ignored, because it treats {} as an array, but another column does not.'.format(path, path_till_now))
+                    warn('Column {} has been ignored, because it treats {} as an array, but another column does not.'.format(path, path_till_now),
+                        DataErrorWarning)
                     break
                 new_path = list_as_dict.get(list_index)
                 if new_path is None:
@@ -494,7 +513,8 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     new_path = OrderedDict()
                     current_path[path_item] = new_path
                 elif type(new_path) is ListAsDict or not hasattr(new_path, 'items'):
-                    warn('Column {} has been ignored, because it treats {} as an object, but another column does not.'.format(path, path_till_now))
+                    warn('Column {} has been ignored, because it treats {} as an object, but another column does not.'.format(path, path_till_now),
+                        DataErrorWarning)
                     break
                 current_path = new_path
                 continue

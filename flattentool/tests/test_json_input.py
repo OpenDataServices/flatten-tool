@@ -112,13 +112,13 @@ def test_parse_nested_list_json_dict():
 
 def test_parse_array():
     parser = JSONParser(root_json_dict=[OrderedDict([
-        ('testarray', ['item','anotheritem'])
+        ('testarray', ['item','anotheritem', 42])
     ])])
     parser.parse()
     assert list(parser.main_sheet) == [ 'testarray' ]
     assert parser.main_sheet.lines == [
         {
-            'testarray': 'item;anotheritem'
+            'testarray': 'item;anotheritem;42'
         }
     ]
     assert parser.sub_sheets == {}

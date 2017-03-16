@@ -196,9 +196,16 @@ def test_convert_type(recwarn):
     assert convert_type('array', None) is None
     assert convert_type('boolean', None) is None
 
-    assert convert_type('array', 'one') == ['one']
-    assert convert_type('array', 'one;two') == ['one', 'two']
-    assert convert_type('array', 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
+    for type_string in ['array', 'string_array', 'array_array', 'number_array']:
+        assert convert_type(type_string, 'one') == ['one']
+        assert convert_type(type_string, 'one;two') == ['one', 'two']
+        assert convert_type(type_string, 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
+    assert 'Non-numeric value "one"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Non-numeric value "one;two"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Non-numeric value "one,two;three,four"' in text_type(recwarn.pop(UserWarning).message)
+    assert convert_type('number_array', '1') == [1]
+    assert convert_type('number_array', '1;2') == [1, 2]
+    assert convert_type('number_array', '1,2;3,4') == [[1, 2], [3, 4]]
 
     with pytest.raises(ValueError) as e:
         convert_type('notatype', 'test')
@@ -218,3 +225,5 @@ def test_convert_type(recwarn):
     assert convert_type('', datetime.datetime(2015, 6, 1), timezone) == '2015-06-01T00:00:00+01:00'
     assert convert_type('string', datetime.datetime(2015, 6, 1, 13, 37, 59), timezone) == '2015-06-01T13:37:59+01:00'
     assert convert_type('', datetime.datetime(2015, 6, 1, 13, 37, 59), timezone) == '2015-06-01T13:37:59+01:00'
+
+    assert len(recwarn) == 0
