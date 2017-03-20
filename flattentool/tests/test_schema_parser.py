@@ -61,7 +61,8 @@ def test_main_sheet_basic():
     parser = SchemaParser(root_schema_dict={
         'properties': {
             'Atest': type_string,
-            'Btest': type_string
+            # type is allowed to be empty, and we should assume string
+            'Btest': {},
         }
     })
     parser.parse()
@@ -263,14 +264,15 @@ class TestSubSheetMainID(object):
             'Atest/Btest/0/Ctest']
 
 
-def test_simple_array():
+@pytest.mark.parametrize('type_', ['string', 'number'])
+def test_simple_array(type_):
     parser = SchemaParser(
         root_schema_dict={
             'properties': {
                 'Atest': {
                     'type': 'array',
                     'items': {
-                        'type': 'string'
+                        'type': type_
                     }
                 }
             }
@@ -280,7 +282,8 @@ def test_simple_array():
     assert set(parser.main_sheet) == set(['Atest'])
 
 
-def test_nested_simple_array():
+@pytest.mark.parametrize('type_', ['string', 'number'])
+def test_nested_simple_array(type_):
     parser = SchemaParser(
         root_schema_dict={
             'properties': {
@@ -289,7 +292,7 @@ def test_nested_simple_array():
                     'items': {
                         'type': 'array',
                         'items': {
-                            'type': 'string'
+                            'type': type_
                         }
                     }
                 }
@@ -406,7 +409,9 @@ def test_sub_sheet_empty_string_root_id():
     assert set(parser.sub_sheets) == set(['Atest'])
     assert list(parser.sub_sheets['Atest']) == ['Atest/0/Btest']
 
-def test_use_titles(recwarn):
+
+@pytest.mark.parametrize('use_titles', [True, False])
+def test_use_titles(recwarn, use_titles):
     parser = SchemaParser(root_schema_dict={
         'properties': {
             'Atest': {
@@ -427,11 +432,13 @@ def test_use_titles(recwarn):
                 'title': 'CTitle'
             }
         }
-    }, use_titles=True)
+    }, use_titles=use_titles)
     parser.parse()
-    assert set(parser.main_sheet) == set(['CTitle'])
-    assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
+    assert len(recwarn) == 0
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
 
     # Array title missing
     parser = SchemaParser(root_schema_dict={
@@ -453,13 +460,132 @@ def test_use_titles(recwarn):
                 'title': 'CTitle'
             }
         }
-    }, use_titles=True)
+    }, use_titles=use_titles)
     parser.parse()
-    assert set(parser.main_sheet) == set(['CTitle'])
-    assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == []
-    w = recwarn.pop(UserWarning)
-    assert 'does not have a title' in text_type(w.message)
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == []
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Atest does not have a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
+
+
+    # Object containing array title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'Xtest': {
+                'type': 'object',
+                'properties': {
+                    'Atest': {
+                        'type': 'array',
+                        'title': 'ATitle',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'Btest': {
+                                    'type': 'string',
+                                    'title': 'BTitle'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'Ctest': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=use_titles)
+    parser.parse()
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Xte_Atest'])
+        assert list(parser.sub_sheets['Xte_Atest']) == []
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Xtest/Atest/0/Btest is missing a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
+
+@pytest.mark.parametrize('use_titles', [True, False])
+def test_use_titles3(recwarn, use_titles):
+    # Array containing a nested object title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'Atest': {
+                'type': 'array',
+                'title': 'ATitle',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'Btest': {
+                            'type': 'object',
+                            'properties': {
+                                'Ctest': {
+                                    'type': 'string',
+                                    'title': 'CTitle'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'Ctest': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=use_titles)
+    parser.parse()
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == []
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Atest/0/Btest/Ctest is missing a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
+
+@pytest.mark.parametrize('use_titles', [True, False])
+def test_use_titles2(recwarn, use_titles):
+    # Object containing object title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'Xtest': {
+                'type': 'object',
+                'properties': {
+                    'Atest': {
+                        'type': 'object',
+                        'title': 'ATitle',
+                        'properties': {
+                            'Btest': {
+                                'type': 'string',
+                                'title': 'BTitle'
+                            }
+                        }
+                    }
+                }
+            },
+            'Ctest': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=use_titles)
+    parser.parse()
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set([])
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Xtest/Atest/Btest does not have a title, skipping' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
 
     # Main sheet title missing
     parser = SchemaParser(root_schema_dict={
@@ -481,14 +607,20 @@ def test_use_titles(recwarn):
                 'type': 'string'
             }
         }
-    }, use_titles=True)
+    }, use_titles=use_titles)
     parser.parse()
-    assert set(parser.main_sheet) == set([])
-    assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
-    w = recwarn.pop(UserWarning)
-    assert 'does not have a title' in text_type(w.message)
+    if use_titles:
+        assert set(parser.main_sheet) == set([])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Ctest does not have a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
 
+
+def test_use_titles5(recwarn):
     # Child sheet title missing
     parser = SchemaParser(root_schema_dict={
         'properties': {
@@ -515,7 +647,7 @@ def test_use_titles(recwarn):
     assert set(parser.sub_sheets) == set(['Atest'])
     assert list(parser.sub_sheets['Atest']) == []
     w = recwarn.pop(UserWarning)
-    assert 'does not have a title' in text_type(w.message)
+    assert 'Field Atest/0/Btest is missing a title' in text_type(w.message)
 
 
 def test_titles_rollup():
