@@ -4,6 +4,7 @@ from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.xml_output import toxml
+import sys
 import json
 import codecs
 from decimal import Decimal
@@ -141,7 +142,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     base[root_list_path] = list(result)
     if xml:
         if output_name is None:
-            print(toxml(base))
+            sys.stdout.buffer.write(toxml(base))
         else:
             with codecs.open(output_name, 'wb') as fp:
                 fp.write(toxml(base))

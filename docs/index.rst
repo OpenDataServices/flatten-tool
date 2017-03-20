@@ -41,6 +41,7 @@ Contents:
    developerguide
    usage-ocds
    usage-360
+   usage-iati
 
 Get started by reading the Spreadsheet Designer's Guide to understand the core
 concepts, how to use the `flatten-tool` command and how to structure your own

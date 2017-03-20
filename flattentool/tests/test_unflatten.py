@@ -59,12 +59,10 @@ def test_360_fields_case_insensitive(tmpdir):
 
 def test_unflatten_xml(tmpdir):
     unflatten(
-        input_name='flattentool/tests/fixtures/dummy_iati',
+        input_name='examples/iati',
         output_name=tmpdir.join('output.xml').strpath,
         input_format='csv',
         root_list_path='iati-activity',
         id_name='iati-identifier',
         xml=True)
-    def remove_whitespace(x):
-        return x.replace('\n', '').replace(' ', '')
-    assert remove_whitespace(open('flattentool/tests/fixtures/dummy_iati_output.xml').read()) == remove_whitespace(tmpdir.join('output.xml').read())
+    assert open('examples/iati/expected.xml').read() == tmpdir.join('output.xml').read()
