@@ -45,9 +45,10 @@ import warnings
 from jsonref import JsonRef
 import pytest
 
-from flattentool.input import SpreadsheetInput, convert_type, WITH_CELLS
+from flattentool.input import SpreadsheetInput, convert_type
 from flattentool.tests.test_init import original_cell_and_row_locations, original_headings
 from flattentool.schema import SchemaParser
+from flattentool.exceptions import DataErrorWarning
 
 
 def test_type_conversion_no_schema():
@@ -138,7 +139,7 @@ def test_type_conversion_with_schema():
             ('decimal', 'InvalidDecimal'),
             ('float', 'InvalidFloat')]),
     ]
-    with pytest.warns(UserWarning) as type_warnings:
+    with pytest.warns(DataErrorWarning) as type_warnings:
         assert (expected, None, None) == run(sheets, schema)
     # check that only one warning was raised
     assert len(type_warnings) == 3
@@ -334,9 +335,8 @@ test_dict_data = [
 def test_dict(sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map):
     result, cell_source_map, heading_source_map = run(sheets, schema=schema, source_maps=True)
     assert expected_result == result
-    if WITH_CELLS:
-        assert expected_cell_source_map == cell_source_map
-        assert expected_heading_source_map == heading_source_map
+    assert expected_cell_source_map == cell_source_map
+    assert expected_heading_source_map == heading_source_map
 
 
 test_list_of_dicts_data_result = [
@@ -486,9 +486,8 @@ test_list_of_dicts_data = [
 def test_list_of_dicts(sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map):
     result, cell_source_map, heading_source_map = run(sheets, schema=schema, source_maps=True)
     assert expected_result == result
-    if WITH_CELLS:
-        assert expected_cell_source_map == cell_source_map
-        assert expected_heading_source_map == heading_source_map
+    assert expected_cell_source_map == cell_source_map
+    assert expected_heading_source_map == heading_source_map
 
 
 test_list_of_dicts_with_ids_data_result = [
@@ -666,9 +665,8 @@ test_list_of_dicts_with_ids_data = [
 def test_list_of_dicts_with_ids(sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map):
     result, cell_source_map, heading_source_map = run(sheets, schema=schema, source_maps=True)
     assert expected_result == result
-    if WITH_CELLS:
-        assert expected_cell_source_map == cell_source_map
-        assert expected_heading_source_map == heading_source_map
+    assert expected_cell_source_map == cell_source_map
+    assert expected_heading_source_map == heading_source_map
 
 
 test_arrangement_data_sheets = (
@@ -957,11 +955,10 @@ def test_arrangement(
     actual_original_cell_and_row_locations = original_cell_and_row_locations(actual_cell_source_map or {})
     actual_original_heading_locations = original_headings(actual_heading_source_map or {})
     assert expected_result == actual_result
-    if WITH_CELLS:
-        assert expected_cell_source_map == actual_cell_source_map
-        assert expected_heading_source_map == actual_heading_source_map
-        assert expected_original_cell_and_row_locations == actual_original_cell_and_row_locations
-        assert expected_original_heading_locations == actual_original_heading_locations
+    assert expected_cell_source_map == actual_cell_source_map
+    assert expected_heading_source_map == actual_heading_source_map
+    assert expected_original_cell_and_row_locations == actual_original_cell_and_row_locations
+    assert expected_original_heading_locations == actual_original_heading_locations
 
 
 class HeadingListInput(SpreadsheetInput):
@@ -981,8 +978,6 @@ class HeadingListInput(SpreadsheetInput):
 
 
 def run(sheets, schema=None, source_maps=False):
-    if not WITH_CELLS:
-        source_maps = False
     input_headings = OrderedDict()
     input_sheets = OrderedDict()
     for sheet in sheets:
