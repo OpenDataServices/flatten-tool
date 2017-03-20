@@ -1,0 +1,12 @@
+{
+    "cafe": [
+        {
+            "name": "Healthy Cafe",
+            "address": "123 City Street, London"
+        },
+        {
+            "name": "Vegetarian Cafe",
+            "address": "42 Town Road, Bristol"
+        }
+    ]
+}

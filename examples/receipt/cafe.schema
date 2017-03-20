@@ -1,0 +1,64 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "TableObject": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Identifier"
+                },
+                "number": {
+                    "type": "integer",
+                    "title": "Number"
+                },
+                "dish": {
+                    "items": {
+                        "$ref": "#/definitions/DishObject"
+                    },
+                    "type": "array",
+                    "title": "Dish"
+                }
+            }
+        },
+        "DishObject": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Identifier"
+                },
+                "name": {
+                    "type": "string",
+                    "title": "Name"
+                },
+                "cost": {
+                    "type": "number",
+                    "title": "Cost"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Identifier"
+        },
+        "name": {
+            "type": "string",
+            "title": "Name"
+        },
+        "address": {
+            "type": "string",
+            "title": "Address"
+        },
+        "table": {
+            "items": {
+                "$ref": "#/definitions/TableObject"
+            },
+            "type": "array",
+            "title": "Table"
+        }
+    }
+}

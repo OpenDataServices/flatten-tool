@@ -1,0 +1,32 @@
+{
+    "cafe": [
+        {
+            "id": "CAFE-HEALTH",
+            "name": "Healthy Cafe",
+            "table": [
+                {
+                    "id": "TABLE-1",
+                    "dish": [
+                        {
+                            "name": "Fish and Chips"
+                        }
+                    ],
+                    "number": "1"
+                },
+                {
+                    "id": "TABLE-3",
+                    "dish": [
+                        {
+                            "name": "Fish and Chips"
+                        }
+                    ],
+                    "number": "3"
+                },
+                {
+                    "id": "TABLE-2",
+                    "number": "2"
+                }
+            ]
+        }
+    ]
+}

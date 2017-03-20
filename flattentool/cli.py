@@ -50,7 +50,7 @@ def create_parser():
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
     parser_create_template.add_argument(
         "-r", "--root-id",
-        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
+        help="Root ID of the data format, e.g. ocid for OCDS")
     parser_create_template.add_argument(
         "--use-titles",
         action='store_true',
@@ -83,7 +83,7 @@ def create_parser():
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
     parser_flatten.add_argument(
         "-r", "--root-id",
-        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
+        help="Root ID of the data format, e.g. ocid for OCDS")
     parser_flatten.add_argument(
         "--use-titles",
         action='store_true',
@@ -107,7 +107,7 @@ def create_parser():
         help="The path in the JSON that will contain the unflattened list. Defaults to main.")
     parser_unflatten.add_argument(
         "-e", "--encoding",
-        help="Encoding of the input file(s) (only relevant for CSV). Defaults to utf8.")
+        help="Encoding of the input file(s) (only relevant for CSV). This can be any encoding recognised by Python. Defaults to utf8.")
     parser_unflatten.add_argument(
         "-o", "--output-name",
         help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to unflattened.json")
@@ -122,7 +122,7 @@ def create_parser():
         help="Name of the timezone, defaults to UTC. Should be in tzdata format, e.g. Europe/London")
     parser_unflatten.add_argument(
         "-r", "--root-id",
-        help="Root ID of the data format, e.g. ocid for OCDS and blank for 360Giving (use --root-id=''). Defaults to ocid.")
+        help="Root ID of the data format, e.g. ocid for OCDS")
     parser_unflatten.add_argument(
         "-s", "--schema",
         help="Path to a relevant schema.")

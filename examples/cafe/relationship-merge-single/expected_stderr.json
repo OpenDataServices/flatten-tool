@@ -1,0 +1,4 @@
+... DataErrorWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet data: "Healthy Cafe" != "Vegetarian Cafe". If you were not expecting merging you may have a duplicate ID.
+  DataErrorWarning)
+... DataErrorWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet data: "3" != "4". If you were not expecting merging you may have a duplicate ID.
+  DataErrorWarning)

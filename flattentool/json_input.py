@@ -1,6 +1,6 @@
 """
 
-This file contains code that takes an OCDS JSON release file as input (not a
+This file contains code that takes an instace of a JSON file as input (not a
 JSON schema, for that see schema.py).
 
 """
@@ -137,7 +137,7 @@ class JSONParser(object):
                     # TODO Make this check the schema
                     # TODO Error if the any of the values contain the seperator
                     # TODO Support doubly nested arrays
-                    flattened_dict[sheet_key(sheet, parent_name+key)] = ';'.join(value)
+                    flattened_dict[sheet_key(sheet, parent_name+key)] = ';'.join(map(six.text_type, value))
                 else:
                     if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
                         if len(value) == 1:

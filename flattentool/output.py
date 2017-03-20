@@ -5,9 +5,13 @@ formats.
 """
 
 import openpyxl
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 import csv
 import os
 import sys
+from warnings import warn
+import six
+from flattentool.exceptions import DataErrorWarning
 
 if sys.version > '3':
     import csv
@@ -18,7 +22,7 @@ else:
 class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
-    def __init__(self, parser, main_sheet_name='main', output_name='release'):
+    def __init__(self, parser, main_sheet_name='main', output_name='unflattened'):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
@@ -52,7 +56,17 @@ class XLSXOutput(SpreadsheetOutput):
         worksheet.title = sheet_name
         worksheet.append(sheet_header)
         for sheet_line in sheet.lines:
-            worksheet.append([ sheet_line.get(x) for x in sheet_header ])
+            line = []
+            for header in sheet_header:
+                value = sheet_line.get(header)
+                if isinstance(value, six.text_type):
+                    new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
+                    if new_value != value:
+                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
+                            DataErrorWarning)
+                    value = new_value
+                line.append(value)
+            worksheet.append(line)
 
     def close(self):
         self.workbook.remove_sheet(self.workbook.active)

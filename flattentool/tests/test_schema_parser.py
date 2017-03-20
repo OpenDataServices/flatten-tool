@@ -61,7 +61,8 @@ def test_main_sheet_basic():
     parser = SchemaParser(root_schema_dict={
         'properties': {
             'Atest': type_string,
-            'Btest': type_string
+            # type is allowed to be empty, and we should assume string
+            'Btest': {},
         }
     })
     parser.parse()
@@ -96,7 +97,7 @@ def test_sub_sheet():
     parser.parse()
     assert set(parser.main_sheet) == set([])
     assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ocid', 'Atest/0/Btest']
+    assert list(parser.sub_sheets['Atest']) == ['Atest/0/Btest']
 
 
 def object_in_array_example_properties(parent_name, child_name):
@@ -125,7 +126,7 @@ class TestSubSheetParentID(object):
         parser.parse()
         assert set(parser.main_sheet) == set(['Atest/id'])
         assert set(parser.sub_sheets) == set(['Ate_Btest'])
-        assert list(parser.sub_sheets['Ate_Btest']) == ['ocid', 'Atest/id', 'Atest/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['Atest/id', 'Atest/Btest/0/Ctest']
 
     def test_parent_is_array(self):
         parser = SchemaParser(root_schema_dict={
@@ -139,8 +140,8 @@ class TestSubSheetParentID(object):
         parser.parse()
         assert set(parser.main_sheet) == set()
         assert set(parser.sub_sheets) == set(['Atest', 'Ate_Btest'])
-        assert list(parser.sub_sheets['Atest']) == ['ocid', 'Atest/0/id']
-        assert list(parser.sub_sheets['Ate_Btest']) == ['ocid', 'Atest/0/id', 'Atest/0/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Atest']) == ['Atest/0/id']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['Atest/0/id', 'Atest/0/Btest/0/Ctest']
 
     def test_two_parents(self):
         parser = SchemaParser(root_schema_dict={
@@ -160,10 +161,10 @@ class TestSubSheetParentID(object):
         parser.parse()
         assert set(parser.main_sheet) == set()
         assert set(parser.sub_sheets) == set(['Atest', 'Dtest', 'Ate_Btest', 'Dte_Btest'])
-        assert list(parser.sub_sheets['Atest']) == ['ocid', 'Atest/0/id']
-        assert list(parser.sub_sheets['Dtest']) == ['ocid', 'Dtest/0/id']
-        assert list(parser.sub_sheets['Ate_Btest']) == ['ocid', 'Atest/0/id', 'Atest/0/Btest/0/Ctest']
-        assert list(parser.sub_sheets['Dte_Btest']) == ['ocid', 'Dtest/0/id', 'Dtest/0/Btest/0/Etest']
+        assert list(parser.sub_sheets['Atest']) == ['Atest/0/id']
+        assert list(parser.sub_sheets['Dtest']) == ['Dtest/0/id']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['Atest/0/id', 'Atest/0/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Dte_Btest']) == ['Dtest/0/id', 'Dtest/0/Btest/0/Etest']
 
     def test_parent_is_object_nested(self):
         parser = SchemaParser(root_schema_dict={
@@ -182,7 +183,7 @@ class TestSubSheetParentID(object):
         parser.parse()
         assert set(parser.main_sheet) == set(['Atest/Btest/id'])
         assert set(parser.sub_sheets) == set(['Ate_Bte_Btest'])
-        assert list(parser.sub_sheets['Ate_Bte_Btest']) == ['ocid', 'Atest/Btest/id', 'Atest/Btest/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Ate_Bte_Btest']) == ['Atest/Btest/id', 'Atest/Btest/Btest/0/Ctest']
 
 
 class TestSubSheetMainID(object):
@@ -199,7 +200,7 @@ class TestSubSheetMainID(object):
         parser.parse()
         assert set(parser.main_sheet) == set(['id', 'Atest/id'])
         assert set(parser.sub_sheets) == set(['Ate_Btest'])
-        assert list(parser.sub_sheets['Ate_Btest']) == ['ocid', 'id', 'Atest/id', 'Atest/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['id', 'Atest/id', 'Atest/Btest/0/Ctest']
 
     def test_parent_is_array(self):
         parser = SchemaParser(root_schema_dict={
@@ -215,8 +216,8 @@ class TestSubSheetMainID(object):
         parser.parse()
         assert set(parser.main_sheet) == set(['id'])
         assert set(parser.sub_sheets) == set(['Atest', 'Ate_Btest'])
-        assert list(parser.sub_sheets['Atest']) == ['ocid', 'id', 'Atest/0/id']
-        assert list(parser.sub_sheets['Ate_Btest']) == ['ocid', 'id', 'Atest/0/id', 'Atest/0/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Atest']) == ['id', 'Atest/0/id']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['id', 'Atest/0/id', 'Atest/0/Btest/0/Ctest']
 
     def test_two_parents(self):
         parser = SchemaParser(root_schema_dict={
@@ -237,10 +238,10 @@ class TestSubSheetMainID(object):
         parser.parse()
         assert set(parser.main_sheet) == set(['id'])
         assert set(parser.sub_sheets) == set(['Atest', 'Dtest', 'Ate_Btest', 'Dte_Btest'])
-        assert list(parser.sub_sheets['Atest']) == ['ocid', 'id', 'Atest/0/id']
-        assert list(parser.sub_sheets['Dtest']) == ['ocid', 'id', 'Dtest/0/id']
-        assert list(parser.sub_sheets['Ate_Btest']) == ['ocid', 'id', 'Atest/0/id', 'Atest/0/Btest/0/Ctest']
-        assert list(parser.sub_sheets['Dte_Btest']) == ['ocid', 'id', 'Dtest/0/id', 'Dtest/0/Btest/0/Etest']
+        assert list(parser.sub_sheets['Atest']) == ['id', 'Atest/0/id']
+        assert list(parser.sub_sheets['Dtest']) == ['id', 'Dtest/0/id']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['id', 'Atest/0/id', 'Atest/0/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Dte_Btest']) == ['id', 'Dtest/0/id', 'Dtest/0/Btest/0/Etest']
 
     def test_custom_main_sheet_name(self):
         parser = SchemaParser(
@@ -258,20 +259,20 @@ class TestSubSheetMainID(object):
         assert set(parser.main_sheet) == set(['id', 'Atest/id'])
         assert set(parser.sub_sheets) == set(['Ate_Btest'])
         assert list(parser.sub_sheets['Ate_Btest']) == [
-            'ocid',
             'id',
             'Atest/id',
             'Atest/Btest/0/Ctest']
 
 
-def test_simple_array():
+@pytest.mark.parametrize('type_', ['string', 'number'])
+def test_simple_array(type_):
     parser = SchemaParser(
         root_schema_dict={
             'properties': {
                 'Atest': {
                     'type': 'array',
                     'items': {
-                        'type': 'string'
+                        'type': type_
                     }
                 }
             }
@@ -281,7 +282,8 @@ def test_simple_array():
     assert set(parser.main_sheet) == set(['Atest'])
 
 
-def test_nested_simple_array():
+@pytest.mark.parametrize('type_', ['string', 'number'])
+def test_nested_simple_array(type_):
     parser = SchemaParser(
         root_schema_dict={
             'properties': {
@@ -290,7 +292,7 @@ def test_nested_simple_array():
                     'items': {
                         'type': 'array',
                         'items': {
-                            'type': 'string'
+                            'type': type_
                         }
                     }
                 }
@@ -318,7 +320,7 @@ def test_references_sheet_names(tmpdir):
     parser = SchemaParser(schema_filename=tmpfile.strpath)
     parser.parse()
     assert set(parser.sub_sheets) == set(['Atest']) # used to be Btest
-    assert list(parser.sub_sheets['Atest']) == ['ocid', 'Atest/0/Ctest']
+    assert list(parser.sub_sheets['Atest']) == ['Atest/0/Ctest']
 
 
 def test_rollup():
@@ -340,7 +342,7 @@ def test_rollup():
     parser.parse()
     assert set(parser.main_sheet) == set(['Atest/0/Btest'])
     assert set(parser.sub_sheets) == set(['Atest'])
-    assert set(parser.sub_sheets['Atest']) == set(['ocid', 'Atest/0/Btest', 'Atest/0/Ctest'])
+    assert set(parser.sub_sheets['Atest']) == set(['Atest/0/Btest', 'Atest/0/Ctest'])
 
 
 def test_bad_rollup(recwarn):
@@ -370,7 +372,7 @@ def test_bad_rollup(recwarn):
 
     assert set(parser.main_sheet) == set()
     assert set(parser.sub_sheets) == set(['Atest'])
-    assert set(parser.sub_sheets['Atest']) == set(['ocid', 'Atest/0/Ctest'])
+    assert set(parser.sub_sheets['Atest']) == set(['Atest/0/Ctest'])
 
 
 def test_sub_sheet_custom_id():
@@ -390,7 +392,7 @@ def test_sub_sheet_custom_id():
     assert set(parser.sub_sheets) == set(['Atest'])
     assert list(parser.sub_sheets['Atest']) == ['custom', 'Atest/0/Btest']
 
-def test_sub_sheet_no_root_id():
+def test_sub_sheet_empty_string_root_id():
     parser = SchemaParser(root_schema_dict={
         'properties': {
             'Atest': {
@@ -407,7 +409,9 @@ def test_sub_sheet_no_root_id():
     assert set(parser.sub_sheets) == set(['Atest'])
     assert list(parser.sub_sheets['Atest']) == ['Atest/0/Btest']
 
-def test_use_titles(recwarn):
+
+@pytest.mark.parametrize('use_titles', [True, False])
+def test_use_titles(recwarn, use_titles):
     parser = SchemaParser(root_schema_dict={
         'properties': {
             'Atest': {
@@ -428,11 +432,13 @@ def test_use_titles(recwarn):
                 'title': 'CTitle'
             }
         }
-    }, use_titles=True)
+    }, use_titles=use_titles)
     parser.parse()
-    assert set(parser.main_sheet) == set(['CTitle'])
-    assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ocid', 'ATitle:BTitle']
+    assert len(recwarn) == 0
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
 
     # Array title missing
     parser = SchemaParser(root_schema_dict={
@@ -454,13 +460,132 @@ def test_use_titles(recwarn):
                 'title': 'CTitle'
             }
         }
-    }, use_titles=True)
+    }, use_titles=use_titles)
     parser.parse()
-    assert set(parser.main_sheet) == set(['CTitle'])
-    assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ocid']
-    w = recwarn.pop(UserWarning)
-    assert 'does not have a title' in text_type(w.message)
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == []
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Atest does not have a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
+
+
+    # Object containing array title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'Xtest': {
+                'type': 'object',
+                'properties': {
+                    'Atest': {
+                        'type': 'array',
+                        'title': 'ATitle',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'Btest': {
+                                    'type': 'string',
+                                    'title': 'BTitle'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'Ctest': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=use_titles)
+    parser.parse()
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Xte_Atest'])
+        assert list(parser.sub_sheets['Xte_Atest']) == []
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Xtest/Atest/0/Btest is missing a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
+
+@pytest.mark.parametrize('use_titles', [True, False])
+def test_use_titles3(recwarn, use_titles):
+    # Array containing a nested object title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'Atest': {
+                'type': 'array',
+                'title': 'ATitle',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'Btest': {
+                            'type': 'object',
+                            'properties': {
+                                'Ctest': {
+                                    'type': 'string',
+                                    'title': 'CTitle'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'Ctest': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=use_titles)
+    parser.parse()
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == []
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Atest/0/Btest/Ctest is missing a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
+
+@pytest.mark.parametrize('use_titles', [True, False])
+def test_use_titles2(recwarn, use_titles):
+    # Object containing object title missing
+    parser = SchemaParser(root_schema_dict={
+        'properties': {
+            'Xtest': {
+                'type': 'object',
+                'properties': {
+                    'Atest': {
+                        'type': 'object',
+                        'title': 'ATitle',
+                        'properties': {
+                            'Btest': {
+                                'type': 'string',
+                                'title': 'BTitle'
+                            }
+                        }
+                    }
+                }
+            },
+            'Ctest': {
+                'type': 'string',
+                'title': 'CTitle'
+            }
+        }
+    }, use_titles=use_titles)
+    parser.parse()
+    if use_titles:
+        assert set(parser.main_sheet) == set(['CTitle'])
+        assert set(parser.sub_sheets) == set([])
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Xtest/Atest/Btest does not have a title, skipping' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
 
     # Main sheet title missing
     parser = SchemaParser(root_schema_dict={
@@ -482,14 +607,20 @@ def test_use_titles(recwarn):
                 'type': 'string'
             }
         }
-    }, use_titles=True)
+    }, use_titles=use_titles)
     parser.parse()
-    assert set(parser.main_sheet) == set([])
-    assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ocid', 'ATitle:BTitle']
-    w = recwarn.pop(UserWarning)
-    assert 'does not have a title' in text_type(w.message)
+    if use_titles:
+        assert set(parser.main_sheet) == set([])
+        assert set(parser.sub_sheets) == set(['Atest'])
+        assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
+        assert len(recwarn) == 1
+        w = recwarn.pop(UserWarning)
+        assert 'Field Ctest does not have a title' in text_type(w.message)
+    else:
+        assert len(recwarn) == 0
 
+
+def test_use_titles5(recwarn):
     # Child sheet title missing
     parser = SchemaParser(root_schema_dict={
         'properties': {
@@ -514,9 +645,9 @@ def test_use_titles(recwarn):
     parser.parse()
     assert set(parser.main_sheet) == set(['CTitle'])
     assert set(parser.sub_sheets) == set(['Atest'])
-    assert list(parser.sub_sheets['Atest']) == ['ocid']
+    assert list(parser.sub_sheets['Atest']) == []
     w = recwarn.pop(UserWarning)
-    assert 'does not have a title' in text_type(w.message)
+    assert 'Field Atest/0/Btest is missing a title' in text_type(w.message)
 
 
 def test_titles_rollup():
@@ -545,7 +676,7 @@ def test_titles_rollup():
     parser.parse()
     assert set(parser.main_sheet) == set(['ATitle:BTitle'])
     assert set(parser.sub_sheets) == set(['Atest'])
-    assert set(parser.sub_sheets['Atest']) == set(['ocid', 'ATitle:BTitle', 'ATitle:CTitle'])
+    assert set(parser.sub_sheets['Atest']) == set(['ATitle:BTitle', 'ATitle:CTitle'])
 
 
 def test_schema_from_uri(httpserver):

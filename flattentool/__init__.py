@@ -2,14 +2,14 @@ from flattentool.schema import SchemaParser
 from flattentool.json_input import JSONParser
 from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
-from flattentool.input import FORMATS as INPUT_FORMATS, WITH_CELLS
+from flattentool.input import FORMATS as INPUT_FORMATS
 import json
 import codecs
 from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id='ocid', use_titles=False, **_):
+def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id=None, use_titles=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -38,7 +38,7 @@ def create_template(schema, output_name='template', output_format='all', main_sh
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main', root_list_path='main', rollup=False, root_id='ocid', use_titles=False, **_):
+def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main', root_list_path='main', rollup=False, root_id=None, use_titles=False, **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
@@ -96,13 +96,16 @@ class NumberStr(float):
 
 def decimal_default(o):
     if isinstance(o, Decimal):
-        return NumberStr(o)
+        if int(o) == o:
+            return int(o)
+        else:
+            return NumberStr(o)
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
-def unflatten(input_name, base_json=None, input_format=None, output_name='unflattened.json',
+def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path='main', encoding='utf8', timezone_name='UTC',
-              root_id='ocid', schema='', convert_titles=False, cell_source_map=None,
+              root_id=None, schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -131,20 +134,16 @@ def unflatten(input_name, base_json=None, input_format=None, output_name='unflat
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
-    if WITH_CELLS:
-        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
-        base[root_list_path] = list(result)
-        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
-        if cell_source_map:
-            with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
-                json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
-        if heading_source_map:
-            with codecs.open(heading_source_map, 'w', encoding='utf-8') as fp:
-                json.dump(heading_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
+    result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
+    base[root_list_path] = list(result)
+    if output_name is None:
+        print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
     else:
-        result = spreadsheet_input.unflatten()
-        base[root_list_path] = list(result)
         with codecs.open(output_name, 'w', encoding='utf-8') as fp:
             json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
-
+    if cell_source_map:
+        with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
+            json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
+    if heading_source_map:
+        with codecs.open(heading_source_map, 'w', encoding='utf-8') as fp:
+            json.dump(heading_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)
