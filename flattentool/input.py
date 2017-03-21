@@ -527,6 +527,13 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != '':
                 if xml:
+                    # For XML we want to support text and attributes at the
+                    # same level, e.g.
+                    # <my-element a="b">some text</my-element>
+                    # which we represent in a dict as:
+                    # {"@a":"b", "text()": "some text"}
+                    # To ensure we can attach attributes everywhere, all
+                    # element text must be added as a dict with a `text()` key.
                     if path_item.startswith('@'):
                         current_path[path_item] = cell
                     else:
