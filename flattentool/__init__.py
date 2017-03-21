@@ -138,7 +138,10 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
-    result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
+    result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten(
+        with_cell_source_map=cell_source_map,
+        with_heading_source_map=heading_source_map,
+    )
     base[root_list_path] = list(result)
     if xml:
         if output_name is None:
