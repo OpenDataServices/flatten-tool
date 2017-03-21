@@ -142,7 +142,10 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     base[root_list_path] = list(result)
     if xml:
         if output_name is None:
-            sys.stdout.buffer.write(toxml(base))
+            if sys.version > '3':
+                sys.stdout.buffer.write(toxml(base))
+            else:
+                sys.stdout.write(toxml(base))
         else:
             with codecs.open(output_name, 'wb') as fp:
                 fp.write(toxml(base))
