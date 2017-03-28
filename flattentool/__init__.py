@@ -159,8 +159,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         for key, value in (cell_source_map_data_meta or {}).items():
             ## strip off meta/0/ from start of source map as actually data is at top level
             cell_source_map_data[key[7:]] = value
-        for key, value in heading_source_map_data_meta.items():
-            heading_source_map_data[key[7:]] = value
+        for key, value in (heading_source_map_data_meta or {}).items():
+            ## strip off meta/ from start of source map as actually data is at top level
+            heading_source_map_data[key[5:]] = value
 
         if result:
             base.update(result[0])
@@ -173,6 +174,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             root_list_path=root_list_path,
             root_id=root_id,
             convert_titles=convert_titles,
+            exclude_sheets=[metatab_name],
             vertical_orientation=vertical_orientation,
             id_name=id_name,
             xml=xml
