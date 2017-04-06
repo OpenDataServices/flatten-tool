@@ -522,8 +522,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
         if cell.cell_value is None or cell.cell_value == '':
             continue
         current_path = unflattened
-        path_list = [item.rstrip('[]') for item in path.split('/')]
-
+        path_list = [item.rstrip('[]') for item in text_type(path).split('/')]
         for num, path_item in enumerate(path_list):
             if isint(path_item):
                 continue
