@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from flattentool.sort_iati import sort_iati_element, IATISchemaWalker
 
 
 def child_to_xml(parent_el, tagname, child):
@@ -25,4 +26,8 @@ def dict_to_xml(data, tagname):
 
 
 def toxml(data):
-    return ET.tostring(dict_to_xml(data, 'iati-activities'))
+    root = dict_to_xml(data, 'iati-activities')
+    schema_dict = IATISchemaWalker('iati-activities-schema.xsd').create_schema_dict('iati-activity')
+    for element in root:
+        sort_iati_element(element, schema_dict)
+    return ET.tostring(root)
