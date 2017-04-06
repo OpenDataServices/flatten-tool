@@ -264,6 +264,7 @@ class SpreadsheetInput(object):
                     if self.vertical_orientation:
                         # This is misleading as it specifies the row number as the distance vertically
                         # and the horizontal 'letter' as a number.
+                        # https://github.com/OpenDataServices/flatten-tool/issues/153
                         cells[header] = Cell(line[header], (sheet_name, str(k+1), j+2, heading))
                     else:
                         cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, heading))
