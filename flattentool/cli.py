@@ -149,6 +149,7 @@ def create_parser():
         help="The jsonschema of the metadata tab")
     parser_unflatten.add_argument(
         "--metatab-only",
+        action='store_true',
         help="Parse the metatab and nothing else")
     parser_unflatten.add_argument(
         "--metatab-vertical-orientation",

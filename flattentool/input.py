@@ -260,11 +260,13 @@ class SpreadsheetInput(object):
                 root_id_or_none = line.get(self.root_id) if self.root_id else None
                 cells = OrderedDict()
                 for k, header in enumerate(line):
-                    headings = actual_headings[k] if actual_headings else header
+                    heading = actual_headings[k] if actual_headings else header
                     if self.vertical_orientation:
-                        cells[header] = Cell(line[header], (sheet_name, str(k+1), j+2, headings))
+                        # This is misleading as it specifies the row number as the distance vertically
+                        # and the horizontal 'letter' as a number.
+                        cells[header] = Cell(line[header], (sheet_name, str(k+1), j+2, heading))
                     else:
-                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, headings))
+                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, heading))
                 unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone, self.xml, self.id_name)
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict(self.id_name, xml=self.xml)
@@ -448,7 +450,7 @@ class XLSXInput(SpreadsheetInput):
             for sheet in list(self.sheet_names_map):
                 if sheet not in self.include_sheets:
                     self.sheet_names_map.pop(sheet)
-        for sheet in list(self.exclude_sheets) or []:
+        for sheet in self.exclude_sheets or []:
             self.sheet_names_map.pop(sheet, None)
 
         sheet_names = list(sheet for sheet in self.sheet_names_map.keys())

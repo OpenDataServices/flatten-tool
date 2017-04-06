@@ -7,7 +7,7 @@ usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
                               [--vertical-orientation]
                               [--metatab-name METATAB_NAME]
                               [--metatab-schema METATAB_SCHEMA]
-                              [--metatab-only METATAB_ONLY]
+                              [--metatab-only]
                               [--metatab-vertical-orientation]
                               input_name
 
@@ -56,8 +56,7 @@ optional arguments:
                         the given name
   --metatab-schema METATAB_SCHEMA
                         The jsonschema of the metadata tab
-  --metatab-only METATAB_ONLY
-                        Parse the metatab and nothing else
+  --metatab-only        Parse the metatab and nothing else
   --metatab-vertical-orientation
                         Read metatab so that headings are in the first column
                         and data is read vertically. Only for XLSX not CSV
