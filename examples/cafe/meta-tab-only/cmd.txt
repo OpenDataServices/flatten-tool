@@ -1,0 +1,1 @@
+$ flatten-tool unflatten --input-format=xlsx --metatab-only --metatab-name Meta --metatab-vertical-orientation examples/cafe/meta-tab-only/meta-tab.xlsx

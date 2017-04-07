@@ -1179,6 +1179,61 @@ table" section earlier.
    titles, you can use the schema in the "Arbitrary-depth in a single
    table" section too.
 
+Metadata Tab
+============
+
+Flattentool supports naming of a special sheetname (or Tab) in a spreadsheet to add data to the top level of the returned data structure.  Currently it only supports output format JSON and the input format has to be XLSX.
+
+Example Usage
+-------------
+
+You have a spreadsheet named "mydata.xlsx with" 2 sheets. The first sheet named "Cafe":
+
+.. csv-table::
+   :header-rows: 1
+   :file: ../examples/cafe/meta-tab/data.csv
+
+A second sheet you would like to add some metadata to this list of rows to a sheet named "Meta":
+
+.. csv-table::
+   :file: ../examples/cafe/meta-tab/metadata.csv
+
+As you can see it is also possible to choose to have the metadata headings on the first column (not the first row) with metadata vertical.
+
+The command for doing this:
+
+.. literalinclude:: ../examples/cafe/meta-tab/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/cafe/meta-tab/expected.json
+   :language: json
+
+Options
+-------
+
+`--metatab-name`
+
+This is the name of the sheet with the metadata on. It is case sensitive. It is the only mandatory option if you want to parse a metatab, without it no metatab will be parsed
+
+`--metatab-schema`
+
+The JSON schema of the metatab. This schema will be used to determine the types and/or titles of the data in the metatab.  It works in the same way as the --schema option but just for the metatab.  The schema used with the --schema option has no effect on the metatab parsing, so this has to be specified if you need title handling or want to specify types.
+
+`--metatab-only`
+
+Just return the metatab information and not the rest of the doc. Using the example above:
+
+.. literalinclude:: ../examples/cafe/meta-tab-only/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/cafe/meta-tab-only/expected.json
+   :language: json
+
+`--metatab-vertical-orientation`
+
+Say that the metatab data runs vertically rather that horizontally see example above.
+
+
 Source maps
 ===========
 
