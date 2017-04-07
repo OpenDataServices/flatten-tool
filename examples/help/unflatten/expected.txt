@@ -4,6 +4,11 @@ usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
                               [-a HEADING_SOURCE_MAP]
                               [--timezone-name TIMEZONE_NAME] [-r ROOT_ID]
                               [-s SCHEMA] [--convert-titles]
+                              [--vertical-orientation]
+                              [--metatab-name METATAB_NAME]
+                              [--metatab-schema METATAB_SCHEMA]
+                              [--metatab-only]
+                              [--metatab-vertical-orientation]
                               input_name
 
 positional arguments:
@@ -42,3 +47,17 @@ optional arguments:
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.
   --convert-titles      Convert titles. Requires a schema to be specified.
+  --vertical-orientation
+                        Read spreadsheet so that headings are in the first
+                        column and data is read vertically. Only for XLSX not
+                        CSV
+  --metatab-name METATAB_NAME
+                        If supplied will assume there is a metadata tab with
+                        the given name
+  --metatab-schema METATAB_SCHEMA
+                        The jsonschema of the metadata tab
+  --metatab-only        Parse the metatab and nothing else
+  --metatab-vertical-orientation
+                        Read metatab so that headings are in the first column
+                        and data is read vertically. Only for XLSX not CSV
+
