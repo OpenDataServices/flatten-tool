@@ -45,7 +45,7 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
         root_list_path='grants',
         root_id='',
         use_titles=use_titles,
-        main_sheet_name='releases')
+        main_sheet_name='grants')
     unflatten(
         input_name=tmpdir.join('flattened').strpath+'.'+output_format,
         output_name=tmpdir.join('roundtrip.json').strpath,
