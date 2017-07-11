@@ -247,26 +247,26 @@ testdata = [
 # We should be able to handle numbers as column headings
     (
         'Non-string column headings',
+        [OrderedDict([
+            (1, 'A'),
+            (2, 'AA'),
+            ('3', 'AAA'),
+            ('4', 'AAAA'),
+            (Decimal('2.2'), 'B'),
+            (2.3, 'C'),
+            (False, 'D'),
+        ])],
         [{
-            1: 'A',
-            2: 'AA',
-            '3': 'AAA',
-            '4': 'AAAA',
-            Decimal('2.2'): 'B',
-            2.3: 'C',
-            False: 'D',
-        }],
-        [{
-            # FIXME
-            #'1': 'A',
-            #'2': 'AA',
-            #'3': 'AA',
-            #'4': 'AA',
             '2.2': 'B',
             '2.3': 'C',
             'False': 'D',
         }],
-        []
+        [
+            'Column "1" has been ignored because it is a number.',
+            'Column "2" has been ignored because it is a number.',
+            'Column "3" has been ignored because it is a number.',
+            'Column "4" has been ignored because it is a number.',
+        ]
     )
 ]
 

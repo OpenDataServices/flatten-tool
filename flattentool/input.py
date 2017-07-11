@@ -525,6 +525,8 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
         path_list = [item.rstrip('[]') for item in text_type(path).split('/')]
         for num, path_item in enumerate(path_list):
             if isint(path_item):
+                if num == 0:
+                    warn('Column "{}" has been ignored because it is a number.'.format(path), DataErrorWarning)
                 continue
             current_type = None
             path_till_now = '/'.join([item for item in path_list[:num + 1] if not isint(item)])
