@@ -85,6 +85,10 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
         return text_type(value)
+    elif type_string == 'date':
+        if type(value) == datetime.datetime:
+            return value.date().isoformat()
+        return text_type(value)
     elif type_string == '':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
@@ -519,18 +523,24 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             continue
         current_path = unflattened
         path_list = [item.rstrip('[]') for item in path.split('/')]
+
         for num, path_item in enumerate(path_list):
             if isint(path_item):
                 continue
-            path_till_now = '/'.join([item for item in path_list[:num+1] if not isint(item)])
+            current_type = None
+            path_till_now = '/'.join([item for item in path_list[:num + 1] if not isint(item)])
             if parser:
                 current_type = parser.flattened.get(path_till_now)
-            else:
-                current_type = None
             try:
-                next_path_item = path_list[num+1]
+                next_path_item = path_list[num + 1]
             except IndexError:
                 next_path_item = ''
+
+            # Quick solution to avoid casting of date as datetinme in spreadsheet > xml
+            if xml:
+                if type(cell.cell_value) == datetime.datetime and not next_path_item:
+                    if 'datetime' not in path:
+                        current_type = 'date'
 
             ## Array
             list_index = -1
