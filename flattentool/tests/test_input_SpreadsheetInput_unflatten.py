@@ -249,6 +249,9 @@ testdata = [
         'Non-string column headings',
         [{
             1: 'A',
+            2: 'AA',
+            '3': 'AAA',
+            '4': 'AAAA',
             Decimal('2.2'): 'B',
             2.3: 'C',
             False: 'D',
@@ -256,6 +259,9 @@ testdata = [
         [{
             # FIXME
             #'1': 'A',
+            #'2': 'AA',
+            #'3': 'AA',
+            #'4': 'AA',
             '2.2': 'B',
             '2.3': 'C',
             'False': 'D',

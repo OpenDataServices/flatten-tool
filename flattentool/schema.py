@@ -32,7 +32,7 @@ class TitleLookup(UserDict):
         remaining_titles = title_header_list[1:]
         try:
             int(first_title)
-            return first_title + '/' + self.lookup_header_list(remaining_titles)
+            return first_title + ('/' + self.lookup_header_list(remaining_titles) if remaining_titles else '')
         except ValueError:
             pass
 
