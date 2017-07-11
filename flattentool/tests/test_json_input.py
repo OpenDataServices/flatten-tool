@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from flattentool.json_input import JSONParser, BadlyFormedJSONError
 from flattentool.schema import SchemaParser
+from flattentool.tests.test_schema_parser import object_in_array_example_properties
 import pytest
 from collections import OrderedDict
 from six import text_type
@@ -402,6 +403,47 @@ class TestParseUsingSchema(object):
             ]
         w = recwarn.pop(UserWarning)
         assert 'Could not provide rollup' in text_type(w.message)
+
+    def test_double_nested_arrays(self):
+        schema_parser = SchemaParser(root_schema_dict={
+            'properties': OrderedDict([
+                ('Atest', {
+                    'type': 'array',
+                    'items': {'type': 'object',
+                              'properties': object_in_array_example_properties('Btest', 'Ctest')}
+                }),
+                ('Dtest', {
+                    'type': 'array',
+                    'items': {'type': 'object',
+                              'properties': object_in_array_example_properties('Btest', 'Etest')}
+                })
+            ])
+        })
+        schema_parser.parse()
+        parser = JSONParser(
+            root_json_dict=[{
+                'Atest': [{
+                    'id': 1,
+                    'Btest': [{
+                        'Ctest': 2
+                    }]
+                }],
+                'Dtest': [{
+                    'id': 3,
+                    'Btest': [{
+                        'Etest': 4
+                    }]
+                }]
+            }],
+            schema_parser=schema_parser
+        )
+        parser.parse()
+        assert set(parser.main_sheet) == set()
+        assert set(parser.sub_sheets) == set(['Atest', 'Dtest', 'Ate_Btest', 'Dte_Btest'])
+        assert list(parser.sub_sheets['Atest']) == ['Atest/0/id']
+        assert list(parser.sub_sheets['Dtest']) == ['Dtest/0/id']
+        assert list(parser.sub_sheets['Ate_Btest']) == ['Atest/0/id', 'Atest/0/Btest/0/Ctest']
+        assert list(parser.sub_sheets['Dte_Btest']) == ['Dtest/0/id', 'Dtest/0/Btest/0/Etest']
 
 # TODO Check support for decimals, integers, booleans and Nones
 
