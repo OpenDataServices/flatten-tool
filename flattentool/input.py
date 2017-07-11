@@ -571,6 +571,16 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 raise ValueError("There is an object or list at '{}' but it should be an {}".format(path_till_now, current_type))
 
             ## Other Types
+            current_path_value = current_path.get(path_item)
+            if not xml and (type(current_path_value) is ListAsDict or hasattr(current_path_value, 'items')):
+                #   ^
+                # xml can have an object/array that also has a text value
+                warn(
+                    'Column {} has been ignored, because another column treats it as an array or object'.format(
+                        path, path_till_now, current_type),
+                    DataErrorWarning)
+                continue
+
             value = cell.cell_value
             converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value

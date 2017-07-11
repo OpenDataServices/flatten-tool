@@ -227,6 +227,40 @@ testdata = [
         }],
         ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.']
     ),
+    (
+        'array / str mixing',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('newtest/0/a', 3),
+            ('newtest', 4),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': [{
+                'a': 3
+            }]
+        }],
+        ['Column newtest has been ignored, because another column treats it as an array or object']
+    ),
+    (
+        'object / str mixing',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('newtest/a', 3),
+            ('newtest', 4),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': {
+                'a': 3
+            }
+        }],
+        ['Column newtest has been ignored, because another column treats it as an array or object']
+    ),
 # Previously this caused the error: KeyError('ocid',)
 # Now it works, but probably not as intended
 # The missing Root ID should be picked up in schema validation
