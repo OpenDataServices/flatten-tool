@@ -5,7 +5,7 @@
   "definitions": {
       "currency": {
         "type": "string",
-        "description": "The currency used in amounts. Use the three-digit currency code from [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) ",
+        "description": "The currency used in amounts. Use the three-letter currency code from [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) eg: Use GBP for Pounds Sterling.",
         "weight": 5.02,
         "enum": ["AED","AFN","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BHD","BIF","BMD","BND","BOB","BRL","BSD","BTN","BWP","BYR","BZD","CAD","CDF","CHF","CLP","CNY","COP","CRC","CUC","CUP","CVE","CZK","DJF","DKK","DOP","DZD","EGP","ERN","ETB","EUR","FJD","FKP","GBP","GEL","GGP","GHS","GIP","GMD","GNF","GTQ","GYD","HKD","HNL","HRK","HTG","HUF","IDR","ILS","IMP","INR","IQD","IRR","ISK","JEP","JMD","JOD","JPY","KES","KGS","KHR","KMF","KPW","KRW","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LSL","LTL","LVL","LYD","MAD","MDL","MGA","MKD","MMK","MNT","MOP","MRO","MUR","MVR","MWK","MXN","MYR","MZN","NAD","NGN","NIO","NOK","NPR","NZD","OMR","PAB","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SBD","SCR","SDG","SEK","SGD","SHP","SLL","SOS","SPL","SRD","STD","SVC","SYP","SZL","THB","TJS","TMT","TND","TOP","TRY","TTD","TVD","TWD","TZS","UAH","UGX","USD","UYU","UZS","VEF","VND","VUV","WST","XAF","XCD","XDR","XOF","XPF","YER","ZAR","ZMW","ZWD"],
         "title": "Currency"
@@ -30,7 +30,7 @@
           "$ref": "#/definitions/currency"
         },
         "value": {
-          "type": "integer",
+          "type": "number",
           "description": "The total value of this transaction.",
           "weight": 6,
           "title": "Value"
@@ -63,7 +63,7 @@
         "dateModified": {
           "format": "date-time",
           "type": "string",
-          "description": "When information about this transaction was last updated.",
+          "description": "The date and time when information about this transaction was last updated.",
           "weight": 25,
           "title": "Last modified"
         }
@@ -99,14 +99,14 @@
         },
         "documentType": {
           "type": ["string","null"],
-          "description": "A document category. For example, 'Application Form', 'Photo' or 'Project Report'. In future, 360 Giving will provide a codelist of document types.",
+          "description": "A document category. For example, 'Application Form', 'Photo' or 'Project Report'. In future, 360Giving will provide a codelist of document types.",
           "weight": 0.8,
           "title": "Document Type"
         },
         "dateModified": {
           "format": "date-time",
           "type": "string",
-          "description": "What was this information last modified?",
+          "description": "The date and time when information about this document was last updated.",
           "weight": 25,
           "title": "Last modified"
         }
@@ -167,7 +167,7 @@
         "dateModified": {
           "format": "date-time",
           "type": "string",
-          "description": "The date when location information was last modified.",
+          "description": "The date and time when information about this location was last updated.",
           "weight": 25,
           "title": "Last modified"
         }
@@ -210,7 +210,7 @@
         "dateModified": {
           "format": "date-time",
           "type": "string",
-          "description": "-",
+          "description": "The date and time when the information was last updated",
           "weight": 25,
           "title": "Last modified"
         }
@@ -247,7 +247,7 @@
                "dateModified": {
                  "format": "date-time",
                  "type": "string",
-                 "description": "-",
+                 "description": "The date and time when information about this grant programme was last updated.",
                  "weight": 25,
                  "title": "Last modified"
                }
@@ -277,7 +277,7 @@
         },
         "contactName": {
           "type": "string",
-          "description": "-",
+          "description": "The contact person at this organisation.",
           "weight": 2,
           "title": "Contact Name"
         },
@@ -323,7 +323,7 @@
           "weight": 3.4,
           "title": "Postal Code"
         },
-        "telephone":{
+        "telephone": {
          "type":"string",
          "description":"Contact phone number.",
          "weight":3.5,
@@ -337,7 +337,7 @@
         },
       "email": {
           "type": "string",
-          "description": "-",
+          "description": "The email address for this organisation.",
           "weight": 5,
           "title": "Email"
         },
@@ -373,7 +373,7 @@
         "dateModified": {
           "format": "date-time",
           "type": "string",
-          "description": "-",
+          "description": "The date and time when information about this organisation was last updated.",
           "weight": 25,
           "title": "Last modified"
         }
@@ -420,18 +420,18 @@
          "dateModified": {
               "format": "date-time",
               "type": "string",
-              "description": "-",
+              "description": "The date and time when information about this event was last updated.",
               "weight": 25,
               "title": "Last modified"
             }
       }
     }
   },
-  "required":["id","title","description","currency","amountAwarded","awardDate"],
+  "required":["id","title","description","currency","amountAwarded","awardDate", "recipientOrganization", "fundingOrganization"],
   "properties": {
     "id": {
       "type": "string",
-      "description": "The unique identifier for this grant. Made up of your 360 Giving prefix, and an identifier from your records. See the [360Giving Grant identifier guidance](http://www.threesixtygiving.org/standard/identifiers/#toc-grant-identifier) for details.",
+      "description": "The unique identifier for this grant. Made up of your 360Giving prefix, and an identifier from your records. See the [360Giving Grant identifier guidance](http://www.threesixtygiving.org/standard/identifiers/#toc-grant-identifier) for details.",
       "weight": 0.001,
       "title": "Identifier"
     },
@@ -448,8 +448,7 @@
       "title": "Description"
     },
     "currency": {
-      "$ref": "#/definitions/currency",
-      "description":"The currency used in grant amounts and transactions using an ISO 3-Digit code. Use GBP for Pounds Sterling."
+      "$ref": "#/definitions/currency"
     },
     "amountAppliedFor": {
       "type": "number",
@@ -506,6 +505,7 @@
       "items": {
         "$ref": "#/definitions/Organization"
       },
+      "minItems": 1,
       "type": "array",
       "weight": 5,
       "title": "Recipient Org",
@@ -517,7 +517,6 @@
         "$ref": "#/definitions/Location"
       },
       "type": "array",
-      "description": "Beneficiary locations",
       "weight": 6.01,
       "title": "Beneficiary Location",
       "description":"Information about the location of beneficiaries. Further information about beneficiaries can be provided through classifications.",
@@ -527,6 +526,7 @@
       "items": {
         "$ref": "#/definitions/Organization"
       },
+      "minItems": 1,
       "type": "array",
       "description": "Details of the funder",
       "weight": 4,
@@ -583,8 +583,7 @@
       },
       "type": "array",
       "description": "-",
-      "weight": 5.02,
-      "title": "Amount applied for"
+      "weight": 5.02
     },
     "commitmentTransaction": {
       "items": {
@@ -592,8 +591,7 @@
       },
       "type": "array",
       "description": "-",
-      "weight": 5.02,
-      "title": "Amount awarded"
+      "weight": 5.02
     },
     "disbursementTransaction": {
          "items": {
@@ -601,8 +599,7 @@
          },
          "type": "array",
          "description": "-",
-         "weight": 5,
-         "title": "Amount paid out"
+         "weight": 5
        },
     "relatedActivity": {
       "type": "array",
@@ -616,7 +613,7 @@
     "dateModified": {
       "format": "date-time",
       "type": "string",
-      "description": "The date when information on this grant was last updated",
+      "description": "The date and time when information about this grant was last updated.",
       "weight": 25,
       "title": "Last modified"
     },
