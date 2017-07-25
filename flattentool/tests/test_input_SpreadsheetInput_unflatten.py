@@ -21,6 +21,7 @@ ROOT_ID_TITLES = {
     'custom': 'Custom'
 }
 
+
 def inject_root_id(root_id, d):
     """
     Insert the appropriate root id, with the given value, into the dictionary d and return.
@@ -279,6 +280,30 @@ testdata = [
         }],
         []
     ),
+# We should be able to handle numbers as column headings
+    (
+        'Non-string column headings',
+        [OrderedDict([
+            (1, 'A'),
+            (2, 'AA'),
+            ('3', 'AAA'),
+            ('4', 'AAAA'),
+            (Decimal('2.2'), 'B'),
+            (2.3, 'C'),
+            (False, 'D'),
+        ])],
+        [{
+            '2.2': 'B',
+            '2.3': 'C',
+            'False': 'D',
+        }],
+        [
+            'Column "1" has been ignored because it is a number.',
+            'Column "2" has been ignored because it is a number.',
+            'Column "3" has been ignored because it is a number.',
+            'Column "4" has been ignored because it is a number.',
+        ]
+    )
 ]
 
 # Test cases that require our schema aware JSON pointer logic, so must be run

@@ -58,10 +58,6 @@ CSV files for you, populated with the data from the input JSON file.
 .. csv-table:: sheet: tab_dish.csv
    :file: ../examples/flatten/simple/expected/tab_dish.csv
 
-.. csv-table:: sheet: dish.csv
-   :file: ../examples/flatten/simple/expected/dish.csv
-   :header-rows: 1
-
 .. caution ::
 
    If you forget the `--root-list-path` option and your data isn't under a top
