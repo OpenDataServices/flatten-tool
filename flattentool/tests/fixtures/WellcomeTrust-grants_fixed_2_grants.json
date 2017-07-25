@@ -26,6 +26,7 @@
             ], 
             "Surname of applicant": "Addison", 
             "Grant number": "105177/Z/14/Z", 
+            "amountAwarded": 152505, 
             "recipientOrganization": [
                 {
                     "addressLocality": "London", 
@@ -70,6 +71,7 @@
             ], 
             "Surname of applicant": "Sandell", 
             "Grant number": "105182/Z/14/Z", 
+            "amountAwarded": 178990, 
             "Grant type": "Large Arts Awards", 
             "Full name of applicant": "Prof Richard Sandell", 
             "awardDate": "24/07/2014"

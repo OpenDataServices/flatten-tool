@@ -1,12 +1,22 @@
-import xml.etree.ElementTree as ET
+try:
+    import lxml.etree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+from warnings import warn
+from flattentool.exceptions import DataErrorWarning
 
 
 def child_to_xml(parent_el, tagname, child):
     if hasattr(child, 'items'):
-        parent_el.append(dict_to_xml(child, tagname))
+        child_el = dict_to_xml(child, tagname)
+        if child_el is not None:
+            parent_el.append(child_el)
     else:
         if tagname.startswith('@'):
-            parent_el.attrib[tagname[1:]] = str(child)
+            try:
+                parent_el.attrib[tagname[1:]] = str(child)
+            except ValueError as e:
+                warn(str(e), DataErrorWarning)
         elif tagname == 'text()':
             parent_el.text = str(child)
         else:
@@ -14,7 +24,12 @@ def child_to_xml(parent_el, tagname, child):
 
 
 def dict_to_xml(data, tagname):
-    el = ET.Element(tagname)
+    try:
+        el = ET.Element(tagname)
+    except ValueError as e:
+        warn(str(e), DataErrorWarning)
+        return
+
     for k, v in data.items():
         if type(v) == list:
             for item in v:

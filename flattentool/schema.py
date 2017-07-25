@@ -18,6 +18,11 @@ def get_property_type_set(property_schema_dict):
         return set(property_type)
 
 
+def make_sub_sheet_name(parent_path, property_name):
+    return ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
+
+
+
 class TitleLookup(UserDict):
     property_name = None
 
@@ -159,8 +164,7 @@ class SchemaParser(object):
                         if title:
                             title_lookup[title].property_name = property_name
 
-                        sub_sheet_name = ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
-
+                        sub_sheet_name = make_sub_sheet_name(parent_path, property_name) 
                         #self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
