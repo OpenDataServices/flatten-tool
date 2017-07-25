@@ -232,17 +232,19 @@ testdata = [
         [OrderedDict([
             ('ROOT_ID', 1),
             ('id', 2),
-            ('newtest/0/a', 3),
-            ('newtest', 4),
+            ('nest/newtest/0/a', 3),
+            ('nest/newtest', 4),
         ])],
         [{
             'ROOT_ID': 1,
             'id': 2,
-            'newtest': [{
-                'a': 3
-            }]
+            'nest': {
+                'newtest': [{
+                    'a': 3
+                }]
+            }
         }],
-        ['Column newtest has been ignored, because another column treats it as an array or object']
+        ['Column nest/newtest has been ignored, because another column treats it as an array or object']
     ),
     (
         'object / str mixing',

@@ -577,7 +577,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 # xml can have an object/array that also has a text value
                 warn(
                     'Column {} has been ignored, because another column treats it as an array or object'.format(
-                        path, path_till_now, current_type),
+                        path_till_now),
                     DataErrorWarning)
                 continue
 
