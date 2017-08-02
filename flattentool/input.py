@@ -549,8 +549,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 if current_type and current_type != 'array':
                     raise ValueError("There is an array at '{}' when the schema says there should be a '{}'".format(path_till_now, current_type))
                 list_index = int(next_path_item)
+                current_type = 'array'
 
-            if isint(next_path_item) or current_type == 'array':
+            if current_type == 'array':
                 list_as_dict = current_path.get(path_item)
                 if list_as_dict is None:
                     list_as_dict = ListAsDict()
@@ -564,7 +565,10 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     new_path = OrderedDict()
                     list_as_dict[list_index] = new_path
                 current_path = new_path
-                continue
+                if not xml or num < len(path_list)-2:
+                    # In xml "arrays" can have text values, if they're the final element
+                    # This corresponds to a tag with text, but also possibly attributes
+                    continue
 
             ## Object
             if current_type == 'object' or (not current_type and next_path_item):
@@ -578,7 +582,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     break
                 current_path = new_path
                 continue
-            if current_type and current_type != 'object' and next_path_item:
+            if current_type and current_type not in ['object', 'array'] and next_path_item:
                 raise ValueError("There is an object or list at '{}' but it should be an {}".format(path_till_now, current_type))
 
             ## Other Types
@@ -607,7 +611,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     if path_item.startswith('@'):
                         current_path[path_item] = cell
                     else:
-                        if path_item not in current_path:
+                        if current_type == 'array':
+                            current_path['text()'] = cell
+                        elif path_item not in current_path:
                             current_path[path_item] = {'text()': cell}
                         else:
                             current_path[path_item]['text()'] = cell
