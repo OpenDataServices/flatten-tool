@@ -54,4 +54,8 @@ def dict_to_xml(data, tagname, toplevel=True, nsmap=None):
 
 
 def toxml(data):
-    return ET.tostring(dict_to_xml(data, 'iati-activities', nsmap={}))
+    nsmap = {
+        # This is "bound by definition" - see https://www.w3.org/XML/1998/namespace
+        'xml': 'http://www.w3.org/XML/1998/namespace'
+    }
+    return ET.tostring(dict_to_xml(data, 'iati-activities', nsmap=nsmap))
