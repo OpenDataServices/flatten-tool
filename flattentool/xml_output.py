@@ -21,7 +21,7 @@ def child_to_xml(parent_el, tagname, child, toplevel=False, nsmap=None):
             try:
                 attr_name = tagname[1:]
                 if USING_LXML and ':' in attr_name:
-                    attr_name = '{' + nsmap[attr_name.split(':', 1)[0]] + '}' + attr_name.split(':', 1)[1]
+                    attr_name = '{' + nsmap.get(attr_name.split(':', 1)[0], '') + '}' + attr_name.split(':', 1)[1]
                 parent_el.attrib[attr_name] = str(child)
             except ValueError as e:
                 warn(str(e), DataErrorWarning)
@@ -34,7 +34,7 @@ def child_to_xml(parent_el, tagname, child, toplevel=False, nsmap=None):
 def dict_to_xml(data, tagname, toplevel=True, nsmap=None):
     if USING_LXML and ':' in tagname and not toplevel:
         print(tagname)
-        tagname = '{' + nsmap[tagname.split(':', 1)[0]] + '}' + tagname.split(':', 1)[1]
+        tagname = '{' + nsmap.get(tagname.split(':', 1)[0], '') + '}' + tagname.split(':', 1)[1]
     try:
         if USING_LXML:
             el = ET.Element(tagname, nsmap=nsmap)
