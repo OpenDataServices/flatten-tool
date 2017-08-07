@@ -1,5 +1,7 @@
 try:
     import lxml.etree as ET
+    # If we're using lxml we have to do some extra work to support namespaces,
+    # so we have a variable to check whether we're using lxml:
     USING_LXML = True
 except ImportError:
     import xml.etree.ElementTree as ET
