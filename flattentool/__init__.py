@@ -130,6 +130,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     else:
         base = OrderedDict()
 
+    base_configuration = {}
 
     cell_source_map_data = OrderedDict()
     heading_source_map_data = OrderedDict()
@@ -144,7 +145,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             convert_titles=convert_titles,
             vertical_orientation=metatab_vertical_orientation,
             id_name=id_name,
-            xml=xml
+            xml=xml,
+            use_configuration=False
         )
         if metatab_schema:
             parser = SchemaParser(schema_filename=metatab_schema)
@@ -163,6 +165,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             ## strip off meta/ from start of source map as actually data is at top level
             heading_source_map_data[key[5:]] = value
 
+        base_configuration = spreadsheet_input.sheet_configuration.get(metatab_name) or base_configuration
+
         if result:
             base.update(result[0])
 
@@ -177,7 +181,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             exclude_sheets=[metatab_name],
             vertical_orientation=vertical_orientation,
             id_name=id_name,
-            xml=xml
+            xml=xml,
+            base_configuration=base_configuration
         )
         if schema:
             parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
