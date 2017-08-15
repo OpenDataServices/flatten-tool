@@ -1198,3 +1198,17 @@ def test_commands_single_sheet_default(tmpdir):
     unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
 
     assert unflattened == {'main': [{'actual': 'other', 'headings': 'headings', 'some': 'some'}, {'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_ignore(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_ignore.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}

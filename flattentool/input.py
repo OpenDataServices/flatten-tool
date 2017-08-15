@@ -490,6 +490,9 @@ class XLSXInput(SpreadsheetInput):
             sheet_configuration = {}
 
         skip_rows = sheet_configuration.get("skipRows", 0)
+        if sheet_configuration.get("ignore"):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
 
         if self.vertical_orientation:
             return [cell.value for cell in worksheet.columns[skip_rows][configuration_line:]]
@@ -497,6 +500,7 @@ class XLSXInput(SpreadsheetInput):
         try:
             return [cell.value for cell in worksheet.rows[skip_rows + configuration_line]]
         except IndexError:
+            # If the heading line is after data in the spreadsheet. i.e when skipRows
             return []
 
     def get_sheet_configuration(self, sheet_name):

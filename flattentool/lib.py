@@ -13,4 +13,6 @@ def parse_sheet_configuration(configuration_list):
             configuration['skipRows'] = max(int(parts[1]), 0)
         if (len(parts) == 2 and parts[0].lower() == "headerrows" and isint(parts[1])):
             configuration['headerRows'] = max(int(parts[1]), 1)
+        if (len(parts) == 1 and parts[0].lower() == "ignore"):
+            configuration['ignore'] = True
     return configuration
