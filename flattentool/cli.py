@@ -100,6 +100,13 @@ def create_parser():
         help="File format of input file or directory.",
         required=True)
     parser_unflatten.add_argument(
+        "--xml",
+        action='store_true',
+        help="Use XML as the output format")
+    parser_unflatten.add_argument(
+        "--id-name",
+        help="String to use for the identifier key, defaults to 'id'")
+    parser_unflatten.add_argument(
         "-b", "--base-json",
         help="A base json file to populate with the unflattened data.")
     parser_unflatten.add_argument(
@@ -130,6 +137,27 @@ def create_parser():
         "--convert-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_unflatten.add_argument(
+        "--vertical-orientation",
+        action='store_true',
+        help="Read spreadsheet so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--metatab-name",
+        help="If supplied will assume there is a metadata tab with the given name")
+    parser_unflatten.add_argument(
+        "--metatab-schema",
+        help="The jsonschema of the metadata tab")
+    parser_unflatten.add_argument(
+        "--metatab-only",
+        action='store_true',
+        help="Parse the metatab and nothing else")
+    parser_unflatten.add_argument(
+        "--metatab-vertical-orientation",
+        action='store_true',
+        help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--default-configuration",
+        help="Comma seperated list of default parsing commands for all sheets. Only for XLSX not CSV")
 
     return parser
 

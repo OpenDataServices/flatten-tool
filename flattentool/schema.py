@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from collections import OrderedDict
 from six.moves import UserDict
+from six import text_type
 import jsonref
 from warnings import warn
 from flattentool.sheet import Sheet
@@ -17,18 +18,26 @@ def get_property_type_set(property_schema_dict):
         return set(property_type)
 
 
+def make_sub_sheet_name(parent_path, property_name):
+    return ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
+
+
+
 class TitleLookup(UserDict):
     property_name = None
 
     def lookup_header(self, title_header):
-        return self.lookup_header_list(title_header.split(':'))
+        if type(title_header) == text_type:
+            return self.lookup_header_list(title_header.split(':'))
+        else:
+            return title_header
 
     def lookup_header_list(self, title_header_list):
         first_title = title_header_list[0]
         remaining_titles = title_header_list[1:]
         try:
             int(first_title)
-            return first_title + '/' + self.lookup_header_list(remaining_titles)
+            return first_title + ('/' + self.lookup_header_list(remaining_titles) if remaining_titles else '')
         except ValueError:
             pass
 
@@ -155,8 +164,7 @@ class SchemaParser(object):
                         if title:
                             title_lookup[title].property_name = property_name
 
-                        sub_sheet_name = ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
-
+                        sub_sheet_name = make_sub_sheet_name(parent_path, property_name) 
                         #self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:

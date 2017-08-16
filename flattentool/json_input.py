@@ -10,7 +10,7 @@ import six
 import copy
 from collections import OrderedDict
 from decimal import Decimal
-from flattentool.schema import SchemaParser
+from flattentool.schema import SchemaParser, make_sub_sheet_name
 from flattentool.input import path_search
 from flattentool.sheet import Sheet
 from warnings import warn
@@ -153,7 +153,7 @@ class JSONParser(object):
                                 if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
-                    sub_sheet_name = key
+                    sub_sheet_name = make_sub_sheet_name(parent_name, key) 
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
 

@@ -8,7 +8,7 @@ from os.path import join, getsize
 from six import text_type
 
 
-def test_cafe_examples_in_docs():
+def test_examples_in_docs():
 
     with open('examples/receipt/source-map/expected.json', 'rb') as fp:
         expected = fp.read()
@@ -68,7 +68,14 @@ def test_cafe_examples_in_docs():
                 elif os.path.exists(join(root, 'expected.json')):
                     with open(join(root, 'expected.json'), 'rb') as fstdout:
                         expected_stdout = fstdout.read()
-                assert _strip(actual_stdout) == _strip(expected_stdout), "Different stdout: {}".format(cmds)
+                elif os.path.exists(join(root, 'expected.xml')):
+                    with open(join(root, 'expected.xml'), 'rb') as fstdout:
+                        expected_stdout = fstdout.read()
+                if 'help' in root:
+                    # Ignore whitespace differences for help messages
+                    assert b' '.join(actual_stdout.split()) == b' '.join(expected_stdout.split())
+                else:
+                    assert _strip(actual_stdout) == _strip(expected_stdout), "Different stdout: {}".format(cmds)
                 expected_stderr = b''
                 if os.path.exists(join(root, 'expected_stderr.json')):
                     with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
@@ -83,9 +90,9 @@ def test_cafe_examples_in_docs():
                 tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 32
+        assert tests_passed == 35
     else:
-        assert tests_passed == 33
+        assert tests_passed == 36
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
@@ -105,4 +112,4 @@ def _strip(output):
 
 # Useful for a coverage check - see developer docs for how to run the check
 if __name__ == '__main__':
-    test_cafe_examples_in_docs()
+    test_examples_in_docs()

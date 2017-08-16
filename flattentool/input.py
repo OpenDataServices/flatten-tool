@@ -17,6 +17,7 @@ import datetime
 import pytz
 from openpyxl.utils import _get_column_letter, column_index_from_string
 from flattentool.exceptions import DataErrorWarning
+from flattentool.lib import isint, parse_sheet_configuration
 
 
 class Cell:
@@ -85,6 +86,10 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
         return text_type(value)
+    elif type_string == 'date':
+        if type(value) == datetime.datetime:
+            return value.date().isoformat()
+        return text_type(value)
     elif type_string == '':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
@@ -116,7 +121,7 @@ def merge(base, mergee, debug_info=None):
             else:
                 base_value = base[key].cell_value
                 if base_value != value:
-                    id_info = 'id "{}"'.format(debug_info.get('id'))
+                    id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
                     warn(
@@ -128,6 +133,7 @@ def merge(base, mergee, debug_info=None):
         else:
             # This happens when a parent record finds the first a child record of a known type
             base[key] = v
+
 
 class SpreadsheetInput(object):
     """
@@ -150,14 +156,35 @@ class SpreadsheetInput(object):
             else:
                 yield d
 
-    def __init__(self, input_name='', root_list_path='main', timezone_name='UTC', root_id='ocid', convert_titles=False):
+    def __init__(self,
+                 input_name='',
+                 root_list_path='main',
+                 timezone_name='UTC',
+                 root_id='ocid',
+                 convert_titles=False,
+                 vertical_orientation=False,
+                 include_sheets=[],
+                 exclude_sheets=[],
+                 id_name='id',
+                 xml=False,
+                 base_configuration={},
+                 use_configuration=True
+                ):
         self.input_name = input_name
         self.root_list_path = root_list_path
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
         self.convert_titles = convert_titles
+        self.id_name = id_name
+        self.xml = xml
         self.parser = None
+        self.vertical_orientation = vertical_orientation
+        self.include_sheets = include_sheets
+        self.exclude_sheets = exclude_sheets
+        self.base_configuration = base_configuration or {}
+        self.sheet_configuration = {}
+        self.use_configuration = use_configuration
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -166,6 +193,13 @@ class SpreadsheetInput(object):
                     self.parser.sub_sheets[sub_sheet_name].title_lookup if sub_sheet_name in self.parser.sub_sheets else None)
             else:
                 yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
+
+    def configure_sheets(self):
+        for sub_sheet_name in self.sub_sheet_names:
+            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name)) 
+
+    def get_sheet_configuration(self, sheet_name):
+        return []
 
     def get_sheet_lines(self, sheet_name):
         raise NotImplementedError
@@ -183,6 +217,9 @@ class SpreadsheetInput(object):
             sheet_name, lines = sheet
             try:
                 actual_headings = self.get_sheet_headings(sheet_name)
+                # If sheet is empty or too many lines have been skipped
+                if not actual_headings:
+                    continue
                 found = OrderedDict()
                 last_col = len(actual_headings)
                 # We want to ignore data in earlier columns, so we look
@@ -244,17 +281,27 @@ class SpreadsheetInput(object):
                 root_id_or_none = line.get(self.root_id) if self.root_id else None
                 cells = OrderedDict()
                 for k, header in enumerate(line):
-                    if actual_headings:
-                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, actual_headings[k]))
+                    heading = actual_headings[k] if actual_headings else header
+                    if self.vertical_orientation:
+                        # This is misleading as it specifies the row number as the distance vertically
+                        # and the horizontal 'letter' as a number.
+                        # https://github.com/OpenDataServices/flatten-tool/issues/153
+                        cells[header] = Cell(line[header], (sheet_name, str(k+1), j+2, heading))
                     else:
-                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, header))
-                unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone)
+                        cells[header] = Cell(line[header], (sheet_name, _get_column_letter(k+1), j+2, heading))
+                unflattened = unflatten_main_with_parser(self.parser, cells, self.timezone, self.xml, self.id_name)
                 if root_id_or_none not in main_sheet_by_ocid:
-                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict('id')
+                    main_sheet_by_ocid[root_id_or_none] = TemporaryDict(self.id_name, xml=self.xml)
                 def inthere(unflattened, id_name):
-                    return unflattened[id_name].cell_value
-                if 'id' in unflattened and inthere(unflattened, 'id') in main_sheet_by_ocid[root_id_or_none]:
-                    unflattened_id = unflattened.get('id').cell_value
+                    if self.xml:
+                        return unflattened[id_name]['text()'].cell_value
+                    else:
+                        return unflattened[id_name].cell_value
+                if self.id_name in unflattened and inthere(unflattened, self.id_name) in main_sheet_by_ocid[root_id_or_none]:
+                    if self.xml:
+                        unflattened_id = unflattened.get(self.id_name)['text()'].cell_value
+                    else:
+                        unflattened_id = unflattened.get(self.id_name).cell_value
                     merge(
                         main_sheet_by_ocid[root_id_or_none][unflattened_id],
                         unflattened,
@@ -262,7 +309,8 @@ class SpreadsheetInput(object):
                             'sheet_name': sheet_name,
                             'root_id': self.root_id,
                             'root_id_or_none': root_id_or_none,
-                            'id': unflattened_id
+                            'id_name': self.id_name,
+                            self.id_name: unflattened_id
                         }
                     )
                 else:
@@ -275,40 +323,46 @@ class SpreadsheetInput(object):
         result = extract_list_to_value(result)
         return result
 
-    def fancy_unflatten(self):
+    def fancy_unflatten(self, with_cell_source_map, with_heading_source_map):
         cell_tree = self.do_unflatten()
         result = extract_list_to_value(cell_tree)
-        cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
-        ordered_items = sorted(cell_source_map.items())
-        ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
-        row_source_map = OrderedDict()
-        heading_source_map = OrderedDict()
-        for path, _ in ordered_items:
-            cells = cell_source_map[path]
-            # Prepare row_source_map key
-            key = '/'.join(str(x) for x in path[:-1])
-            if not key in row_source_map:
-                row_source_map[key] = []
-            # Prepeare header_source_map key
-            header_path_parts = []
-            for x in path:
-                try:
-                    int(x)
-                except:
-                    header_path_parts.append(x)
-            header_path = '/'.join(header_path_parts)
-            if header_path not in heading_source_map:
-                heading_source_map[header_path] = []
-            # Populate the row and header source maps
-            for cell in cells:
-                sheet, col, row, header = cell
-                if (sheet, row) not in row_source_map[key]:
-                    row_source_map[key].append((sheet, row))
-                if (sheet, header) not in heading_source_map[header_path]:
-                    heading_source_map[header_path].append((sheet, header))
-        for key in row_source_map:
-            assert key not in ordered_cell_source_map, 'Row/cell collision: {}'.format(key)
-            ordered_cell_source_map[key] = row_source_map[key]
+        ordered_cell_source_map = None
+        heading_source_map = None
+        if with_cell_source_map or with_heading_source_map:
+            cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
+            ordered_items = sorted(cell_source_map.items())
+            row_source_map = OrderedDict()
+            heading_source_map = OrderedDict()
+            for path, _ in ordered_items:
+                cells = cell_source_map[path]
+                # Prepare row_source_map key
+                key = '/'.join(str(x) for x in path[:-1])
+                if not key in row_source_map:
+                    row_source_map[key] = []
+                if with_heading_source_map:
+                    # Prepeare header_source_map key
+                    header_path_parts = []
+                    for x in path:
+                        try:
+                            int(x)
+                        except:
+                            header_path_parts.append(x)
+                    header_path = '/'.join(header_path_parts)
+                    if header_path not in heading_source_map:
+                        heading_source_map[header_path] = []
+                # Populate the row and header source maps
+                for cell in cells:
+                    sheet, col, row, header = cell
+                    if (sheet, row) not in row_source_map[key]:
+                        row_source_map[key].append((sheet, row))
+                    if with_heading_source_map:
+                        if (sheet, header) not in heading_source_map[header_path]:
+                            heading_source_map[header_path].append((sheet, header))
+        if with_cell_source_map:
+            ordered_cell_source_map = OrderedDict(( '/'.join(str(x) for x in path), location) for path, location in ordered_items)
+            for key in row_source_map:
+                assert key not in ordered_cell_source_map, 'Row/cell collision: {}'.format(key)
+                ordered_cell_source_map[key] = row_source_map[key]
         return result, ordered_cell_source_map, heading_source_map
 
 def extract_list_to_error_path(path, input):
@@ -382,7 +436,18 @@ class CSVInput(SpreadsheetInput):
 
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
-        self.sub_sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
+        sheet_names = sorted([fname[:-4] for fname in sheet_file_names if fname.endswith('.csv')])
+        if self.include_sheets:
+            for sheet in list(sheet_names):
+                if sheet not in self.include_sheets:
+                    sheet_names.remove(sheet)
+        for sheet in list(self.exclude_sheets) or []:
+            try:
+                sheet_names.remove(sheet)
+            except ValueError:
+                pass
+        self.sub_sheet_names = sheet_names
+        self.configure_sheets()
 
     def get_sheet_lines(self, sheet_name):
         if sys.version > '3':  # If Python 3 or greater
@@ -404,18 +469,70 @@ class XLSXInput(SpreadsheetInput):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
         self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.get_sheet_names())
+        if self.include_sheets:
+            for sheet in list(self.sheet_names_map):
+                if sheet not in self.include_sheets:
+                    self.sheet_names_map.pop(sheet)
+        for sheet in self.exclude_sheets or []:
+            self.sheet_names_map.pop(sheet, None)
 
-        sheet_names = list(self.sheet_names_map.keys())
+        sheet_names = list(sheet for sheet in self.sheet_names_map.keys())
         self.sub_sheet_names = sheet_names
+        self.configure_sheets()
 
     def get_sheet_headings(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
-        return [cell.value for cell in worksheet.rows[0]]
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if sheet_configuration.get("ignore"):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
+
+        if self.vertical_orientation:
+            return [cell.value for cell in worksheet.columns[skip_rows][configuration_line:]]
+
+        try:
+            return [cell.value for cell in worksheet.rows[skip_rows + configuration_line]]
+        except IndexError:
+            # If the heading line is after data in the spreadsheet. i.e when skipRows
+            return []
+
+    def get_sheet_configuration(self, sheet_name):
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        if worksheet.rows[0][0].value == '#':
+            return [cell.value for num, cell in enumerate(worksheet.rows[0]) if num != 0 and cell.value]
+        else:
+            return []
 
     def get_sheet_lines(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+
+
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
-        header_row = worksheet.rows[0]
-        remaining_rows = worksheet.rows[1:]
+        if self.vertical_orientation:
+            header_row = worksheet.columns[skip_rows]
+            remaining_rows = worksheet.columns[skip_rows + header_rows:]
+            if configuration_line:
+                header_row = header_row[1:]
+                remaining_rows = [row[1:] for row in remaining_rows]
+        else:
+            header_row = worksheet.rows[skip_rows + configuration_line]
+            remaining_rows = worksheet.rows[skip_rows + configuration_line + header_rows:]
+
         coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
         for row in remaining_rows:
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
@@ -427,52 +544,53 @@ FORMATS = {
 }
 
 
-def isint(string):
-    try:
-        int(string)
-        return True
-    except ValueError:
-        return False
 
 class ListAsDict(dict):
     pass
 
-def list_as_dicts_to_temporary_dicts(unflattened):
+def list_as_dicts_to_temporary_dicts(unflattened, id_name, xml):
     for key, value in list(unflattened.items()):
         if isinstance(value, Cell):
             continue
         if hasattr(value, 'items'):
             if not value:
                 unflattened.pop(key)
-            list_as_dicts_to_temporary_dicts(value)
+            list_as_dicts_to_temporary_dicts(value, id_name, xml)
         if isinstance(value, ListAsDict):
-            temporarydict = TemporaryDict("id")
+            temporarydict = TemporaryDict(id_name, xml=xml)
             for index in sorted(value.keys()):
                 temporarydict.append(value[index])
             unflattened[key] = temporarydict
     return unflattened
 
 
-def unflatten_main_with_parser(parser, line, timezone):
+def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
     unflattened = OrderedDict()
     for path, cell in line.items():
         # Skip blank cells
         if cell.cell_value is None or cell.cell_value == '':
             continue
         current_path = unflattened
-        path_list = [item.rstrip('[]') for item in path.split('/')]
+        path_list = [item.rstrip('[]') for item in text_type(path).split('/')]
         for num, path_item in enumerate(path_list):
             if isint(path_item):
+                if num == 0:
+                    warn('Column "{}" has been ignored because it is a number.'.format(path), DataErrorWarning)
                 continue
-            path_till_now = '/'.join([item for item in path_list[:num+1] if not isint(item)])
+            current_type = None
+            path_till_now = '/'.join([item for item in path_list[:num + 1] if not isint(item)])
             if parser:
                 current_type = parser.flattened.get(path_till_now)
-            else:
-                current_type = None
             try:
-                next_path_item = path_list[num+1]
+                next_path_item = path_list[num + 1]
             except IndexError:
                 next_path_item = ''
+
+            # Quick solution to avoid casting of date as datetinme in spreadsheet > xml
+            if xml:
+                if type(cell.cell_value) == datetime.datetime and not next_path_item:
+                    if 'datetime' not in path:
+                        current_type = 'date'
 
             ## Array
             list_index = -1
@@ -480,8 +598,9 @@ def unflatten_main_with_parser(parser, line, timezone):
                 if current_type and current_type != 'array':
                     raise ValueError("There is an array at '{}' when the schema says there should be a '{}'".format(path_till_now, current_type))
                 list_index = int(next_path_item)
+                current_type = 'array'
 
-            if isint(next_path_item) or current_type == 'array':
+            if current_type == 'array':
                 list_as_dict = current_path.get(path_item)
                 if list_as_dict is None:
                     list_as_dict = ListAsDict()
@@ -495,7 +614,10 @@ def unflatten_main_with_parser(parser, line, timezone):
                     new_path = OrderedDict()
                     list_as_dict[list_index] = new_path
                 current_path = new_path
-                continue
+                if not xml or num < len(path_list)-2:
+                    # In xml "arrays" can have text values, if they're the final element
+                    # This corresponds to a tag with text, but also possibly attributes
+                    continue
 
             ## Object
             if current_type == 'object' or (not current_type and next_path_item):
@@ -509,17 +631,45 @@ def unflatten_main_with_parser(parser, line, timezone):
                     break
                 current_path = new_path
                 continue
-            if current_type and current_type != 'object' and next_path_item:
+            if current_type and current_type not in ['object', 'array'] and next_path_item:
                 raise ValueError("There is an object or list at '{}' but it should be an {}".format(path_till_now, current_type))
 
             ## Other Types
+            current_path_value = current_path.get(path_item)
+            if not xml and (type(current_path_value) is ListAsDict or hasattr(current_path_value, 'items')):
+                #   ^
+                # xml can have an object/array that also has a text value
+                warn(
+                    'Column {} has been ignored, because another column treats it as an array or object'.format(
+                        path_till_now),
+                    DataErrorWarning)
+                continue
+
             value = cell.cell_value
             converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != '':
-                current_path[path_item] = cell
+                if xml:
+                    # For XML we want to support text and attributes at the
+                    # same level, e.g.
+                    # <my-element a="b">some text</my-element>
+                    # which we represent in a dict as:
+                    # {"@a":"b", "text()": "some text"}
+                    # To ensure we can attach attributes everywhere, all
+                    # element text must be added as a dict with a `text()` key.
+                    if path_item.startswith('@'):
+                        current_path[path_item] = cell
+                    else:
+                        if current_type == 'array':
+                            current_path['text()'] = cell
+                        elif path_item not in current_path:
+                            current_path[path_item] = {'text()': cell}
+                        else:
+                            current_path[path_item]['text()'] = cell
+                else:
+                    current_path[path_item] = cell
 
-    unflattened = list_as_dicts_to_temporary_dicts(unflattened)
+    unflattened = list_as_dicts_to_temporary_dicts(unflattened, id_name, xml)
     return unflattened
 
 
@@ -536,7 +686,7 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, to
         if parent_field.endswith('[]'):
             parent_field = parent_field[:-2]
         if parent_field not in nested_dict:
-            nested_dict[parent_field] = TemporaryDict(keyfield='id', top_sheet=top_sheet)
+            nested_dict[parent_field] = TemporaryDict(keyfield=id_name, top_sheet=top_sheet, xml=xml)
         sub_sheet_id = id_fields.get(path+'/id')
         if sub_sheet_id not in nested_dict[parent_field]:
             nested_dict[parent_field][sub_sheet_id] = {}
@@ -556,21 +706,28 @@ def path_search(nested_dict, path_list, id_fields=None, path=None, top=False, to
 
 
 class TemporaryDict(UserDict):
-    def __init__(self, keyfield, top_sheet=False):
+    def __init__(self, keyfield, top_sheet=False, xml=False):
         self.keyfield = keyfield
         self.items_no_keyfield = []
         self.data = OrderedDict()
         self.top_sheet = top_sheet
+        self.xml = xml
 
     def __repr__(self):
         return 'TemporaryDict(keyfield={}, items_no_keyfield={}, data={})'.format(repr(self.keyfield), repr(self.items_no_keyfield), repr(self.data))
 
     def append(self, item):
         if self.keyfield in item:
-            if isinstance(item[self.keyfield], Cell):
-                key = item[self.keyfield].cell_value
+            if self.xml:
+                if isinstance(item[self.keyfield]['text()'], Cell):
+                    key = item[self.keyfield]['text()'].cell_value
+                else:
+                    key = item[self.keyfield]['text()']
             else:
-                key = item[self.keyfield]
+                if isinstance(item[self.keyfield], Cell):
+                    key = item[self.keyfield].cell_value
+                else:
+                    key = item[self.keyfield]
             if key not in self.data:
                 self.data[key] = item
             else:

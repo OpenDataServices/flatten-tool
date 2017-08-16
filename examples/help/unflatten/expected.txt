@@ -1,9 +1,15 @@
-usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [-b BASE_JSON]
-                              [-m ROOT_LIST_PATH] [-e ENCODING]
+usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
+                              [-b BASE_JSON] [-m ROOT_LIST_PATH] [-e ENCODING]
                               [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
                               [-a HEADING_SOURCE_MAP]
                               [--timezone-name TIMEZONE_NAME] [-r ROOT_ID]
                               [-s SCHEMA] [--convert-titles]
+                              [--vertical-orientation]
+                              [--metatab-name METATAB_NAME]
+                              [--metatab-schema METATAB_SCHEMA]
+                              [--metatab-only]
+                              [--metatab-vertical-orientation]
+                              [--default-configuration DEFAULT_CONFIGURATION]
                               input_name
 
 positional arguments:
@@ -13,6 +19,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -f INPUT_FORMAT, --input-format INPUT_FORMAT
                         File format of input file or directory.
+  --xml                 Use XML as the output format
+  --id-name ID_NAME     String to use for the identifier key, defaults to 'id'
   -b BASE_JSON, --base-json BASE_JSON
                         A base json file to populate with the unflattened
                         data.
@@ -40,3 +48,20 @@ optional arguments:
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.
   --convert-titles      Convert titles. Requires a schema to be specified.
+  --vertical-orientation
+                        Read spreadsheet so that headings are in the first
+                        column and data is read vertically. Only for XLSX not
+                        CSV
+  --metatab-name METATAB_NAME
+                        If supplied will assume there is a metadata tab with
+                        the given name
+  --metatab-schema METATAB_SCHEMA
+                        The jsonschema of the metadata tab
+  --metatab-only        Parse the metatab and nothing else
+  --metatab-vertical-orientation
+                        Read metatab so that headings are in the first column
+                        and data is read vertically. Only for XLSX not CSV
+  --default-configuration DEFAULT_CONFIGURATION
+                        Comma seperated list of default parsing commands for
+                        all sheets. Only for XLSX not CSV
+

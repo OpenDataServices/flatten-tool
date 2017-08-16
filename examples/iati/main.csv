@@ -1,0 +1,3 @@
+iati-identifier,reporting-org/@ref,reporting-org/@type,reporting-org/narrative,participating-org/@role,participating-org/@ref,activity-status/@code,activity-date/@type,activity-date/@iso-date,recipient-country/0/@code,recipient-country/0/@percentage,recipient-country/1/@code,recipient-country/1/@percentage,title/narrative,description/narrative
+AA-AAA-123456789-ABC123,AA-AAA-123456789,40,Organisation name,1,AA-AAA-123456789,2,1,2011-10-01,AF,40,XK,60,A title,A description
+AA-AAA-123456789-ABC124,AA-AAA-123456789,40,Organisation name,1,AA-AAA-123456789,3,2,2016-01-01,AG,30,XK,70,Another title,Another description

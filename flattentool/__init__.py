@@ -3,6 +3,9 @@ from flattentool.json_input import JSONParser
 from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS
+from flattentool.xml_output import toxml
+from flattentool.lib import parse_sheet_configuration
+import sys
 import json
 import codecs
 from decimal import Decimal
@@ -106,7 +109,12 @@ def decimal_default(o):
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path='main', encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
-              heading_source_map=None, **_):
+              heading_source_map=None, id_name='id', xml=False,
+              vertical_orientation=False,
+              metatab_name=None, metatab_only=False, metatab_schema='',
+              metatab_vertical_orientation=False,
+              default_configuration='',
+              **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
 
@@ -115,32 +123,101 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         raise Exception('You must specify an input format (may autodetect in future')
     elif input_format not in INPUT_FORMATS:
         raise Exception('The requested format is not available')
+    if metatab_name and base_json:
+        raise Exception('Not allowed to use base_json with metatab')
 
-    spreadsheet_input_class = INPUT_FORMATS[input_format]
-    spreadsheet_input = spreadsheet_input_class(
-        input_name=input_name,
-        timezone_name=timezone_name,
-        root_list_path=root_list_path,
-        root_id=root_id,
-        convert_titles=convert_titles)
-    if schema:
-        parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
-        parser.parse()
-        spreadsheet_input.parser = parser
-    spreadsheet_input.encoding = encoding
-    spreadsheet_input.read_sheets()
     if base_json:
         with open(base_json) as fp:
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
         base = OrderedDict()
-    result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten()
-    base[root_list_path] = list(result)
-    if output_name is None:
-        print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
+
+
+    base_configuration = parse_sheet_configuration(
+        [item.strip() for item in default_configuration.split(",")]
+    )
+
+    cell_source_map_data = OrderedDict()
+    heading_source_map_data = OrderedDict()
+
+    if metatab_name:
+        spreadsheet_input_class = INPUT_FORMATS[input_format]
+        spreadsheet_input = spreadsheet_input_class(
+            input_name=input_name,
+            timezone_name=timezone_name,
+            root_list_path='meta',
+            include_sheets=[metatab_name],
+            convert_titles=convert_titles,
+            vertical_orientation=metatab_vertical_orientation,
+            id_name=id_name,
+            xml=xml,
+            use_configuration=False
+        )
+        if metatab_schema:
+            parser = SchemaParser(schema_filename=metatab_schema)
+            parser.parse()
+            spreadsheet_input.parser = parser
+        spreadsheet_input.encoding = encoding
+        spreadsheet_input.read_sheets()
+        result, cell_source_map_data_meta, heading_source_map_data_meta = spreadsheet_input.fancy_unflatten(
+            with_cell_source_map=cell_source_map,
+            with_heading_source_map=heading_source_map,
+        )
+        for key, value in (cell_source_map_data_meta or {}).items():
+            ## strip off meta/0/ from start of source map as actually data is at top level
+            cell_source_map_data[key[7:]] = value
+        for key, value in (heading_source_map_data_meta or {}).items():
+            ## strip off meta/ from start of source map as actually data is at top level
+            heading_source_map_data[key[5:]] = value
+
+        base_configuration = spreadsheet_input.sheet_configuration.get(metatab_name) or base_configuration
+
+        if result:
+            base.update(result[0])
+
+    if not metatab_only:
+        spreadsheet_input_class = INPUT_FORMATS[input_format]
+        spreadsheet_input = spreadsheet_input_class(
+            input_name=input_name,
+            timezone_name=timezone_name,
+            root_list_path=root_list_path,
+            root_id=root_id,
+            convert_titles=convert_titles,
+            exclude_sheets=[metatab_name],
+            vertical_orientation=vertical_orientation,
+            id_name=id_name,
+            xml=xml,
+            base_configuration=base_configuration
+        )
+        if schema:
+            parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
+            parser.parse()
+            spreadsheet_input.parser = parser
+        spreadsheet_input.encoding = encoding
+        spreadsheet_input.read_sheets()
+        result, cell_source_map_data_main, heading_source_map_data_main = spreadsheet_input.fancy_unflatten(
+            with_cell_source_map=cell_source_map,
+            with_heading_source_map=heading_source_map,
+        )
+        cell_source_map_data.update(cell_source_map_data_main or {})
+        heading_source_map_data.update(heading_source_map_data_main or {})
+        base[root_list_path] = list(result)
+
+    if xml:
+        if output_name is None:
+            if sys.version > '3':
+                sys.stdout.buffer.write(toxml(base))
+            else:
+                sys.stdout.write(toxml(base))
+        else:
+            with codecs.open(output_name, 'wb') as fp:
+                fp.write(toxml(base))
     else:
-        with codecs.open(output_name, 'w', encoding='utf-8') as fp:
-            json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
+        if output_name is None:
+            print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
+        else:
+            with codecs.open(output_name, 'w', encoding='utf-8') as fp:
+                json.dump(base, fp, indent=4, default=decimal_default, ensure_ascii=False)
     if cell_source_map:
         with codecs.open(cell_source_map, 'w', encoding='utf-8') as fp:
             json.dump(cell_source_map_data, fp, indent=4, default=decimal_default, ensure_ascii=False)

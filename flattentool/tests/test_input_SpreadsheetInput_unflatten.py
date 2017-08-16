@@ -21,6 +21,7 @@ ROOT_ID_TITLES = {
     'custom': 'Custom'
 }
 
+
 def inject_root_id(root_id, d):
     """
     Insert the appropriate root id, with the given value, into the dictionary d and return.
@@ -227,6 +228,42 @@ testdata = [
         }],
         ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.']
     ),
+    (
+        'array / str mixing',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('nest/newtest/0/a', 3),
+            ('nest/newtest', 4),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': [{
+                    'a': 3
+                }]
+            }
+        }],
+        ['Column nest/newtest has been ignored, because another column treats it as an array or object']
+    ),
+    (
+        'object / str mixing',
+        [OrderedDict([
+            ('ROOT_ID', 1),
+            ('id', 2),
+            ('newtest/a', 3),
+            ('newtest', 4),
+        ])],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': {
+                'a': 3
+            }
+        }],
+        ['Column newtest has been ignored, because another column treats it as an array or object']
+    ),
 # Previously this caused the error: KeyError('ocid',)
 # Now it works, but probably not as intended
 # The missing Root ID should be picked up in schema validation
@@ -243,6 +280,30 @@ testdata = [
         }],
         []
     ),
+# We should be able to handle numbers as column headings
+    (
+        'Non-string column headings',
+        [OrderedDict([
+            (1, 'A'),
+            (2, 'AA'),
+            ('3', 'AAA'),
+            ('4', 'AAAA'),
+            (Decimal('2.2'), 'B'),
+            (2.3, 'C'),
+            (False, 'D'),
+        ])],
+        [{
+            '2.2': 'B',
+            '2.3': 'C',
+            'False': 'D',
+        }],
+        [
+            'Column "1" has been ignored because it is a number.',
+            'Column "2" has been ignored because it is a number.',
+            'Column "3" has been ignored because it is a number.',
+            'Column "4" has been ignored because it is a number.',
+        ]
+    )
 ]
 
 # Test cases that require our schema aware JSON pointer logic, so must be run

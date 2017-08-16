@@ -1036,3 +1036,196 @@ def test_unflatten_xslx_unicode(tmpdir):
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
     assert reloaded_json == {'main': [{'ocid': 1 if sys.version > '3' else '1', 'id': 'éαГ😼𝒞人'}]}
+
+def test_metatab(tmpdir):
+    tmpdir.join('metatab_schema.json').write(
+        '{"properties": {}}' 
+    )
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('meta_unflattened.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True,
+        metatab_schema = tmpdir.join('metatab_schema.json').strpath,
+        cell_source_map=tmpdir.join('meta_cell_source_map.json').strpath,
+        heading_source_map=tmpdir.join('meta_heading_source_map.json').strpath,
+        )
+
+    metatab_json = json.load(tmpdir.join('meta_unflattened.json'))
+
+    assert metatab_json == {'a': 'a1',
+                             'b': 'b1',
+                             'c': 'c1',
+                             'main': [{'colA': 'cell1', 'colB': 'cell2'},
+                                      {'colA': 'cell3', 'colB': 'cell4'},
+                                      {'colC': 'cell5', 'colD': 'cell6'},
+                                      {'colC': 'cell7', 'colD': 'cell8'}]}
+
+
+    cell_source_map = json.load(tmpdir.join('meta_cell_source_map.json'))
+
+    assert cell_source_map ==  {'': [['Meta', 2]],
+                                'a': [['Meta', '1', 2, 'a']],
+                                'b': [['Meta', '2', 2, 'b']],
+                                'c': [['Meta', '3', 2, 'c']],
+                                'main/0': [['main', 2]],
+                                'main/0/colA': [['main', 'A', 2, 'colA']],
+                                'main/0/colB': [['main', 'B', 2, 'colB']],
+                                'main/1': [['main', 3]],
+                                'main/1/colA': [['main', 'A', 3, 'colA']],
+                                'main/1/colB': [['main', 'B', 3, 'colB']],
+                                'main/2': [['subsheet', 2]],
+                                'main/2/colC': [['subsheet', 'A', 2, 'colC']],
+                                'main/2/colD': [['subsheet', 'B', 2, 'colD']],
+                                'main/3': [['subsheet', 3]],
+                                'main/3/colC': [['subsheet', 'A', 3, 'colC']],
+                                'main/3/colD': [['subsheet', 'B', 3, 'colD']]}
+
+    heading_source_map = json.load(tmpdir.join('meta_heading_source_map.json'))
+
+    assert heading_source_map == {'a': [['Meta', 'a']],
+                                  'b': [['Meta', 'b']],
+                                  'c': [['Meta', 'c']],
+                                  'main/colA': [['main', 'colA']],
+                                  'main/colB': [['main', 'colB']],
+                                  'main/colC': [['subsheet', 'colC']],
+                                  'main/colD': [['subsheet', 'colD']]}
+
+def test_metatab_only(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('meta_unflattened.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True,
+        metatab_only=True,
+        cell_source_map=tmpdir.join('meta_cell_source_map.json').strpath,
+        heading_source_map=tmpdir.join('meta_heading_source_map.json').strpath,
+        )
+
+    metatab_json = json.load(tmpdir.join('meta_unflattened.json'))
+
+    assert metatab_json == {'a': 'a1',
+                            'b': 'b1',
+                            'c': 'c1'}
+
+
+    cell_source_map = json.load(tmpdir.join('meta_cell_source_map.json'))
+
+    assert cell_source_map ==  {'': [['Meta', 2]],
+                                'a': [['Meta', '1', 2, 'a']],
+                                'b': [['Meta', '2', 2, 'b']],
+                                'c': [['Meta', '3', 2, 'c']]}
+
+    heading_source_map = json.load(tmpdir.join('meta_heading_source_map.json'))
+
+    assert heading_source_map == {'a': [['Meta', 'a']],
+                                  'b': [['Meta', 'b']],
+                                  'c': [['Meta', 'c']]}
+
+def test_metatab_with_base(tmpdir):
+    tmpdir.join('base_json.json').write(
+        '{}' 
+    )
+
+    with pytest.raises(Exception):
+        unflatten(
+            'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+            input_format='xlsx',
+            output_name=tmpdir.join('meta_unflattened.json').strpath,
+            metatab_name='Meta',
+            metatab_vertical_orientation=True,
+            base_json = tmpdir.join('base_json.json').strpath,
+            )
+
+def test_bad_format(tmpdir):
+    with pytest.raises(Exception):
+        unflatten(
+            'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+            input_format='what',
+            output_name=tmpdir.join('meta_unflattened.json').strpath,
+            )
+
+    with pytest.raises(Exception):
+        unflatten(
+            'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+            input_format=None,
+            output_name=tmpdir.join('meta_unflattened.json').strpath,
+            )
+
+def test_commands_single_sheet(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_in_file.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_metatab(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_in_metatab.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_metatab_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_metatab_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_metatab_heading_source_map.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True
+        )
+
+    unflattened = json.load(tmpdir.join('command_metatab_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
+                           'some': 'data'}
+
+def test_commands_single_sheet_default(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_defaulted.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        default_configuration="SkipRows 1, headerrows 2",
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_defaulted.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        default_configuration="SkipRows 1",
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'other', 'headings': 'headings', 'some': 'some'}, {'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_ignore(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_ignore.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
