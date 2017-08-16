@@ -17,6 +17,7 @@ import datetime
 import pytz
 from openpyxl.utils import _get_column_letter, column_index_from_string
 from flattentool.exceptions import DataErrorWarning
+from flattentool.lib import isint, parse_sheet_configuration
 
 
 class Cell:
@@ -133,6 +134,7 @@ def merge(base, mergee, debug_info=None):
             # This happens when a parent record finds the first a child record of a known type
             base[key] = v
 
+
 class SpreadsheetInput(object):
     """
     Base class describing a spreadsheet input. Has stubs which are
@@ -164,7 +166,9 @@ class SpreadsheetInput(object):
                  include_sheets=[],
                  exclude_sheets=[],
                  id_name='id',
-                 xml=False
+                 xml=False,
+                 base_configuration={},
+                 use_configuration=True
                 ):
         self.input_name = input_name
         self.root_list_path = root_list_path
@@ -178,6 +182,9 @@ class SpreadsheetInput(object):
         self.vertical_orientation = vertical_orientation
         self.include_sheets = include_sheets
         self.exclude_sheets = exclude_sheets
+        self.base_configuration = base_configuration or {}
+        self.sheet_configuration = {}
+        self.use_configuration = use_configuration
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -186,6 +193,13 @@ class SpreadsheetInput(object):
                     self.parser.sub_sheets[sub_sheet_name].title_lookup if sub_sheet_name in self.parser.sub_sheets else None)
             else:
                 yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
+
+    def configure_sheets(self):
+        for sub_sheet_name in self.sub_sheet_names:
+            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name)) 
+
+    def get_sheet_configuration(self, sheet_name):
+        return []
 
     def get_sheet_lines(self, sheet_name):
         raise NotImplementedError
@@ -203,6 +217,9 @@ class SpreadsheetInput(object):
             sheet_name, lines = sheet
             try:
                 actual_headings = self.get_sheet_headings(sheet_name)
+                # If sheet is empty or too many lines have been skipped
+                if not actual_headings:
+                    continue
                 found = OrderedDict()
                 last_col = len(actual_headings)
                 # We want to ignore data in earlier columns, so we look
@@ -430,6 +447,7 @@ class CSVInput(SpreadsheetInput):
             except ValueError:
                 pass
         self.sub_sheet_names = sheet_names
+        self.configure_sheets()
 
     def get_sheet_lines(self, sheet_name):
         if sys.version > '3':  # If Python 3 or greater
@@ -460,23 +478,60 @@ class XLSXInput(SpreadsheetInput):
 
         sheet_names = list(sheet for sheet in self.sheet_names_map.keys())
         self.sub_sheet_names = sheet_names
+        self.configure_sheets()
 
     def get_sheet_headings(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if sheet_configuration.get("ignore"):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
 
         if self.vertical_orientation:
-            return [cell.value for cell in worksheet.columns[0]]
+            return [cell.value for cell in worksheet.columns[skip_rows][configuration_line:]]
 
-        return [cell.value for cell in worksheet.rows[0]]
+        try:
+            return [cell.value for cell in worksheet.rows[skip_rows + configuration_line]]
+        except IndexError:
+            # If the heading line is after data in the spreadsheet. i.e when skipRows
+            return []
+
+    def get_sheet_configuration(self, sheet_name):
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        if worksheet.rows[0][0].value == '#':
+            return [cell.value for num, cell in enumerate(worksheet.rows[0]) if num != 0 and cell.value]
+        else:
+            return []
 
     def get_sheet_lines(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+
+
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         if self.vertical_orientation:
-            header_row = worksheet.columns[0]
-            remaining_rows = worksheet.columns[1:]
+            header_row = worksheet.columns[skip_rows]
+            remaining_rows = worksheet.columns[skip_rows + header_rows:]
+            if configuration_line:
+                header_row = header_row[1:]
+                remaining_rows = [row[1:] for row in remaining_rows]
         else:
-            header_row = worksheet.rows[0]
-            remaining_rows = worksheet.rows[1:]
+            header_row = worksheet.rows[skip_rows + configuration_line]
+            remaining_rows = worksheet.rows[skip_rows + configuration_line + header_rows:]
 
         coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
         for row in remaining_rows:
@@ -489,12 +544,6 @@ FORMATS = {
 }
 
 
-def isint(string):
-    try:
-        int(string)
-        return True
-    except ValueError:
-        return False
 
 class ListAsDict(dict):
     pass

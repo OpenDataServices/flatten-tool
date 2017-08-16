@@ -4,6 +4,7 @@ from flattentool.output import FORMATS as OUTPUT_FORMATS
 from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.xml_output import toxml
+from flattentool.lib import parse_sheet_configuration
 import sys
 import json
 import codecs
@@ -112,6 +113,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               vertical_orientation=False,
               metatab_name=None, metatab_only=False, metatab_schema='',
               metatab_vertical_orientation=False,
+              default_configuration='',
               **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -131,6 +133,10 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         base = OrderedDict()
 
 
+    base_configuration = parse_sheet_configuration(
+        [item.strip() for item in default_configuration.split(",")]
+    )
+
     cell_source_map_data = OrderedDict()
     heading_source_map_data = OrderedDict()
 
@@ -144,7 +150,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             convert_titles=convert_titles,
             vertical_orientation=metatab_vertical_orientation,
             id_name=id_name,
-            xml=xml
+            xml=xml,
+            use_configuration=False
         )
         if metatab_schema:
             parser = SchemaParser(schema_filename=metatab_schema)
@@ -163,6 +170,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             ## strip off meta/ from start of source map as actually data is at top level
             heading_source_map_data[key[5:]] = value
 
+        base_configuration = spreadsheet_input.sheet_configuration.get(metatab_name) or base_configuration
+
         if result:
             base.update(result[0])
 
@@ -177,7 +186,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             exclude_sheets=[metatab_name],
             vertical_orientation=vertical_orientation,
             id_name=id_name,
-            xml=xml
+            xml=xml,
+            base_configuration=base_configuration
         )
         if schema:
             parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)

@@ -1138,3 +1138,77 @@ def test_bad_format(tmpdir):
             input_format=None,
             output_name=tmpdir.join('meta_unflattened.json').strpath,
             )
+
+def test_commands_single_sheet(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_in_file.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_metatab(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_in_metatab.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_metatab_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_metatab_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_metatab_heading_source_map.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True
+        )
+
+    unflattened = json.load(tmpdir.join('command_metatab_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
+                           'some': 'data'}
+
+def test_commands_single_sheet_default(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_defaulted.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        default_configuration="SkipRows 1, headerrows 2",
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_defaulted.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        default_configuration="SkipRows 1",
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'other', 'headings': 'headings', 'some': 'some'}, {'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_ignore(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_ignore.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        )
+
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
