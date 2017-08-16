@@ -38,6 +38,7 @@ To resolve the $ref entries in the schema, the whole schema is passed through
 TODO: Extra columns
 '''
 
+from __future__ import unicode_literals
 from collections import OrderedDict
 from decimal import Decimal
 import warnings
