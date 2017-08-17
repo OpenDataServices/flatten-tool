@@ -278,6 +278,166 @@ testdata = [
         ['Column newtest has been ignored, because another column treats it as an array or object'],
         False
     ),
+    (
+        'Mismatch of object/array for field not in schema (multiline)',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/a', 3),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/0/a', 4),
+            ]),
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': {
+                    'a': 3,
+                }
+            }
+        }],
+        ['Column nest/newtest/0/a has been ignored, because it treats newtest as an array, but another column does not'],
+        False
+    ),
+# Previously this caused the error: TypeError: unorderable types: str() < int()
+# Now one of the columns is ignored
+    (
+        'Mismatch of array/object for field not in schema (multiline)',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/0/a', 4),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/a', 3),
+            ])
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': [
+                {'a': 4}
+            ]
+        }],
+        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not'],
+        False
+    ),
+# Previously this caused the error: 'Cell' object has no attribute 'get'
+# Now one of the columns is ignored
+    (
+        'str / array mixing multiline',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest', 3),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/0/a', 4),
+                ('nest/newtest/0/b', 5),
+            ]),
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': 3
+            }
+        }],
+        [
+            'Column nest/newtest/0/a has been ignored, because it treats newtest as an array, but another column does not',
+            'Column nest/newtest/0/b has been ignored, because it treats newtest as an array, but another column does not',
+        ],
+        False
+    ),
+    (
+        'array / str mixing multiline',
+        # same as above, but with rows switched
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/0/a', 4),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest', 3),
+            ]),
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': [
+                    {'a': 4}
+                ]
+            }
+        }],
+        ['Column nest/newtest has been ignored, because another column treats it as an array or object'],
+        False
+    ),
+# WARNING: Conflict when merging field "newtest" for id "2" in sheet custom_main: "3" 
+    (
+        'str / object mixing multiline',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest', 3),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/a', 4),
+                ('newtest/b', 5),
+            ])
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': 3
+        }],
+        [
+            'Column newtest/a has been ignored, because it treats newtest as an object, but another column does not',
+            'Column newtest/b has been ignored, because it treats newtest as an object, but another column does not',
+        ],
+        False
+    ),
+    (
+        'object / str mixing multiline',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/a', 4),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest', 3),
+            ])
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': {
+                'a': 4
+            }
+        }],
+        ['Column newtest has been ignored, because another column treats it as an array or object'],
+        False
+    ),
 # Previously this caused the error: KeyError('ocid',)
 # Now it works, but probably not as intended
 # The missing Root ID should be picked up in schema validation
