@@ -149,7 +149,7 @@ class SpreadsheetInput(object):
 
         """
         if self.parser:
-            title_lookup = title_lookup or self.parser.title_lookup
+            title_lookup = self.parser.title_lookup
         for d in dicts:
             if title_lookup:
                 yield OrderedDict([(title_lookup.lookup_header(k), v) for k,v in d.items()])
