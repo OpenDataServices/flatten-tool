@@ -6,6 +6,8 @@ Tests that only apply for multiple sheets.
 """
 from __future__ import unicode_literals
 from .test_input_SpreadsheetInput import ListInput
+from .test_input_SpreadsheetInput_unflatten import ROOT_ID_PARAMS, create_schema, inject_root_id
+from flattentool.schema import SchemaParser
 from decimal import Decimal
 from collections import OrderedDict
 import sys
@@ -14,7 +16,6 @@ import openpyxl
 import datetime
 from six import text_type
 
-from .test_input_SpreadsheetInput_unflatten import ROOT_ID_PARAMS, create_schema, inject_root_id
 
 testdata_multiplesheets = [
     (
@@ -362,16 +363,14 @@ testdata_multiplesheets = [
 
 
 
-from flattentool.schema import SchemaParser
-
-@pytest.mark.xfail
-def test_with_schema():
-    spreadsheet_input = ListInput(
-        sheets={
+testdata_pointer = [
+    (
+        'with schema',
+        {
             'custom_main': [
                 {
                     'ROOT_ID': 1,
-                    'id': 2,
+                    'id': '2',
                     'testA': 3
                 }
             ],
@@ -382,38 +381,19 @@ def test_with_schema():
                     'testR/testB': 4 # test that we can infer this an array from schema
                 }
             ]
-        }
-        )
-    spreadsheet_input.read_sheets()
-
-    parser = SchemaParser(
-        root_schema_dict={
-            'properties': {
-                'id': {
-                    'type': 'string',
-                },
-                'testR': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'object'
-                    }
-                },
-            }
         },
-        root_id='ROOT_ID',
-        rollup=True
+        [{
+            'ROOT_ID': 1,
+            'id': 2, # check that we join correctly when this gets converted to an
+                     # integer because of the schema type
+            'testA': 3,
+            'testR': [{
+                'testB': '4'
+            }]
+        }],
+        []
     )
-    parser.parse()
-    spreadsheet_input.parser = parser
-    assert list(spreadsheet_input.unflatten()) == [{
-        'ROOT_ID': 1,
-        'id': '2', # check that we join correctly when this gets converted to a
-                   # string because of the schema type
-        'testA': 3,
-        'testR': [{
-            'testB': 4
-        }]
-    }]
+]
 
 
 @pytest.mark.parametrize('convert_titles', [True, False])
@@ -441,3 +421,10 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_di
         inject_root_id(root_id, expected_output_dict) for expected_output_dict in expected_output_list
     ]
     assert list(spreadsheet_input.unflatten()) == expected_output_list
+
+
+@pytest.mark.parametrize('convert_titles', [True, False])
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+@pytest.mark.parametrize('comment,input_dict,expected_output_list,warning_messages', testdata_pointer)
+def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_dict, expected_output_list, recwarn, comment, warning_messages):
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_dict=input_dict, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages, reversible=False)
