@@ -26,16 +26,20 @@ def inject_root_id(root_id, d):
     """
     Insert the appropriate root id, with the given value, into the dictionary d and return.
     """
-    d = copy.copy(d)
-    if 'ROOT_ID' in d:
-        if root_id != '':
-            d.update({root_id: d['ROOT_ID']})
-        del d['ROOT_ID']
-    if 'ROOT_ID_TITLE' in d:
-        if root_id != '':
-            d.update({ROOT_ID_TITLES[root_id]: d['ROOT_ID_TITLE']})
-        del d['ROOT_ID_TITLE']
-    return d
+    new_d = type(d)()
+    for k, v in d.items():
+        if k == 'ROOT_ID':
+            if root_id == '':
+                continue
+            else:
+                k = root_id
+        elif k == 'ROOT_ID_TITLE':
+            if root_id == '':
+                continue
+            else:
+                k = ROOT_ID_TITLES[root_id]
+        new_d[k] = v
+    return new_d
 
 
 UNICODE_TEST_STRING = 'éαГ😼𝒞人'
