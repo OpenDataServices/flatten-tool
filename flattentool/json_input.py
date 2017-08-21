@@ -140,7 +140,12 @@ class JSONParser(object):
                     if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
                         if len(value) == 1:
                             for k, v in value[0].items():
-                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+                                if self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
+                                    if type(v) in BASIC_TYPES:
+                                        flattened_dict[sheet_key_title(sheet, parent_name+key+'/0/'+k)] = v
+                                    else:
+                                        raise ValueError('Rolled up values must be basic types')
+                                elif not self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     if type(v) in BASIC_TYPES:
                                         flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     else:

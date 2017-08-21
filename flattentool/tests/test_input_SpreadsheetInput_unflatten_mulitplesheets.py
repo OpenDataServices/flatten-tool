@@ -31,16 +31,16 @@ testdata_multiplesheets = [
                     'id': 3,
                 }
             ],
-            'testR': [
+            'testArr': [
                 {
                     'ROOT_ID': 1,
                     'id': 2,
-                    'testR/0/testC': '3',
+                    'testArr/0/testC': '3',
                 },
                 {
                     'ROOT_ID': 1,
                     'id': 2,
-                    'testR/0/testC': '4',
+                    'testArr/0/testC': '4',
                 }
             ]
         },
@@ -48,7 +48,7 @@ testdata_multiplesheets = [
             {
                 'ROOT_ID': 1,
                 'id': 2,
-                'testR': [
+                'testArr': [
                     {'testC': '3'},
                     {'testC': '4'},
                 ]
@@ -270,33 +270,33 @@ testdata_multiplesheets = [
                     'ROOT_ID': 1,
                     'id': 2,
                     'testC': 3,
-                    'testR/0/id': '4',
-                    'testR/0/testB': '5',
+                    'testArr/0/id': '4',
+                    'testArr/0/testB': '5',
                 },
                 {
                     'ROOT_ID': 6,
                     'id': 7,
                     'testC': 8,
-                    'testR/0/testB': '9',
+                    'testArr/0/testB': '9',
                 }
             ],
-            'testR': [
+            'testArr': [
                 {
                     'ROOT_ID': 1,
                     'id': 2,
-                    'testR/0/id': '4',
-                    'testR/0/testB': '5',
+                    'testArr/0/id': '4',
+                    'testArr/0/testB': '5',
                 },
                 {
                     'ROOT_ID': 6,
                     'id': 7,
-                    'testR/0/testB': '9',
+                    'testArr/0/testB': '9',
                 }
             ]
         },
         [
-            {'ROOT_ID': 1, 'id': 2, 'testC':3, 'testR': [{'id': '4', 'testB': '5'}]},
-            {'ROOT_ID': 6, 'id': 7, 'testC':8, 'testR': [
+            {'ROOT_ID': 1, 'id': 2, 'testC':3, 'testArr': [{'id': '4', 'testB': '5'}]},
+            {'ROOT_ID': 6, 'id': 7, 'testC':8, 'testArr': [
                 {'testB': '9'}, {'testB': '9'}
                 # We have duplicates here because there's no ID to merge these
                 # on. This is different to the old behaviour. Issue filed at
@@ -313,16 +313,16 @@ testdata_multiplesheets = [
                 {
                     'ROOT_ID': 1,
                     'id': 2,
-                    'testR/0/id': '3',
-                    'testR/0/testB': '4'
+                    'testArr/0/id': '3',
+                    'testArr/0/testB': '4'
                 }
             ]),
-            ('testR', [
+            ('testArr', [
                 {
                     'ROOT_ID': 1,
                     'id': 2,
-                    'testR/0/id': '3',
-                    'testR/0/testB': '5',
+                    'testArr/0/id': '3',
+                    'testArr/0/testB': '5',
                 }
             ])
         ]),
@@ -330,7 +330,7 @@ testdata_multiplesheets = [
             {
                 'ROOT_ID': 1,
                 'id': 2,
-                'testR': [{
+                'testArr': [{
                     'id': '3',
                     'testB': '4'
                     # (Since sheets are parsed in the order they appear, and the first value is used).
@@ -378,7 +378,7 @@ testdata_multiplesheets_pointer = [
                 {
                     'ROOT_ID': 1,
                     'id': 2,
-                    'testR/testB': 4 # test that we can infer this an array from schema
+                    'testArr/testB': 4 # test that we can infer this an array from schema
                 }
             ]
         },
@@ -387,7 +387,7 @@ testdata_multiplesheets_pointer = [
             'id': 2, # check that we join correctly when this gets converted to an
                      # integer because of the schema type
             'testA': 3,
-            'testR': [{
+            'testArr': [{
                 'testB': '4'
             }]
         }],
@@ -410,16 +410,16 @@ testdata_multiplesheets_titles = [
                     'Identifier': 3,
                 }
             ],
-            'testR': [
+            'testArr': [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:C title': '3',
+                    'Arr title:C title': '3',
                 },
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:C title': '4',
+                    'Arr title:C title': '4',
                 }
             ]
         },
@@ -427,7 +427,7 @@ testdata_multiplesheets_titles = [
             {
                 'ROOT_ID': 1,
                 'id': 2,
-                'testR': [
+                'testArr': [
                     {'testC': '3'},
                     {'testC': '4'},
                 ]
@@ -516,20 +516,20 @@ testdata_multiplesheets_titles = [
                     ('Identifier', 6),
                 ])
             ]),
-            ('testR', [
+            ('testArr', [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': '3',
-                    'R title:B title': '4',
+                    'Arr title:Identifier': '3',
+                    'Arr title:B title': '4',
                 }
             ]),
             ('tes_testNest', [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': '3',
-                    'R title:Nest title:D title': '5',
+                    'Arr title:Identifier': '3',
+                    'Arr title:Nest title:D title': '5',
                 }
             ])
         ]),
@@ -537,7 +537,7 @@ testdata_multiplesheets_titles = [
             OrderedDict([
                 ('ROOT_ID', 1),
                 ('id', 2),
-                ('testR', [
+                ('testArr', [
                     {
                         'id': '3',
                         'testB': '4',
@@ -566,16 +566,16 @@ testdata_multiplesheets_titles = [
                    'Identifier': 2,
                }
            ],
-           'testR': [
+           'testArr': [
                {
                    'ROOT_ID': 1,
                    'Identifier': 2,
-                   'R title:Identifier': '3',
-                   'R title:NestObj title:Identifier': '4',
+                   'Arr title:Identifier': '3',
+                   'Arr title:NestObj title:Identifier': '4',
                }
            ]
        },
-       [{'ROOT_ID': 1, 'id': 2, 'testR': [{'id': '3', 'testNestObj': {'id': '4'}}]}],
+       [{'ROOT_ID': 1, 'id': 2, 'testArr': [{'id': '3', 'testNestObj': {'id': '4'}}]}],
        [],
        True
    ),
@@ -592,20 +592,20 @@ testdata_multiplesheets_titles = [
                 {
                     'ROOT_ID': 1,
                     'Identifier': '',
-                    'R title:Identifier': 3,
-                    'R title:B title': 4,
+                    'Arr title:Identifier': 3,
+                    'Arr title:B title': 4,
                 },
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': 3,
-                    'R title:B title': 5,
+                    'Arr title:Identifier': 3,
+                    'Arr title:B title': 5,
                 }
             ]
         },
         [
-            {'ROOT_ID': 1, 'id': 2, 'testR': [{'id': '3', 'testB': '5'}]},
-            {'ROOT_ID': 1, 'testR': [{'id': '3', 'testB': '4'}]},
+            {'ROOT_ID': 1, 'id': 2, 'testArr': [{'id': '3', 'testB': '5'}]},
+            {'ROOT_ID': 1, 'testArr': [{'id': '3', 'testB': '4'}]},
         ],
         [],
         False
@@ -623,20 +623,20 @@ testdata_multiplesheets_titles = [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 100,
-                    'R title:Identifier': 3,
-                    'R title:B title': 4,
+                    'Arr title:Identifier': 3,
+                    'Arr title:B title': 4,
                 },
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': 3,
-                    'R title:B title': 5,
+                    'Arr title:Identifier': 3,
+                    'Arr title:B title': 5,
                 }
             ])
         ]),
         [
-            {'ROOT_ID': 1, 'id': 2, 'testR': [{'id': '3', 'testB': '5'}]},
-            {'ROOT_ID': 1, 'id': 100, 'testR': [{'id': '3', 'testB': '4'}]},
+            {'ROOT_ID': 1, 'id': 2, 'testArr': [{'id': '3', 'testB': '5'}]},
+            {'ROOT_ID': 1, 'id': 100, 'testArr': [{'id': '3', 'testB': '4'}]},
         ],
         [],
         False
@@ -649,33 +649,33 @@ testdata_multiplesheets_titles = [
                     'ROOT_ID': 1,
                     'Identifier': 2,
                     'A title': 3,
-                    'R title:Identifier': 4,
-                    'R title:B title': 5,
+                    'Arr title:Identifier': 4,
+                    'Arr title:B title': 5,
                 },
                 {
                     'ROOT_ID': 6,
                     'Identifier': 7,
                     'A title': 8,
-                    'R title:B title': 9,
+                    'Arr title:B title': 9,
                 }
             ],
-            'testR': [
+            'testArr': [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': 4,
-                    'R title:B title': 5,
+                    'Arr title:Identifier': 4,
+                    'Arr title:B title': 5,
                 },
                 {
                     'ROOT_ID': 6,
                     'Identifier': 7,
-                    'R title:B title': 9,
+                    'Arr title:B title': 9,
                 }
             ]
         },
         [
-            {'ROOT_ID': 1, 'id': 2, 'testA':3, 'testR': [{'id': '4', 'testB': '5'}]},
-            {'ROOT_ID': 6, 'id': 7, 'testA':8, 'testR': [
+            {'ROOT_ID': 1, 'id': 2, 'testA':3, 'testArr': [{'id': '4', 'testB': '5'}]},
+            {'ROOT_ID': 6, 'id': 7, 'testA':8, 'testArr': [
                 {'testB': '9'}, {'testB': '9'}
                 # We have duplicates here because there's no ID to merge these
                 # on. This is different to the old behaviour. Issue filed at
@@ -692,16 +692,16 @@ testdata_multiplesheets_titles = [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': '3',
-                    'R title:B title': '4'
+                    'Arr title:Identifier': '3',
+                    'Arr title:B title': '4'
                 }
             ]),
-            ('testR', [
+            ('testArr', [
                 {
                     'ROOT_ID': 1,
                     'Identifier': 2,
-                    'R title:Identifier': '3',
-                    'R title:B title': '5',
+                    'Arr title:Identifier': '3',
+                    'Arr title:B title': '5',
                 }
             ])
         ]),
@@ -709,7 +709,7 @@ testdata_multiplesheets_titles = [
             {
                 'ROOT_ID': 1,
                 'id': 2,
-                'testR': [{
+                'testArr': [{
                     'id': '3',
                     'testB': '4'
                     # (Since sheets are parsed in the order they appear, and the first value is used).

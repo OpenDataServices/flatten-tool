@@ -590,19 +590,15 @@ def create_schema(root_id):
                     }
                 }
             },
-            'testR': {
-                'title': 'R title',
+            'testArr': {
+                'title': 'Arr title',
                 'type': 'array',
-                'rollUp': ['id', 'testB'],
                 'items': {
                     'type': 'object',
                     'properties': {
                         'id': {
                             'title': 'Identifier',
                             'type': 'string',
-                            # 'type': 'integer',
-                            # integer does not work, as testB:integer is not
-                            # in the rollUp
                         },
                         'testB': {
                             'title': 'B title',
@@ -611,13 +607,6 @@ def create_schema(root_id):
                         'testC': {
                             'title': 'C title',
                             'type': 'string',
-                        },
-                        'testSA': {
-                            'title': 'SA title',
-                            'type': 'array',
-                            'items': {
-                                'type': 'string'
-                            }
                         },
                         'testNest': {
                             'title': 'Nest title',
@@ -648,6 +637,38 @@ def create_schema(root_id):
                                     'title': 'D title',
                                     'type': 'string',
                                 },
+                            }
+                        },
+                    }
+                }
+            },
+            'testR': {
+                'title': 'R title',
+                'type': 'array',
+                'rollUp': ['id', 'testB'],
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {
+                            'title': 'Identifier',
+                            'type': 'string',
+                            # 'type': 'integer',
+                            # integer does not work, as testB:integer is not
+                            # in the rollUp
+                        },
+                        'testB': {
+                            'title': 'B title',
+                            'type': 'string',
+                        },
+                        'testC': {
+                            'title': 'C title',
+                            'type': 'string',
+                        },
+                        'testSA': {
+                            'title': 'SA title',
+                            'type': 'array',
+                            'items': {
+                                'type': 'string'
                             }
                         },
                     }
