@@ -363,7 +363,7 @@ testdata_multiplesheets = [
 
 
 
-testdata_pointer = [
+testdata_multiplesheets_pointer = [
     (
         'with schema',
         {
@@ -392,6 +392,349 @@ testdata_pointer = [
             }]
         }],
         []
+    )
+]
+
+
+testdata_multiplesheets_titles = [
+    (
+        'Basic sub sheet',
+        {
+            'custom_main': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                },
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 3,
+                }
+            ],
+            'testR': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:C title': '3',
+                },
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:C title': '4',
+                }
+            ]
+        },
+        [
+            {
+                'ROOT_ID': 1,
+                'id': 2,
+                'testR': [
+                    {'testC': '3'},
+                    {'testC': '4'},
+                ]
+            },
+            {
+                'ROOT_ID': 1,
+                'id': 3
+            }
+        ],
+        [],
+        True
+    ),
+    (
+        'Nested sub sheet (with id)',
+        {
+            'custom_main': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'B title:Identifier': 3,
+                    'B title:C title': 4,
+                }
+            ],
+            'tes_subField': [
+                # It used to be neccesary to supply testA/id in this
+                # situation, but now it's optional
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'B title:Identifier': 3,
+                    'B title:Sub title:E title': 5,
+                }
+            ]
+        },
+        [
+            {'ROOT_ID': 1, 'id': 2, 'testB': {
+                'id': 3,
+                'testC': 4,
+                'subField': [{'testE': 5}]
+            }}
+        ],
+        [],
+        True
+    ),
+    (
+        'Nested sub sheet (without id)',
+        {
+            'custom_main': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'B title:Identifier': 3,
+                    'B title:C title': 4,
+                }
+            ],
+            'sub': [
+                # It used to be neccesary to supply testA/id in this
+                # situation, but now it's optional
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'B title:Sub title:E title': 5,
+                }
+            ]
+        },
+        [
+            {'ROOT_ID': 1, 'id': 2, 'testB': {
+                'id': 3,
+                'testC': 4,
+                'subField': [{'testE': 5}]
+            }}
+        ],
+        [],
+        False
+    ),
+    (
+        'Basic two sub sheets',
+        OrderedDict([
+            ('custom_main', [
+                OrderedDict([
+                    ('ROOT_ID', 1),
+                    ('Identifier', 2),
+                ]),
+                OrderedDict([
+                    ('ROOT_ID', 1),
+                    ('Identifier', 6),
+                ])
+            ]),
+            ('testR', [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': '3',
+                    'R title:B title': '4',
+                }
+            ]),
+            ('tes_testNest', [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': '3',
+                    'R title:Nest title:D title': '5',
+                }
+            ])
+        ]),
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('testR', [
+                    {
+                        'id': '3',
+                        'testB': '4',
+                        'testNest': [
+                            {
+                                'testD': '5'
+                            }
+                        ]
+                    }
+                ])
+            ]),
+            {
+                'ROOT_ID':1,
+                'id': 6
+            }
+        ],
+        [],
+        True
+    ),
+   (
+       'Nested id',
+        {
+           'custom_main': [
+               {
+                   'ROOT_ID': 1,
+                   'Identifier': 2,
+               }
+           ],
+           'testR': [
+               {
+                   'ROOT_ID': 1,
+                   'Identifier': 2,
+                   'R title:Identifier': '3',
+                   'R title:NestObj title:Identifier': '4',
+               }
+           ]
+       },
+       [{'ROOT_ID': 1, 'id': 2, 'testR': [{'id': '3', 'testNestObj': {'id': '4'}}]}],
+       [],
+       True
+   ),
+    (
+        'Missing columns',
+        {
+            'custom_main': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                }
+            ],
+            'sub': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': '',
+                    'R title:Identifier': 3,
+                    'R title:B title': 4,
+                },
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': 3,
+                    'R title:B title': 5,
+                }
+            ]
+        },
+        [
+            {'ROOT_ID': 1, 'id': 2, 'testR': [{'id': '3', 'testB': '5'}]},
+            {'ROOT_ID': 1, 'testR': [{'id': '3', 'testB': '4'}]},
+        ],
+        [],
+        False
+    ),
+    (
+        'Unmatched id',
+        OrderedDict([
+            ('custom_main', [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                }
+            ]),
+            ('sub', [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 100,
+                    'R title:Identifier': 3,
+                    'R title:B title': 4,
+                },
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': 3,
+                    'R title:B title': 5,
+                }
+            ])
+        ]),
+        [
+            {'ROOT_ID': 1, 'id': 2, 'testR': [{'id': '3', 'testB': '5'}]},
+            {'ROOT_ID': 1, 'id': 100, 'testR': [{'id': '3', 'testB': '4'}]},
+        ],
+        [],
+        False
+    ),
+    (
+        'Test same rollup',
+        {
+            'main': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'A title': 3,
+                    'R title:Identifier': 4,
+                    'R title:B title': 5,
+                },
+                {
+                    'ROOT_ID': 6,
+                    'Identifier': 7,
+                    'A title': 8,
+                    'R title:B title': 9,
+                }
+            ],
+            'testR': [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': 4,
+                    'R title:B title': 5,
+                },
+                {
+                    'ROOT_ID': 6,
+                    'Identifier': 7,
+                    'R title:B title': 9,
+                }
+            ]
+        },
+        [
+            {'ROOT_ID': 1, 'id': 2, 'testA':3, 'testR': [{'id': '4', 'testB': '5'}]},
+            {'ROOT_ID': 6, 'id': 7, 'testA':8, 'testR': [
+                {'testB': '9'}, {'testB': '9'}
+                # We have duplicates here because there's no ID to merge these
+                # on. This is different to the old behaviour. Issue filed at
+                # https://github.com/OpenDataServices/flatten-tool/issues/99
+            ]},
+        ],
+        [],
+        False
+    ),
+    (
+        'Test conflicting rollup',
+        OrderedDict([
+            ('main', [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': '3',
+                    'R title:B title': '4'
+                }
+            ]),
+            ('testR', [
+                {
+                    'ROOT_ID': 1,
+                    'Identifier': 2,
+                    'R title:Identifier': '3',
+                    'R title:B title': '5',
+                }
+            ])
+        ]),
+        [
+            {
+                'ROOT_ID': 1,
+                'id': 2,
+                'testR': [{
+                    'id': '3',
+                    'testB': '4'
+                    # (Since sheets are parsed in the order they appear, and the first value is used).
+                }]
+            }
+        ],
+        ['Conflict when merging field "testB" for ROOT_ID "1", id "2" in sheet testA: "4" != "5"'],
+        False
+    ),
+    (
+        'Unflatten empty',
+        {
+            'custom_main': [],
+            'subsheet': [
+                {
+                    'ROOT_ID': '',
+                    'Identifier': '',
+                    'A title': '',
+                    'U title': '',
+                }
+            ]
+        },
+        [],
+        [],
+        False
     )
 ]
 
@@ -425,6 +768,22 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_di
 
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,input_dict,expected_output_list,warning_messages', testdata_pointer)
+@pytest.mark.parametrize('comment,input_dict,expected_output_list,warning_messages', testdata_multiplesheets_pointer)
 def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_dict, expected_output_list, recwarn, comment, warning_messages):
     return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_dict=input_dict, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages, reversible=False)
+
+
+@pytest.mark.parametrize('comment,input_dict,expected_output_list,warning_messages,reversible', testdata_multiplesheets_titles)
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+def test_unflatten_titles(root_id, root_id_kwargs, input_dict, expected_output_list, recwarn, comment, warning_messages, reversible):
+    """
+    Essentially the same as test unflatten, except that convert_titles and
+    use_schema are always true, as both of these are needed to convert titles
+    properly. (and runs with different test data).
+    """
+    if root_id != '':
+        # Skip all tests with a root ID for now, as this is broken
+        # https://github.com/OpenDataServices/flatten-tool/issues/84
+        pytest.skip()
+    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_dict=input_dict, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages, reversible=reversible)
+

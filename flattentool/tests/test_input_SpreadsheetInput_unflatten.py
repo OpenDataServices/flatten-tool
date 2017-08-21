@@ -559,6 +559,10 @@ def create_schema(root_id):
                 'title': 'B title',
                 'type': 'object',
                 'properties': {
+                    'id': {
+                        'title': 'Identifier',
+                        'type': 'integer',
+                    },
                     'testC': {
                         'title': 'C title',
                         'type': 'integer',
@@ -566,6 +570,23 @@ def create_schema(root_id):
                     'testD': {
                         'title': 'D title',
                         'type': 'integer',
+                    },
+                    'subField': {
+                        'title': 'Sub title',
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'id': {
+                                    'title': 'Identifier',
+                                    'type': 'integer',
+                                },
+                                'testE': {
+                                    'title': 'E title',
+                                    'type': 'integer',
+                                },
+                            }
+                        }
                     }
                 }
             },
@@ -597,7 +618,38 @@ def create_schema(root_id):
                             'items': {
                                 'type': 'string'
                             }
-                        }
+                        },
+                        'testNest': {
+                            'title': 'Nest title',
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'id': {
+                                        'title': 'Identifier',
+                                        'type': 'string',
+                                    },
+                                    'testD': {
+                                        'title': 'D title',
+                                        'type': 'string',
+                                    },
+                                }
+                            }
+                        },
+                        'testNestObj': {
+                            'title': 'NestObj title',
+                            'type': 'object',
+                            'properties': {
+                                'id': {
+                                    'title': 'Identifier',
+                                    'type': 'string',
+                                },
+                                'testD': {
+                                    'title': 'D title',
+                                    'type': 'string',
+                                },
+                            }
+                        },
                     }
                 }
             },

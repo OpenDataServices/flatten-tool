@@ -4,7 +4,7 @@ testdata in reverse.
 '''
 
 from .test_input_SpreadsheetInput_unflatten import ROOT_ID_PARAMS, testdata, testdata_titles, create_schema, inject_root_id
-from .test_input_SpreadsheetInput_unflatten_mulitplesheets import testdata_multiplesheets
+from .test_input_SpreadsheetInput_unflatten_mulitplesheets import testdata_multiplesheets, testdata_multiplesheets_titles
 from flattentool.json_input import JSONParser
 from flattentool.schema import SchemaParser
 from collections import OrderedDict
@@ -112,3 +112,19 @@ def test_flatten_multiplesheets(use_titles, use_schema, root_id, root_id_kwargs,
     output = {sheet_name:sheet.lines for sheet_name, sheet in parser.sub_sheets.items() if sheet.lines}
     output['custom_main'] = parser.main_sheet.lines
     assert output == expected_output_dict
+
+
+@pytest.mark.parametrize('comment,expected_output_dict,input_list,warning_messages,reversible', [x for x in testdata_multiplesheets_titles if x[4]])
+@pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
+def test_flatten_multiplesheets_titles(root_id, root_id_kwargs, input_list, expected_output_dict, recwarn, comment, warning_messages, reversible, tmpdir):
+    """
+    Essentially the same as test unflatten, except that convert_titles and
+    use_schema are always true, as both of these are needed to convert titles
+    properly. (and runs with different test data).
+    """
+    if root_id != '':
+        # Skip all tests with a root ID for now, as this is broken
+        # https://github.com/OpenDataServices/flatten-tool/issues/84
+        pytest.skip()
+    return test_flatten_multiplesheets(use_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_dict=expected_output_dict, recwarn=recwarn, comment=comment, warning_messages=warning_messages, reversible=reversible, tmpdir=tmpdir)
+
