@@ -15,11 +15,8 @@ import json
 # titles, which the fixtures don't
 @pytest.mark.parametrize('use_titles,use_schema', [(False, False), (True, False), (False, True)])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,expected_output_list,input_list,warning_messages,reversible', testdata)
+@pytest.mark.parametrize('comment,expected_output_list,input_list,warning_messages,reversible', [x for x in testdata if x[4]])
 def test_flatten(use_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages, tmpdir, reversible):
-    if not reversible:
-        pytest.skip()
-
     # Not sure why, but this seems to be necessary to have warnings picked up
     # on Python 2.7 and 3.3, but 3.4 and 3.5 are fine without it
     import warnings
@@ -59,7 +56,7 @@ def test_flatten(use_titles, use_schema, root_id, root_id_kwargs, input_list, ex
     assert list(parser.main_sheet.lines) == expected_output_list
 
 
-@pytest.mark.parametrize('comment,expected_output_list,input_list,warning_messages,reversible', testdata_titles)
+@pytest.mark.parametrize('comment,expected_output_list,input_list,warning_messages,reversible', [x for x in testdata_titles if x[4]])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
 def test_flatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages, reversible, tmpdir):
     """
@@ -79,11 +76,8 @@ def test_flatten_titles(root_id, root_id_kwargs, input_list, expected_output_lis
 # titles, which the fixtures don't
 @pytest.mark.parametrize('use_titles,use_schema', [(False, False), (True, False), (False, True)])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,expected_output_dict,input_list,warning_messages,reversible', testdata_multiplesheets)
+@pytest.mark.parametrize('comment,expected_output_dict,input_list,warning_messages,reversible', [x for x in testdata_multiplesheets if x[4]])
 def test_flatten_multiplesheets(use_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_dict, recwarn, comment, warning_messages, tmpdir, reversible):
-    if not reversible:
-        pytest.skip()
-
     # Not sure why, but this seems to be necessary to have warnings picked up
     # on Python 2.7 and 3.3, but 3.4 and 3.5 are fine without it
     import warnings
