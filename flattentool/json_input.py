@@ -23,23 +23,21 @@ class BadlyFormedJSONError(ValueError):
     pass
 
 
-def sheet_key_field(sheet, key, id_key=None):
+def sheet_key_field(sheet, key):
     if key not in sheet:
         sheet.append(key)
     return key
 
-def sheet_key_title(sheet, key, id_key=None):
+def sheet_key_title(sheet, key):
     """
     If the key has a corresponding title, return that. If doesn't, create it in the sheet and return it.
 
     """
-    if id_key: # call sheet_key_field instead
-        return sheet_key_field(sheet, key, id_key)
-    title_lookup = {v: k for k, v in sheet.titles.items()}
-    if key in title_lookup:
-        return title_lookup[key]
+    if key in sheet.titles:
+        return sheet.titles[key]
     else:
-        sheet.append(key)
+        if key not in sheet:
+            sheet.append(key)
         return key
 
 
@@ -111,13 +109,13 @@ class JSONParser(object):
         if top_level_of_sub_sheet:
             # Only add the IDs for the top level of object in an array
             for k, v in parent_id_fields.items():
-                flattened_dict[sheet_key(sheet, k, id_key=json_key)] = v
+                flattened_dict[sheet_key(sheet, k)] = v
 
         if self.root_id and self.root_id in json_dict:
-            parent_id_fields[self.root_id] = json_dict[self.root_id]
+            parent_id_fields[sheet_key(sheet, self.root_id)] = json_dict[self.root_id]
 
         if 'id' in json_dict:
-            parent_id_fields[parent_name+'id'] = json_dict['id']
+            parent_id_fields[sheet_key(sheet, parent_name+'id')] = json_dict['id']
 
 
         for key, value in json_dict.items():
@@ -142,7 +140,12 @@ class JSONParser(object):
                     if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
                         if len(value) == 1:
                             for k, v in value[0].items():
-                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+                                if self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
+                                    if type(v) in BASIC_TYPES:
+                                        flattened_dict[sheet_key_title(sheet, parent_name+key+'/0/'+k)] = v
+                                    else:
+                                        raise ValueError('Rolled up values must be basic types')
+                                elif not self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     if type(v) in BASIC_TYPES:
                                         flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     else:

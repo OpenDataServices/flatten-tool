@@ -98,6 +98,19 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
 
+def warnings_for_ignored_columns(v, extra_message):
+    if isinstance(v, Cell):
+        warn('Column {} has been ignored, {}'.format(v.cell_location[3], extra_message))
+    elif isinstance(v, dict):
+        for x in v.values():
+            warnings_for_ignored_columns(x, extra_message)
+    elif isinstance(v, TemporaryDict):
+        for x in v.to_list():
+            warnings_for_ignored_columns(x, extra_message)
+    else:
+        raise ValueError()
+
+
 def merge(base, mergee, debug_info=None):
     if not debug_info:
         debug_info = {}
@@ -108,6 +121,9 @@ def merge(base, mergee, debug_info=None):
             value = v
         if key in base:
             if isinstance(value, TemporaryDict):
+                if not isinstance(base[key], TemporaryDict):
+                    warnings_for_ignored_columns(v, 'because it treats {} as an array, but another column does not'.format(key))
+                    continue
                 for temporarydict_key, temporarydict_value in value.items():
                     if temporarydict_key in base[key]:
                         merge(base[key][temporarydict_key], temporarydict_value, debug_info)
@@ -116,9 +132,18 @@ def merge(base, mergee, debug_info=None):
                         base[key][temporarydict_key] = temporarydict_value
                 for temporarydict_value in  value.items_no_keyfield:
                     base[key].items_no_keyfield.append(temporarydict_value)
-            elif isinstance(value, dict) and isinstance(base[key], dict):
-                merge(base[key], value, debug_info)
+            elif isinstance(value, dict):
+                if isinstance(base[key], dict):
+                    merge(base[key], value, debug_info)
+                else:
+                    warnings_for_ignored_columns(v, 'because it treats {} as an object, but another column does not'.format(key))
             else:
+                if not isinstance(base[key], Cell):
+                    id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
+                    if debug_info.get('root_id'):
+                        id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
+                    warnings_for_ignored_columns(v, 'because another column treats it as an array or object'.format(key))
+                    continue
                 base_value = base[key].cell_value
                 if base_value != value:
                     id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
@@ -149,7 +174,7 @@ class SpreadsheetInput(object):
 
         """
         if self.parser:
-            title_lookup = title_lookup or self.parser.title_lookup
+            title_lookup = self.parser.title_lookup
         for d in dicts:
             if title_lookup:
                 yield OrderedDict([(title_lookup.lookup_header(k), v) for k,v in d.items()])
