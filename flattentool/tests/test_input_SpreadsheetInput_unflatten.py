@@ -26,16 +26,20 @@ def inject_root_id(root_id, d):
     """
     Insert the appropriate root id, with the given value, into the dictionary d and return.
     """
-    d = copy.copy(d)
-    if 'ROOT_ID' in d:
-        if root_id != '':
-            d.update({root_id: d['ROOT_ID']})
-        del d['ROOT_ID']
-    if 'ROOT_ID_TITLE' in d:
-        if root_id != '':
-            d.update({ROOT_ID_TITLES[root_id]: d['ROOT_ID_TITLE']})
-        del d['ROOT_ID_TITLE']
-    return d
+    new_d = type(d)()
+    for k, v in d.items():
+        if k == 'ROOT_ID':
+            if root_id == '':
+                continue
+            else:
+                k = root_id
+        elif k == 'ROOT_ID_TITLE':
+            if root_id == '':
+                continue
+            else:
+                k = ROOT_ID_TITLES[root_id]
+        new_d[k] = v
+    return new_d
 
 
 UNICODE_TEST_STRING = 'éαГ😼𝒞人'
@@ -54,7 +58,8 @@ testdata = [
                 'id': 2,
                 'testA': 3
         }],
-        []
+        [],
+        True
     ),
     (
         'Basic with zero',
@@ -68,7 +73,8 @@ testdata = [
                 'id': 2,
                 'testA': 0
         }],
-        []
+        [],
+        True
     ),
     (
         'Nested',
@@ -83,7 +89,8 @@ testdata = [
             'id': 2,
             'testO': {'testB': 3, 'testC': 4}
         }],
-        []
+        [],
+        True
     ),
     (
         'Unicode',
@@ -95,7 +102,8 @@ testdata = [
             'ROOT_ID': UNICODE_TEST_STRING,
             'testU': UNICODE_TEST_STRING
         }],
-        []
+        [],
+        True
     ),
     (
         'Single item array',
@@ -110,7 +118,8 @@ testdata = [
                 'id': 3, 'testB': 4
             }],
         }],
-        []
+        [],
+        False,
     ),
     (
         'Single item array without parent ID',
@@ -126,7 +135,8 @@ testdata = [
                 'testB': '3'
             }],
         }],
-        []
+        [],
+        False
     ),
     (
         'Empty',
@@ -140,7 +150,8 @@ testdata = [
             'testE': '',
         }],
         [],
-        []
+        [],
+        False
     ),
     (
         'Empty except for root id',
@@ -156,7 +167,8 @@ testdata = [
         [{
             'ROOT_ID': 1
         }],
-        []
+        [],
+        False
     ),
 # Previously this caused the error: TypeError: unorderable types: str() < int()
 # Now one of the columns is ignored
@@ -175,7 +187,8 @@ testdata = [
                 'a': 3,
             }
         }],
-        ['Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not.']
+        ['Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not.'],
+        False
     ),
 # Previously this caused the error: TypeError: unorderable types: str() < int()
 # Now one of the columns is ignored
@@ -194,7 +207,8 @@ testdata = [
                 {'a': 4}
             ]
         }],
-        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.']
+        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.'],
+        False
     ),
 # Previously this caused the error: 'Cell' object has no attribute 'get'
 # Now one of the columns is ignored
@@ -211,7 +225,8 @@ testdata = [
             'id': 2,
             'newtest': 3
         }],
-        ['Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not.']
+        ['Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not.'],
+        False
     ),
     (
         'str / object mixing',
@@ -226,7 +241,8 @@ testdata = [
             'id': 2,
             'newtest': 3
         }],
-        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.']
+        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not.'],
+        False
     ),
     (
         'array / str mixing',
@@ -245,7 +261,8 @@ testdata = [
                 }]
             }
         }],
-        ['Column nest/newtest has been ignored, because another column treats it as an array or object']
+        ['Column nest/newtest has been ignored, because another column treats it as an array or object'],
+        False
     ),
     (
         'object / str mixing',
@@ -262,7 +279,168 @@ testdata = [
                 'a': 3
             }
         }],
-        ['Column newtest has been ignored, because another column treats it as an array or object']
+        ['Column newtest has been ignored, because another column treats it as an array or object'],
+        False
+    ),
+    (
+        'Mismatch of object/array for field not in schema (multiline)',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/a', 3),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/0/a', 4),
+            ]),
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': {
+                    'a': 3,
+                }
+            }
+        }],
+        ['Column nest/newtest/0/a has been ignored, because it treats newtest as an array, but another column does not'],
+        False
+    ),
+# Previously this caused the error: TypeError: unorderable types: str() < int()
+# Now one of the columns is ignored
+    (
+        'Mismatch of array/object for field not in schema (multiline)',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/0/a', 4),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/a', 3),
+            ])
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': [
+                {'a': 4}
+            ]
+        }],
+        ['Column newtest/a has been ignored, because it treats newtest as an object, but another column does not'],
+        False
+    ),
+# Previously this caused the error: 'Cell' object has no attribute 'get'
+# Now one of the columns is ignored
+    (
+        'str / array mixing multiline',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest', 3),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/0/a', 4),
+                ('nest/newtest/0/b', 5),
+            ]),
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': 3
+            }
+        }],
+        [
+            'Column nest/newtest/0/a has been ignored, because it treats newtest as an array, but another column does not',
+            'Column nest/newtest/0/b has been ignored, because it treats newtest as an array, but another column does not',
+        ],
+        False
+    ),
+    (
+        'array / str mixing multiline',
+        # same as above, but with rows switched
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest/0/a', 4),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('nest/newtest', 3),
+            ]),
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'nest': {
+                'newtest': [
+                    {'a': 4}
+                ]
+            }
+        }],
+        ['Column nest/newtest has been ignored, because another column treats it as an array or object'],
+        False
+    ),
+# WARNING: Conflict when merging field "newtest" for id "2" in sheet custom_main: "3" 
+    (
+        'str / object mixing multiline',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest', 3),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/a', 4),
+                ('newtest/b', 5),
+            ])
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': 3
+        }],
+        [
+            'Column newtest/a has been ignored, because it treats newtest as an object, but another column does not',
+            'Column newtest/b has been ignored, because it treats newtest as an object, but another column does not',
+        ],
+        False
+    ),
+    (
+        'object / str mixing multiline',
+        [
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest/a', 4),
+            ]),
+            OrderedDict([
+                ('ROOT_ID', 1),
+                ('id', 2),
+                ('newtest', 3),
+            ])
+        ],
+        [{
+            'ROOT_ID': 1,
+            'id': 2,
+            'newtest': {
+                'a': 4
+            }
+        }],
+        ['Column newtest has been ignored, because another column treats it as an array or object'],
+        False
     ),
 # Previously this caused the error: KeyError('ocid',)
 # Now it works, but probably not as intended
@@ -278,7 +456,8 @@ testdata = [
             'id': 2,
             'testA': 3
         }],
-        []
+        [],
+        False
     ),
 # We should be able to handle numbers as column headings
     (
@@ -302,7 +481,8 @@ testdata = [
             'Column "2" has been ignored because it is a number.',
             'Column "3" has been ignored because it is a number.',
             'Column "4" has been ignored because it is a number.',
-        ]
+        ],
+        False
     )
 ]
 
@@ -379,6 +559,10 @@ def create_schema(root_id):
                 'title': 'B title',
                 'type': 'object',
                 'properties': {
+                    'id': {
+                        'title': 'Identifier',
+                        'type': 'integer',
+                    },
                     'testC': {
                         'title': 'C title',
                         'type': 'integer',
@@ -386,6 +570,75 @@ def create_schema(root_id):
                     'testD': {
                         'title': 'D title',
                         'type': 'integer',
+                    },
+                    'subField': {
+                        'title': 'Sub title',
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'id': {
+                                    'title': 'Identifier',
+                                    'type': 'integer',
+                                },
+                                'testE': {
+                                    'title': 'E title',
+                                    'type': 'integer',
+                                },
+                            }
+                        }
+                    }
+                }
+            },
+            'testArr': {
+                'title': 'Arr title',
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {
+                            'title': 'Identifier',
+                            'type': 'string',
+                        },
+                        'testB': {
+                            'title': 'B title',
+                            'type': 'string',
+                        },
+                        'testC': {
+                            'title': 'C title',
+                            'type': 'string',
+                        },
+                        'testNest': {
+                            'title': 'Nest title',
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'id': {
+                                        'title': 'Identifier',
+                                        'type': 'string',
+                                    },
+                                    'testD': {
+                                        'title': 'D title',
+                                        'type': 'string',
+                                    },
+                                }
+                            }
+                        },
+                        'testNestObj': {
+                            'title': 'NestObj title',
+                            'type': 'object',
+                            'properties': {
+                                'id': {
+                                    'title': 'Identifier',
+                                    'type': 'string',
+                                },
+                                'testD': {
+                                    'title': 'D title',
+                                    'type': 'string',
+                                },
+                            }
+                        },
                     }
                 }
             },
@@ -417,7 +670,7 @@ def create_schema(root_id):
                             'items': {
                                 'type': 'string'
                             }
-                        }
+                        },
                     }
                 }
             },
@@ -456,7 +709,8 @@ testdata_titles = [
             'id': 2,
             'testA': 3
         }],
-        []
+        [],
+        True
     ),
     (
         'Nested',
@@ -471,7 +725,8 @@ testdata_titles = [
             'id': 2,
             'testB': {'testC': 3, 'testD': 4}
         }],
-        []
+        [],
+        True
     ),
     (
         'Nested titles should be converted individually',
@@ -486,7 +741,8 @@ testdata_titles = [
             'id': 2,
             'testB': {'testC': 3, 'Not in schema': 4}
         }],
-        []
+        [],
+        False
     ),
     (
         'Should be space and case invariant',
@@ -501,7 +757,8 @@ testdata_titles = [
             'id': 2,
             'testB': {'testC': 3, 'Not in schema': 4}
         }],
-        []
+        [],
+        False
     ),
     (
         'Unicode',
@@ -513,7 +770,8 @@ testdata_titles = [
             'ROOT_ID': UNICODE_TEST_STRING,
             'testU': UNICODE_TEST_STRING
         }],
-        []
+        [],
+        True
     ),
    (
         'Single item array',
@@ -530,7 +788,8 @@ testdata_titles = [
                 'id': '3', 'testB': '4'
             }],
         }],
-        []
+        [],
+        False
     ),
     (
         'Single item array without parent ID',
@@ -546,7 +805,8 @@ testdata_titles = [
                 'testB': '3'
             }],
         }],
-        []
+        [],
+        False
     ),
     (
         '''
@@ -567,7 +827,8 @@ testdata_titles = [
                 'testC': '4'
             }],
         }],
-        []
+        [],
+        False
     ),
     (
         'Single item array, titles should be converted individually',
@@ -585,7 +846,8 @@ testdata_titles = [
                 'Not in schema': 4
             }],
         }],
-        []
+        [],
+        False
     ),
     (
         'Multi item array, allow numbering',
@@ -616,7 +878,8 @@ testdata_titles = [
             }
             ]
         }],
-        []
+        [],
+        False
     ),
     (
         'Empty',
@@ -630,7 +893,8 @@ testdata_titles = [
             'E title': '',
         }],
         [],
-        []
+        [],
+        False
     ),
     (
         'Empty except for root id',
@@ -646,7 +910,8 @@ testdata_titles = [
         [{
             'ROOT_ID': 1
         }],
-        []
+        [],
+        False
     ),
     (
         'Test arrays of strings (1 item)',
@@ -660,7 +925,8 @@ testdata_titles = [
             'id': 2,
             'testSA': [ 'a' ],
         }],
-        []
+        [],
+        True
     ),
     (
         'Test arrays of strings (2 items)',
@@ -674,7 +940,8 @@ testdata_titles = [
             'id': 2,
             'testSA': [ 'a', 'b' ],
         }],
-        []
+        [],
+        True
     ),
     (
         'Test arrays of strings within an object array (1 item)',
@@ -690,7 +957,8 @@ testdata_titles = [
                 'testSA': [ 'a' ],
             }]
         }],
-        []
+        [],
+        False
     ),
     (
         'Test arrays of strings within an object array (2 items)',
@@ -706,7 +974,8 @@ testdata_titles = [
                 'testSA': [ 'a', 'b' ],
             }]
         }],
-        []
+        [],
+        False
     ),
 ]
 
@@ -723,8 +992,8 @@ ROOT_ID_PARAMS =     [
 @pytest.mark.parametrize('convert_titles', [True, False])
 @pytest.mark.parametrize('use_schema', [True, False])
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages', testdata)
-def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages):
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages,reversible', testdata)
+def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages, reversible):
     # Not sure why, but this seems to be necessary to have warnings picked up
     # on Python 2.7 and 3.3, but 3.4 and 3.5 are fine without it
     import warnings
@@ -765,12 +1034,12 @@ def test_unflatten(convert_titles, use_schema, root_id, root_id_kwargs, input_li
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
 @pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages', testdata_pointer)
 def test_unflatten_pointer(convert_titles, root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages):
-    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages)
+    return test_unflatten(convert_titles=convert_titles, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages, reversible=False)
 
 
-@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages', testdata_titles)
+@pytest.mark.parametrize('comment,input_list,expected_output_list,warning_messages,reversible', testdata_titles)
 @pytest.mark.parametrize('root_id,root_id_kwargs', ROOT_ID_PARAMS)
-def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages):
+def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_list, recwarn, comment, warning_messages, reversible):
     """
     Essentially the same as test unflatten, except that convert_titles and
     use_schema are always true, as both of these are needed to convert titles
@@ -780,6 +1049,6 @@ def test_unflatten_titles(root_id, root_id_kwargs, input_list, expected_output_l
         # Skip all tests with a root ID for now, as this is broken
         # https://github.com/OpenDataServices/flatten-tool/issues/84
         pytest.skip()
-    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages)
+    return test_unflatten(convert_titles=True, use_schema=True, root_id=root_id, root_id_kwargs=root_id_kwargs, input_list=input_list, expected_output_list=expected_output_list, recwarn=recwarn, comment=comment, warning_messages=warning_messages, reversible=reversible)
 
 
