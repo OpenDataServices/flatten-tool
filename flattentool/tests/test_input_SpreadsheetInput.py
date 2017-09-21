@@ -98,7 +98,21 @@ class TestSuccessfulInput(object):
 
         assert list(xlsxinput.get_sheet_lines('main')) == \
             [{'colA': 1}]
+        assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colA']) == int
         assert xlsxinput.sub_sheet_names == ['main']
+
+    def test_xlsx_input_integer2(self):
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer2.xlsx')
+
+        xlsxinput.read_sheets()
+
+        assert list(xlsxinput.get_sheet_lines('Sheet1')) == \
+            [{'activity-status/@code': 2}]
+        # This is a float, but is converted to an int in the unflatten step, see
+        # test_input_SpreadsheetInput_unflatten.py
+        # 'Basic with float'
+        assert type(list(xlsxinput.get_sheet_lines('Sheet1'))[0]['activity-status/@code']) == float
+        assert xlsxinput.sub_sheet_names == ['Sheet1']
 
     def test_xlsx_input_formula(self):
         """ When a forumla is present, we should use the value, rather than the
