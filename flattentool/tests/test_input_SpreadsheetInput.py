@@ -98,7 +98,10 @@ class TestSuccessfulInput(object):
 
         assert list(xlsxinput.get_sheet_lines('main')) == \
             [{'colA': 1}]
-        assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colA']) == int
+        if sys.version_info[0] == 2:
+            assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colA']) == long
+        else:
+            assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colA']) == int
         assert xlsxinput.sub_sheet_names == ['main']
 
     def test_xlsx_input_integer2(self):
