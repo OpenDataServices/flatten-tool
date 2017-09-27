@@ -498,8 +498,19 @@ class CSVInput(SpreadsheetInput):
         skip_rows = sheet_configuration.get("skipRows", 0)
         header_rows = sheet_configuration.get("headerRows", 1)
         for i in range(0, configuration_line + skip_rows):
-            next(dictreader.reader)
-        fieldnames = dictreader.fieldnames
+            previous_row = next(dictreader.reader)
+        if sys.version > '3':  # If Python 3 or greater
+            fieldnames = dictreader.fieldnames
+        else:
+            # unicodecsv dictreader always reads the headingline first
+            # so in the case of there being any rows to skip look at 
+            # previous row and use that for fieldnames.
+            if (configuration_line + skip_rows):
+                fieldnames = previous_row
+                dictreader.fieldnames = fieldnames
+                dictreader.unicode_fieldnames = fieldnames
+            else:
+                fieldnames = dictreader.unicode_fieldnames 
         for i in range(0, header_rows - 1):
             next(dictreader.reader)
         for line in dictreader:
