@@ -40,6 +40,7 @@ try:
 except ImportError:
     from UserDict import UserDict  # pylint: disable=F0401
 
+
 def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     if value == '' or value is None:
         return None
@@ -446,18 +447,29 @@ class CSVInput(SpreadsheetInput):
     encoding = 'utf-8'
 
     def get_sheet_headings(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if sheet_configuration.get("ignore"):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
+
         if sys.version > '3':  # If Python 3 or greater
             with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
                 r = csvreader(main_sheet_file)
-                for row in enumerate(r):
-                    # Just return the first row
-                    return row[1]
+                for num, row in enumerate(r):
+                    if num == (skip_rows + configuration_line):
+                        return row
         else:  # If Python 2
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 r = csvreader(main_sheet_file, encoding=self.encoding)
-                for row in enumerate(r):
-                    # Just return the first row
-                    return row[1]
+                for num, row in enumerate(r):
+                    if num == (skip_rows + configuration_line):
+                        return row
 
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
@@ -472,21 +484,66 @@ class CSVInput(SpreadsheetInput):
             except ValueError:
                 pass
         self.sub_sheet_names = sheet_names
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in sheet_names)
         self.configure_sheets()
+
+    def generate_rows(self, dictreader, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+        for i in range(0, configuration_line + skip_rows):
+            previous_row = next(dictreader.reader)
+        if sys.version > '3':  # If Python 3 or greater
+            fieldnames = dictreader.fieldnames
+        else:
+            # unicodecsv dictreader always reads the headingline first
+            # so in the case of there being any rows to skip look at 
+            # previous row and use that for fieldnames.
+            if (configuration_line + skip_rows):
+                fieldnames = previous_row
+                dictreader.fieldnames = fieldnames
+                dictreader.unicode_fieldnames = fieldnames
+            else:
+                fieldnames = dictreader.unicode_fieldnames 
+        for i in range(0, header_rows - 1):
+            next(dictreader.reader)
+        for line in dictreader:
+            yield OrderedDict((fieldname, line[fieldname]) for fieldname in fieldnames)
+
+    def get_sheet_configuration(self, sheet_name):
+        if sys.version > '3':  # If Python 3 or greater
+            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+                r = csvreader(main_sheet_file)
+                heading_row = next(r)
+        else:  # If Python 2
+            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
+                r = csvreader(main_sheet_file, encoding=self.encoding)
+                heading_row = next(r)
+        if heading_row[0] == '#':
+            return heading_row[1:]
+        return []
+
+
 
     def get_sheet_lines(self, sheet_name):
         if sys.version > '3':  # If Python 3 or greater
             # Pass the encoding to the open function
             with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
                 dictreader = DictReader(main_sheet_file)
-                for line in dictreader:
-                    yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
+                for row in self.generate_rows(dictreader, sheet_name):
+                    yield row
         else:  # If Python 2
             # Pass the encoding to DictReader
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 dictreader = DictReader(main_sheet_file, encoding=self.encoding)
-                for line in dictreader:
-                    yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
+                for row in self.generate_rows(dictreader, sheet_name):
+                    yield row
 
 
 class XLSXInput(SpreadsheetInput):
