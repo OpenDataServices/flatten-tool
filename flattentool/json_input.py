@@ -15,6 +15,7 @@ from flattentool.input import path_search
 from flattentool.sheet import Sheet
 from warnings import warn
 import codecs
+import xmltodict
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
@@ -45,12 +46,14 @@ class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
 
-    def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None, root_id='ocid', use_titles=False):
+    def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
+                 root_id='ocid', use_titles=False, xml=False, id_name='id'):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
         self.root_id = root_id
         self.use_titles = use_titles
+        self.id_name = id_name
         if schema_parser:
             self.main_sheet = schema_parser.main_sheet
             self.sub_sheets = schema_parser.sub_sheets
@@ -59,6 +62,11 @@ class JSONParser(object):
             self.schema_parser = schema_parser
         else:
             self.rollup = False
+
+        if xml:
+            with codecs.open(json_filename, 'rb') as xml_file:
+                root_json_dict = xmltodict.parse(xml_file, cdata_key='')['iati-activities']
+            json_filename = None
 
         if json_filename is None and root_json_dict is None:
             raise ValueError('Etiher json_filename or root_json_dict must be supplied')
@@ -114,8 +122,8 @@ class JSONParser(object):
         if self.root_id and self.root_id in json_dict:
             parent_id_fields[sheet_key(sheet, self.root_id)] = json_dict[self.root_id]
 
-        if 'id' in json_dict:
-            parent_id_fields[sheet_key(sheet, parent_name+'id')] = json_dict['id']
+        if self.id_name in json_dict:
+            parent_id_fields[sheet_key(sheet, parent_name+self.id_name)] = json_dict[self.id_name]
 
 
         for key, value in json_dict.items():
