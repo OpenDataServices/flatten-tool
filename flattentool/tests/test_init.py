@@ -1240,3 +1240,20 @@ def test_commands_ignore(tmpdir):
     unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
 
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_hashcomments(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_hashcomments.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('commands_hashcomments_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('commands_hashcomments_source_map.json').strpath,
+        heading_source_map=tmpdir.join('commands_hashcomments_heading_source_map.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True
+        )
+
+    unflattened = json.load(tmpdir.join('commands_hashcomments_unflattened.json'))
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
+                           'some': 'data'}
