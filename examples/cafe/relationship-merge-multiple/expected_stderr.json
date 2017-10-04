@@ -1,4 +1,4 @@
-... DataErrorWarning: Conflict when merging field "name" for id "CAFE-HEALTH" in sheet b: "Healthy Cafe" != "Incorrect value". If you were not expecting merging you may have a duplicate ID.
+... DataErrorWarning: You may have a duplicate Identifier: We couldn't merge these rows with the id "CAFE-HEALTH": field "name" in sheet "b": one cell has the value: "Healthy Cafe", the other cell has the value: "Incorrect value"
   DataErrorWarning)
-... DataErrorWarning: Conflict when merging field "number_of_tables" for id "CAFE-HEALTH" in sheet d: "3" != "4". If you were not expecting merging you may have a duplicate ID.
+... DataErrorWarning: You may have a duplicate Identifier: We couldn't merge these rows with the id "CAFE-HEALTH": field "number_of_tables" in sheet "d": one cell has the value: "3", the other cell has the value: "4"
   DataErrorWarning)

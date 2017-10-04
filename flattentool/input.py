@@ -153,8 +153,8 @@ def merge(base, mergee, debug_info=None):
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
                     warn(
-                        'Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
-                            key, id_info, debug_info.get('sheet_name'), base_value, value),
+                        'You may have a duplicate Identifier: We couldn\'t merge these rows with the {}: field "{}" in sheet "{}": one cell has the value: "{}", the other cell has the value: "{}"'.format(
+                            id_info, key, debug_info.get('sheet_name'), base_value, value),
                         DataErrorWarning)
                 else:
                     base[key].sub_cells.append(v)
