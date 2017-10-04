@@ -71,7 +71,7 @@ def create_parser():
     parser_flatten.add_argument(
         "--xml",
         action='store_true',
-        help="Use XML as the output format")
+        help="Use XML as the input format")
     parser_flatten.add_argument(
         "--id-name",
         help="String to use for the identifier key, defaults to 'id'")
