@@ -1,8 +1,9 @@
 from flattentool import unflatten, flatten
 import json
-import pytest
 import sys
 import os
+import xmltodict
+import pytest
 
 
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
@@ -93,3 +94,37 @@ def test_roundtrip_360_rollup(tmpdir, use_titles):
     original_json = json.load(open(input_name))
     roundtripped_json = json.load(tmpdir.join('roundtrip.json'))
     assert original_json == roundtripped_json
+
+
+def to_dict(x):
+    ''' Converts a nested dictlike objects e.g. OrderedDict's, to a dicts. '''
+    if hasattr(x, 'items'):
+        return dict((k, to_dict(v)) for k,v in x.items())
+    elif isinstance(x, list):
+        return [to_dict(y) for y in x]
+    else:
+        return x
+
+
+@pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
+def test_roundtrip_xml(tmpdir, output_format):
+    input_name = 'examples/iati/expected.xml'
+    flatten(
+        input_name=input_name,
+        output_name=tmpdir.join('flattened').strpath+'.'+output_format,
+        output_format=output_format,
+        root_list_path='iati-activity',
+        id_name='iati-identifier',
+        xml=True)
+    unflatten(
+        input_name=tmpdir.join('flattened').strpath+'.'+output_format,
+        output_name=tmpdir.join('roundtrip.xml').strpath,
+        input_format=output_format,
+        root_list_path='iati-activity',
+        id_name='iati-identifier',
+        xml=True)
+    original_xml = open(input_name, 'rb')
+    roundtripped_xml = tmpdir.join('roundtrip.xml').open('rb')
+
+    # Compare without ordering, by wrapping in to_dict
+    assert to_dict(xmltodict.parse(original_xml)) == to_dict(xmltodict.parse(roundtripped_xml))
