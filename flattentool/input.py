@@ -94,6 +94,8 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     elif type_string == '':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
+        if type(value) == float and int(value) == value:
+            return int(value)
         return value if type(value) in [int] else text_type(value)
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
