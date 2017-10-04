@@ -1156,7 +1156,7 @@ def test_bad_format(tmpdir):
             output_name=tmpdir.join('meta_unflattened.json').strpath,
             )
 
-def test_commands_single_sheet(tmpdir):
+def test_commands_single_sheet_xlsx(tmpdir):
 
     unflatten(
         'flattentool/tests/fixtures/xlsx/commands_in_file.xlsx',
@@ -1168,6 +1168,17 @@ def test_commands_single_sheet(tmpdir):
 
     unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
 
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
+
+def test_commands_single_sheet_csv(tmpdir):
+    unflatten(
+        'flattentool/tests/fixtures/csv/commands_in_file',
+        input_format='csv',
+        output_name=tmpdir.join('command_single_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
+        )
+    unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
 
 def test_commands_metatab(tmpdir):
