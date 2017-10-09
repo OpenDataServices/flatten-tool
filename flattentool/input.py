@@ -574,7 +574,8 @@ class XLSXInput(SpreadsheetInput):
             sheet_configuration = {}
 
         skip_rows = sheet_configuration.get("skipRows", 0)
-        if sheet_configuration.get("ignore"):
+        if (sheet_configuration.get("ignore") or
+            (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
             # returning empty headers is a proxy for no data in the sheet.
             return []
 
@@ -617,7 +618,13 @@ class XLSXInput(SpreadsheetInput):
             header_row = worksheet.rows[skip_rows + configuration_line]
             remaining_rows = worksheet.rows[skip_rows + configuration_line + header_rows:]
 
-        coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
+        coli_to_header = {}
+        for i, header in enumerate(header_row):
+            if header.value is None:
+                continue
+            if sheet_configuration.get("hashcomments") and str(header.value).startswith('#'):
+                continue
+            coli_to_header[i] = header.value
         for row in remaining_rows:
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
