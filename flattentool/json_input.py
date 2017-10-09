@@ -66,7 +66,10 @@ class JSONParser(object):
 
         if self.xml:
             with codecs.open(json_filename, 'rb') as xml_file:
-                root_json_dict = xmltodict.parse(xml_file)['iati-activities']
+                root_json_dict = xmltodict.parse(
+                    xml_file,
+                    force_list=(root_list_path,),
+                    )['iati-activities']
             json_filename = None
 
         if json_filename is None and root_json_dict is None:
