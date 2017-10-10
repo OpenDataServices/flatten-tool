@@ -96,16 +96,6 @@ def test_roundtrip_360_rollup(tmpdir, use_titles):
     assert original_json == roundtripped_json
 
 
-def to_dict(x):
-    ''' Converts a nested dictlike objects e.g. OrderedDict's, to a dicts. '''
-    if hasattr(x, 'items'):
-        return dict((k, to_dict(v)) for k,v in x.items())
-    elif isinstance(x, list):
-        return [to_dict(y) for y in x]
-    else:
-        return x
-
-
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip_xml(tmpdir, output_format):
     input_name = 'examples/iati/expected.xml'
@@ -126,5 +116,8 @@ def test_roundtrip_xml(tmpdir, output_format):
     original_xml = open(input_name, 'rb')
     roundtripped_xml = tmpdir.join('roundtrip.xml').open('rb')
 
-    # Compare without ordering, by wrapping in to_dict
-    assert to_dict(xmltodict.parse(original_xml)) == to_dict(xmltodict.parse(roundtripped_xml))
+    # Compare without ordering, by using dict_constructor=dict instead of
+    # OrderedDict
+    original = xmltodict.parse(original_xml, dict_constructor=dict)
+    roundtripped = xmltodict.parse(roundtripped_xml, dict_constructor=dict)
+    assert original == roundtripped
