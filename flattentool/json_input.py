@@ -69,6 +69,7 @@ class JSONParser(object):
                 root_json_dict = xmltodict.parse(
                     xml_file,
                     force_list=(root_list_path,),
+                    force_cdata=True,
                     )['iati-activities']
             json_filename = None
 
@@ -125,7 +126,10 @@ class JSONParser(object):
         if top_level_of_sub_sheet:
             # Only add the IDs for the top level of object in an array
             for k, v in parent_id_fields.items():
-                flattened_dict[sheet_key(sheet, k)] = v
+                if self.xml:
+                    flattened_dict[sheet_key(sheet, k)] = v['#text']
+                else:
+                    flattened_dict[sheet_key(sheet, k)] = v
 
         if self.root_id and self.root_id in json_dict:
             parent_id_fields[sheet_key(sheet, self.root_id)] = json_dict[self.root_id]
