@@ -93,6 +93,10 @@ class JSONParser(object):
         else:
             root_json_list = path_search(self.root_json_dict, self.root_list_path.split('/'))
         for json_dict in root_json_list:
+            if json_dict is None:
+                # This is particularly useful for IATI XML, in order to not
+                # fallover on empty activity, e.g. <iati-activity/>
+                continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
     
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
