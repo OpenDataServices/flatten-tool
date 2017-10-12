@@ -15,4 +15,6 @@ def parse_sheet_configuration(configuration_list):
             configuration['headerRows'] = max(int(parts[1]), 1)
         if (len(parts) == 1 and parts[0].lower() == "ignore"):
             configuration['ignore'] = True
+        if (len(parts) == 1 and parts[0].lower() in ("hashcomments", "hashcomment")):
+            configuration['hashcomments'] = True
     return configuration

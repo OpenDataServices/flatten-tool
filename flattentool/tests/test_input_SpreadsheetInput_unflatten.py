@@ -62,6 +62,24 @@ testdata = [
         True
     ),
     (
+        'Basic with float',
+        # 3.0 is converted to 3
+        # This is needed to handle google docs xlsx properly
+        # https://github.com/OpenDataServices/cove/issues/838
+        [{
+            'ROOT_ID': '1',
+            'id': 2,
+            'testA': 3.0
+        }],
+        [{
+                'ROOT_ID': '1',
+                'id': 2,
+                'testA': 3
+        }],
+        [],
+        True
+    ),
+    (
         'Basic with zero',
         [{
             'ROOT_ID': '1',

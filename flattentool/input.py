@@ -94,6 +94,8 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     elif type_string == '':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
+        if type(value) == float and int(value) == value:
+            return int(value)
         return value if type(value) in [int] else text_type(value)
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
@@ -151,8 +153,8 @@ def merge(base, mergee, debug_info=None):
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
                     warn(
-                        'Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
-                            key, id_info, debug_info.get('sheet_name'), base_value, value),
+                        'You may have a duplicate Identifier: We couldn\'t merge these rows with the {}: field "{}" in sheet "{}": one cell has the value: "{}", the other cell has the value: "{}"'.format(
+                            id_info, key, debug_info.get('sheet_name'), base_value, value),
                         DataErrorWarning)
                 else:
                     base[key].sub_cells.append(v)
@@ -572,7 +574,8 @@ class XLSXInput(SpreadsheetInput):
             sheet_configuration = {}
 
         skip_rows = sheet_configuration.get("skipRows", 0)
-        if sheet_configuration.get("ignore"):
+        if (sheet_configuration.get("ignore") or
+            (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
             # returning empty headers is a proxy for no data in the sheet.
             return []
 
@@ -615,7 +618,13 @@ class XLSXInput(SpreadsheetInput):
             header_row = worksheet.rows[skip_rows + configuration_line]
             remaining_rows = worksheet.rows[skip_rows + configuration_line + header_rows:]
 
-        coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
+        coli_to_header = {}
+        for i, header in enumerate(header_row):
+            if header.value is None:
+                continue
+            if sheet_configuration.get("hashcomments") and str(header.value).startswith('#'):
+                continue
+            coli_to_header[i] = header.value
         for row in remaining_rows:
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
