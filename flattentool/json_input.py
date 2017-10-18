@@ -15,6 +15,7 @@ from flattentool.input import path_search
 from flattentool.sheet import Sheet
 from warnings import warn
 import codecs
+import xmltodict
 
 BASIC_TYPES = [six.text_type, bool, int, Decimal, type(None)]
 
@@ -45,12 +46,15 @@ class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
 
-    def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None, root_id='ocid', use_titles=False):
+    def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
+                 root_id='ocid', use_titles=False, xml=False, id_name='id'):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
         self.root_id = root_id
         self.use_titles = use_titles
+        self.id_name = id_name
+        self.xml = xml
         if schema_parser:
             self.main_sheet = schema_parser.main_sheet
             self.sub_sheets = schema_parser.sub_sheets
@@ -59,6 +63,18 @@ class JSONParser(object):
             self.schema_parser = schema_parser
         else:
             self.rollup = False
+
+        if self.xml:
+            with codecs.open(json_filename, 'rb') as xml_file:
+                top_dict = xmltodict.parse(
+                    xml_file,
+                    force_list=(root_list_path,),
+                    force_cdata=True,
+                    )
+                # AFAICT, this should be true for *all* XML files
+                assert len(top_dict) == 1
+                root_json_dict = list(top_dict.values())[0]
+            json_filename = None
 
         if json_filename is None and root_json_dict is None:
             raise ValueError('Etiher json_filename or root_json_dict must be supplied')
@@ -81,6 +97,10 @@ class JSONParser(object):
         else:
             root_json_list = path_search(self.root_json_dict, self.root_list_path.split('/'))
         for json_dict in root_json_list:
+            if json_dict is None:
+                # This is particularly useful for IATI XML, in order to not
+                # fallover on empty activity, e.g. <iati-activity/>
+                continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
     
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
@@ -109,17 +129,24 @@ class JSONParser(object):
         if top_level_of_sub_sheet:
             # Only add the IDs for the top level of object in an array
             for k, v in parent_id_fields.items():
-                flattened_dict[sheet_key(sheet, k)] = v
+                if self.xml:
+                    flattened_dict[sheet_key(sheet, k)] = v['#text']
+                else:
+                    flattened_dict[sheet_key(sheet, k)] = v
 
         if self.root_id and self.root_id in json_dict:
             parent_id_fields[sheet_key(sheet, self.root_id)] = json_dict[self.root_id]
 
-        if 'id' in json_dict:
-            parent_id_fields[sheet_key(sheet, parent_name+'id')] = json_dict['id']
+        if self.id_name in json_dict:
+            parent_id_fields[sheet_key(sheet, parent_name+self.id_name)] = json_dict[self.id_name]
 
 
         for key, value in json_dict.items():
             if type(value) in BASIC_TYPES:
+                if self.xml and key == '#text':
+                    # Handle the text output from xmltodict
+                    key = ''
+                    parent_name = parent_name.strip('/')
                 flattened_dict[sheet_key(sheet, parent_name+key)] = value
             elif hasattr(value, 'items'):
                 self.parse_json_dict(

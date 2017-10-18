@@ -1,7 +1,7 @@
-usage: flatten-tool flatten [-h] [-s SCHEMA] [-f OUTPUT_FORMAT]
-                            [-m MAIN_SHEET_NAME] [-o OUTPUT_NAME]
-                            [--root-list-path ROOT_LIST_PATH] [--rollup]
-                            [-r ROOT_ID] [--use-titles]
+usage: flatten-tool flatten [-h] [-s SCHEMA] [-f OUTPUT_FORMAT] [--xml]
+                            [--id-name ID_NAME] [-m MAIN_SHEET_NAME]
+                            [-o OUTPUT_NAME] [--root-list-path ROOT_LIST_PATH]
+                            [--rollup] [-r ROOT_ID] [--use-titles]
                             input_name
 
 positional arguments:
@@ -14,6 +14,8 @@ optional arguments:
   -f OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
                         Type of template you want to create. Defaults to all
                         available options
+  --xml                 Use XML as the input format
+  --id-name ID_NAME     String to use for the identifier key, defaults to 'id'
   -m MAIN_SHEET_NAME, --main-sheet-name MAIN_SHEET_NAME
                         The name of the main sheet, as seen in the first tab
                         of the spreadsheet for example. Defaults to main
