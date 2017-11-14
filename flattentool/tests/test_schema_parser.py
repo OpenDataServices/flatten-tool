@@ -283,6 +283,33 @@ def test_simple_array(type_):
 
 
 @pytest.mark.parametrize('type_', ['string', 'number'])
+def test_double_array(type_):
+    """
+    Make sure we handle an array under items, used for e.g. co-ordinates.
+
+    """
+    parser = SchemaParser(
+        root_schema_dict={
+            'properties': {
+                'Atest': {
+                    'type': 'array',
+                    'items': [
+                        {
+                            'type': type_
+                        },
+                        {
+                            'type': type_
+                        }
+                    ]
+                }
+            }
+        }
+    )
+    parser.parse()
+    assert set(parser.main_sheet) == set(['Atest'])
+
+
+@pytest.mark.parametrize('type_', ['string', 'number'])
 def test_nested_simple_array(type_):
     parser = SchemaParser(
         root_schema_dict={
