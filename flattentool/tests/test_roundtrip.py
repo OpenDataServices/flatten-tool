@@ -1,8 +1,9 @@
 from flattentool import unflatten, flatten
 import json
-import pytest
 import sys
 import os
+import xmltodict
+import pytest
 
 
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
@@ -93,3 +94,30 @@ def test_roundtrip_360_rollup(tmpdir, use_titles):
     original_json = json.load(open(input_name))
     roundtripped_json = json.load(tmpdir.join('roundtrip.json'))
     assert original_json == roundtripped_json
+
+
+@pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
+def test_roundtrip_xml(tmpdir, output_format):
+    input_name = 'examples/iati/expected.xml'
+    flatten(
+        input_name=input_name,
+        output_name=tmpdir.join('flattened').strpath+'.'+output_format,
+        output_format=output_format,
+        root_list_path='iati-activity',
+        id_name='iati-identifier',
+        xml=True)
+    unflatten(
+        input_name=tmpdir.join('flattened').strpath+'.'+output_format,
+        output_name=tmpdir.join('roundtrip.xml').strpath,
+        input_format=output_format,
+        root_list_path='iati-activity',
+        id_name='iati-identifier',
+        xml=True)
+    original_xml = open(input_name, 'rb')
+    roundtripped_xml = tmpdir.join('roundtrip.xml').open('rb')
+
+    # Compare without ordering, by using dict_constructor=dict instead of
+    # OrderedDict
+    original = xmltodict.parse(original_xml, dict_constructor=dict)
+    roundtripped = xmltodict.parse(roundtripped_xml, dict_constructor=dict)
+    assert original == roundtripped
