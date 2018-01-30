@@ -581,18 +581,18 @@ class XLSXInput(SpreadsheetInput):
             return []
 
         if self.vertical_orientation:
-            return [cell.value for cell in worksheet.columns[skip_rows][configuration_line:]]
+            return [cell.value for cell in worksheet[_get_column_letter(skip_rows+1)][configuration_line:]]
 
         try:
-            return [cell.value for cell in worksheet.rows[skip_rows + configuration_line]]
+            return [cell.value for cell in worksheet[skip_rows + configuration_line + 1]]
         except IndexError:
             # If the heading line is after data in the spreadsheet. i.e when skipRows
             return []
 
     def get_sheet_configuration(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
-        if worksheet.rows[0][0].value == '#':
-            return [cell.value for num, cell in enumerate(worksheet.rows[0]) if num != 0 and cell.value]
+        if worksheet['A1'].value == '#':
+            return [cell.value for num, cell in enumerate(worksheet[1]) if num != 0 and cell.value]
         else:
             return []
 
@@ -610,14 +610,14 @@ class XLSXInput(SpreadsheetInput):
 
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         if self.vertical_orientation:
-            header_row = worksheet.columns[skip_rows]
-            remaining_rows = worksheet.columns[skip_rows + header_rows:]
+            header_row = worksheet[_get_column_letter(skip_rows + 1)]
+            remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1)
             if configuration_line:
                 header_row = header_row[1:]
-                remaining_rows = [row[1:] for row in remaining_rows]
+                remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1, min_row=2)
         else:
-            header_row = worksheet.rows[skip_rows + configuration_line]
-            remaining_rows = worksheet.rows[skip_rows + configuration_line + header_rows:]
+            header_row = worksheet[skip_rows + configuration_line + 1]
+            remaining_rows = worksheet.iter_rows(min_row=skip_rows + configuration_line + header_rows + 1)
 
         coli_to_header = {}
         for i, header in enumerate(header_row):
