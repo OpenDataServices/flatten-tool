@@ -15,7 +15,8 @@ from warnings import warn
 import traceback
 import datetime
 import pytz
-from openpyxl.utils import _get_column_letter, column_index_from_string
+from openpyxl.utils import column_index_from_string
+from openpyxl.utils.cell import _get_column_letter
 from flattentool.exceptions import DataErrorWarning
 from flattentool.lib import isint, parse_sheet_configuration
 
