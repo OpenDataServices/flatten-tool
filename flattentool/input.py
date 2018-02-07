@@ -581,7 +581,7 @@ class XLSXInput(SpreadsheetInput):
             return []
 
         if self.vertical_orientation:
-            return [cell.value for cell in worksheet[_get_column_letter(skip_rows+1)][configuration_line:]]
+            return [cell.value for cell in worksheet[_get_column_letter(skip_rows + 1)][configuration_line:]]
 
         try:
             return [cell.value for cell in worksheet[skip_rows + configuration_line + 1]]
