@@ -120,7 +120,7 @@ def sort_iati_element(element, schema_subdict):
         sort_iati_element(child, schema_subdict[child.tag])
 
 
-def sort_iati_xml_file(input_file, output_file, *schemas):
+def sort_iati_xml_file(input_file, output_file, schemas):
     """
     Sort an IATI XML file according to the schema.
     """
