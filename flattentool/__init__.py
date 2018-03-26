@@ -112,6 +112,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               vertical_orientation=False,
               metatab_name=None, metatab_only=False, metatab_schema='',
               metatab_vertical_orientation=False,
+              xml_schemas=None,
               **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -196,12 +197,12 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     if xml:
         if output_name is None:
             if sys.version > '3':
-                sys.stdout.buffer.write(toxml(base))
+                sys.stdout.buffer.write(toxml(base, xml_schemas=xml_schemas))
             else:
-                sys.stdout.write(toxml(base))
+                sys.stdout.write(toxml(base, xml_schemas=xml_schemas))
         else:
             with codecs.open(output_name, 'wb') as fp:
-                fp.write(toxml(base))
+                fp.write(toxml(base, xml_schemas=xml_schemas))
     else:
         if output_name is None:
             print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))

@@ -45,13 +45,12 @@ class IATISchemaWalker(object):
     Based on the Schema2Doc class in https://github.com/IATI/IATI-Standard-SSOT/blob/version-2.02/gen.py
 
     """
-    def __init__(self, schema):
+    def __init__(self, schemas):
         """
         schema -- the filename of the schema to use, e.g.
                   'iati-activities-schema.xsd'
         """
-        self.tree = ET.parse("./IATI-Schemas/"+schema)
-        self.tree2 = ET.parse("./IATI-Schemas/iati-common.xsd")
+        self.trees = [ET.parse(schema) for schema in schemas]
 
     def get_schema_element(self, tag_name, name_attribute):
         """
@@ -63,9 +62,10 @@ class IATISchemaWalker(object):
                           e.g. iati-activities
 
         """
-        schema_element = self.tree.find("xsd:{0}[@name='{1}']".format(tag_name, name_attribute), namespaces=namespaces)
-        if schema_element is None:
-            schema_element = self.tree2.find("xsd:{0}[@name='{1}']".format(tag_name, name_attribute), namespaces=namespaces)
+        for tree in self.trees:
+            schema_element = tree.find("xsd:{0}[@name='{1}']".format(tag_name, name_attribute), namespaces=namespaces)
+            if schema_element is not None:
+                return schema_element
         return schema_element
 
     def element_loop(self, element, path):
@@ -120,11 +120,11 @@ def sort_iati_element(element, schema_subdict):
         sort_iati_element(child, schema_subdict[child.tag])
 
 
-def sort_iati_xml_file(input_file, output_file):
+def sort_iati_xml_file(input_file, output_file, *schemas):
     """
     Sort an IATI XML file according to the schema.
     """
-    schema_dict = IATISchemaWalker('iati-activities-schema.xsd').create_schema_dict('iati-activity')
+    schema_dict = IATISchemaWalker(schemas).create_schema_dict('iati-activity')
     tree = ET.parse(input_file)
     root = tree.getroot()
 
@@ -136,7 +136,7 @@ def sort_iati_xml_file(input_file, output_file):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 2:
-        print('Usage: python3 sort_iati.py input_file.xml output_file.xml')
+    if len(sys.argv) <= 3:
+        print('Usage: python3 sort_iati.py input_file.xml output_file.xml schema.xsd')
     else:
-        sort_iati_xml_file(sys.argv[1], sys.argv[2])
+        sort_iati_xml_file(sys.argv[1], sys.argv[2], sys.argv[3:])

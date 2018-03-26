@@ -9,6 +9,7 @@ usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
                               [--metatab-schema METATAB_SCHEMA]
                               [--metatab-only]
                               [--metatab-vertical-orientation]
+                              [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
                               input_name
 
 positional arguments:
@@ -60,4 +61,6 @@ optional arguments:
   --metatab-vertical-orientation
                         Read metatab so that headings are in the first column
                         and data is read vertically. Only for XLSX not CSV
+  --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
+                        Path to one or more XML schemas (used for sorting)
 

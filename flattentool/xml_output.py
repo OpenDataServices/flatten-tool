@@ -25,9 +25,10 @@ def dict_to_xml(data, tagname):
     return el
 
 
-def toxml(data):
+def toxml(data, xml_schemas=None):
     root = dict_to_xml(data, 'iati-activities')
-    schema_dict = IATISchemaWalker('iati-activities-schema.xsd').create_schema_dict('iati-activity')
-    for element in root:
-        sort_iati_element(element, schema_dict)
+    if xml_schemas is not None:
+        schema_dict = IATISchemaWalker(xml_schemas).create_schema_dict('iati-activity')
+        for element in root:
+            sort_iati_element(element, schema_dict)
     return ET.tostring(root)

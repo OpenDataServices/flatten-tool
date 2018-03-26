@@ -155,6 +155,12 @@ def create_parser():
         "--metatab-vertical-orientation",
         action='store_true',
         help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--xml-schema",
+        dest='xml_schemas',
+        metavar='XML_SCHEMA',
+        nargs='*',
+        help="Path to one or more XML schemas (used for sorting)")
 
     return parser
 
