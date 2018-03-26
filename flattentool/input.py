@@ -15,8 +15,10 @@ from warnings import warn
 import traceback
 import datetime
 import pytz
-from openpyxl.utils import _get_column_letter, column_index_from_string
+from openpyxl.utils import column_index_from_string
+from openpyxl.utils.cell import _get_column_letter
 from flattentool.exceptions import DataErrorWarning
+from flattentool.lib import isint, parse_sheet_configuration
 
 
 class Cell:
@@ -38,6 +40,7 @@ try:
     from collections import UserDict  # pylint: disable=E0611
 except ImportError:
     from UserDict import UserDict  # pylint: disable=F0401
+
 
 def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     if value == '' or value is None:
@@ -85,12 +88,31 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
         return text_type(value)
+    elif type_string == 'date':
+        if type(value) == datetime.datetime:
+            return value.date().isoformat()
+        return text_type(value)
     elif type_string == '':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
+        if type(value) == float and int(value) == value:
+            return int(value)
         return value if type(value) in [int] else text_type(value)
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
+
+
+def warnings_for_ignored_columns(v, extra_message):
+    if isinstance(v, Cell):
+        warn('Column {} has been ignored, {}'.format(v.cell_location[3], extra_message))
+    elif isinstance(v, dict):
+        for x in v.values():
+            warnings_for_ignored_columns(x, extra_message)
+    elif isinstance(v, TemporaryDict):
+        for x in v.to_list():
+            warnings_for_ignored_columns(x, extra_message)
+    else:
+        raise ValueError()
 
 
 def merge(base, mergee, debug_info=None):
@@ -103,6 +125,9 @@ def merge(base, mergee, debug_info=None):
             value = v
         if key in base:
             if isinstance(value, TemporaryDict):
+                if not isinstance(base[key], TemporaryDict):
+                    warnings_for_ignored_columns(v, 'because it treats {} as an array, but another column does not'.format(key))
+                    continue
                 for temporarydict_key, temporarydict_value in value.items():
                     if temporarydict_key in base[key]:
                         merge(base[key][temporarydict_key], temporarydict_value, debug_info)
@@ -111,23 +136,33 @@ def merge(base, mergee, debug_info=None):
                         base[key][temporarydict_key] = temporarydict_value
                 for temporarydict_value in  value.items_no_keyfield:
                     base[key].items_no_keyfield.append(temporarydict_value)
-            elif isinstance(value, dict) and isinstance(base[key], dict):
-                merge(base[key], value, debug_info)
+            elif isinstance(value, dict):
+                if isinstance(base[key], dict):
+                    merge(base[key], value, debug_info)
+                else:
+                    warnings_for_ignored_columns(v, 'because it treats {} as an object, but another column does not'.format(key))
             else:
+                if not isinstance(base[key], Cell):
+                    id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
+                    if debug_info.get('root_id'):
+                        id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
+                    warnings_for_ignored_columns(v, 'because another column treats it as an array or object'.format(key))
+                    continue
                 base_value = base[key].cell_value
                 if base_value != value:
                     id_info = '{} "{}"'.format(debug_info.get('id_name'), debug_info.get(debug_info.get('id_name')))
                     if debug_info.get('root_id'):
                         id_info = '{} "{}", '.format(debug_info.get('root_id'), debug_info.get('root_id_or_none'))+id_info
                     warn(
-                        'Conflict when merging field "{}" for {} in sheet {}: "{}" != "{}". If you were not expecting merging you may have a duplicate ID.'.format(
-                            key, id_info, debug_info.get('sheet_name'), base_value, value),
+                        'You may have a duplicate Identifier: We couldn\'t merge these rows with the {}: field "{}" in sheet "{}": one cell has the value: "{}", the other cell has the value: "{}"'.format(
+                            id_info, key, debug_info.get('sheet_name'), base_value, value),
                         DataErrorWarning)
                 else:
                     base[key].sub_cells.append(v)
         else:
             # This happens when a parent record finds the first a child record of a known type
             base[key] = v
+
 
 class SpreadsheetInput(object):
     """
@@ -143,7 +178,7 @@ class SpreadsheetInput(object):
 
         """
         if self.parser:
-            title_lookup = title_lookup or self.parser.title_lookup
+            title_lookup = self.parser.title_lookup
         for d in dicts:
             if title_lookup:
                 yield OrderedDict([(title_lookup.lookup_header(k), v) for k,v in d.items()])
@@ -160,7 +195,9 @@ class SpreadsheetInput(object):
                  include_sheets=[],
                  exclude_sheets=[],
                  id_name='id',
-                 xml=False
+                 xml=False,
+                 base_configuration={},
+                 use_configuration=True
                 ):
         self.input_name = input_name
         self.root_list_path = root_list_path
@@ -174,6 +211,9 @@ class SpreadsheetInput(object):
         self.vertical_orientation = vertical_orientation
         self.include_sheets = include_sheets
         self.exclude_sheets = exclude_sheets
+        self.base_configuration = base_configuration or {}
+        self.sheet_configuration = {}
+        self.use_configuration = use_configuration
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -182,6 +222,13 @@ class SpreadsheetInput(object):
                     self.parser.sub_sheets[sub_sheet_name].title_lookup if sub_sheet_name in self.parser.sub_sheets else None)
             else:
                 yield sub_sheet_name, self.get_sheet_lines(sub_sheet_name)
+
+    def configure_sheets(self):
+        for sub_sheet_name in self.sub_sheet_names:
+            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name)) 
+
+    def get_sheet_configuration(self, sheet_name):
+        return []
 
     def get_sheet_lines(self, sheet_name):
         raise NotImplementedError
@@ -199,6 +246,9 @@ class SpreadsheetInput(object):
             sheet_name, lines = sheet
             try:
                 actual_headings = self.get_sheet_headings(sheet_name)
+                # If sheet is empty or too many lines have been skipped
+                if not actual_headings:
+                    continue
                 found = OrderedDict()
                 last_col = len(actual_headings)
                 # We want to ignore data in earlier columns, so we look
@@ -400,18 +450,29 @@ class CSVInput(SpreadsheetInput):
     encoding = 'utf-8'
 
     def get_sheet_headings(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if sheet_configuration.get("ignore"):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
+
         if sys.version > '3':  # If Python 3 or greater
             with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
                 r = csvreader(main_sheet_file)
-                for row in enumerate(r):
-                    # Just return the first row
-                    return row[1]
+                for num, row in enumerate(r):
+                    if num == (skip_rows + configuration_line):
+                        return row
         else:  # If Python 2
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 r = csvreader(main_sheet_file, encoding=self.encoding)
-                for row in enumerate(r):
-                    # Just return the first row
-                    return row[1]
+                for num, row in enumerate(r):
+                    if num == (skip_rows + configuration_line):
+                        return row
 
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
@@ -426,20 +487,66 @@ class CSVInput(SpreadsheetInput):
             except ValueError:
                 pass
         self.sub_sheet_names = sheet_names
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in sheet_names)
+        self.configure_sheets()
+
+    def generate_rows(self, dictreader, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+        for i in range(0, configuration_line + skip_rows):
+            previous_row = next(dictreader.reader)
+        if sys.version > '3':  # If Python 3 or greater
+            fieldnames = dictreader.fieldnames
+        else:
+            # unicodecsv dictreader always reads the headingline first
+            # so in the case of there being any rows to skip look at 
+            # previous row and use that for fieldnames.
+            if (configuration_line + skip_rows):
+                fieldnames = previous_row
+                dictreader.fieldnames = fieldnames
+                dictreader.unicode_fieldnames = fieldnames
+            else:
+                fieldnames = dictreader.unicode_fieldnames 
+        for i in range(0, header_rows - 1):
+            next(dictreader.reader)
+        for line in dictreader:
+            yield OrderedDict((fieldname, line[fieldname]) for fieldname in fieldnames)
+
+    def get_sheet_configuration(self, sheet_name):
+        if sys.version > '3':  # If Python 3 or greater
+            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+                r = csvreader(main_sheet_file)
+                heading_row = next(r)
+        else:  # If Python 2
+            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
+                r = csvreader(main_sheet_file, encoding=self.encoding)
+                heading_row = next(r)
+        if heading_row[0] == '#':
+            return heading_row[1:]
+        return []
+
+
 
     def get_sheet_lines(self, sheet_name):
         if sys.version > '3':  # If Python 3 or greater
             # Pass the encoding to the open function
             with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
                 dictreader = DictReader(main_sheet_file)
-                for line in dictreader:
-                    yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
+                for row in self.generate_rows(dictreader, sheet_name):
+                    yield row
         else:  # If Python 2
             # Pass the encoding to DictReader
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 dictreader = DictReader(main_sheet_file, encoding=self.encoding)
-                for line in dictreader:
-                    yield OrderedDict((fieldname, line[fieldname]) for fieldname in dictreader.fieldnames)
+                for row in self.generate_rows(dictreader, sheet_name):
+                    yield row
 
 
 class XLSXInput(SpreadsheetInput):
@@ -456,25 +563,69 @@ class XLSXInput(SpreadsheetInput):
 
         sheet_names = list(sheet for sheet in self.sheet_names_map.keys())
         self.sub_sheet_names = sheet_names
+        self.configure_sheets()
 
     def get_sheet_headings(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if (sheet_configuration.get("ignore") or
+            (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
 
         if self.vertical_orientation:
-            return [cell.value for cell in worksheet.columns[0]]
+            return [cell.value for cell in worksheet[_get_column_letter(skip_rows + 1)][configuration_line:]]
 
-        return [cell.value for cell in worksheet.rows[0]]
+        try:
+            return [cell.value for cell in worksheet[skip_rows + configuration_line + 1]]
+        except IndexError:
+            # If the heading line is after data in the spreadsheet. i.e when skipRows
+            return []
+
+    def get_sheet_configuration(self, sheet_name):
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        if worksheet['A1'].value == '#':
+            return [cell.value for num, cell in enumerate(worksheet[1]) if num != 0 and cell.value]
+        else:
+            return []
 
     def get_sheet_lines(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+
+
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         if self.vertical_orientation:
-            header_row = worksheet.columns[0]
-            remaining_rows = worksheet.columns[1:]
+            header_row = worksheet[_get_column_letter(skip_rows + 1)]
+            remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1)
+            if configuration_line:
+                header_row = header_row[1:]
+                remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1, min_row=2)
         else:
-            header_row = worksheet.rows[0]
-            remaining_rows = worksheet.rows[1:]
+            header_row = worksheet[skip_rows + configuration_line + 1]
+            remaining_rows = worksheet.iter_rows(min_row=skip_rows + configuration_line + header_rows + 1)
 
-        coli_to_header = ({i: x.value for i, x in enumerate(header_row) if x.value is not None})
+        coli_to_header = {}
+        for i, header in enumerate(header_row):
+            if header.value is None:
+                continue
+            if sheet_configuration.get("hashcomments") and str(header.value).startswith('#'):
+                continue
+            coli_to_header[i] = header.value
         for row in remaining_rows:
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
@@ -485,12 +636,6 @@ FORMATS = {
 }
 
 
-def isint(string):
-    try:
-        int(string)
-        return True
-    except ValueError:
-        return False
 
 class ListAsDict(dict):
     pass
@@ -518,19 +663,26 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
         if cell.cell_value is None or cell.cell_value == '':
             continue
         current_path = unflattened
-        path_list = [item.rstrip('[]') for item in path.split('/')]
+        path_list = [item.rstrip('[]') for item in text_type(path).split('/')]
         for num, path_item in enumerate(path_list):
             if isint(path_item):
+                if num == 0:
+                    warn('Column "{}" has been ignored because it is a number.'.format(path), DataErrorWarning)
                 continue
-            path_till_now = '/'.join([item for item in path_list[:num+1] if not isint(item)])
+            current_type = None
+            path_till_now = '/'.join([item for item in path_list[:num + 1] if not isint(item)])
             if parser:
                 current_type = parser.flattened.get(path_till_now)
-            else:
-                current_type = None
             try:
-                next_path_item = path_list[num+1]
+                next_path_item = path_list[num + 1]
             except IndexError:
                 next_path_item = ''
+
+            # Quick solution to avoid casting of date as datetinme in spreadsheet > xml
+            if xml:
+                if type(cell.cell_value) == datetime.datetime and not next_path_item:
+                    if 'datetime' not in path:
+                        current_type = 'date'
 
             ## Array
             list_index = -1
@@ -538,8 +690,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 if current_type and current_type != 'array':
                     raise ValueError("There is an array at '{}' when the schema says there should be a '{}'".format(path_till_now, current_type))
                 list_index = int(next_path_item)
+                current_type = 'array'
 
-            if isint(next_path_item) or current_type == 'array':
+            if current_type == 'array':
                 list_as_dict = current_path.get(path_item)
                 if list_as_dict is None:
                     list_as_dict = ListAsDict()
@@ -553,7 +706,10 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     new_path = OrderedDict()
                     list_as_dict[list_index] = new_path
                 current_path = new_path
-                continue
+                if not xml or num < len(path_list)-2:
+                    # In xml "arrays" can have text values, if they're the final element
+                    # This corresponds to a tag with text, but also possibly attributes
+                    continue
 
             ## Object
             if current_type == 'object' or (not current_type and next_path_item):
@@ -567,10 +723,20 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     break
                 current_path = new_path
                 continue
-            if current_type and current_type != 'object' and next_path_item:
+            if current_type and current_type not in ['object', 'array'] and next_path_item:
                 raise ValueError("There is an object or list at '{}' but it should be an {}".format(path_till_now, current_type))
 
             ## Other Types
+            current_path_value = current_path.get(path_item)
+            if not xml and (type(current_path_value) is ListAsDict or hasattr(current_path_value, 'items')):
+                #   ^
+                # xml can have an object/array that also has a text value
+                warn(
+                    'Column {} has been ignored, because another column treats it as an array or object'.format(
+                        path_till_now),
+                    DataErrorWarning)
+                continue
+
             value = cell.cell_value
             converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value
@@ -586,7 +752,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     if path_item.startswith('@'):
                         current_path[path_item] = cell
                     else:
-                        if path_item not in current_path:
+                        if current_type == 'array':
+                            current_path['text()'] = cell
+                        elif path_item not in current_path:
                             current_path[path_item] = {'text()': cell}
                         else:
                             current_path[path_item]['text()'] = cell

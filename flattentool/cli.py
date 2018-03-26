@@ -69,6 +69,13 @@ def create_parser():
         "-f", "--output-format",
         help="Type of template you want to create. Defaults to all available options")
     parser_flatten.add_argument(
+        "--xml",
+        action='store_true',
+        help="Use XML as the input format")
+    parser_flatten.add_argument(
+        "--id-name",
+        help="String to use for the identifier key, defaults to 'id'")
+    parser_flatten.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
     parser_flatten.add_argument(
@@ -161,6 +168,9 @@ def create_parser():
         metavar='XML_SCHEMA',
         nargs='*',
         help="Path to one or more XML schemas (used for sorting)")
+    parser_unflatten.add_argument(
+        "--default-configuration",
+        help="Comma seperated list of default parsing commands for all sheets. Only for XLSX not CSV")
 
     return parser
 

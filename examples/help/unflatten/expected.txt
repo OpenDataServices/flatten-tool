@@ -10,6 +10,7 @@ usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
                               [--metatab-only]
                               [--metatab-vertical-orientation]
                               [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
+                              [--default-configuration DEFAULT_CONFIGURATION]
                               input_name
 
 positional arguments:
@@ -63,4 +64,7 @@ optional arguments:
                         and data is read vertically. Only for XLSX not CSV
   --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
                         Path to one or more XML schemas (used for sorting)
+  --default-configuration DEFAULT_CONFIGURATION
+                        Comma seperated list of default parsing commands for
+                        all sheets. Only for XLSX not CSV
 
