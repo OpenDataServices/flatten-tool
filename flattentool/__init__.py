@@ -208,14 +208,15 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         base[root_list_path] = list(result)
 
     if xml:
+        xml_output = toxml(base, xml_schemas=xml_schemas)
         if output_name is None:
             if sys.version > '3':
-                sys.stdout.buffer.write(toxml(base, xml_schemas=xml_schemas))
+                sys.stdout.buffer.write(xml_output)
             else:
-                sys.stdout.write(toxml(base, xml_schemas=xml_schemas))
+                sys.stdout.write(xml_output)
         else:
             with codecs.open(output_name, 'wb') as fp:
-                fp.write(toxml(base, xml_schemas=xml_schemas))
+                fp.write(xml_output)
     else:
         if output_name is None:
             print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
