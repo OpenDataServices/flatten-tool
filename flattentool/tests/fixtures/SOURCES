@@ -13,7 +13,7 @@ tenders_releases_base.json
 Source: Same as tenders_releases_2_releases.json (but with the releases key removed)
 License: http://data.gc.ca/eng/open-government-licence-canada 
 
-WellcomeTrust-grants_fixed_2_grants.json
-Source: http://data.threesixtygiving.org/dataset/welcome-trust-grants-awarded
-(but with the key "Grants" changed to "grants" and truncated to to releases)
+fundingproviders-grants_fixed_2_grants.json
+Source: Edited version  of data from http://data.threesixtygiving.org/dataset/welcome-trust-grants-awarded
+(converted to different formats; key "Grants" changed to "grants"; truncated to two releases; personal and organization indentifiers replaced)
 License: Creative Commons Attribution
