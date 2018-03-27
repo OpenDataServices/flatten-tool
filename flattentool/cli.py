@@ -1,6 +1,8 @@
 from __future__ import print_function
 import argparse
 from flattentool import create_template, unflatten, flatten
+from flattentool.input import FORMATS as INPUT_FORMATS
+from flattentool.output import FORMATS as OUTPUT_FORMATS
 from six import text_type
 
 """
@@ -28,6 +30,9 @@ def create_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='subparser_name')
 
+    output_formats = sorted(OUTPUT_FORMATS) + ['all']
+    input_formats = sorted(INPUT_FORMATS)
+
     parser_create_template = subparsers.add_parser(
         'create-template',
         help='Create a template from the given schema')
@@ -37,7 +42,8 @@ def create_parser():
         required=True)
     parser_create_template.add_argument(
         "-f", "--output-format",
-        help="Type of template you want to create. Defaults to all available options")
+        help="Type of template you want to create. Defaults to all available options",
+        choices=output_formats)
     parser_create_template.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
@@ -67,7 +73,8 @@ def create_parser():
         help="Path to a relevant schema.")
     parser_flatten.add_argument(
         "-f", "--output-format",
-        help="Type of template you want to create. Defaults to all available options")
+        help="Type of template you want to create. Defaults to all available options",
+        choices=output_formats)
     parser_flatten.add_argument(
         "--xml",
         action='store_true',
@@ -105,6 +112,7 @@ def create_parser():
     parser_unflatten.add_argument(
         "-f", "--input-format",
         help="File format of input file or directory.",
+        choices=input_formats,
         required=True)
     parser_unflatten.add_argument(
         "--xml",
