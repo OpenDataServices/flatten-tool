@@ -12,7 +12,8 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='template', output_format='all', main_sheet_name='main', flatten=False, rollup=False, root_id=None, use_titles=False, **_):
+def create_template(schema, output_name='template', output_format='all', main_sheet_name='main',
+                    rollup=False, root_id=None, use_titles=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
