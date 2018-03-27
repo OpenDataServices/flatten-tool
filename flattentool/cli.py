@@ -132,7 +132,7 @@ def create_parser():
         help="Encoding of the input file(s) (only relevant for CSV). This can be any encoding recognised by Python. Defaults to utf8.")
     parser_unflatten.add_argument(
         "-o", "--output-name",
-        help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to unflattened.json")
+        help="Name of the outputted file. Will have an extension appended as appropriate.")
     parser_unflatten.add_argument(
         "-c", "--cell-source-map",
         help="Path to write a cell source map to. Will have an extension appended as appropriate.")
