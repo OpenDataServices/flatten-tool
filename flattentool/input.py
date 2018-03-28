@@ -254,6 +254,8 @@ class SpreadsheetInput(object):
                 # We want to ignore data in earlier columns, so we look
                 # through the data backwards
                 for i, actual_heading in enumerate(reversed(actual_headings)):
+                    if actual_heading is None:
+                        continue
                     if actual_heading in found:
                         found[actual_heading].append((last_col-i)-1)
                     else:
