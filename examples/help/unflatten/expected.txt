@@ -1,4 +1,4 @@
-usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
+usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
                               [-b BASE_JSON] [-m ROOT_LIST_PATH] [-e ENCODING]
                               [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
                               [-a HEADING_SOURCE_MAP]
@@ -17,7 +17,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f INPUT_FORMAT, --input-format INPUT_FORMAT
+  -f {csv,xlsx}, --input-format {csv,xlsx}
                         File format of input file or directory.
   --xml                 Use XML as the output format
   --id-name ID_NAME     String to use for the identifier key, defaults to 'id'
@@ -33,7 +33,7 @@ optional arguments:
                         Defaults to utf8.
   -o OUTPUT_NAME, --output-name OUTPUT_NAME
                         Name of the outputted file. Will have an extension
-                        appended as appropriate. Defaults to unflattened.json
+                        appended as appropriate.
   -c CELL_SOURCE_MAP, --cell-source-map CELL_SOURCE_MAP
                         Path to write a cell source map to. Will have an
                         extension appended as appropriate.
