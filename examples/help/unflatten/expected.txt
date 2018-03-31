@@ -1,4 +1,4 @@
-usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
+usage: flatten-tool unflatten [-h] -f {csv,ods,xlsx} [--xml] [--id-name ID_NAME]
                               [-b BASE_JSON] [-m ROOT_LIST_PATH] [-e ENCODING]
                               [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
                               [-a HEADING_SOURCE_MAP]
@@ -17,7 +17,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f {csv,xlsx}, --input-format {csv,xlsx}
+  -f {csv,ods,xlsx}, --input-format {csv,ods,xlsx}
                         File format of input file or directory.
   --xml                 Use XML as the output format
   --id-name ID_NAME     String to use for the identifier key, defaults to 'id'

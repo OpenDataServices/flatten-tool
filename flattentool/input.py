@@ -9,14 +9,17 @@ import sys
 from decimal import Decimal, InvalidOperation
 import os
 from collections import OrderedDict
+from itertools import islice
 import openpyxl
 from six import text_type
+from six.moves import zip_longest
 from warnings import warn
 import traceback
 import datetime
 import pytz
 from openpyxl.utils import column_index_from_string
 from openpyxl.utils.cell import _get_column_letter
+import pyexcel_ods3
 from flattentool.exceptions import DataErrorWarning
 from flattentool.lib import isint, parse_sheet_configuration
 
@@ -28,6 +31,7 @@ class Cell:
         self.sub_cells = []
 
 # The "pylint: disable" lines exist to ignore warnings about the imports we expect not to work not working
+
 
 if sys.version > '3':
     from csv import DictReader
@@ -225,7 +229,7 @@ class SpreadsheetInput(object):
 
     def configure_sheets(self):
         for sub_sheet_name in self.sub_sheet_names:
-            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name)) 
+            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name))
 
     def get_sheet_configuration(self, sheet_name):
         return []
@@ -508,14 +512,14 @@ class CSVInput(SpreadsheetInput):
             fieldnames = dictreader.fieldnames
         else:
             # unicodecsv dictreader always reads the headingline first
-            # so in the case of there being any rows to skip look at 
+            # so in the case of there being any rows to skip look at
             # previous row and use that for fieldnames.
             if (configuration_line + skip_rows):
                 fieldnames = previous_row
                 dictreader.fieldnames = fieldnames
                 dictreader.unicode_fieldnames = fieldnames
             else:
-                fieldnames = dictreader.unicode_fieldnames 
+                fieldnames = dictreader.unicode_fieldnames
         for i in range(0, header_rows - 1):
             next(dictreader.reader)
         for line in dictreader:
@@ -555,7 +559,7 @@ class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
-        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.get_sheet_names())
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.sheetnames)
         if self.include_sheets:
             for sheet in list(self.sheet_names_map):
                 if sheet not in self.include_sheets:
@@ -563,8 +567,7 @@ class XLSXInput(SpreadsheetInput):
         for sheet in self.exclude_sheets or []:
             self.sheet_names_map.pop(sheet, None)
 
-        sheet_names = list(sheet for sheet in self.sheet_names_map.keys())
-        self.sub_sheet_names = sheet_names
+        self.sub_sheet_names = list(self.sheet_names_map.keys())
         self.configure_sheets()
 
     def get_sheet_headings(self, sheet_name):
@@ -578,7 +581,7 @@ class XLSXInput(SpreadsheetInput):
 
         skip_rows = sheet_configuration.get("skipRows", 0)
         if (sheet_configuration.get("ignore") or
-            (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
+           (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
             # returning empty headers is a proxy for no data in the sheet.
             return []
 
@@ -609,7 +612,6 @@ class XLSXInput(SpreadsheetInput):
         skip_rows = sheet_configuration.get("skipRows", 0)
         header_rows = sheet_configuration.get("headerRows", 1)
 
-
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         if self.vertical_orientation:
             header_row = worksheet[_get_column_letter(skip_rows + 1)]
@@ -632,15 +634,95 @@ class XLSXInput(SpreadsheetInput):
             yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
 
+class ODSInput(SpreadsheetInput):
+    def read_sheets(self):
+        self.workbook = pyexcel_ods3.get_data(self.input_name)
+
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.keys())
+        if self.include_sheets:
+            for sheet in list(self.sheet_names_map):
+                if sheet not in self.include_sheets:
+                    self.sheet_names_map.pop(sheet)
+        for sheet in self.exclude_sheets or []:
+            self.sheet_names_map.pop(sheet, None)
+
+        self.sub_sheet_names = list(self.sheet_names_map.keys())
+        self.configure_sheets()
+
+    def get_sheet_headings(self, sheet_name):
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if (sheet_configuration.get("ignore") or
+           (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
+
+        if self.vertical_orientation:
+            return [x[skip_rows] if len(x) > skip_rows else None for x in worksheet][configuration_line:]
+
+        try:
+            return worksheet[skip_rows + configuration_line]
+        except IndexError:
+            # If the heading line is after data in the spreadsheet. i.e when skipRows
+            return []
+
+    def get_sheet_configuration(self, sheet_name):
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        if worksheet[0][0] == '#':
+            return [cell for num, cell in enumerate(worksheet[0]) if num != 0]
+        else:
+            return []
+
+    def get_sheet_lines(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[self.sheet_names_map[sheet_name]]
+        configuration_line = 1 if sheet_configuration else 0
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+
+        worksheet = self.workbook[self.sheet_names_map[sheet_name]]
+        if self.vertical_orientation:
+            if configuration_line:
+                worksheet = worksheet[1:]
+            rows = islice(zip_longest(*worksheet), skip_rows, None)
+            header_row = list(next(rows))
+            remaining_rows = islice(rows, header_rows - 1, None)
+        else:
+            header_row = worksheet[skip_rows + configuration_line]
+            remaining_rows = worksheet[skip_rows + configuration_line + 1:]
+
+        coli_to_header = {}
+        for i, header in enumerate(header_row):
+            if header is None:
+                continue
+            if sheet_configuration.get("hashcomments") and header.startswith('#'):
+                continue
+            coli_to_header[i] = header
+        for row in remaining_rows:
+            yield OrderedDict((coli_to_header[i], x) for i, x in enumerate(row) if i in coli_to_header)
+
+
 FORMATS = {
     'xlsx': XLSXInput,
+    'ods': ODSInput,
     'csv': CSVInput
 }
 
 
-
 class ListAsDict(dict):
     pass
+
 
 def list_as_dicts_to_temporary_dicts(unflattened, id_name, xml):
     for key, value in list(unflattened.items()):

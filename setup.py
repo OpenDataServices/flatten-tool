@@ -1,7 +1,8 @@
 from setuptools import setup
 import sys
 
-install_requires = ['jsonref', 'schema', 'openpyxl>=2.5', 'six', 'pytz', 'xmltodict']
+install_requires = ['jsonref', 'schema', 'openpyxl>=2.5', 'six', 'pytz',
+                    'xmltodict', 'pyexcel-ods3']
 
 if sys.version < '3':
     install_requires.append('unicodecsv')
