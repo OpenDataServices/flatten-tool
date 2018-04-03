@@ -1,3 +1,4 @@
+from collections import OrderedDict
 try:
     import lxml.etree as ET
     # If we're using lxml we have to do some extra work to support namespaces,
@@ -8,6 +9,14 @@ except ImportError:
     USING_LXML = False
 from warnings import warn
 from flattentool.exceptions import DataErrorWarning
+
+
+def sort_attributes(data):
+    attribs = []
+    other = []
+    for k, v in data.items():
+        (other, attribs)[k.startswith('@')].append((k, v))
+    return OrderedDict(sorted(attribs) + other)
 
 
 def child_to_xml(parent_el, tagname, child, toplevel=False, nsmap=None):
@@ -44,6 +53,9 @@ def dict_to_xml(data, tagname, toplevel=True, nsmap=None):
     except ValueError as e:
         warn(str(e), DataErrorWarning)
         return
+
+    if USING_LXML:
+        data = sort_attributes(data)
 
     for k, v in data.items():
         if type(v) == list:
