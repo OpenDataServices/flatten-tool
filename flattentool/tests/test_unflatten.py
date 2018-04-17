@@ -63,7 +63,6 @@ def test_unflatten_xml(tmpdir):
         output_name=tmpdir.join('output.xml').strpath,
         input_format='csv',
         root_list_path='iati-activity',
-        xml_root_path='iati-activities',
         id_name='iati-identifier',
         xml=True)
     assert open('examples/iati/expected.xml').read() == tmpdir.join('output.xml').read()
