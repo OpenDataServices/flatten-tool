@@ -117,7 +117,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               vertical_orientation=False,
               metatab_name=None, metatab_only=False, metatab_schema='',
               metatab_vertical_orientation=False,
-              default_configuration='', xml_root_path='iati-activities',
+              default_configuration='',
               **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -208,6 +208,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         base[root_list_path] = list(result)
 
     if xml:
+        xml_root_path = base_configuration.get('XMLRootPath', 'iati-activities')
         if output_name is None:
             if sys.version > '3':
                 sys.stdout.buffer.write(toxml(base, xml_root_path))

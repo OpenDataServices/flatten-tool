@@ -128,9 +128,6 @@ def create_parser():
         "-m", "--root-list-path",
         help="The path in the JSON that will contain the unflattened list. Defaults to main.")
     parser_unflatten.add_argument(
-        "--xml-root-path",
-        help="The root element in the XML. Defaults to 'iati-activities'.")
-    parser_unflatten.add_argument(
         "-e", "--encoding",
         help="Encoding of the input file(s) (only relevant for CSV). This can be any encoding recognised by Python. Defaults to utf8.")
     parser_unflatten.add_argument(

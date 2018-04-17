@@ -1,6 +1,5 @@
 usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
-                              [-b BASE_JSON] [-m ROOT_LIST_PATH]
-                              [--xml-root-path XML_ROOT_PATH] [-e ENCODING]
+                              [-b BASE_JSON] [-m ROOT_LIST_PATH] [-e ENCODING]
                               [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
                               [-a HEADING_SOURCE_MAP]
                               [--timezone-name TIMEZONE_NAME] [-r ROOT_ID]
@@ -28,9 +27,6 @@ optional arguments:
   -m ROOT_LIST_PATH, --root-list-path ROOT_LIST_PATH
                         The path in the JSON that will contain the unflattened
                         list. Defaults to main.
-  --xml-root-path XML_ROOT_PATH
-                        The root element in the XML. Defaults to 'iati-
-                        activities'.
   -e ENCODING, --encoding ENCODING
                         Encoding of the input file(s) (only relevant for CSV).
                         This can be any encoding recognised by Python.

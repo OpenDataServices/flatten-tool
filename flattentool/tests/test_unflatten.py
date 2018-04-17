@@ -74,7 +74,8 @@ def test_unflatten_org_xml(tmpdir):
         output_name=tmpdir.join('output.xml').strpath,
         input_format='xlsx',
         root_list_path='iati-organisation',
-        xml_root_path='iati-organisations',
         id_name='organisation-identifier',
-        xml=True)
+        xml=True,
+        metatab_name='Meta'
+        )
     assert open('flattentool/tests/fixtures/iati-org.xml').read() == tmpdir.join('output.xml').read()
