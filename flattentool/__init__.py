@@ -208,15 +208,15 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         base[root_list_path] = list(result)
 
     if xml:
-        xml_root_path = base_configuration.get('XMLRootPath', 'iati-activities')
+        xml_root_tag = base_configuration.get('XMLRootTag', 'iati-activities')
         if output_name is None:
             if sys.version > '3':
-                sys.stdout.buffer.write(toxml(base, xml_root_path))
+                sys.stdout.buffer.write(toxml(base, xml_root_tag))
             else:
-                sys.stdout.write(toxml(base, xml_root_path))
+                sys.stdout.write(toxml(base, xml_root_tag))
         else:
             with codecs.open(output_name, 'wb') as fp:
-                fp.write(toxml(base, xml_root_path))
+                fp.write(toxml(base, xml_root_tag))
     else:
         if output_name is None:
             print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))
