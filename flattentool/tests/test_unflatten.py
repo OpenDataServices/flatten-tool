@@ -58,9 +58,9 @@ def test_360_fields_case_insensitive(tmpdir):
 
 
 def test_unflatten_xml(tmpdir):
-    fixture_path = 'flattentool/tests/fixtures'
+    schema_path = 'examples/iati'
     schemas = ['iati-activities-schema.xsd', 'iati-common.xsd']
-    schema_paths = ['{}/{}'.format(fixture_path, schema) for schema in schemas]
+    schema_filepaths = ['{}/{}'.format(schema_path, schema) for schema in schemas]
     unflatten(
         input_name='examples/iati',
         output_name=tmpdir.join('output.xml').strpath,
@@ -68,6 +68,6 @@ def test_unflatten_xml(tmpdir):
         root_list_path='iati-activity',
         id_name='iati-identifier',
         xml=True,
-        xml_schemas=schema_paths,
+        xml_schemas=schema_filepaths,
         )
     assert open('examples/iati/expected.xml').read() == tmpdir.join('output.xml').read()
