@@ -66,3 +66,15 @@ def test_unflatten_xml(tmpdir):
         id_name='iati-identifier',
         xml=True)
     assert open('examples/iati/expected.xml').read() == tmpdir.join('output.xml').read()
+
+
+def test_unflatten_org_xml(tmpdir):
+    unflatten(
+        input_name='flattentool/tests/fixtures/xlsx/iati-org.xlsx',
+        output_name=tmpdir.join('output.xml').strpath,
+        input_format='xlsx',
+        id_name='organisation-identifier',
+        xml=True,
+        metatab_name='Meta'
+        )
+    assert open('flattentool/tests/fixtures/iati-org.xml').read() == tmpdir.join('output.xml').read()
