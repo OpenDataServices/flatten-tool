@@ -5,13 +5,9 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-env:
-  - INSTALL_LXML=true
-  - INSTALL_LXML=false
 # Apparently six must be installed first, otherwise setup.py will be unhappy
 install:
   - pip install six
   - pip install --upgrade -r requirements_dev.txt
-  - if [ \"$INSTALL_LXML\" == \"true\" ]; then pip install lxml; fi
 script: py.test --cov .
 after_success: coveralls
