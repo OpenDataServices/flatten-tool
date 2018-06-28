@@ -1,4 +1,6 @@
+import os
 import json
+import pytest
 
 from flattentool import unflatten
 
@@ -57,15 +59,16 @@ def test_360_fields_case_insensitive(tmpdir):
     assert output_json_grants == output_json_space_case
 
 
-def test_unflatten_xml(tmpdir):
+@pytest.mark.parametrize('dirname', ['examples/iati', 'examples/iati_multilang'])
+def test_unflatten_xml(tmpdir, dirname):
     unflatten(
-        input_name='examples/iati',
+        input_name=dirname,
         output_name=tmpdir.join('output.xml').strpath,
         input_format='csv',
         root_list_path='iati-activity',
         id_name='iati-identifier',
         xml=True)
-    assert open('examples/iati/expected.xml').read() == tmpdir.join('output.xml').read()
+    assert open(os.path.join(dirname, 'expected.xml')).read() == tmpdir.join('output.xml').read()
 
 
 def test_unflatten_org_xml(tmpdir):

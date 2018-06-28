@@ -740,7 +740,14 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 continue
 
             value = cell.cell_value
-            converted_value = convert_type(current_type or '', value, timezone)
+            if xml and current_type == 'array':
+                # In xml "arrays" can have text values, if they're the final element
+                # However the type of the text value itself should not be "array",
+                # as that would split the text on commas, which we don't want.
+                # https://github.com/OpenDataServices/cove/issues/1030
+                converted_value = convert_type('', value, timezone)
+            else:
+                converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != '':
                 if xml:
