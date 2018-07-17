@@ -6,7 +6,8 @@
       <narrative>Organisation name</narrative>
     </reporting-org>
     <title>
-      <narrative>A title</narrative>
+      <narrative xml:lang="en">A title, with comma</narrative>
+      <narrative xml:lang="fr">Un titre</narrative>
     </title>
     <description>
       <narrative>A description</narrative>
@@ -33,7 +34,8 @@
       <narrative>Organisation name</narrative>
     </reporting-org>
     <title>
-      <narrative>Another title</narrative>
+      <narrative xml:lang="en">Another title; with semicolon</narrative>
+      <narrative xml:lang="fr">Un autre titre</narrative>
     </title>
     <description>
       <narrative>Another description</narrative>

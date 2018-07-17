@@ -111,7 +111,7 @@ def decimal_default(o):
 
 
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
-              root_list_path='main', encoding='utf8', timezone_name='UTC',
+              root_list_path=None, encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, id_name='id', xml=False,
               vertical_orientation=False,
@@ -180,6 +180,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         if result:
             base.update(result[0])
 
+    if root_list_path is None:
+        root_list_path = base_configuration.get('RootListPath', 'main')
+
     if not metatab_only:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
         spreadsheet_input = spreadsheet_input_class(
@@ -209,7 +212,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         base[root_list_path] = list(result)
 
     if xml:
-        xml_output = toxml(base, xml_schemas=xml_schemas)
+        xml_root_tag = base_configuration.get('XMLRootTag', 'iati-activities')
+        xml_output = toxml(base, xml_root_tag, xml_schemas=xml_schemas)
         if output_name is None:
             if sys.version > '3':
                 sys.stdout.buffer.write(xml_output)
