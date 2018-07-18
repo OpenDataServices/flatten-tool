@@ -86,5 +86,4 @@ def toxml(data, xml_root_tag, xml_schemas=None):
     if USING_LXML:
         return ET.tostring(root, pretty_print=True)
     else:
-        indent(root)
         return ET.tostring(root)

@@ -29,7 +29,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
 from collections import OrderedDict
-import xml.etree.ElementTree as ET
+from warnings import warn
+try:
+    import lxml.etree as ET
+    # Note that lxml is now "required" - it's listed as a requirement in
+    # setup.py and is needed for the tests to pass.
+    # However, stdlib etree still exists as an unsupported feature.
+except ImportError:
+    import xml.etree.ElementTree as ET
+    warn('Using stdlib etree may work, but is not supported. Please install lxml.')
 import sys
 
 # Namespaces necessary for opening schema files
