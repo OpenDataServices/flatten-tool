@@ -37,13 +37,13 @@ namespaces = {
     'xsd': 'http://www.w3.org/2001/XMLSchema'
 }
 
+
 class IATISchemaWalker(object):
     """
     Class for converting an IATI XML schema to documentation in the
     reStructuredText format.
     
     Based on the Schema2Doc class in https://github.com/IATI/IATI-Standard-SSOT/blob/version-2.02/gen.py
-
     """
     def __init__(self, schemas):
         """
@@ -60,7 +60,6 @@ class IATISchemaWalker(object):
         name_attribute -- the value of the 'name' attribute in the schema, ie.
                           the name of the element/type etc. being described,
                           e.g. iati-activities
-
         """
         for tree in self.trees:
             schema_element = tree.find("xsd:{0}[@name='{1}']".format(tag_name, name_attribute), namespaces=namespaces)
@@ -71,9 +70,7 @@ class IATISchemaWalker(object):
     def element_loop(self, element, path):
         """
         Return information about the children of the supplied element.
-
         """
-
         a = element.attrib
         type_elements = []
         if 'type' in a:
@@ -95,7 +92,6 @@ class IATISchemaWalker(object):
                 child_tuples.append((a['ref'], None, child, a.get('minOccurs'), a.get('maxOccurs')))
         return child_tuples
 
-
     def create_schema_dict(self, parent_name, parent_element=None):
         """
         Created a nested OrderedDict representing the sturucture (and order!) of
@@ -114,10 +110,17 @@ def sort_iati_element(element, schema_subdict):
     children = list(element)
     for child in children:
         element.remove(child)
-    for child in sorted(children,
-           key=lambda x: list(schema_subdict.keys()).index(x.tag)):
+    keys = list(schema_subdict.keys())
+
+    def index_key(x):
+        if x.tag in keys:
+            return keys.index(x.tag)
+        else:
+            return len(keys) + 1
+
+    for child in sorted(children, key=index_key):
         element.append(child)
-        sort_iati_element(child, schema_subdict[child.tag])
+        sort_iati_element(child, schema_subdict.get(child.tag, {}))
 
 
 def sort_iati_xml_file(input_file, output_file, schemas):
