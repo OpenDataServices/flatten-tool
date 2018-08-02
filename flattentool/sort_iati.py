@@ -129,25 +129,3 @@ def sort_iati_element(element, schema_subdict):
     for child in sorted(children, key=index_key):
         element.append(child)
         sort_iati_element(child, schema_subdict.get(child.tag, {}))
-
-
-def sort_iati_xml_file(input_file, output_file, schemas):
-    """
-    Sort an IATI XML file according to the schema.
-    """
-    schema_dict = IATISchemaWalker(schemas).create_schema_dict('iati-activity')
-    tree = ET.parse(input_file)
-    root = tree.getroot()
-
-    for element in root:
-        sort_iati_element(element, schema_dict)
-
-    with open(output_file, 'wb') as fp:
-        tree.write(fp, encoding='utf-8')
-
-
-if __name__ == '__main__':
-    if len(sys.argv) <= 3:
-        print('Usage: python3 sort_iati.py input_file.xml output_file.xml schema.xsd')
-    else:
-        sort_iati_xml_file(sys.argv[1], sys.argv[2], sys.argv[3:])
