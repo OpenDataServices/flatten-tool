@@ -32,7 +32,7 @@ def test_blank_sheets(tmpdir):
 
     # Check XLSX is empty
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release']
+    assert wb.sheetnames == ['release']
     rows = list(wb['release'].rows)
     assert len(rows) == 1
     assert len(rows[0]) == 1
@@ -55,7 +55,7 @@ def test_populated_header(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release', 'b']
+    assert wb.sheetnames == ['release', 'b']
     rows = list(wb['release'].rows)
     assert len(rows) == 1
     assert [ x.value for x in rows[0] ] == [ 'a', 'd' ]
@@ -86,7 +86,7 @@ def test_empty_lines(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release', 'b']
+    assert wb.sheetnames == ['release', 'b']
     rows = list(wb['release'].rows)
     assert len(rows) == 1
     assert [ x.value for x in rows[0] ] == [ 'a', 'd' ]
@@ -119,7 +119,7 @@ def test_populated_lines(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release', 'b']
+    assert wb.sheetnames == ['release', 'b']
     rows = list(wb['release'].rows)
     assert len(rows) == 3
     assert [ x.value for x in rows[0] ] == [ 'a' ]
@@ -152,7 +152,7 @@ def test_utf8(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release']
+    assert wb.sheetnames == ['release']
     rows = list(wb['release'].rows)
     assert len(rows) == 3
     assert [ x.value for x in rows[0] ] == [ 'é' ]
