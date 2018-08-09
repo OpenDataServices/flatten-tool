@@ -2,9 +2,9 @@ sudo: false
 language: python
 python:
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
+  - "3.6"
 # Apparently six must be installed first, otherwise setup.py will be unhappy
 install:
   - pip install six
