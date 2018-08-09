@@ -555,7 +555,7 @@ class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
-        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.get_sheet_names())
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.sheetnames)
         if self.include_sheets:
             for sheet in list(self.sheet_names_map):
                 if sheet not in self.include_sheets:
