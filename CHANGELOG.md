@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Avoid some openpyxl warnings https://github.com/OpenDataServices/flatten-tool/pull/211
+
 ## [0.1.2] - 2018-06-28
 
 (As there are new features, this should have been a minor release. Just noting so we pick this up for future releases.)
