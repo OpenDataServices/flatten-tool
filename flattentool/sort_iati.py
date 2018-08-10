@@ -2,10 +2,7 @@
 Sorts an IATI XML file according to the schema. This is most useful for 2.0x
 where that ordering is required.
 
-Instructions for Ubuntu:
-sudo apt-get install python3-lxml
-git clone https://github.com/IATI/IATI-Schemas.git
-python3 sort_iati.py input_file.xml output_file.xml
+Based on https://github.com/OpenDataServices/iati-utils/blob/master/sort_iati.py
 
 Copyright (c) 2013-2014 Ben Webb
 Copyright (c) 2016 Open Data Services Co-operative Limited
