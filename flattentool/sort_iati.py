@@ -121,7 +121,7 @@ class IATISchemaWalker(object):
 
 def sort_iati_element(element, schema_subdict):
     """
-    Sort the given elements children according to the order of schema_subdict.
+    Sort the given element's children according to the order of schema_subdict.
     """
     children = list(element)
     for child in children:
