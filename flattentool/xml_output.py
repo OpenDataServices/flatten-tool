@@ -13,7 +13,7 @@ except ImportError:
     USING_LXML = False
     warn('Using stdlib etree may work, but is not supported. Please install lxml.')
 from flattentool.exceptions import DataErrorWarning
-from flattentool.sort_iati import sort_element, XMLSchemaWalker
+from flattentool.sort_xml import sort_element, XMLSchemaWalker
 
 
 def sort_attributes(data):
