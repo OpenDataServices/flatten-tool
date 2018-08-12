@@ -46,7 +46,7 @@ class IATISchemaWalker(object):
     """
     Class for converting an IATI XML schema to documentation in the
     reStructuredText format.
-    
+
     Based on the Schema2Doc class in https://github.com/IATI/IATI-Standard-SSOT/blob/version-2.02/gen.py
     """
     def __init__(self, schemas):
@@ -80,12 +80,22 @@ class IATISchemaWalker(object):
         if 'type' in a:
             complexType = self.get_schema_element('complexType', a['type'])
             if complexType is not None:
-                type_elements = ( complexType.findall('xsd:choice/xsd:element', namespaces=namespaces) +
-                    complexType.findall('xsd:sequence/xsd:element', namespaces=namespaces) )
+                type_elements = (
+                    complexType.findall('xsd:choice/xsd:element',
+                                        namespaces=namespaces) +
+                    complexType.findall('xsd:sequence/xsd:element',
+                                        namespaces=namespaces))
 
-        children = ( element.findall('xsd:complexType/xsd:choice/xsd:element', namespaces=namespaces)
-            + element.findall('xsd:complexType/xsd:sequence/xsd:element', namespaces=namespaces)
-            + element.findall("xsd:complexType/xsd:all/xsd:element", namespaces=namespaces)
+        children = (
+            element.findall(
+                'xsd:complexType/xsd:choice/xsd:element',
+                namespaces=namespaces)
+            + element.findall(
+                'xsd:complexType/xsd:sequence/xsd:element',
+                namespaces=namespaces)
+            + element.findall(
+                'xsd:complexType/xsd:all/xsd:element',
+                namespaces=namespaces)
             + type_elements)
         child_tuples = []
         for child in children:
@@ -104,7 +114,9 @@ class IATISchemaWalker(object):
         if parent_element is None:
             parent_element = self.get_schema_element('element', parent_name)
 
-        return OrderedDict([(name, self.create_schema_dict(name, element)) for name, element, _, _, _ in self.element_loop(parent_element, '')])
+        return OrderedDict([
+            (name, self.create_schema_dict(name, element))
+            for name, element, _, _, _ in self.element_loop(parent_element, '')])
 
 
 def sort_iati_element(element, schema_subdict):
