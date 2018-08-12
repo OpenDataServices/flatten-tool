@@ -35,7 +35,6 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
     warn('Using stdlib etree may work, but is not supported. Please install lxml.')
-import sys
 
 # Namespaces necessary for opening schema files
 namespaces = {
