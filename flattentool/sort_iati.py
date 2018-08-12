@@ -1,6 +1,5 @@
 """
-Sorts an IATI XML file according to the schema. This is most useful for 2.0x
-where that ordering is required.
+Sort an XML file according to one or more provided schemas.
 
 Based on https://github.com/OpenDataServices/iati-utils/blob/master/sort_iati.py
 
@@ -44,8 +43,7 @@ namespaces = {
 
 class IATISchemaWalker(object):
     """
-    Class for converting an IATI XML schema to documentation in the
-    reStructuredText format.
+    Class for traversing one or more XML schemas.
 
     Based on the Schema2Doc class in https://github.com/IATI/IATI-Standard-SSOT/blob/version-2.02/gen.py
     """
@@ -109,7 +107,7 @@ class IATISchemaWalker(object):
     def create_schema_dict(self, parent_name, parent_element=None):
         """
         Create a nested OrderedDict representing the structure (and order!) of
-        elements in the IATI schema.
+        elements in the provided schema.
         """
         if parent_element is None:
             parent_element = self.get_schema_element('element', parent_name)
