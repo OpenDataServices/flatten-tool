@@ -108,8 +108,8 @@ class IATISchemaWalker(object):
 
     def create_schema_dict(self, parent_name, parent_element=None):
         """
-        Created a nested OrderedDict representing the sturucture (and order!) of
-        element in the IATI schema.
+        Created a nested OrderedDict representing the structure (and order!) of
+        elements in the IATI schema.
         """
         if parent_element is None:
             parent_element = self.get_schema_element('element', parent_name)
