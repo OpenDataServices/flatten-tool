@@ -41,7 +41,7 @@ namespaces = {
 }
 
 
-class IATISchemaWalker(object):
+class XMLSchemaWalker(object):
     """
     Class for traversing one or more XML schemas.
 
@@ -117,7 +117,7 @@ class IATISchemaWalker(object):
             for name, element, _, _, _ in self.element_loop(parent_element, '')])
 
 
-def sort_iati_element(element, schema_subdict):
+def sort_element(element, schema_subdict):
     """
     Sort the given element's children according to the order of schema_subdict.
     """
@@ -134,4 +134,4 @@ def sort_iati_element(element, schema_subdict):
 
     for child in sorted(children, key=index_key):
         element.append(child)
-        sort_iati_element(child, schema_subdict.get(child.tag, {}))
+        sort_element(child, schema_subdict.get(child.tag, {}))
