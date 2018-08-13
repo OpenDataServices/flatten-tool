@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Avoid some openpyxl warnings https://github.com/OpenDataServices/flatten-tool/pull/211
+- Fix XML unflattening with stdlib etree https://github.com/OpenDataServices/flatten-tool/pull/212
 
 ## [0.1.2] - 2018-06-28
 
