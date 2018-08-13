@@ -8,7 +8,7 @@ if sys.version < '3':
 
 setup(
     name='flattentool',
-    version='0.0.0',
+    version='0.2.0',
     author='Ben Webb',
     author_email='bjwebb67@googlemail.com',
     packages=['flattentool'],

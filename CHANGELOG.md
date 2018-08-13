@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.0] - 2018-08-13
+
+### Added
+
+- Sort XML according to provided schema(s) https://github.com/OpenDataServices/flatten-tool/pull/196
+
+### Changed
+
+- Remove Python 3.3 support https://github.com/OpenDataServices/flatten-tool/commit/636cf988ff7e5247a089b22061f0fe7767ea81b4
+
 ### Fixed
 
 - Avoid some openpyxl warnings https://github.com/OpenDataServices/flatten-tool/pull/211
