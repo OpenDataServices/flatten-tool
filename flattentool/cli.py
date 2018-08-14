@@ -36,10 +36,10 @@ def create_parser():
     parser_create_template = subparsers.add_parser(
         'create-template',
         help='Create a template from the given schema')
-    parser_create_template.add_argument(
+    schema_group = parser_create_template.add_mutually_exclusive_group(required=True)
+    schema_group.add_argument(
         "-s", "--schema",
-        help="Path to the schema file you want to use to create the template",
-        required=True)
+        help="Path to the schema file you want to use to create the template")
     parser_create_template.add_argument(
         "-f", "--output-format",
         help="Type of template you want to create. Defaults to all available options",
@@ -61,6 +61,19 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_create_template.add_argument(
+        "--xml",
+        action='store_true',
+        help="Use XML as the input format")
+    schema_group.add_argument(
+        "--xml-schema",
+        dest='xml_schemas',
+        metavar='XML_SCHEMA',
+        nargs='*',
+        help="Path to one or more XML schemas")
+    parser_create_template.add_argument(
+        "--root-list-path",
+        help="Path of the root list, defaults to main. Needed for XML template creation only.")
 
     parser_flatten = subparsers.add_parser(
         'flatten',

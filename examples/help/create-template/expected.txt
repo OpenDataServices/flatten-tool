@@ -1,6 +1,9 @@
-usage: flatten-tool create-template [-h] -s SCHEMA [-f {csv,xlsx,all}]
+usage: flatten-tool create-template [-h] [-s SCHEMA] [-f {csv,xlsx,all}]
                                     [-m MAIN_SHEET_NAME] [-o OUTPUT_NAME]
                                     [--rollup] [-r ROOT_ID] [--use-titles]
+                                    [--xml]
+                                    [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
+                                    [--root-list-path ROOT_LIST_PATH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,3 +25,9 @@ optional arguments:
   -r ROOT_ID, --root-id ROOT_ID
                         Root ID of the data format, e.g. ocid for OCDS
   --use-titles          Convert titles. Requires a schema to be specified.
+  --xml                 Use XML as the input format
+  --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
+                        Path to one or more XML schemas
+  --root-list-path ROOT_LIST_PATH
+                        Path of the root list, defaults to main. Needed for
+                        XML template creation only.
