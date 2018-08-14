@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Prefer `RootListPath` from sheet configuration over CLI/function argument https://github.com/OpenDataServices/flatten-tool/pull/214
+
 ## [0.2.0] - 2018-08-13
 
 ### Added
