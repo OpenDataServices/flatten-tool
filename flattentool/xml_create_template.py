@@ -83,7 +83,8 @@ class XMLSchemaWalkerForTemplate(XMLSchemaWalker):
                 path += '/0/'
             else:
                 path += '/'
-            yield from list(self.generate_paths(name, element, path))
+            for child_path in self.generate_paths(name, element, path):
+                yield child_path
 
 
 class XMLSchemaParser(object):
