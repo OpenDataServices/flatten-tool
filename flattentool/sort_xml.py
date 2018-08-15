@@ -111,6 +111,8 @@ class XMLSchemaWalker(object):
         """
         if parent_element is None:
             parent_element = self.get_schema_element('element', parent_name)
+        if parent_element is None:
+            return {}
 
         return OrderedDict([
             (name, self.create_schema_dict(name, element))
