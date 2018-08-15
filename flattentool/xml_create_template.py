@@ -56,11 +56,16 @@ class XMLSchemaWalkerForTemplate(XMLSchemaWalker):
     def has_simple_content(self, element):
         a = element.attrib
         simple_content = False
+        # we look up the type, and that has a simpleContent child
         if 'type' in a:
             complexType = self.get_schema_element('complexType', a['type'])
             if complexType is not None:
                 simple_content = bool(complexType.findall('xsd:simpleContent', namespaces=namespaces))
-        return simple_content or bool(element.findall('xsd:complexType/xsd:simpleContent', namespaces=namespaces))
+        # or the compleType element here has a simpleContent child
+        simple_content = simple_content or bool(element.findall('xsd:complexType/xsd:simpleContent', namespaces=namespaces))
+        # or there is only an annotation element
+        simple_content = simple_content or [child.tag for child in element] == ['{http://www.w3.org/2001/XMLSchema}annotation']
+        return simple_content
 
     def generate_paths(self, parent_name, parent_element=None, parent_path=''):
         if parent_element is None:
