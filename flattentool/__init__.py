@@ -113,7 +113,7 @@ def decimal_default(o):
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               root_list_path=None, encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
-              heading_source_map=None, id_name='id', xml=False,
+              heading_source_map=None, id_name=None, xml=False,
               vertical_orientation=False,
               metatab_name=None, metatab_only=False, metatab_schema='',
               metatab_vertical_orientation=False,
@@ -182,6 +182,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
 
     if root_list_path is None:
         root_list_path = base_configuration.get('RootListPath', 'main')
+    if id_name is None:
+        id_name = base_configuration.get('IDName', 'id')
 
     if not metatab_only:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
