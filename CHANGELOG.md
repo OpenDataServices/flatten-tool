@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add a spreadsheet configuration variable for id_name (called IDName).
 
+### Fixed
+
+- Ignore elements that don't exist in the schema, whilst sorting xml. Previously an exception was raised. https://github.com/OpenDataServices/flatten-tool/pull/218
+
 ## [0.2.0] - 2018-08-13
 
 ### Added
