@@ -1,0 +1,8 @@
+#,skiprows 2,headerrows 3
+This row is skipped,It could contain some provenance data,
+,,This row is skipped too
+name,address/street,address/city
+Name,Street Address,City address
+Use name from the sign,Don't include the postcode,
+Healthy Cafe,123 City Street,London
+Vegetarian Cafe,42 Town Road,Bristol
