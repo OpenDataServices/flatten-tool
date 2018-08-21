@@ -1257,3 +1257,26 @@ def test_commands_hashcomments(tmpdir):
 
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
                            'some': 'data'}
+
+
+def test_commands_id_name(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_id_name.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('commands_id_name_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('commands_id_name_source_map.json').strpath,
+        heading_source_map=tmpdir.join('commands_id_name_heading_source_map.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True
+        )
+
+    unflattened = json.load(tmpdir.join('commands_id_name_unflattened.json'))
+
+    assert unflattened == {'someroot': [{'actual': 'actual', 'headings': 'data', 'someId': 'some',
+                                "someArray": [
+                                    {"heading1": "more data", "heading2": "other data"},
+                                    {"heading1": "more more data", "heading2": "more other data"},
+                                ]
+                            }],
+                           'some': 'data'}
