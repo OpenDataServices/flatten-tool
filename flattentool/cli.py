@@ -96,6 +96,9 @@ def create_parser():
         action='store_true',
         help="No root list path")
     parser_flatten.add_argument(
+        "--separate-by-key",
+        help="Separate By Key")
+    parser_flatten.add_argument(
         "--rollup",
         action='store_true',
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
