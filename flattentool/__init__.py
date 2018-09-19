@@ -111,7 +111,7 @@ def decimal_default(o):
 
 
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
-              root_list_path=None, encoding='utf8', timezone_name='UTC',
+              root_list_path=None, no_root_list_path=False, encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, id_name=None, xml=False,
               vertical_orientation=False,
@@ -131,7 +131,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     if metatab_name and base_json:
         raise Exception('Not allowed to use base_json with metatab')
 
-    if base_json:
+    if no_root_list_path:
+        base = None
+    elif base_json:
         with open(base_json) as fp:
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
@@ -145,7 +147,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     cell_source_map_data = OrderedDict()
     heading_source_map_data = OrderedDict()
 
-    if metatab_name:
+    if metatab_name and not no_root_list_path:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
         spreadsheet_input = spreadsheet_input_class(
             input_name=input_name,
@@ -211,7 +213,10 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         )
         cell_source_map_data.update(cell_source_map_data_main or {})
         heading_source_map_data.update(heading_source_map_data_main or {})
-        base[root_list_path] = list(result)
+        if no_root_list_path:
+            base = list(result)
+        else:
+            base[root_list_path] = list(result)
 
     if xml:
         xml_root_tag = base_configuration.get('XMLRootTag', 'iati-activities')
