@@ -530,7 +530,7 @@ class CSVInput(SpreadsheetInput):
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 r = csvreader(main_sheet_file, encoding=self.encoding)
                 heading_row = next(r)
-        if heading_row[0] == '#':
+        if len(heading_row) > 0 and heading_row[0] == '#':
             return heading_row[1:]
         return []
 
