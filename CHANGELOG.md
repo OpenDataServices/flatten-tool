@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Ignore elements that don't exist in the schema, whilst sorting xml. Previously an exception was raised. https://github.com/OpenDataServices/flatten-tool/pull/218
+- Fix: unflatten would crash if given a csv with an empty first row https://github.com/OpenDataServices/flatten-tool/pull/229
 
 ## [0.2.0] - 2018-08-13
 
