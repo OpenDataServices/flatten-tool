@@ -47,7 +47,7 @@ class JSONParser(object):
     # Similarily with methods like parse_json_dict
 
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
-                 root_id='ocid', use_titles=False, xml=False, id_name='id'):
+                 root_id='ocid', use_titles=False, xml=False, id_name='id',separate_by_key=None):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -55,6 +55,7 @@ class JSONParser(object):
         self.use_titles = use_titles
         self.id_name = id_name
         self.xml = xml
+        self.separate_by_key = separate_by_key
         if schema_parser:
             self.main_sheet = schema_parser.main_sheet
             self.sub_sheets = schema_parser.sub_sheets
@@ -101,9 +102,15 @@ class JSONParser(object):
                 # This is particularly useful for IATI XML, in order to not
                 # fallover on empty activity, e.g. <iati-activity/>
                 continue
-            self.parse_json_dict(json_dict, sheet=self.main_sheet)
+            if self.separate_by_key:
+                sheet_name_prefix = json_dict[self.separate_by_key]
+                if sheet_name_prefix not in self.sub_sheets:
+                    self.sub_sheets[sheet_name_prefix] = Sheet(name=sheet_name_prefix)
+                self.parse_json_dict(json_dict, sheet=self.sub_sheets[sheet_name_prefix], sheet_name_prefix=sheet_name_prefix)
+            else:
+                self.parse_json_dict(json_dict, sheet=self.main_sheet)
     
-    def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
+    def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False, sheet_name_prefix=''):
         """
         Parse a json dictionary.
 
@@ -183,7 +190,9 @@ class JSONParser(object):
                                 if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
-                    sub_sheet_name = make_sub_sheet_name(parent_name, key) 
+                    sub_sheet_name = make_sub_sheet_name(parent_name, key)
+                    if sheet_name_prefix:
+                        sub_sheet_name = sheet_name_prefix + "-" + sub_sheet_name
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
 

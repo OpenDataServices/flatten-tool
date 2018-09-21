@@ -92,6 +92,13 @@ def create_parser():
         "--root-list-path",
         help="Path of the root list, defaults to main")
     parser_flatten.add_argument(
+        "--no-root-list-path",
+        action='store_true',
+        help="No root list path")
+    parser_flatten.add_argument(
+        "--separate-by-key",
+        help="Separate By Key")
+    parser_flatten.add_argument(
         "--rollup",
         action='store_true',
         help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
