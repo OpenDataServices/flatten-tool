@@ -65,6 +65,16 @@ CSV files for you, populated with the data from the input JSON file.
    generate empty a single empty sheet called `main`, which probably isn't what
    you want.
 
+If your data has a list as a root, use the `--root-is-list` option.
+
+.. literalinclude:: ../examples/flatten/root-is-list/data.json
+   :language: json
+
+.. literalinclude:: ../examples/flatten/root-is-list/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: main.csv
+   :file: ../examples/flatten/root-is-list/expected/main.csv
 
 All flatten options
 -------------------

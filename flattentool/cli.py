@@ -102,6 +102,10 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_flatten.add_argument(
+        "--root-is-list",
+        action='store_true',
+        help="The root element is a list. --root-list-path and meta data will be ignored.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
@@ -179,6 +183,10 @@ def create_parser():
     parser_unflatten.add_argument(
         "--default-configuration",
         help="Comma seperated list of default parsing commands for all sheets. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--root-is-list",
+        action='store_true',
+        help="The root element is a list. --root-list-path and meta data will be ignored.")
 
     return parser
 

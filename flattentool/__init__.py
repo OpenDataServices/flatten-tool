@@ -43,7 +43,8 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
 
 def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main',
-            root_list_path='main', rollup=False, root_id=None, use_titles=False, xml=False, id_name='id',  **_):
+            root_list_path='main', root_is_list=False,
+            rollup=False, root_id=None, use_titles=False, xml=False, id_name='id',  **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
@@ -60,7 +61,7 @@ def flatten(input_name, schema=None, output_name='flattened', output_format='all
         schema_parser = None
     parser = JSONParser(
         json_filename=input_name,
-        root_list_path=root_list_path,
+        root_list_path=None if root_is_list else root_list_path,
         schema_parser=schema_parser,
         root_id=root_id,
         use_titles=use_titles,
@@ -111,7 +112,7 @@ def decimal_default(o):
 
 
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
-              root_list_path=None, encoding='utf8', timezone_name='UTC',
+              root_list_path=None, root_is_list=False, encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
               heading_source_map=None, id_name=None, xml=False,
               vertical_orientation=False,
@@ -131,7 +132,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     if metatab_name and base_json:
         raise Exception('Not allowed to use base_json with metatab')
 
-    if base_json:
+    if root_is_list:
+        base = None
+    elif base_json:
         with open(base_json) as fp:
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
@@ -145,7 +148,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     cell_source_map_data = OrderedDict()
     heading_source_map_data = OrderedDict()
 
-    if metatab_name:
+    if metatab_name and not root_is_list:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
         spreadsheet_input = spreadsheet_input_class(
             input_name=input_name,
@@ -185,7 +188,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     if id_name is None:
         id_name = base_configuration.get('IDName', 'id')
 
-    if not metatab_only:
+    if not metatab_only or root_is_list:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
         spreadsheet_input = spreadsheet_input_class(
             input_name=input_name,
@@ -211,7 +214,10 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         )
         cell_source_map_data.update(cell_source_map_data_main or {})
         heading_source_map_data.update(heading_source_map_data_main or {})
-        base[root_list_path] = list(result)
+        if root_is_list:
+            base = list(result)
+        else:
+            base[root_list_path] = list(result)
 
     if xml:
         xml_root_tag = base_configuration.get('XMLRootTag', 'iati-activities')

@@ -1,0 +1,1 @@
+$ flatten-tool flatten --root-is-list  examples/flatten/root-is-list/data.json -o examples/flatten/root-is-list/actual
