@@ -1239,7 +1239,7 @@ Configuration properties: skip and header rows
 Flattentool supports directives in the first row of a file to tell it to:
 
 * **skiprows** - start processing data from n rows down
-* **headerrows** - ignore the first n rows after the field paths
+* **headerrows** - the total number of header rows. Note that the first header row will be treated as field paths.
 
 Example usage
 -------------
