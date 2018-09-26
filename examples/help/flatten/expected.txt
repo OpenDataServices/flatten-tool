@@ -2,6 +2,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
                             [--id-name ID_NAME] [-m MAIN_SHEET_NAME]
                             [-o OUTPUT_NAME] [--root-list-path ROOT_LIST_PATH]
                             [--rollup] [-r ROOT_ID] [--use-titles]
+                            [--root-is-list]
                             input_name
 
 positional arguments:
@@ -30,3 +31,5 @@ optional arguments:
   -r ROOT_ID, --root-id ROOT_ID
                         Root ID of the data format, e.g. ocid for OCDS
   --use-titles          Convert titles. Requires a schema to be specified.
+  --root-is-list        The root element is a list. --root-list-path and meta
+                        data will be ignored.

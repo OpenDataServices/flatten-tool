@@ -14,5 +14,7 @@ examples/create-template/simple/actual
 examples/create-template/simple/actual.*
 examples/flatten/simple/actual
 examples/flatten/simple/actual.*
+examples/flatten/root-is-list/actual
+examples/flatten/root-is-list/actual.*
 examples/receipt/source-map/actual
 examples/receipt/source-map/actual.*

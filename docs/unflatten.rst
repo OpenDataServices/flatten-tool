@@ -72,6 +72,17 @@ That's what we expected. Great.
     `building/cafe`, it only accepts a single key.
 
 
+The Root is a list
+------------------
+
+You can also specify the data outputted is just a list, using the `--root-is-list` option.
+
+.. literalinclude:: ../examples/cafe/root-is-list/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/root-is-list/expected.json
+   :language: json
+
+
 Writing output to a file
 ------------------------
 

@@ -11,6 +11,7 @@ usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
                               [--metatab-vertical-orientation]
                               [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
                               [--default-configuration DEFAULT_CONFIGURATION]
+                              [--root-is-list]
                               input_name
 
 positional arguments:
@@ -67,4 +68,5 @@ optional arguments:
   --default-configuration DEFAULT_CONFIGURATION
                         Comma seperated list of default parsing commands for
                         all sheets. Only for XLSX not CSV
-
+  --root-is-list        The root element is a list. --root-list-path and meta
+                        data will be ignored.
