@@ -188,6 +188,7 @@ class SpreadsheetInput(object):
     def __init__(self,
                  input_name='',
                  root_list_path='main',
+                 root_is_list=False,
                  timezone_name='UTC',
                  root_id='ocid',
                  convert_titles=False,
@@ -201,6 +202,7 @@ class SpreadsheetInput(object):
                 ):
         self.input_name = input_name
         self.root_list_path = root_list_path
+        self.root_is_list = root_is_list
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
@@ -360,7 +362,7 @@ class SpreadsheetInput(object):
         ordered_cell_source_map = None
         heading_source_map = None
         if with_cell_source_map or with_heading_source_map:
-            cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
+            cell_source_map = extract_list_to_error_path([] if self.root_is_list else [self.root_list_path], cell_tree)
             ordered_items = sorted(cell_source_map.items())
             row_source_map = OrderedDict()
             heading_source_map = OrderedDict()
