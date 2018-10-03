@@ -1,0 +1,13 @@
+{
+    "definition": {
+        "address": {
+            "title": "An Address",
+            "description": "A Description",
+            "type": "object",
+            "properties": {
+                "address": {"type": "string"},
+                "country": {"type": "string"}
+            }
+        }
+    }
+}
