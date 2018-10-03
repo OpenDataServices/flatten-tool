@@ -124,7 +124,22 @@ class SchemaParser(object):
             parent_path = parent_path + '/'
         parent_id_fields = parent_id_fields or []
         title_lookup = self.title_lookup if title_lookup is None else title_lookup
-        if 'properties' in schema_dict:
+
+        if 'type' in schema_dict and schema_dict['type'] == 'array' \
+                and 'items' in schema_dict and 'oneOf' in schema_dict['items']:
+            for oneOf in schema_dict['items']['oneOf']:
+                for field, child_title in self.parse_schema_dict(
+                            parent_path,
+                            oneOf,
+                            parent_id_fields=parent_id_fields,
+                            title_lookup=title_lookup,
+                            parent_title=parent_title):
+                        yield (
+                            field,
+                            child_title
+                        )
+
+        elif 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
                 if self.use_titles:
                     id_fields = parent_id_fields + [(parent_title if parent_title is not None else parent_path)+(schema_dict['properties']['id'].get('title') or 'id')]

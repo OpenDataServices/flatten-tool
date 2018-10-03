@@ -1,0 +1,1 @@
+$ flatten-tool unflatten -f csv examples/bods/unflatten/input  -o examples/bods/unflatten/actual/out.json --root-is-list  --id-name=statementID --schema examples/bods/schema/bods-package.json
