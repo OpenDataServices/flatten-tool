@@ -1,0 +1,134 @@
+{
+  "id": "entity-statement.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "version": "0.1",
+  "title": "Entity statement",
+  "description": "A statement identifying and describing the entity that is the subject of the ownership or control described in an ownership or control statement.",
+  "type": "object",
+  "properties": {
+    "statementID": {
+      "$ref": "components.json#/definitions/ID",
+      "propertyOrder": 1
+    },
+    "statementType": {
+      "title": "Statement type",
+      "description": " This should always be 'entityStatement.",
+      "type": "string",
+      "enum": [
+        "entityStatement"
+      ],
+      "propertyOrder": 2
+    },
+    "statementDate": {
+      "$ref": "components.json#/definitions/StatementDate",
+      "propertyOrder": 3
+    },
+    "entityType": {
+      "title": "Type",
+      "description": "From the [entityType codelist](#entitytype). What kind of entity is this? The 'registeredEntity' code covers any legal entity created through an act of official registration, usually resulting in an identifier being assigned to the entity. The 'legalEntity' code covers other bodies with distinct legal personality (government departments, international institutions etc.).  The 'arrangement' code covers artificial entities, described in the data model for the purpose of associating one or more natural or legal persons together in an ownership or control relationship, but without implying that the parties to this arrangement have any other form of collective legal identity.",
+      "type": "string",
+      "enum": [
+        "registeredEntity",
+        "legalEntity",
+        "arrangement",
+        "anonymousEntity",
+        "unknownEntity"
+      ],
+      "codelist": "entityType.csv",
+      "openCodelist": false,
+      "propertyOrder": 4
+    },
+    "missingInfoReason": {
+      "title": "Missing information reason(s)",
+      "description": "For EntityStatements with the type 'anonymousEntity' or 'unknownEntity' this field should contain an explanation of the reason that detailed information on the entity is not provided. This may be a standard descriptive phrase from the source system, or a free-text justification.",
+      "type": "string",
+      "propertyOrder": 5
+    },
+    "name": {
+      "title": "Entity name",
+      "description": "The declared name of this entity.",
+      "type": "string",
+      "propertyOrder": 6
+    },
+    "alternateNames": {
+      "title": "Alternative names",
+      "description": "An array of other names this entity is known by.",
+      "type": "array",
+      "items":{
+        "type":"string",
+        "title":"Name",
+        "description":"A name this entity is known by."
+      },
+      "propertyOrder": 7
+    },
+    "incorporatedInJurisdiction": {
+      "title": "Incorporated In Jurisdiction",
+      "description": "Details on where this legal entity is incorporated",
+      "$ref": "components.json#/definitions/Jurisdiction",
+      "propertyOrder": 10
+    },
+    "identifiers": {
+      "title": "Identifiers",
+      "description": "One or more official identifiers for this entity. Where available, official registration numbers should be provided.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Identifier"
+      },
+      "propertyOrder": 20
+    },
+    "foundingDate": {
+      "title": "Founding date",
+      "description": "When was this entity founded, created or registered. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+      "type": "string",
+      "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+      "propertyOrder": 30
+    },
+    "dissolutionDate": {
+      "title": "Dissolution date",
+      "description": "If this entity is no longer active, provide the date on which it was disolved or ceased. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+      "type": "string",
+      "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+      "propertyOrder": 35
+    },
+    "addresses": {
+      "title": "Addresses",
+      "description": "One or more addresses for this entity.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Address"
+      },
+      "propertyOrder": 40
+    },
+    "uri": {
+      "title": "URI",
+      "description": "Where a [persistent URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) is available for this entity this should be included.",
+      "type": "string",
+      "format": "uri",
+      "propertyOrder": 21
+    },
+    "replacesStatements": {
+      "$ref": "components.json#/definitions/ReplacesStatements",
+      "propertyOrder": 100
+    },
+    "source": {
+      "title": "Source",
+      "description": "The source of information about this entity.",
+      "$ref": "components.json#/definitions/Source",
+      "propertyOrder":89
+    },
+    "annotations": {
+      "title": "Annotations",
+      "description": "Annotations about this statement or parts of this statement",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Annotation"
+      },
+      "propertyOrder": 90
+    }
+  },
+  "required": [
+    "statementID",
+    "statementType",
+    "entityType"
+  ]
+}
