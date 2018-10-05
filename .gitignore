@@ -20,3 +20,5 @@ examples/flatten/root-is-list/actual
 examples/flatten/root-is-list/actual.*
 examples/receipt/source-map/actual
 examples/receipt/source-map/actual.*
+examples/bods/unflatten/actual
+examples/bods/unflatten/actual.*

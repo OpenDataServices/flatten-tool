@@ -17,3 +17,13 @@ The id element is `statementID`, so also use the `--id-name` option.
 
 
 
+unflatten
+---------
+
+As well as the options above, also pass the `--schema` option so that types are set correctly. Note the boolean and the integer in the output.
+
+.. literalinclude:: ../examples/bods/unflatten/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/bods/unflatten/expected/out.json
+   :language: json

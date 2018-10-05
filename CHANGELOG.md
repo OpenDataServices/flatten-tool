@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix: unflatten would crash if given a csv with an empty first row https://github.com/OpenDataServices/flatten-tool/pull/229
 - Clarified meaning of headerrows in docs. https://github.com/OpenDataServices/flatten-tool/issues/230
 - Tool can work with schema's that have refs to local files (part of https://github.com/OpenDataServices/flatten-tool/issues/225 )
+- Schema loader can work with schema's that have 'oneOf' (part of https://github.com/OpenDataServices/flatten-tool/issues/225 )
 
 ## [0.2.0] - 2018-08-13
 
