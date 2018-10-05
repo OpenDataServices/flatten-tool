@@ -128,16 +128,17 @@ class SchemaParser(object):
         if 'type' in schema_dict and schema_dict['type'] == 'array' \
                 and 'items' in schema_dict and 'oneOf' in schema_dict['items']:
             for oneOf in schema_dict['items']['oneOf']:
-                for field, child_title in self.parse_schema_dict(
-                            parent_path,
-                            oneOf,
-                            parent_id_fields=parent_id_fields,
-                            title_lookup=title_lookup,
-                            parent_title=parent_title):
-                        yield (
-                            field,
-                            child_title
-                        )
+                if 'type' in oneOf and oneOf['type'] == 'object':
+                    for field, child_title in self.parse_schema_dict(
+                                parent_path,
+                                oneOf,
+                                parent_id_fields=parent_id_fields,
+                                title_lookup=title_lookup,
+                                parent_title=parent_title):
+                            yield (
+                                field,
+                                child_title
+                            )
 
         elif 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
