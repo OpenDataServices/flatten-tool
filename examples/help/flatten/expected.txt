@@ -2,7 +2,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
                             [--id-name ID_NAME] [-m MAIN_SHEET_NAME]
                             [-o OUTPUT_NAME] [--root-list-path ROOT_LIST_PATH]
                             [--rollup] [-r ROOT_ID] [--use-titles]
-                            [--root-is-list]
+                            [--root-is-list] [--sheet-prefix SHEET_PREFIX]
                             input_name
 
 positional arguments:
@@ -33,3 +33,6 @@ optional arguments:
   --use-titles          Convert titles. Requires a schema to be specified.
   --root-is-list        The root element is a list. --root-list-path and meta
                         data will be ignored.
+  --sheet-prefix SHEET_PREFIX
+                        A string to prefix to the start of every sheet (or
+                        file) name.

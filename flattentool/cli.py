@@ -106,6 +106,9 @@ def create_parser():
         "--root-is-list",
         action='store_true',
         help="The root element is a list. --root-list-path and meta data will be ignored.")
+    parser_flatten.add_argument(
+        "--sheet-prefix",
+        help="A string to prefix to the start of every sheet (or file) name.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',

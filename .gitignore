@@ -16,6 +16,8 @@ examples/create-template/refs/actual
 examples/create-template/refs/actual.*
 examples/flatten/simple/actual
 examples/flatten/simple/actual.*
+examples/flatten/sheet-prefix/actual
+examples/flatten/sheet-prefix/actual.*
 examples/flatten/root-is-list/actual
 examples/flatten/root-is-list/actual.*
 examples/receipt/source-map/actual

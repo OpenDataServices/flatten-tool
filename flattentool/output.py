@@ -22,10 +22,11 @@ else:
 class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
-    def __init__(self, parser, main_sheet_name='main', output_name='unflattened'):
+    def __init__(self, parser, main_sheet_name='main', output_name='unflattened', sheet_prefix=''):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
+        self.sheet_prefix = sheet_prefix
 
     def open(self):
         pass
@@ -53,7 +54,7 @@ class XLSXOutput(SpreadsheetOutput):
     def write_sheet(self, sheet_name, sheet):
         sheet_header = list(sheet)
         worksheet = self.workbook.create_sheet()
-        worksheet.title = sheet_name
+        worksheet.title = self.sheet_prefix + sheet_name
         worksheet.append(sheet_header)
         for sheet_line in sheet.lines:
             line = []
@@ -84,14 +85,14 @@ class CSVOutput(SpreadsheetOutput):
         sheet_header = list(sheet)
         if sys.version > '3':  # If Python 3 or greater
             # Pass the encoding to the open function
-            with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
+            with open(os.path.join(self.output_name, self.sheet_prefix + sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
                 dictwriter = csv.DictWriter(csv_file, sheet_header)
                 dictwriter.writeheader()
                 for sheet_line in sheet.lines:
                     dictwriter.writerow(sheet_line)
         else:  # If Python 2
             # Pass the encoding to DictReader
-            with open(os.path.join(self.output_name, sheet_name+'.csv'), 'w') as csv_file:
+            with open(os.path.join(self.output_name, self.sheet_prefix + sheet_name+'.csv'), 'w') as csv_file:
                 dictwriter = csv.DictWriter(csv_file, sheet_header, encoding='utf-8')
                 dictwriter.writeheader()
                 for sheet_line in sheet.lines:

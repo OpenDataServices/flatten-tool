@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add a spreadsheet configuration variable for id_name (called IDName).
 - Add --root-is-list to flatten and unflatten. Added new BODS page to docs.
+- Add --sheet-prefix to flatten.
 
 ### Fixed
 

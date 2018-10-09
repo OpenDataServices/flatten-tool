@@ -43,7 +43,7 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
 
 def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main',
-            root_list_path='main', root_is_list=False,
+            root_list_path='main', root_is_list=False, sheet_prefix='',
             rollup=False, root_id=None, use_titles=False, xml=False, id_name='id',  **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
@@ -73,7 +73,8 @@ def flatten(input_name, schema=None, output_name='flattened', output_format='all
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
             main_sheet_name=main_sheet_name,
-            output_name=name)
+            output_name=name,
+            sheet_prefix=sheet_prefix)
         spreadsheet_output.write_sheets()
 
     if output_format == 'all':

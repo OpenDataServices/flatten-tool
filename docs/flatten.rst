@@ -76,6 +76,29 @@ If your data has a list as a root, use the `--root-is-list` option.
 .. csv-table:: sheet: main.csv
    :file: ../examples/flatten/root-is-list/expected/main.csv
 
+Sheet Prefix
+------------
+
+You can pass a string that will be added at the start of all CSV file names, or all Excel sheet names.
+
+
+.. literalinclude:: ../examples/flatten/sheet-prefix/cmd.txt
+   :language: bash
+
+Will produce:
+
+.. csv-table:: sheet: test-cafe.csv
+   :file: ../examples/flatten/sheet-prefix/expected/test-cafe.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: test-table.csv
+   :file: ../examples/flatten/sheet-prefix/expected/test-table.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: test-tab_dish.csv
+   :file: ../examples/flatten/sheet-prefix/expected/test-tab_dish.csv
+
+
 All flatten options
 -------------------
 
