@@ -1,8 +1,8 @@
 Flatten-Tool for BODS
-=====================
++++++++++++++++++++++
 
 flatten and unflatten
----------------------
+=====================
 
 This data standard has a list as the root element,
 as opposed to other standards where the root element is a dict with meta data and a list of data.
@@ -16,21 +16,8 @@ The id element is `statementID`, so also use the `--id-name` option.
     flatten-tool unflatten -f csv --root-is-list --id-name=statementID -o examples/bods-one-unflattened.json examples/bods-one-flatten
 
 
-
-unflatten
----------
-
-As well as the options above, also pass the `--schema` option so that types are set correctly. Note the boolean and the integer in the output.
-
-.. literalinclude:: ../examples/bods/unflatten/cmd.txt
-   :language: bash
-
-.. literalinclude:: ../examples/bods/unflatten/expected/out.json
-   :language: json
-
-
-Problems with flatten
----------------------
+flatten
+=======
 
 This data standard has three types of statement - `entityStatement`, `personStatement` or `ownershipOrControlStatement`.
 When using flatten, the spreadsheets produced can become very mixed up.
@@ -43,13 +30,56 @@ However both columns appear in main.csv!
 It's also unclear what subsheets apply to which type - for instance there might be a subsheet called `identifiers`
 but it's not clear what type this applies to! (The answer is entities)
 
-There is no current way to solve this problem in the tool.
+It would be better to have separate sheets for each type.
+That way, only the relevant columns will appear in each sheet and it will be clear which subsheet applies to which sheet.
 
-If you can separate your JSON data into statements of one type only before using this tool, then the output will be cleaner.
+You can solve this with a combination of the filter and sheet prefix options. To flatten a set of data, run 3 commands:
+
+.. code-block:: bash
+
+    flatten-tool flatten --sheet-prefix=1_person_ --filter-field=statementType --filter-value=personStatement -f csv -o example1/ example1.json --root-is-list --id-name=statementID
+    flatten-tool flatten --sheet-prefix=2_entity_ --filter-field=statementType --filter-value=entityStatement -f csv -o example1/ example1.json --root-is-list --id-name=statementID
+    flatten-tool flatten --sheet-prefix=3_ownership_ --filter-field=statementType --filter-value=ownershipOrControlStatement -f csv -o example1/ example1.json --root-is-list --id-name=statementID
+
+You will have a set of sheets:
+
+  *  1_person_addresses.csv
+  *  1_person_main.csv
+  *  1_person_names.csv
+  *  1_person_nationalities.csv
+  *  2_entity_identifiers.csv
+  *  2_entity_main.csv
+  *  3_ownership_interests.csv
+  *  3_ownership_main.csv
+
+`birthDate` only appears in `1_person_main.csv` and `foundingDate` only appears in `2_entity_main.csv`, so it is clear which column is for which type.
+
+Note this works in csv mode.
+If you want to use Excel mode, you'll need to specify 3 separate output files and then combine the sheets in them into one file afterwards by hand.
+
+.. code-block:: bash
+
+    flatten-tool flatten --sheet-prefix=1_person_ --filter-field=statementType --filter-value=personStatement -f xlsx -o example1/part1.xlsx example1.json --root-is-list --id-name=statementID
+    flatten-tool flatten --sheet-prefix=2_entity_ --filter-field=statementType --filter-value=entityStatement -f xlsx -o example1/part2.xlsx example1.json --root-is-list --id-name=statementID
+    flatten-tool flatten --sheet-prefix=3_ownership_ --filter-field=statementType --filter-value=ownershipOrControlStatement -f xlsx -o example1/part3.xlsx example1.json --root-is-list --id-name=statementID
+
+unflatten
+=========
+
+Schema
+------
+
+As well as the options above, also pass the `--schema` option so that types are set correctly. Note the boolean and the integer in the output.
+
+.. literalinclude:: ../examples/bods/unflatten/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/bods/unflatten/expected/out.json
+   :language: json
 
 
-Problems with unflatten
------------------------
+Order is important
+------------------
 
 In the BODS schema, statements must appear in a certain order. Each of the `entityStatements` or `personStatements`
 referenced by a particular `ownershipOrControlStatement` must appear before that particular statement in the ordered array.
@@ -88,7 +118,7 @@ For instance:
   *  3main-control-own.csv
 
 create-template
----------------
+===============
 
 You can run this directly on `bods-package.json`:
 

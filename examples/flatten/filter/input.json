@@ -1,0 +1,23 @@
+{
+  "main": [
+    {
+      "id": "1",
+      "type": "cafe",
+      "title": "Cafe Open",
+      "dishes": [
+        { "title": "All Day Breakfast" }
+      ],
+      "coffee": "passable"
+    },
+    {
+      "id": "2",
+      "type": "pub",
+      "title": "Pints R Us",
+      "pints": [
+        { "title": "Beer" },
+        { "title": "Larger" }
+      ],
+      "coke": "pepsi"
+    }
+  ]
+}
