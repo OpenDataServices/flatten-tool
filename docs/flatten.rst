@@ -98,6 +98,30 @@ Will produce:
 .. csv-table:: sheet: test-tab_dish.csv
    :file: ../examples/flatten/sheet-prefix/expected/test-tab_dish.csv
 
+Filter
+------
+
+When flattening, you can optionally choose to only process some of the data.
+
+Currently, only simple filters can be specified using the `--filter-field` and `--filter-value` option.
+
+.. literalinclude:: ../examples/flatten/filter/input.json
+   :language: json
+
+.. literalinclude:: ../examples/flatten/filter/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: main.csv
+   :file: ../examples/flatten/filter/expected/main.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: pints.csv
+   :file: ../examples/flatten/filter/expected/pints.csv
+   :header-rows: 1
+
+No `dishes` sheet is produced, and the main sheet does not have a `coffee` column.
+
+The field specified must be a field directly on the data object - it's not possible to filter on fields like `pints/0/title` .
 
 All flatten options
 -------------------
