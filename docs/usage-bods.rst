@@ -1,8 +1,8 @@
 Flatten-Tool for BODS
-=====================
++++++++++++++++++++++
 
 flatten and unflatten
----------------------
+=====================
 
 This data standard has a list as the root element,
 as opposed to other standards where the root element is a dict with meta data and a list of data.
@@ -16,21 +16,8 @@ The id element is `statementID`, so also use the `--id-name` option.
     flatten-tool unflatten -f csv --root-is-list --id-name=statementID -o examples/bods-one-unflattened.json examples/bods-one-flatten
 
 
-
-unflatten
----------
-
-As well as the options above, also pass the `--schema` option so that types are set correctly. Note the boolean and the integer in the output.
-
-.. literalinclude:: ../examples/bods/unflatten/cmd.txt
-   :language: bash
-
-.. literalinclude:: ../examples/bods/unflatten/expected/out.json
-   :language: json
-
-
-Problems with flatten
----------------------
+flatten
+=======
 
 This data standard has three types of statement - `entityStatement`, `personStatement` or `ownershipOrControlStatement`.
 When using flatten, the spreadsheets produced can become very mixed up.
@@ -76,8 +63,23 @@ If you want to use Excel mode, you'll need to specify 3 separate output files an
     flatten-tool flatten --sheet-prefix=2_entity_ --filter-field=statementType --filter-value=entityStatement -f xlsx -o example1/part2.xlsx example1.json --root-is-list --id-name=statementID
     flatten-tool flatten --sheet-prefix=3_ownership_ --filter-field=statementType --filter-value=ownershipOrControlStatement -f xlsx -o example1/part3.xlsx example1.json --root-is-list --id-name=statementID
 
-Problems with unflatten
------------------------
+unflatten
+=========
+
+Schema
+------
+
+As well as the options above, also pass the `--schema` option so that types are set correctly. Note the boolean and the integer in the output.
+
+.. literalinclude:: ../examples/bods/unflatten/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/bods/unflatten/expected/out.json
+   :language: json
+
+
+Order is important
+------------------
 
 In the BODS schema, statements must appear in a certain order. Each of the `entityStatements` or `personStatements`
 referenced by a particular `ownershipOrControlStatement` must appear before that particular statement in the ordered array.
@@ -116,7 +118,7 @@ For instance:
   *  3main-control-own.csv
 
 create-template
----------------
+===============
 
 You can run this directly on `bods-package.json`:
 
