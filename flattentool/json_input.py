@@ -35,7 +35,10 @@ def sheet_key_title(sheet, key):
 
     """
     if key in sheet.titles:
-        return sheet.titles[key]
+        title = sheet.titles[key]
+        if title not in sheet:
+            sheet.append(title)
+        return title
     else:
         if key not in sheet:
             sheet.append(key)
@@ -56,8 +59,13 @@ class JSONParser(object):
         self.id_name = id_name
         self.xml = xml
         if schema_parser:
-            self.main_sheet = schema_parser.main_sheet
-            self.sub_sheets = schema_parser.sub_sheets
+            # Don't use columns from the schema parser
+            # (avoids empty columns)
+            self.main_sheet = copy.deepcopy(schema_parser.main_sheet)
+            self.sub_sheets = copy.deepcopy(schema_parser.sub_sheets)
+            self.main_sheet.columns = []
+            for sheet_name, sheet in list(self.sub_sheets.items()):
+                sheet.columns = []
             # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified
             self.rollup = schema_parser.rollup
             self.schema_parser = schema_parser
@@ -102,6 +110,11 @@ class JSONParser(object):
                 # fallover on empty activity, e.g. <iati-activity/>
                 continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
+
+        # Remove sheets with no lines of data
+        for sheet_name, sheet in list(self.sub_sheets.items()):
+            if not sheet.lines:
+                del self.sub_sheets[sheet_name]
     
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
         """
@@ -198,6 +211,6 @@ class JSONParser(object):
                             top_level_of_sub_sheet=True)
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
-        
+
         if top:
             sheet.lines.append(flattened_dict)

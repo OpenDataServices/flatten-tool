@@ -299,7 +299,7 @@ class TestParseUsingSchema(object):
             {'a': 'b'}
         ]
         assert len(parser.sub_sheets) == 1
-        assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d', 'c/0/f'])
+        assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d'])
         assert parser.sub_sheets['c'].lines == [{'c/0/d':'e'}]
 
     def test_column_matching(self, tmpdir): 
