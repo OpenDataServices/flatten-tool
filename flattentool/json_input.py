@@ -50,7 +50,7 @@ class JSONParser(object):
     # Similarily with methods like parse_json_dict
 
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
-                 root_id='ocid', use_titles=False, xml=False, id_name='id'):
+                 root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None, filter_value=None):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -58,6 +58,8 @@ class JSONParser(object):
         self.use_titles = use_titles
         self.id_name = id_name
         self.xml = xml
+        self.filter_field = filter_field
+        self.filter_value = filter_value
         if schema_parser:
             # Don't use columns from the schema parser
             # (avoids empty columns)
@@ -138,6 +140,12 @@ class JSONParser(object):
             top = True
         else:
             top = False
+
+        if parent_name == '' and self.filter_field and self.filter_value:
+            if self.filter_field not in json_dict:
+                return
+            if json_dict[self.filter_field] != self.filter_value:
+                return
 
         if top_level_of_sub_sheet:
             # Only add the IDs for the top level of object in an array
