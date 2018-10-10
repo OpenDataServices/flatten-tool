@@ -50,7 +50,8 @@ class JSONParser(object):
     # Similarily with methods like parse_json_dict
 
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
-                 root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None, filter_value=None):
+                 root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None, filter_value=None,
+                 empty_schema_columns=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -60,14 +61,16 @@ class JSONParser(object):
         self.xml = xml
         self.filter_field = filter_field
         self.filter_value = filter_value
+        self.empty_schema_columns = empty_schema_columns
         if schema_parser:
-            # Don't use columns from the schema parser
-            # (avoids empty columns)
             self.main_sheet = copy.deepcopy(schema_parser.main_sheet)
             self.sub_sheets = copy.deepcopy(schema_parser.sub_sheets)
-            self.main_sheet.columns = []
-            for sheet_name, sheet in list(self.sub_sheets.items()):
-                sheet.columns = []
+            if not empty_schema_columns:
+                # Don't use columns from the schema parser
+                # (avoids empty columns)
+                self.main_sheet.columns = []
+                for sheet_name, sheet in list(self.sub_sheets.items()):
+                    sheet.columns = []
             # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified
             self.rollup = schema_parser.rollup
             self.schema_parser = schema_parser
@@ -113,10 +116,11 @@ class JSONParser(object):
                 continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
 
-        # Remove sheets with no lines of data
-        for sheet_name, sheet in list(self.sub_sheets.items()):
-            if not sheet.lines:
-                del self.sub_sheets[sheet_name]
+        if not self.empty_schema_columns:
+            # Remove sheets with no lines of data
+            for sheet_name, sheet in list(self.sub_sheets.items()):
+                if not sheet.lines:
+                    del self.sub_sheets[sheet_name]
     
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
         """

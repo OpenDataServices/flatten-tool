@@ -264,7 +264,8 @@ class TestParseIDs(object):
 
 
 class TestParseUsingSchema(object):
-    def test_sub_sheet_names(self, tmpdir):
+    @pytest.mark.parametrize('empty_schema_columns', [False, True])
+    def test_sub_sheet_names(self, tmpdir, empty_schema_columns):
         test_schema = tmpdir.join('test.json')
         test_schema.write('''{
             "properties": {
@@ -291,7 +292,8 @@ class TestParseUsingSchema(object):
                 ('a', 'b'),
                 ('c', [OrderedDict([('d', 'e')])]),
             ])],
-            schema_parser=schema_parser
+            schema_parser=schema_parser,
+            empty_schema_columns=empty_schema_columns,
         )
         parser.parse()
         assert list(parser.main_sheet) == [ 'a' ]
@@ -299,7 +301,10 @@ class TestParseUsingSchema(object):
             {'a': 'b'}
         ]
         assert len(parser.sub_sheets) == 1
-        assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d'])
+        if empty_schema_columns:
+            assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d', 'c/0/f'])
+        else:
+            assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d'])
         assert parser.sub_sheets['c'].lines == [{'c/0/d':'e'}]
 
     def test_column_matching(self, tmpdir): 

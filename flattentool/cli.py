@@ -115,6 +115,10 @@ def create_parser():
     parser_flatten.add_argument(
         "--filter-value",
         help="Data Filter - only data with this will be processed. Use with --filter-field")
+    parser_flatten.add_argument(
+        "--empty-schema-columns",
+        action='store_true',
+        help="Include columns from the schema that contain no data.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
