@@ -1,7 +1,7 @@
 import pytest
 from collections import OrderedDict
 from six import text_type
-from flattentool.schema import SchemaParser, get_property_type_set
+from flattentool.schema import SchemaParser, JsonLoaderLocalRefsDisabled, get_property_type_set
 from flattentool.sheet import Sheet
 
 
@@ -683,3 +683,24 @@ def test_schema_from_uri(httpserver):
     httpserver.serve_content('{"a":{"$ref":"#/b"}, "b":"c"}', 404)
     parser = SchemaParser(schema_filename=httpserver.url)
     assert parser.root_schema_dict['a'] == 'c'
+
+
+test_json_loader_local_refs_disabled_is_ref_local_data_returns_true = [
+    ( "file:///home/odsc/work/flatten-tool/examples/create-template/refs/definitions.json#/definition/address" ),
+    ( "definitions.json#/definition/address" ),
+]
+
+
+@pytest.mark.parametrize("data", test_json_loader_local_refs_disabled_is_ref_local_data_returns_true)
+def test_json_loader_local_refs_disabled_is_ref_local_true(data):
+    assert True == JsonLoaderLocalRefsDisabled().is_ref_local(data)
+
+test_json_loader_local_refs_disabled_is_ref_local_data_returns_false = [
+    ( "https://raw.githubusercontent.com/openownership/data-standard/master/schema/beneficial-ownership-statements.json" ),
+    ( "http://raw.githubusercontent.com/openownership/data-standard/master/schema/beneficial-ownership-statements.json" ),
+]
+
+
+@pytest.mark.parametrize("data", test_json_loader_local_refs_disabled_is_ref_local_data_returns_false)
+def test_json_loader_local_refs_disabled_is_ref_local_true(data):
+    assert False == JsonLoaderLocalRefsDisabled().is_ref_local(data)

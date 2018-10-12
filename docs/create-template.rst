@@ -108,6 +108,16 @@ represented by another sheet, Flatten Tool will generate an empty sheet for the
 object so that you can still add columns at a later date.
 
 
+Disable local refs
+------------------
+
+You can pass a `--disable-local-refs` flag for a special mode that will disable local refs in JSON Schema files.
+
+.. literalinclude:: ../examples/create-template/refs-disable-local-refs/cmd.txt
+   :language: bash
+
+You may want to do this if running the command against JSON Schema files you don't trust.
+
 All create-template options
 ---------------------------
 
