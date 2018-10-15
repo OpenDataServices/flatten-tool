@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Add --empty-schema-columns flag to flatten (see Changed) https://github.com/OpenDataServices/cove/issues/1019
+
+### Changed
+
+- Don't include blank columns or sheets (ie. those with just a header taken from the schema) when flattening, unless the --empty-schema-columns flag is passed https://github.com/OpenDataServices/cove/issues/1019
+
+
 ## [0.3.0] - 2018-10-12
 
 ### Added
@@ -15,11 +24,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add --sheet-prefix to flatten.
 - Add --filter-field and --filter-value to flatten.
 - Added new BODS page to docs.
-- Add --empty-schema-columns flag to flatten (see Changed) https://github.com/OpenDataServices/cove/issues/1019
-
-### Changed
-
-- Don't include blank columns or sheets (ie. those with just a header taken from the schema) when flattening, unless the --empty-schema-columns flag is passed https://github.com/OpenDataServices/cove/issues/1019
 
 
 ### Fixed
