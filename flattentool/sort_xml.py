@@ -69,7 +69,7 @@ class XMLSchemaWalker(object):
                 return schema_element
         return schema_element
 
-    def element_loop(self, element, path):
+    def element_loop(self, element):
         """
         Return information about the children of the supplied element.
         """
@@ -95,14 +95,12 @@ class XMLSchemaWalker(object):
                 'xsd:complexType/xsd:all/xsd:element',
                 namespaces=namespaces)
             + type_elements)
-        child_tuples = []
         for child in children:
             a = child.attrib
             if 'name' in a:
-                child_tuples.append((a['name'], child, None, a.get('minOccurs'), a.get('maxOccurs')))
+                yield a['name'], child, None, a.get('minOccurs'), a.get('maxOccurs')
             else:
-                child_tuples.append((a['ref'], None, child, a.get('minOccurs'), a.get('maxOccurs')))
-        return child_tuples
+                yield a['ref'], None, child, a.get('minOccurs'), a.get('maxOccurs')
 
     def create_schema_dict(self, parent_name, parent_element=None):
         """
@@ -116,7 +114,7 @@ class XMLSchemaWalker(object):
 
         return OrderedDict([
             (name, self.create_schema_dict(name, element))
-            for name, element, _, _, _ in self.element_loop(parent_element, '')])
+            for name, element, _, _, _ in self.element_loop(parent_element)])
 
 
 def sort_element(element, schema_subdict):

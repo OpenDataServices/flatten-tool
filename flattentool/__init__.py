@@ -5,6 +5,7 @@ from flattentool.output import FORMATS_SUFFIX
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.xml_output import toxml
 from flattentool.lib import parse_sheet_configuration
+from flattentool.xml_create_template import XMLSchemaParser
 import sys
 import json
 import codecs
@@ -12,8 +13,9 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='template', output_format='all', main_sheet_name='main',
-                    rollup=False, root_id=None, use_titles=False, **_):
+def create_template(schema=None, output_name='template', output_format='all', main_sheet_name='main',
+                    rollup=False, root_id=None, use_titles=False,
+                    xml=False, xml_schemas=None, root_list_path=None, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -21,7 +23,10 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
     """
 
-    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
+    if xml:
+        parser = XMLSchemaParser(xml_schemas=xml_schemas, root_list_path=root_list_path)
+    else: 
+        parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
