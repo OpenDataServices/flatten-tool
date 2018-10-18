@@ -1,13 +1,15 @@
 from __future__ import print_function
 
 import argparse
+import warnings
+import sys
 
 from six import text_type
 
-import warnings
 from flattentool import create_template, unflatten, flatten
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.output import FORMATS as OUTPUT_FORMATS
+from flattentool.json_input import BadlyFormedJSONError
 
 """
 This file does most of the work of the flatten-tool commandline command.
@@ -40,7 +42,7 @@ def create_parser():
     parser.add_argument(
         '-v', '--verbose',
         action='store_true',
-        help='Print detailed output when warnings occur.')
+        help='Print detailed output when warnings or errors occur.')
 
     parser_create_template = subparsers.add_parser(
         'create-template',
@@ -253,6 +255,16 @@ def main():
     if args.subparser_name is None:
         parser.print_help()
     else:
+        def handler(type, value, traceback):
+            if args.verbose:
+                sys.__excepthook__(type, value, traceback)
+            elif type == BadlyFormedJSONError:
+                sys.stderr.write('JSON error: {}\n'.format(value))
+            else:
+                sys.stderr.write(str(value) + '\n')
+
+        sys.excepthook = handler
+
         if not args.verbose:
             def custom_warning_formatter(message, category, filename, lineno, line=None):
                 if category == UserWarning:
