@@ -23,7 +23,7 @@ def test_xml_basic_example():
         xml=True,
         id_name='iati-identifier')
     parser.parse()
-    assert list(parser.main_sheet) == ['iati-identifier', 'reporting-org/@ref', 'reporting-org/@type', 'reporting-org/narrative', 'participating-org/@ref', 'participating-org/@role', 'activity-status/@code', 'activity-date/@iso-date', 'activity-date/@type', 'title/narrative', 'description/narrative']
+    assert list(parser.main_sheet) == ['iati-identifier', 'reporting-org/@ref', 'reporting-org/@type', 'reporting-org/narrative', 'title/narrative', 'description/narrative', 'participating-org/@ref', 'participating-org/@role', 'activity-status/@code', 'activity-date/@iso-date', 'activity-date/@type']
     assert parser.main_sheet.lines == [
         {'activity-date/@type': '1', 'reporting-org/narrative': 'Organisation name', 'participating-org/@ref': 'AA-AAA-123456789', 'title/narrative': 'A title', 'participating-org/@role': '1', 'reporting-org/@ref': 'AA-AAA-123456789', 'iati-identifier': 'AA-AAA-123456789-ABC123', 'reporting-org/@type': '40', 'description/narrative': 'A description', 'activity-date/@iso-date': '2011-10-01', 'activity-status/@code': '2'},
         {'activity-date/@type': '2', 'reporting-org/narrative': 'Organisation name', 'participating-org/@ref': 'AA-AAA-123456789', 'title/narrative': 'Another title', 'participating-org/@role': '1', 'reporting-org/@ref': 'AA-AAA-123456789', 'iati-identifier': 'AA-AAA-123456789-ABC124', 'reporting-org/@type': '40', 'description/narrative': 'Another description', 'activity-date/@iso-date': '2016-01-01', 'activity-status/@code': '3'}

@@ -32,10 +32,11 @@ def test_blank_sheets(tmpdir):
 
     # Check XLSX is empty
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release']
-    assert len(wb['release'].rows) == 1
-    assert len(wb['release'].rows[0]) == 1
-    assert wb['release'].rows[0][0].value == None
+    assert wb.sheetnames == ['release']
+    rows = list(wb['release'].rows)
+    assert len(rows) == 1
+    assert len(rows[0]) == 1
+    assert rows[0][0].value == None
     
     # Check CSV is Empty
     assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
@@ -54,11 +55,13 @@ def test_populated_header(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release', 'b']
-    assert len(wb['release'].rows) == 1
-    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a', 'd' ]
-    assert len(wb['b'].rows) == 1
-    assert [ x.value for x in wb['b'].rows[0] ] == [ 'ocid', 'c' ]
+    assert wb.sheetnames == ['release', 'b']
+    rows = list(wb['release'].rows)
+    assert len(rows) == 1
+    assert [ x.value for x in rows[0] ] == [ 'a', 'd' ]
+    b_rows = list(wb['b'].rows)
+    assert len(b_rows) == 1
+    assert [ x.value for x in b_rows[0] ] == [ 'ocid', 'c' ]
 
     # Check CSV
     assert set(tmpdir.join('release').listdir()) == set([
@@ -83,11 +86,13 @@ def test_empty_lines(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release', 'b']
-    assert len(wb['release'].rows) == 1
-    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a', 'd' ]
-    assert len(wb['b'].rows) == 1
-    assert [ x.value for x in wb['b'].rows[0] ] == [ 'ocid', 'c' ]
+    assert wb.sheetnames == ['release', 'b']
+    rows = list(wb['release'].rows)
+    assert len(rows) == 1
+    assert [ x.value for x in rows[0] ] == [ 'a', 'd' ]
+    b_rows = list(wb['b'].rows)
+    assert len(b_rows) == 1
+    assert [ x.value for x in b_rows[0] ] == [ 'ocid', 'c' ]
 
     # Check CSV
     assert set(tmpdir.join('release').listdir()) == set([
@@ -114,15 +119,17 @@ def test_populated_lines(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release', 'b']
-    assert len(wb['release'].rows) == 3
-    assert [ x.value for x in wb['release'].rows[0] ] == [ 'a' ]
-    assert [ x.value for x in wb['release'].rows[1] ] == [ 'cell1' ]
-    assert [ x.value for x in wb['release'].rows[2] ] == [ 'cell2' ]
-    assert len(wb['b'].rows) == 3
-    assert [ x.value for x in wb['b'].rows[0] ] == [ 'ocid', 'c' ]
-    assert [ x.value for x in wb['b'].rows[1] ] == [ None, 'cell3' ]
-    assert [ x.value for x in wb['b'].rows[2] ] == [ None, 'cell4' ]
+    assert wb.sheetnames == ['release', 'b']
+    rows = list(wb['release'].rows)
+    assert len(rows) == 3
+    assert [ x.value for x in rows[0] ] == [ 'a' ]
+    assert [ x.value for x in rows[1] ] == [ 'cell1' ]
+    assert [ x.value for x in rows[2] ] == [ 'cell2' ]
+    b_rows = list(wb['b'].rows)
+    assert len(b_rows) == 3
+    assert [ x.value for x in b_rows[0] ] == [ 'ocid', 'c' ]
+    assert [ x.value for x in b_rows[1] ] == [ None, 'cell3' ]
+    assert [ x.value for x in b_rows[2] ] == [ None, 'cell4' ]
 
     # Check CSV
     assert set(tmpdir.join('release').listdir()) == set([
@@ -145,11 +152,12 @@ def test_utf8(tmpdir):
 
     # Check XLSX
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
-    assert wb.get_sheet_names() == ['release']
-    assert len(wb['release'].rows) == 3
-    assert [ x.value for x in wb['release'].rows[0] ] == [ 'é' ]
-    assert [ x.value for x in wb['release'].rows[1] ] == [ 'éαГ😼𝒞人' ]
-    assert [ x.value for x in wb['release'].rows[2] ] == [ 'cell2' ]
+    assert wb.sheetnames == ['release']
+    rows = list(wb['release'].rows)
+    assert len(rows) == 3
+    assert [ x.value for x in rows[0] ] == [ 'é' ]
+    assert [ x.value for x in rows[1] ] == [ 'éαГ😼𝒞人' ]
+    assert [ x.value for x in rows[2] ] == [ 'cell2' ]
 
     # Check CSV
     assert set(tmpdir.join('release').listdir()) == set([

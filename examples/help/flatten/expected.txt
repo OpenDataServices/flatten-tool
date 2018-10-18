@@ -1,7 +1,10 @@
-usage: flatten-tool flatten [-h] [-s SCHEMA] [-f OUTPUT_FORMAT] [--xml]
+usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
                             [--id-name ID_NAME] [-m MAIN_SHEET_NAME]
                             [-o OUTPUT_NAME] [--root-list-path ROOT_LIST_PATH]
                             [--rollup] [-r ROOT_ID] [--use-titles]
+                            [--root-is-list] [--sheet-prefix SHEET_PREFIX]
+                            [--filter-field FILTER_FIELD]
+                            [--filter-value FILTER_VALUE]
                             input_name
 
 positional arguments:
@@ -11,7 +14,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.
-  -f OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
+  -f {csv,xlsx,all}, --output-format {csv,xlsx,all}
                         Type of template you want to create. Defaults to all
                         available options
   --xml                 Use XML as the input format
@@ -30,3 +33,14 @@ optional arguments:
   -r ROOT_ID, --root-id ROOT_ID
                         Root ID of the data format, e.g. ocid for OCDS
   --use-titles          Convert titles. Requires a schema to be specified.
+  --root-is-list        The root element is a list. --root-list-path and meta
+                        data will be ignored.
+  --sheet-prefix SHEET_PREFIX
+                        A string to prefix to the start of every sheet (or
+                        file) name.
+  --filter-field FILTER_FIELD
+                        Data Filter - only data with this will be processed.
+                        Use with --filter-value
+  --filter-value FILTER_VALUE
+                        Data Filter - only data with this will be processed.
+                        Use with --filter-field

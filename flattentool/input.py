@@ -15,7 +15,8 @@ from warnings import warn
 import traceback
 import datetime
 import pytz
-from openpyxl.utils import _get_column_letter, column_index_from_string
+from openpyxl.utils import column_index_from_string
+from openpyxl.utils.cell import _get_column_letter
 from flattentool.exceptions import DataErrorWarning
 from flattentool.lib import isint, parse_sheet_configuration
 
@@ -187,6 +188,7 @@ class SpreadsheetInput(object):
     def __init__(self,
                  input_name='',
                  root_list_path='main',
+                 root_is_list=False,
                  timezone_name='UTC',
                  root_id='ocid',
                  convert_titles=False,
@@ -200,6 +202,7 @@ class SpreadsheetInput(object):
                 ):
         self.input_name = input_name
         self.root_list_path = root_list_path
+        self.root_is_list = root_is_list
         self.sub_sheet_names = []
         self.timezone = pytz.timezone(timezone_name)
         self.root_id = root_id
@@ -253,6 +256,8 @@ class SpreadsheetInput(object):
                 # We want to ignore data in earlier columns, so we look
                 # through the data backwards
                 for i, actual_heading in enumerate(reversed(actual_headings)):
+                    if actual_heading is None:
+                        continue
                     if actual_heading in found:
                         found[actual_heading].append((last_col-i)-1)
                     else:
@@ -357,7 +362,7 @@ class SpreadsheetInput(object):
         ordered_cell_source_map = None
         heading_source_map = None
         if with_cell_source_map or with_heading_source_map:
-            cell_source_map = extract_list_to_error_path([self.root_list_path], cell_tree)
+            cell_source_map = extract_list_to_error_path([] if self.root_is_list else [self.root_list_path], cell_tree)
             ordered_items = sorted(cell_source_map.items())
             row_source_map = OrderedDict()
             heading_source_map = OrderedDict()
@@ -527,7 +532,7 @@ class CSVInput(SpreadsheetInput):
             with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
                 r = csvreader(main_sheet_file, encoding=self.encoding)
                 heading_row = next(r)
-        if heading_row[0] == '#':
+        if len(heading_row) > 0 and heading_row[0] == '#':
             return heading_row[1:]
         return []
 
@@ -552,7 +557,7 @@ class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
 
-        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.get_sheet_names())
+        self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.sheetnames)
         if self.include_sheets:
             for sheet in list(self.sheet_names_map):
                 if sheet not in self.include_sheets:
@@ -580,18 +585,18 @@ class XLSXInput(SpreadsheetInput):
             return []
 
         if self.vertical_orientation:
-            return [cell.value for cell in worksheet.columns[skip_rows][configuration_line:]]
+            return [cell.value for cell in worksheet[_get_column_letter(skip_rows + 1)][configuration_line:]]
 
         try:
-            return [cell.value for cell in worksheet.rows[skip_rows + configuration_line]]
+            return [cell.value for cell in worksheet[skip_rows + configuration_line + 1]]
         except IndexError:
             # If the heading line is after data in the spreadsheet. i.e when skipRows
             return []
 
     def get_sheet_configuration(self, sheet_name):
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
-        if worksheet.rows[0][0].value == '#':
-            return [cell.value for num, cell in enumerate(worksheet.rows[0]) if num != 0 and cell.value]
+        if worksheet['A1'].value == '#':
+            return [cell.value for num, cell in enumerate(worksheet[1]) if num != 0 and cell.value]
         else:
             return []
 
@@ -609,14 +614,14 @@ class XLSXInput(SpreadsheetInput):
 
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         if self.vertical_orientation:
-            header_row = worksheet.columns[skip_rows]
-            remaining_rows = worksheet.columns[skip_rows + header_rows:]
+            header_row = worksheet[_get_column_letter(skip_rows + 1)]
+            remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1)
             if configuration_line:
                 header_row = header_row[1:]
-                remaining_rows = [row[1:] for row in remaining_rows]
+                remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1, min_row=2)
         else:
-            header_row = worksheet.rows[skip_rows + configuration_line]
-            remaining_rows = worksheet.rows[skip_rows + configuration_line + header_rows:]
+            header_row = worksheet[skip_rows + configuration_line + 1]
+            remaining_rows = worksheet.iter_rows(min_row=skip_rows + configuration_line + header_rows + 1)
 
         coli_to_header = {}
         for i, header in enumerate(header_row):
@@ -737,7 +742,14 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 continue
 
             value = cell.cell_value
-            converted_value = convert_type(current_type or '', value, timezone)
+            if xml and current_type == 'array':
+                # In xml "arrays" can have text values, if they're the final element
+                # However the type of the text value itself should not be "array",
+                # as that would split the text on commas, which we don't want.
+                # https://github.com/OpenDataServices/cove/issues/1030
+                converted_value = convert_type('', value, timezone)
+            else:
+                converted_value = convert_type(current_type or '', value, timezone)
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != '':
                 if xml:

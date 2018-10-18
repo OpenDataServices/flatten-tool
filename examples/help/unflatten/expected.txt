@@ -1,4 +1,4 @@
-usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
+usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
                               [-b BASE_JSON] [-m ROOT_LIST_PATH] [-e ENCODING]
                               [-o OUTPUT_NAME] [-c CELL_SOURCE_MAP]
                               [-a HEADING_SOURCE_MAP]
@@ -9,7 +9,9 @@ usage: flatten-tool unflatten [-h] -f INPUT_FORMAT [--xml] [--id-name ID_NAME]
                               [--metatab-schema METATAB_SCHEMA]
                               [--metatab-only]
                               [--metatab-vertical-orientation]
+                              [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
                               [--default-configuration DEFAULT_CONFIGURATION]
+                              [--root-is-list]
                               input_name
 
 positional arguments:
@@ -17,7 +19,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f INPUT_FORMAT, --input-format INPUT_FORMAT
+  -f {csv,xlsx}, --input-format {csv,xlsx}
                         File format of input file or directory.
   --xml                 Use XML as the output format
   --id-name ID_NAME     String to use for the identifier key, defaults to 'id'
@@ -33,7 +35,7 @@ optional arguments:
                         Defaults to utf8.
   -o OUTPUT_NAME, --output-name OUTPUT_NAME
                         Name of the outputted file. Will have an extension
-                        appended as appropriate. Defaults to unflattened.json
+                        appended as appropriate.
   -c CELL_SOURCE_MAP, --cell-source-map CELL_SOURCE_MAP
                         Path to write a cell source map to. Will have an
                         extension appended as appropriate.
@@ -61,7 +63,10 @@ optional arguments:
   --metatab-vertical-orientation
                         Read metatab so that headings are in the first column
                         and data is read vertically. Only for XLSX not CSV
+  --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
+                        Path to one or more XML schemas (used for sorting)
   --default-configuration DEFAULT_CONFIGURATION
                         Comma seperated list of default parsing commands for
                         all sheets. Only for XLSX not CSV
-
+  --root-is-list        The root element is a list. --root-list-path and meta
+                        data will be ignored.

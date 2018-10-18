@@ -1,0 +1,1 @@
+$ flatten-tool flatten --filter-field=type --filter-value=pub examples/flatten/filter/input.json -o examples/flatten/filter/actual

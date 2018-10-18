@@ -2,6 +2,8 @@ from __future__ import print_function
 import argparse
 import sys
 from flattentool import create_template, unflatten, flatten
+from flattentool.input import FORMATS as INPUT_FORMATS
+from flattentool.output import FORMATS as OUTPUT_FORMATS
 from six import text_type
 
 """
@@ -29,6 +31,9 @@ def create_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='subparser_name')
 
+    output_formats = sorted(OUTPUT_FORMATS) + ['all']
+    input_formats = sorted(INPUT_FORMATS)
+
     parser_create_template = subparsers.add_parser(
         'create-template',
         help='Create a template from the given schema')
@@ -38,7 +43,8 @@ def create_parser():
         required=True)
     parser_create_template.add_argument(
         "-f", "--output-format",
-        help="Type of template you want to create. Defaults to all available options")
+        help="Type of template you want to create. Defaults to all available options",
+        choices=output_formats)
     parser_create_template.add_argument(
         "-m", "--main-sheet-name",
         help="The name of the main sheet, as seen in the first tab of the spreadsheet for example. Defaults to main")
@@ -68,7 +74,8 @@ def create_parser():
         help="Path to a relevant schema.")
     parser_flatten.add_argument(
         "-f", "--output-format",
-        help="Type of template you want to create. Defaults to all available options")
+        help="Type of template you want to create. Defaults to all available options",
+        choices=output_formats)
     parser_flatten.add_argument(
         "--xml",
         action='store_true',
@@ -96,6 +103,19 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_flatten.add_argument(
+        "--root-is-list",
+        action='store_true',
+        help="The root element is a list. --root-list-path and meta data will be ignored.")
+    parser_flatten.add_argument(
+        "--sheet-prefix",
+        help="A string to prefix to the start of every sheet (or file) name.")
+    parser_flatten.add_argument(
+        "--filter-field",
+        help="Data Filter - only data with this will be processed. Use with --filter-value")
+    parser_flatten.add_argument(
+        "--filter-value",
+        help="Data Filter - only data with this will be processed. Use with --filter-field")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
@@ -106,6 +126,7 @@ def create_parser():
     parser_unflatten.add_argument(
         "-f", "--input-format",
         help="File format of input file or directory.",
+        choices=input_formats,
         required=True)
     parser_unflatten.add_argument(
         "--xml",
@@ -125,7 +146,7 @@ def create_parser():
         help="Encoding of the input file(s) (only relevant for CSV). This can be any encoding recognised by Python. Defaults to utf8.")
     parser_unflatten.add_argument(
         "-o", "--output-name",
-        help="Name of the outputted file. Will have an extension appended as appropriate. Defaults to unflattened.json")
+        help="Name of the outputted file. Will have an extension appended as appropriate.")
     parser_unflatten.add_argument(
         "-c", "--cell-source-map",
         help="Path to write a cell source map to. Will have an extension appended as appropriate.")
@@ -164,8 +185,18 @@ def create_parser():
         action='store_true',
         help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
     parser_unflatten.add_argument(
+        "--xml-schema",
+        dest='xml_schemas',
+        metavar='XML_SCHEMA',
+        nargs='*',
+        help="Path to one or more XML schemas (used for sorting)")
+    parser_unflatten.add_argument(
         "--default-configuration",
         help="Comma seperated list of default parsing commands for all sheets. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--root-is-list",
+        action='store_true',
+        help="The root element is a list. --root-list-path and meta data will be ignored.")
 
     return parser
 

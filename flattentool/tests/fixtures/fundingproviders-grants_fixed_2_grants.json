@@ -1,0 +1,80 @@
+{
+    "grants": [
+        {
+            "currency": "GBP",
+            "grantProgramme": [
+                {
+                    "code": "AAC",
+                    "title": "Awards Funding Committee"
+                }
+            ],
+            "id": "360G-fundingproviders-000001/X/00/X",
+            "Co-applicant(s)": "Miss Hypatia Alexandria, Mr Thomas Aquinas",
+            "title": "Title A",
+            "fundingOrganization": [
+                {
+                    "id": "GB-CHC-000000",
+                    "name": "Funding Providers UK"
+                }
+            ],
+            "dateModified": "13-03-2015",
+            "dataSource": "http://www.fundingproviders.co.uk/grants/",
+            "plannedDates": [
+                {
+                    "duration": "30"
+                }
+            ],
+            "Surname of applicant": "Roe",
+            "Grant number": "000001/X/00/X",
+            "amountAwarded": 152505,
+            "recipientOrganization": [
+                {
+                    "addressLocality": "London",
+                    "name": "Company Name Limited"
+                }
+            ],
+            "Grant type": "Large Awards",
+            "Full name of applicant": "Miss Jane Roe",
+            "awardDate": "24/07/2014"
+        },
+        {
+            "recipientOrganization": [
+                {
+                    "id": "GB-COH-RC000000",
+                    "addressLocality": "Leicester",
+                    "name": "University of UK",
+                    "companyNumber": "RC000000"
+                }
+            ],
+            "currency": "GBP",
+            "grantProgramme": [
+                {
+                    "code": "AAC",
+                    "title": "Awards Funding Committee"
+                }
+            ],
+            "Department": "Department of Studies",
+            "id": "360G-fundingproviders-000002/X/00/X",
+            "title": "Title B",
+            "fundingOrganization": [
+                {
+                    "id": "GB-CHC-000000",
+                    "name": "Funding Providers UK"
+                }
+            ],
+            "dateModified": "13-03-2015",
+            "dataSource": "http://www.fundingproviders.co.uk/grants/",
+            "plannedDates": [
+                {
+                    "duration": "25"
+                }
+            ],
+            "Surname of applicant": "Doe",
+            "Grant number": "000002/X/00/X",
+            "amountAwarded": 178990,
+            "Grant type": "Large Awards",
+            "Full name of applicant": "Prof John Doe",
+            "awardDate": "24/07/2014"
+        }
+    ]
+}

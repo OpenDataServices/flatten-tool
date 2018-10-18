@@ -38,7 +38,7 @@ def test_roundtrip(tmpdir, output_format):
 @pytest.mark.parametrize('use_titles', [False, True])
 @pytest.mark.parametrize('output_format', ['xlsx', 'csv'])
 def test_roundtrip_360(tmpdir, output_format, use_titles):
-    input_name = 'flattentool/tests/fixtures/WellcomeTrust-grants_fixed_2_grants.json'
+    input_name = 'flattentool/tests/fixtures/fundingproviders-grants_fixed_2_grants.json'
     flatten(
         input_name=input_name,
         output_name=tmpdir.join('flattened').strpath+'.'+output_format,
@@ -64,7 +64,7 @@ def test_roundtrip_360(tmpdir, output_format, use_titles):
 
 @pytest.mark.parametrize('use_titles', [False, True])
 def test_roundtrip_360_rollup(tmpdir, use_titles):
-    input_name = 'flattentool/tests/fixtures/WellcomeTrust-grants_fixed_2_grants.json'
+    input_name = 'flattentool/tests/fixtures/fundingproviders-grants_fixed_2_grants.json'
     output_format = 'csv'
     output_name = tmpdir.join('flattened').strpath+'.'+output_format
     moved_name = tmpdir.mkdir('flattened_main_only').strpath
