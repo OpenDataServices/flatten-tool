@@ -1,0 +1,1 @@
+$ flatten-tool flatten --empty-schema-columns --root-list-path=cafe --main-sheet-name=cafe --schema=examples/receipt/cafe.schema examples/receipt/normalised/expected.json -o examples/flatten/empty-schema-columns/actual
