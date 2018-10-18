@@ -233,6 +233,8 @@ def main():
             print(text_type(e))
             return
     elif args.subparser_name == 'flatten':
+        if sys.stdin.isatty() and args.input_name == sys.stdin.fileno():
+            parser.error('one of the following arguments is required: input_name or piped data')
         flatten(**kwargs_from_parsed_args(args))
     elif args.subparser_name == 'unflatten':
         unflatten(**kwargs_from_parsed_args(args))
