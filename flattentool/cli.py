@@ -1,5 +1,6 @@
 from __future__ import print_function
 import argparse
+import sys
 from flattentool import create_template, unflatten, flatten
 from six import text_type
 
@@ -60,7 +61,7 @@ def create_parser():
         'flatten',
         help='Flatten a JSON file')
     parser_flatten.add_argument(
-        'input_name',
+        'input_name', nargs='?', default=sys.stdin.fileno(),
         help="Name of the input JSON file.")
     parser_flatten.add_argument(
         "-s", "--schema",

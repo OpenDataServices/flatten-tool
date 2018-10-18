@@ -82,7 +82,7 @@ class JSONParser(object):
         if json_filename is not None and root_json_dict is not None:
             raise ValueError('Only one of json_file or root_json_dict should be supplied')
  
-        if json_filename:
+        if json_filename is not None:
             with codecs.open(json_filename, encoding='utf-8') as json_file:
                 try:
                     self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
