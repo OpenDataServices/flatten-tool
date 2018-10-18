@@ -5,7 +5,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
                             [--root-is-list] [--sheet-prefix SHEET_PREFIX]
                             [--filter-field FILTER_FIELD]
                             [--filter-value FILTER_VALUE]
-                            input_name
+                            [input_name]
 
 positional arguments:
   input_name            Name of the input JSON file.

@@ -67,7 +67,7 @@ def create_parser():
         'flatten',
         help='Flatten a JSON file')
     parser_flatten.add_argument(
-        'input_name', nargs='?', default=sys.stdin.fileno(),
+        'input_name', nargs='?', default=sys.stdin.isatty() and sys.stdin.fileno(),
         help="Name of the input JSON file.")
     parser_flatten.add_argument(
         "-s", "--schema",
