@@ -70,7 +70,7 @@ class XLSXOutput(SpreadsheetOutput):
             worksheet.append(line)
 
     def close(self):
-        self.workbook.remove_sheet(self.workbook.active)
+        self.workbook.remove(self.workbook.active)
         self.workbook.save(self.output_name)
 
 
