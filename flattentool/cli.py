@@ -1,5 +1,6 @@
 from __future__ import print_function
 import argparse
+import warnings
 from flattentool import create_template, unflatten, flatten
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.output import FORMATS as OUTPUT_FORMATS
@@ -32,6 +33,11 @@ def create_parser():
 
     output_formats = sorted(OUTPUT_FORMATS) + ['all']
     input_formats = sorted(INPUT_FORMATS)
+
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='Print detailed output when warnings occur.')
 
     parser_create_template = subparsers.add_parser(
         'create-template',
@@ -222,19 +228,30 @@ def main():
 
     if args.subparser_name is None:
         parser.print_help()
-    elif args.subparser_name == 'create-template':
-        # Pass the arguments to the create_template function
-        # If the schema file does not exist we catch it in this exception
-        try:
-            # Note: Ensures that empty arguments are not passed to the create_template function
-            create_template(**kwargs_from_parsed_args(args))
-        except (OSError, IOError) as e:
-            print(text_type(e))
-            return
-    elif args.subparser_name == 'flatten':
-        flatten(**kwargs_from_parsed_args(args))
-    elif args.subparser_name == 'unflatten':
-        unflatten(**kwargs_from_parsed_args(args))
+    else:
+        if not args.verbose:
+            def custom_warning_formatter(message, category, filename, lineno, line=None):
+                if category == UserWarning:
+                    return str(message) + '\n'
+                else:
+                    return default_warning_formatter(message, category, filename, lineno, line)
+
+            default_warning_formatter = warnings.formatwarning
+            warnings.formatwarning = custom_warning_formatter
+
+        if args.subparser_name == 'create-template':
+            # Pass the arguments to the create_template function
+            # If the schema file does not exist we catch it in this exception
+            try:
+                # Note: Ensures that empty arguments are not passed to the create_template function
+                create_template(**kwargs_from_parsed_args(args))
+            except (OSError, IOError) as e:
+                print(text_type(e))
+                return
+        elif args.subparser_name == 'flatten':
+            flatten(**kwargs_from_parsed_args(args))
+        elif args.subparser_name == 'unflatten':
+            unflatten(**kwargs_from_parsed_args(args))
 
 
 if __name__ == '__main__':
