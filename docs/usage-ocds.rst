@@ -25,7 +25,7 @@ Converting a JSON file to a spreadsheet
 
 .. code-block:: bash
 
-    flatten-tool flatten input.json --root-id=ocid --main-sheet-name releases --output-name flattened --root-list-path='releases'
+    flatten-tool flatten input.json --root-id=ocid --main-sheet-name releases --root-list-path=releases
 
 This will command will create an output called flattened in all the formats we support - currently this is ``flattened.xlsx`` and a ``flattened/`` directory of CSV files.
 
@@ -45,13 +45,13 @@ Then, for a populated XLSX template in (in release_populated.xlsx):
 
 .. code-block:: bash
 
-    flatten-tool unflatten release_populated.xlsx --root-id=ocid --base-json base.json --input-format xlsx --output-name release.json --root-list-path='releases'
+    flatten-tool unflatten release_populated.xlsx --root-id=ocid --base-json base.json --input-format xlsx --output-name release.json --root-list-path=releases
 
 Or for populated CSV files (in the release_populated directory):
 
 .. code-block:: bash
 
-    flatten-tool unflatten release_populated --root-id=ocid --base-json base.json --input-format csv --output-name release.json --root-list-path='releases'
+    flatten-tool unflatten release_populated --root-id=ocid --base-json base.json --input-format csv --output-name release.json --root-list-path=releases
 
 These produce a release.json file based on the data in the spreadsheets.
 
@@ -66,7 +66,7 @@ Download https://raw.githubusercontent.com/open-contracting/standard/1.0/standar
 
 .. code-block:: bash
 
-    flatten-tool create-template --root-id=ocid --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
+    flatten-tool create-template --root-id=ocid --schema release-schema.json --main-sheet-name releases
 
 This will create ``template.xlsx`` and a ``template/`` directory of CSV files.
 
