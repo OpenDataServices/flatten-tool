@@ -7,27 +7,27 @@ spreadsheet and producing a JSON document.
 If you already have a JSON schema, Flatten Tool can automatically create a
 template spreadsheet with the correct headers that you can start filling in.
 
-Flatten Tool's sub-command for this is `flatten-tool create-template`.
+Flatten Tool's sub-command for this is ``flatten-tool create-template``.
 
 
 Generating a spreadsheet template from a JSON Schema
 ====================================================
 
-Here's an example command that uses a schema from the cafe example under `Sheet
-shapes` and generates a spreadsheet:
+Here's an example command that uses a schema from the cafe example under
+:doc:`Sheet shapes <unflatten#sheet-shapes>` and generates a spreadsheet:
 
 .. literalinclude:: ../examples/create-template/simple/cmd.txt
    :language: bash
 
-The example uses `--use-titles` so that the generated spreadsheet has human
-readable titles and `--main-sheet-name=cafe` so that the generated spreadsheet
-have `cafe` as their first tab and not the default, `main`.
+The example uses ``--use-titles`` so that the generated spreadsheet has human
+readable titles and ``--main-sheet-name=cafe`` so that the generated spreadsheet
+has ``cafe`` as its first tab and not the default, ``main``.
 
-If you don't specify `-o`, Flatten Tool will choose a spreadsheet called
-`template` in the current working directory.
+If you don't specify ``-o``, Flatten Tool will choose a spreadsheet called
+``template`` in the current working directory.
 
-If you don't specify a format with `-f`, Flatten Tool will create a
-`template.xlsx` file and a set of CSV files under `template/`.
+If you don't specify a format with ``-f``, Flatten Tool will create a
+``template.xlsx`` file and a set of CSV files under ``template/``.
 
 The schema is the same as the one used in the user guide and looks like this:
 
@@ -61,9 +61,9 @@ have the values listed on the main sheet.
 
 To enable roll up behaviour you have to:
 
-* Use the `--rollup` flag
+* Use the ``--rollup`` flag
 
-* Add the `rollUp` key to the JSON Schema to the child object with a value that
+* Add the ``rollUp`` key to the JSON Schema to the child object with a value that
   is an array of the fields to roll up
 
 Here are the changes we make to the schema:
@@ -88,7 +88,7 @@ Here are the resulting sheets:
    :file: ../examples/create-template/rollup/expected/tab_dish.csv
 
 
-Notice how `Table: Number` has now been moved into the `cafe.csv` file.
+Notice how ``Table: Number`` has now been moved into the ``cafe.csv`` file.
 
 .. caution ::
 
@@ -111,7 +111,7 @@ object so that you can still add columns at a later date.
 Disable local refs
 ------------------
 
-You can pass a `--disable-local-refs` flag for a special mode that will disable local refs in JSON Schema files.
+You can pass a ``--disable-local-refs`` flag for a special mode that will disable local refs in JSON Schema files.
 
 .. literalinclude:: ../examples/create-template/refs-disable-local-refs/cmd.txt
    :language: bash

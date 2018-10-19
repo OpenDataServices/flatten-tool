@@ -29,7 +29,7 @@ Helper libraries
 
 As you'll have read in the :doc:`User Guide <unflatten>`, Flatten Tool makes
 use of JSON Pointer, JSON Schema and JSON Ref standards. The Python libraries
-that support this are `jsonpointer`, `jsonschema` and `jsonref` respectively.
+that support this are ``jsonpointer``, ``jsonschema`` and ``jsonref`` respectively.
 
 
 Running the tests
@@ -68,7 +68,7 @@ Spreadsheet Loaders
 
    Responsible for loading data out of spreadsheets and representing it in the
    correct format for the unflattener - a Python structure of basic JSON types and
-   the special `Empty` value
+   the special ``Empty`` value
 
 Unflatten function
 
@@ -81,8 +81,8 @@ Unflatten function
 
    .. tip ::
 
-      Take a look at the `run()` function in
-      `flattentool/tests/test_headings.py` to see a function that behaves a
+      Take a look at the ``run()`` function in
+      ``flattentool/tests/test_headings.py`` to see a function that behaves a
       little like a pure Python entry point to Flatten Tool's functionality.
 
 Serialisers
@@ -101,10 +101,10 @@ The existing implementation makes a special effort to correctly handle decimal
 types such as currency.
 
 This special effort also means that Flatten Tool treats float values as
-`Decimal` too.
+``Decimal`` too.
 
 Most of the time this is perfectly fine, since Python correctly treats a
-`Decimal` generated from a float as being equal to the float itself:
+``Decimal`` generated from a float as being equal to the float itself:
 
 .. code-block:: python
 
@@ -113,8 +113,8 @@ Most of the time this is perfectly fine, since Python correctly treats a
    True
 
 Do be aware of this small quirk of Python's behaviour though. Python doesn't
-treat a `Decimal` obtained from `'1.3'` as being the same as one generated from
-`1.3`:
+treat a ``Decimal`` obtained from ``'1.3'`` as being the same as one generated from
+``1.3``:
 
 .. code-block:: python
 
@@ -126,7 +126,7 @@ treat a `Decimal` obtained from `'1.3'` as being the same as one generated from
 Stdin support
 -------------
 
-The next version could support a single sheet being fed into `stdin` like this:
+The next version could support a single sheet being fed into ``stdin`` like this:
 
 .. code-block:: bash
 
@@ -147,16 +147,16 @@ Naming and Versioning
 ---------------------
 
 The next release of Flatten Tool will likely start a version numbering schema.
-We could also name the command line tool `flattentool` rather than
-`flatten-tool` so that everything is consistent.
+We could also name the command line tool ``flattentool`` rather than
+``flatten-tool`` so that everything is consistent.
 
 Other possible directions
 -------------------------
 
-It might be also be good to add a `CHANGELOG.txt` which could document changes
+It might be also be good to add a ``CHANGELOG.txt`` which could document changes
 such as:
 
 * This documentation
 * Changed stdout behaviour for unflatten and loss of the default - writing to
-  `unflattened.json`.
+  ``unflattened.json``.
 * Publishing on PyPi

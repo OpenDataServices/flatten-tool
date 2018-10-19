@@ -6,9 +6,9 @@ flatten and unflatten
 
 This data standard has a list as the root element,
 as opposed to other standards where the root element is a dict with meta data and a list of data.
-When flattening and unflattening, use the `--root-is-list` option.
+When flattening and unflattening, use the ``--root-is-list`` option.
 
-The id element is `statementID`, so also use the `--id-name` option.
+The id element is ``statementID``, so also use the ``--id-name`` option.
 
 .. code-block:: bash
 
@@ -19,15 +19,15 @@ The id element is `statementID`, so also use the `--id-name` option.
 flatten
 =======
 
-This data standard has three types of statement - `entityStatement`, `personStatement` or `ownershipOrControlStatement`.
+This data standard has three types of statement - ``entityStatement``, ``personStatement`` or ``ownershipOrControlStatement``.
 When using flatten, the spreadsheets produced can become very mixed up.
 
 The main.csv spreadsheet will have data of all three types in it.
 What's worse is that it's unclear what columns apply to what types -
-for instance, `foundingDate` applies to entities but `birthDate` applies to people.
+for instance, ``foundingDate`` applies to entities but ``birthDate`` applies to people.
 However both columns appear in main.csv!
 
-It's also unclear what subsheets apply to which type - for instance there might be a subsheet called `identifiers`
+It's also unclear what subsheets apply to which type - for instance there might be a subsheet called ``identifiers``
 but it's not clear what type this applies to! (The answer is entities)
 
 It would be better to have separate sheets for each type.
@@ -52,7 +52,7 @@ You will have a set of sheets:
   *  3_ownership_interests.csv
   *  3_ownership_main.csv
 
-`birthDate` only appears in `1_person_main.csv` and `foundingDate` only appears in `2_entity_main.csv`, so it is clear which column is for which type.
+``birthDate`` only appears in ``1_person_main.csv`` and ``foundingDate`` only appears in ``2_entity_main.csv``, so it is clear which column is for which type.
 
 Note this works in csv mode.
 If you want to use Excel mode, you'll need to specify 3 separate output files and then combine the sheets in them into one file afterwards by hand.
@@ -69,7 +69,7 @@ unflatten
 Schema
 ------
 
-As well as the options above, also pass the `--schema` option so that types are set correctly. Note the boolean and the integer in the output.
+As well as the options above, also pass the ``--schema`` option so that types are set correctly. Note the boolean and the integer in the output.
 
 .. literalinclude:: ../examples/bods/unflatten/cmd.txt
    :language: bash
@@ -81,8 +81,8 @@ As well as the options above, also pass the `--schema` option so that types are 
 Order is important
 ------------------
 
-In the BODS schema, statements must appear in a certain order. Each of the `entityStatements` or `personStatements`
-referenced by a particular `ownershipOrControlStatement` must appear before that particular statement in the ordered array.
+In the BODS schema, statements must appear in a certain order. Each of the ``entityStatements`` or ``personStatements``
+referenced by a particular ``ownershipOrControlStatement`` must appear before that particular statement in the ordered array.
 
 If you have only one main table, you must make sure the statements appear in the correct order.
 
@@ -120,7 +120,7 @@ For instance:
 create-template
 ===============
 
-You can run this directly on `bods-package.json`:
+You can run this directly on ``bods-package.json``:
 
 .. code-block:: bash
 
@@ -139,7 +139,7 @@ Instead, this process can be followed to obtain clearer templates:
 
     flatten-tool  create-template -f csv -s /path/to/person-statement.json -o . --root-id=statementID
 
-3) Rename all the files in the directory to have `1_person_` at the start.
+3) Rename all the files in the directory to have ``1_person_`` at the start.
 
 If your on a bash shell, you can do this by running:
 
@@ -155,7 +155,7 @@ If your on a bash shell, you can do this by running:
     flatten-tool  create-template -f csv -s /path/to/entity-statement.json -o . --root-id=statementID
 
 
-5) Rename all the new files in the directory to have `2_entity_` at the start.
+5) Rename all the new files in the directory to have ``2_entity_`` at the start.
 
 If your on a bash shell, you can do this by running:
 
@@ -172,7 +172,7 @@ If your on a bash shell, you can do this by running:
     flatten-tool  create-template -f csv -s /path/to/ownership-or-control-statement.json -o . --root-id=statementID
 
 
-7) Rename all the new files in the  directory to have `3_ownership_control_` at the start.
+7) Rename all the new files in the  directory to have ``3_ownership_control_`` at the start.
 
 If your on a bash shell, you can do this by running:
 
@@ -204,7 +204,7 @@ The advantages are:
 
   *  Separate for each type, so it's clear what sheet applies to each type.
   *  Each sheet only has the relevant columns in it, so there is no confusion about whether they apply or not.
-  *  The sheets have numbers at the start, so that when `unflatten` is used the statements will appear in the right order in the output.
+  *  The sheets have numbers at the start, so that when ``unflatten`` is used the statements will appear in the right order in the output.
 
 
 

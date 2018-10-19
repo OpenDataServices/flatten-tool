@@ -68,7 +68,7 @@ Download https://raw.githubusercontent.com/open-contracting/standard/1.0/standar
 
     flatten-tool create-template --root-id=ocid --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
 
-This will create `template.xlsx` and a `template/` directory of csv files.
+This will create ``template.xlsx`` and a ``template/`` directory of csv files.
 
 See ``flatten-tool create-template --help`` for details of the command line options.
 

@@ -14,7 +14,7 @@ In this section you'll learn about flattening. The main use case for wanting to
 flatten a JSON document is so that you can manage the data in a spreadsheet
 from now on.
 
-Flatten Tool provides `flatten-tool flatten` sub-command for this purpose.
+Flatten Tool provides ``flatten-tool flatten`` sub-command for this purpose.
 
 
 Generating a spreadsheet from a JSON document
@@ -26,8 +26,8 @@ template.
 .. literalinclude:: ../examples/flatten/simple/cmd.txt
    :language: bash
 
-One difference is that the default output name is `flatten`, and so the command
-above will generate a `flatten/` directory with CSV files and a `flatten.xlsx`
+One difference is that the default output name is ``flatten``, and so the command
+above will generate a ``flatten/`` directory with CSV files and a ``flatten.xlsx``
 file in the current working directory.
 
 The schema is the same as the one used in the user guide and looks like this:
@@ -45,7 +45,7 @@ CSV files for you, populated with the data from the input JSON file.
 
 .. warning ::
 
-   You can't use `--use-titles` with flatten.
+   You can't use ``--use-titles`` with flatten.
 
 .. csv-table:: sheet: cafe.csv
    :file: ../examples/flatten/simple/expected/cafe.csv
@@ -60,12 +60,12 @@ CSV files for you, populated with the data from the input JSON file.
 
 .. caution ::
 
-   If you forget the `--root-list-path` option and your data isn't under a top
-   level key called `main`, Flatten Tool won't find your data and will instead
-   generate empty a single empty sheet called `main`, which probably isn't what
+   If you forget the ``--root-list-path`` option and your data isn't under a top
+   level key called ``main``, Flatten Tool won't find your data and will instead
+   generate empty a single empty sheet called ``main``, which probably isn't what
    you want.
 
-If your data has a list as a root, use the `--root-is-list` option.
+If your data has a list as a root, use the ``--root-is-list`` option.
 
 .. literalinclude:: ../examples/flatten/root-is-list/data.json
    :language: json
@@ -103,7 +103,7 @@ Filter
 
 When flattening, you can optionally choose to only process some of the data.
 
-Currently, only simple filters can be specified using the `--filter-field` and `--filter-value` option.
+Currently, only simple filters can be specified using the ``--filter-field`` and ``--filter-value`` option.
 
 .. literalinclude:: ../examples/flatten/filter/input.json
    :language: json
@@ -119,9 +119,9 @@ Currently, only simple filters can be specified using the `--filter-field` and `
    :file: ../examples/flatten/filter/expected/pints.csv
    :header-rows: 1
 
-No `dishes` sheet is produced, and the main sheet does not have a `coffee` column.
+No ``dishes`` sheet is produced, and the main sheet does not have a ``coffee`` column.
 
-The field specified must be a field directly on the data object - it's not possible to filter on fields like `pints/0/title` .
+The field specified must be a field directly on the data object - it's not possible to filter on fields like ``pints/0/title`` .
 
 All flatten options
 -------------------
