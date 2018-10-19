@@ -13,7 +13,7 @@ Before we get into too much detail though, let's start by looking
 at the Command Line API for unflattening a spreadsheet.
 
 
-Command-Line API
+Command Line API
 ================
 
 To demonstrate the command line API you'll start with the simplest possible
@@ -171,8 +171,8 @@ spreadsheet lies in knowing about the `JSON Pointer specification
 <https://tools.ietf.org/html/rfc6901>`_.  This specification describes a fairly
 intuitive way to reference values in a JSON document.
 
-To breifly describe how it works, each `/` character after the first one drills
-down into a JSON strucutre. If they value after the `/` is a string, then a key
+To briefly describe how it works, each `/` character after the first one drills
+down into a JSON structure. If they value after the `/` is a string, then a key
 is looked up, if it is an integer then an array index is taken.
 
 For example, in the JSON pointer `/cafe/0/name` is equivalent to taking the
@@ -274,7 +274,7 @@ Cafe` at `/cafe/1/name` producing this:
 
 Although both `Healthy Cafe` and `Vegetarian Cafe` are under a column that
 resolves to `/cafe/0/name`, the rules described in the previous section explain
-why noth are present in the output and why `Healthy Cafe` comes before
+why both are present in the output and why `Healthy Cafe` comes before
 `Vegetarian Cafe`.
 
 
@@ -523,14 +523,14 @@ Using spreadsheet cell formatting
 ---------------------------------
 
 CSV files only support string values, so the easiest way to get the example
-above to use integers would be to use a spreadsheet format such xlsx that
+above to use integers would be to use a spreadsheet format such as XLSX that
 supported integers and make sure the cell type was number. Flatten Tool would
 pass the cell value through to the JSON as a number in that case.
 
 .. note::
 
     Make sure you specify the correct format `-f=xlsx` on the command line if
-    you want to use an xlsx file.
+    you want to use an XLSX file.
 
 .. literalinclude:: ../examples/cafe/tables-typed-xlsx/cmd.txt
    :language: bash
@@ -1193,7 +1193,7 @@ table" section earlier.
 Metadata Tab
 ============
 
-Flattentool supports naming of a special sheetname (or Tab) in a spreadsheet to add data to the top level of the returned data structure.  Currently it only supports output format JSON and the input format has to be XLSX.
+Flatten Tool supports naming of a special sheet (or Tab) in a spreadsheet to add data to the top level of the returned data structure.  Currently it only supports output format JSON and the input format has to be XLSX.
 
 Example Usage
 -------------
@@ -1247,7 +1247,7 @@ Say that the metatab data runs vertically rather that horizontally see example a
 Configuration properties: skip and header rows
 ==============================================
 
-Flattentool supports directives in the first row of a file to tell it to:
+Flatten Tool supports directives in the first row of a file to tell it to:
 
 * **skiprows** - start processing data from n rows down
 * **headerrows** - the total number of header rows. Note that the first header row will be treated as field paths.
@@ -1263,7 +1263,7 @@ You have a CSV file named "mydata.csv" that contains:
 
 This pattern may occur, for example, when you export from a spreadsheet that includes formatted header rows that explain the data.
 
-By adding a row containing a cell with '#', and then a set of configuration directives, you can instruct flattentool to skip rows at the top of the file, and to recognise that the field paths are followed by a set of additional header lines. 
+By adding a row containing a cell with '#', and then a set of configuration directives, you can instruct Flatten Tool to skip rows at the top of the file, and to recognise that the field paths are followed by a set of additional header lines. 
 
 .. csv-table::
    :file: ../examples/cafe/skip-and-headers/data.csv

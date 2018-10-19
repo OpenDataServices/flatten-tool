@@ -37,10 +37,10 @@ Running the tests
 
 After following the installation above, run ``py.test``.
 
-Note that the tests require the Python testsuite. This should come with python,
-but some distros split it out. On Ubuntu you will need to install a package
-like ``libpython3.4-testsuite`` (depending on which Python version you are
-using).
+Note that the tests require the Python test suite. This should come with Python,
+but some distributions split it out. On Ubuntu you will need to install a
+package like ``libpython3.4-testsuite`` (depending on which Python version you
+are using).
 
 
 
@@ -76,7 +76,7 @@ Unflatten function
    JSON Schema if present and keeping all state explicit.
 
    Use the JSON Schema to convert any basic JSON types to richer types that can
-   be correctly serailised by a serialiser later (e.g. dates). Returns a cell
+   be correctly serialised by a serialiser later (e.g. dates). Returns a cell
    tree.
 
    .. tip ::

@@ -1,4 +1,4 @@
-Flatten-Tool for BODS
+Flatten Tool for BODS
 +++++++++++++++++++++
 
 flatten and unflatten
