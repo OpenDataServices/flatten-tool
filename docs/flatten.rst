@@ -7,8 +7,8 @@ Flattening
    unlike the :doc:`Spreadsheet Designer's Guide <unflatten>`, the tests backing
    up the documented examples are not correct. Use with caution.
 
-So far, all the examples you've seen have been about unflattening - taking a
-spreadsheet and producing a JSON document.
+The :doc:`Spreadsheet Designer's Guide <unflatten>` was about unflattening -
+taking a spreadsheet and producing a JSON document.
 
 In this section you'll learn about flattening. The main use case for wanting to
 flatten a JSON document is so that you can manage the data in a spreadsheet
