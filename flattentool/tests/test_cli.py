@@ -1,4 +1,5 @@
 import json
+import six
 import sys
 import pytest
 from io import StringIO, TextIOWrapper
@@ -37,7 +38,7 @@ def test_stdin(tmpdir, monkeypatch):
 
     output_name = tmpdir.join('flattened').strpath + '.xlsx'
 
-    with patch('sys.stdin', TextIOWrapper(StringIO(stdin))):
+    with patch('sys.stdin', TextIOWrapper(StringIO(six.text_type(stdin)))):
         monkeypatch.setattr(sys, 'argv', [
             'flatten-tool', 'flatten',
             '--output-name', output_name,
