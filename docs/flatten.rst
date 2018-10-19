@@ -13,14 +13,14 @@ taking a spreadsheet and producing a JSON document.
 In this section you'll learn about flattening. The main use case for wanting to
 flatten a JSON document is so that you can manage the data in a spreadsheet.
 
-Flatten Tool provides ``flatten-tool flatten`` sub-command for this purpose.
+Flatten Tool provides the ``flatten-tool flatten`` sub-command for this purpose.
 
 
 Generating a spreadsheet from a JSON document
 =============================================
 
-Generating a spreadsheet from a JSON document is very similar to creating a
-template.
+Generating a spreadsheet from a JSON document is very similar to :doc:`creating
+a template <create-template>`.
 
 .. literalinclude:: ../examples/flatten/simple/cmd.txt
    :language: bash
@@ -61,8 +61,8 @@ CSV files for you, populated with the data from the input JSON file.
 
    If you forget the ``--root-list-path`` option and your data isn't under a top
    level key called ``main``, Flatten Tool won't find your data and will instead
-   generate empty a single empty sheet called ``main``, which probably isn't what
-   you want.
+   generate a single empty sheet called ``main``, which probably isn't what you
+   want.
 
 If your data has a list as a root, use the ``--root-is-list`` option.
 
@@ -78,7 +78,7 @@ If your data has a list as a root, use the ``--root-is-list`` option.
 Sheet Prefix
 ------------
 
-You can pass a string that will be added at the start of all CSV file names, or all Excel sheet names.
+You can pass a string that will be added at the start of all CSV file names, or all Excel sheet names, using the ``--sheet-prefix`` option.
 
 
 .. literalinclude:: ../examples/flatten/sheet-prefix/cmd.txt
