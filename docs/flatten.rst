@@ -26,9 +26,9 @@ template.
 .. literalinclude:: ../examples/flatten/simple/cmd.txt
    :language: bash
 
-One difference is that the default output name is `flatten`, and so the command
-above will generate a `flatten/` directory with CSV files and a `flatten.xlsx`
-file in the current working directory.
+One difference is that the default output name is `flattened`, and so the
+command above will generate a `flattened/` directory with CSV files and a
+`flattened.xlsx` file in the current working directory.
 
 The schema is the same as the one used in the user guide and looks like this:
 

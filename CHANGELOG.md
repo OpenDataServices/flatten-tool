@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add --disable-local-refs to flatten, unflatten and create-template.
 
+### Fixed
+
+- create-template: If --output-format is xlsx, the default --output-name is template.xlsx instead of template.
+- flatten: If --output-format is xlsx, the default --output-name is flattened.xlsx instead of flattened.
+
 ## [0.3.0] - 2018-10-12
 
 ### Added

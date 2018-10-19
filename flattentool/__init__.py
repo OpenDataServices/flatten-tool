@@ -12,7 +12,7 @@ from decimal import Decimal
 from collections import OrderedDict
 
 
-def create_template(schema, output_name='template', output_format='all', main_sheet_name='main',
+def create_template(schema, output_name=None, output_format='all', main_sheet_name='main',
                     rollup=False, root_id=None, use_titles=False, disable_local_refs=False, **_):
     """
     Creates template file(s) from given inputs
@@ -33,17 +33,21 @@ def create_template(schema, output_name='template', output_format='all', main_sh
         spreadsheet_output.write_sheets()
 
     if output_format == 'all':
+        if not output_name:
+            output_name = 'template'
         for format_name, spreadsheet_output_class in OUTPUT_FORMATS.items():
             spreadsheet_output(spreadsheet_output_class, output_name+FORMATS_SUFFIX[format_name])
 
     elif output_format in OUTPUT_FORMATS.keys():   # in dictionary of allowed formats
+        if not output_name:
+            output_name = 'template' + FORMATS_SUFFIX[output_format]
         spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
 
     else:
         raise Exception('The requested format is not available')
 
 
-def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main',
+def flatten(input_name, schema=None, output_name=None, output_format='all', main_sheet_name='main',
             root_list_path='main', root_is_list=False, sheet_prefix='', filter_field=None, filter_value=None,
             rollup=False, root_id=None, use_titles=False, xml=False, id_name='id', disable_local_refs=False, **_):
     """
@@ -85,10 +89,14 @@ def flatten(input_name, schema=None, output_name='flattened', output_format='all
         spreadsheet_output.write_sheets()
 
     if output_format == 'all':
+        if not output_name:
+            output_name = 'flattened'
         for format_name, spreadsheet_output_class in OUTPUT_FORMATS.items():
             spreadsheet_output(spreadsheet_output_class, output_name+FORMATS_SUFFIX[format_name])
 
     elif output_format in OUTPUT_FORMATS.keys():   # in dictionary of allowed formats
+        if not output_name:
+            output_name = 'flattened' + FORMATS_SUFFIX[output_format]
         spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
 
     else:
