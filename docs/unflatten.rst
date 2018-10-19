@@ -72,7 +72,7 @@ That's what we expected. Great.
     ``building/cafe``, it only accepts a single key.
 
 
-The Root is a list
+The root is a list
 ------------------
 
 You can also specify the data outputted is just a list, using the ``--root-is-list`` option.

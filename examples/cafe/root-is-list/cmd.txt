@@ -1,1 +1,1 @@
-$ flatten-tool unflatten -f=csv --root-is-list examples/cafe/root-is-list/ -o examples/cafe/root-is-list/actual/out.json  --cell-source-map=examples/cafe/root-is-list/actual/cellsourcemap.json --heading-source-map=examples/cafe/root-is-list/actual/headingsourcemap.json
+$ flatten-tool unflatten -f=csv examples/cafe/simple/ --root-is-list
