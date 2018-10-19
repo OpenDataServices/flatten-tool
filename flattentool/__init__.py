@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 
 def create_template(schema, output_name='template', output_format='all', main_sheet_name='main',
-                    rollup=False, root_id=None, use_titles=False, **_):
+                    rollup=False, root_id=None, use_titles=False, disable_local_refs=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -21,7 +21,8 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
     """
 
-    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
+    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles,
+                          disable_local_refs=disable_local_refs)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
@@ -44,7 +45,7 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
 def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main',
             root_list_path='main', root_is_list=False, sheet_prefix='', filter_field=None, filter_value=None,
-            rollup=False, root_id=None, use_titles=False, xml=False, id_name='id',  **_):
+            rollup=False, root_id=None, use_titles=False, xml=False, id_name='id', disable_local_refs=False, **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
@@ -58,7 +59,8 @@ def flatten(input_name, schema=None, output_name='flattened', output_format='all
             schema_filename=schema,
             rollup=rollup,
             root_id=root_id,
-            use_titles=use_titles)
+            use_titles=use_titles,
+            disable_local_refs=disable_local_refs)
         schema_parser.parse()
     else:
         schema_parser = None
@@ -126,6 +128,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               metatab_vertical_orientation=False,
               xml_schemas=None,
               default_configuration='',
+              disable_local_refs=False,
               **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -168,7 +171,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             use_configuration=False
         )
         if metatab_schema:
-            parser = SchemaParser(schema_filename=metatab_schema)
+            parser = SchemaParser(schema_filename=metatab_schema, disable_local_refs=disable_local_refs)
             parser.parse()
             spreadsheet_input.parser = parser
         spreadsheet_input.encoding = encoding
@@ -210,7 +213,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             base_configuration=base_configuration
         )
         if schema:
-            parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
+            parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id, disable_local_refs=disable_local_refs)
             parser.parse()
             spreadsheet_input.parser = parser
         spreadsheet_input.encoding = encoding

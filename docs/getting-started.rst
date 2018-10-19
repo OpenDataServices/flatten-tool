@@ -23,7 +23,7 @@ will print general help information.
 
 .. code-block:: bash
 
-    flatten-tool {create-template,unflatten} -h
+    flatten-tool {create-template,flatten,unflatten} -h
 
 will print help information specific to that subcommand.
 
