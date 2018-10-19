@@ -86,10 +86,9 @@ You can also specify the data outputted is just a list, using the ``--root-is-li
 Writing output to a file
 ------------------------
 
-By default, Flatten Tool prints its output to stdout. If you want it to write
-its output to a file instead, you can use the ``-o`` option.
-
-Here's the same example, this time writing its output to ``unflattened.json``:
+By default, Flatten Tool prints its output to standard output (your terminal).
+If you want it to write its output to a file instead, you can use the
+``--output-name`` option (or ``-o`` for short).
 
 .. literalinclude:: ../examples/cafe/simple-file/cmd.txt
    :language: bash
