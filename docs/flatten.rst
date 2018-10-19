@@ -4,7 +4,7 @@ Flattening
 .. caution::
 
    This page is a work in progress. The information may not be complete, and
-   unlike the Spreadsheet Designer's Guide, the tests backing
+   unlike the :doc:`Spreadsheet Designer's Guide <unflatten>`, the tests backing
    up the documented examples are not correct. Use with caution.
 
 So far, all the examples you've seen have been about unflattening - taking a
