@@ -27,7 +27,7 @@ Converting a JSON file to a spreadsheet
 
     flatten-tool flatten input.json --root-id=ocid --main-sheet-name releases --root-list-path=releases
 
-This will command will create an output called flattened in all the formats we support - currently this is ``flattened.xlsx`` and a ``flattened/`` directory of CSV files.
+This command will create an output called flattened in all the formats we support - currently this is ``flattened.xlsx`` and a ``flattened/`` directory of CSV files.
 
 See ``flatten-tool flatten --help`` for details of the command line options.
 
@@ -41,7 +41,7 @@ Converting a populated spreadsheet to JSON
 
 And populate this with the package information for your release.
 
-Then, for a populated XLSX template in (in release_populated.xlsx):
+Then, for a populated XLSX template (in release_populated.xlsx):
 
 .. code-block:: bash
 
