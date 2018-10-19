@@ -11,8 +11,7 @@ The :doc:`Spreadsheet Designer's Guide <unflatten>` was about unflattening -
 taking a spreadsheet and producing a JSON document.
 
 In this section you'll learn about flattening. The main use case for wanting to
-flatten a JSON document is so that you can manage the data in a spreadsheet
-from now on.
+flatten a JSON document is so that you can manage the data in a spreadsheet.
 
 Flatten Tool provides ``flatten-tool flatten`` sub-command for this purpose.
 
