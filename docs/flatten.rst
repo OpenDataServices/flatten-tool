@@ -26,6 +26,11 @@ template.
 .. literalinclude:: ../examples/flatten/simple/cmd.txt
    :language: bash
 
+Alternately, you can provide the JSON document via standard input:
+
+.. literalinclude:: ../examples/flatten/simple/stdin.txt
+   :language: bash
+
 One difference is that the default output name is `flatten`, and so the command
 above will generate a `flatten/` directory with CSV files and a `flatten.xlsx`
 file in the current working directory.

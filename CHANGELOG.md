@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - Add --disable-local-refs to flatten, unflatten and create-template.
+- Add support for standard input to flatten.
 
 ## [0.3.0] - 2018-10-12
 
