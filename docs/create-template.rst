@@ -88,7 +88,7 @@ Here are the resulting sheets:
    :file: ../examples/create-template/rollup/expected/tab_dish.csv
 
 
-Notice how ``Table: Number`` has now been moved into the ``cafe.csv`` file.
+Notice how ``Table: Number`` now appears in both the ``cafe.csv`` and ``table.csv`` files.
 
 .. caution ::
 
