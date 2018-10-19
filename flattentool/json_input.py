@@ -7,6 +7,7 @@ JSON schema, for that see schema.py).
 
 import json
 import six
+import sys
 import copy
 from collections import OrderedDict
 from decimal import Decimal
@@ -83,13 +84,18 @@ class JSONParser(object):
 
         if json_filename is not None and root_json_dict is not None:
             raise ValueError('Only one of json_file or root_json_dict should be supplied')
- 
-        if json_filename is not None:
+
+        def json_load(json_file):
+            try:
+                self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
+            except ValueError as err:
+                raise BadlyFormedJSONError(*err.args)
+
+        if json_filename == sys.stdin:
+            json_load(sys.stdin.buffer)
+        elif json_filename:
             with codecs.open(json_filename, encoding='utf-8') as json_file:
-                try:
-                    self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
-                except ValueError as err:
-                    raise BadlyFormedJSONError(*err.args)
+                json_load(json_file)
         else:
             self.root_json_dict = root_json_dict
 

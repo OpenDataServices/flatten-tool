@@ -71,7 +71,7 @@ def create_parser():
         'flatten',
         help='Flatten a JSON file')
     parser_flatten.add_argument(
-        'input_name', nargs='?', default=sys.stdin.isatty() and sys.stdin.fileno(),
+        'input_name', nargs='?', default=sys.stdin,
         help="Name of the input JSON file.")
     parser_flatten.add_argument(
         "-s", "--schema",
@@ -246,7 +246,7 @@ def main():
             print(text_type(e))
             return
     elif args.subparser_name == 'flatten':
-        if sys.stdin.isatty() and args.input_name == sys.stdin.fileno():
+        if args.input_name == sys.stdin and sys.stdin.isatty():
             parser.error('one of the following arguments is required: input_name or piped data')
         flatten(**kwargs_from_parsed_args(args))
     elif args.subparser_name == 'unflatten':
