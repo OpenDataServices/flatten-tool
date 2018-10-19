@@ -60,7 +60,7 @@ def create_parser():
     parser_create_template.add_argument(
         "--use-titles",
         action='store_true',
-        help="Convert titles. Requires a schema to be specified.")
+        help="Convert titles.")
     parser_create_template.add_argument(
         "--disable-local-refs",
         action='store_true',
