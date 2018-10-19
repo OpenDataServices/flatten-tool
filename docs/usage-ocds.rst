@@ -27,7 +27,7 @@ Converting a JSON file to a spreadsheet
 
     flatten-tool flatten input.json --root-id=ocid --main-sheet-name releases --output-name flattened --root-list-path='releases'
 
-This will command will create an output called flattened in all the formats we support - currently this is ``flattened.xlsx`` and a ``flattened/`` directory of csv files.
+This will command will create an output called flattened in all the formats we support - currently this is ``flattened.xlsx`` and a ``flattened/`` directory of CSV files.
 
 See ``flatten-tool flatten --help`` for details of the command line options.
 
@@ -68,7 +68,7 @@ Download https://raw.githubusercontent.com/open-contracting/standard/1.0/standar
 
     flatten-tool create-template --root-id=ocid --output-format all --output-name template --schema release-schema.json --main-sheet-name releases
 
-This will create ``template.xlsx`` and a ``template/`` directory of csv files.
+This will create ``template.xlsx`` and a ``template/`` directory of CSV files.
 
 See ``flatten-tool create-template --help`` for details of the command line options.
 
