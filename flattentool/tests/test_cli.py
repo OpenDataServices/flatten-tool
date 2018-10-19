@@ -1,10 +1,14 @@
 import json
 import sys
 import pytest
-from io import BytesIO, StringIO, TextIOWrapper
-from unittest.mock import patch
+from io import StringIO, TextIOWrapper
 from flattentool import cli
 from test.test_argparse import stderr_to_parser_error, ArgumentParserError
+
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 
 def test_create_parser():
@@ -29,11 +33,11 @@ def test_create_parser_missing_required_options():
 
 
 def test_stdin(tmpdir, monkeypatch):
-    stdin = json.dumps({'main': [{'a': 1}]}, indent=4).encode('utf-8') + b'\n'
+    stdin = json.dumps({'main': [{'a': 1}]}, indent=4) + '\n'
 
     output_name = tmpdir.join('flattened').strpath + '.xlsx'
 
-    with patch('sys.stdin', TextIOWrapper(BytesIO(stdin))):
+    with patch('sys.stdin', TextIOWrapper(StringIO(stdin))):
         monkeypatch.setattr(sys, 'argv', [
             'flatten-tool', 'flatten',
             '--output-name', output_name,
@@ -49,4 +53,4 @@ def test_stdin(tmpdir, monkeypatch):
         ])
         cli.main()
 
-    assert actual.getvalue() == stdin.decode('utf-8')
+    assert actual.getvalue() == stdin
