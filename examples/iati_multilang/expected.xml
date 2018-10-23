@@ -5,11 +5,6 @@
     <reporting-org ref="AA-AAA-123456789" type="40">
       <narrative>Organisation name</narrative>
     </reporting-org>
-    <participating-org ref="AA-AAA-123456789" role="1"/>
-    <activity-status code="2"/>
-    <activity-date iso-date="2011-10-01" type="1"/>
-    <recipient-country code="AF" percentage="40"/>
-    <recipient-country code="XK" percentage="60"/>
     <title>
       <narrative xml:lang="en">A title, with comma</narrative>
       <narrative xml:lang="fr">Un titre</narrative>
@@ -17,6 +12,11 @@
     <description>
       <narrative>A description</narrative>
     </description>
+    <participating-org ref="AA-AAA-123456789" role="1"/>
+    <activity-status code="2"/>
+    <activity-date iso-date="2011-10-01" type="1"/>
+    <recipient-country code="AF" percentage="40"/>
+    <recipient-country code="XK" percentage="60"/>
     <transaction>
       <transaction-type code="2"/>
       <transaction-date iso-date="2012-01-01"/>
@@ -33,11 +33,6 @@
     <reporting-org ref="AA-AAA-123456789" type="40">
       <narrative>Organisation name</narrative>
     </reporting-org>
-    <participating-org ref="AA-AAA-123456789" role="1"/>
-    <activity-status code="3"/>
-    <activity-date iso-date="2016-01-01" type="2"/>
-    <recipient-country code="AG" percentage="30"/>
-    <recipient-country code="XK" percentage="70"/>
     <title>
       <narrative xml:lang="en">Another title; with semicolon</narrative>
       <narrative xml:lang="fr">Un autre titre</narrative>
@@ -45,6 +40,11 @@
     <description>
       <narrative>Another description</narrative>
     </description>
+    <participating-org ref="AA-AAA-123456789" role="1"/>
+    <activity-status code="3"/>
+    <activity-date iso-date="2016-01-01" type="2"/>
+    <recipient-country code="AG" percentage="30"/>
+    <recipient-country code="XK" percentage="70"/>
     <transaction>
       <transaction-type code="2"/>
       <transaction-date iso-date="2013-04-04"/>

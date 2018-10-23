@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 
 def create_template(schema, output_name='template', output_format='all', main_sheet_name='main',
-                    rollup=False, root_id=None, use_titles=False, **_):
+                    rollup=False, root_id=None, use_titles=False, disable_local_refs=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -21,7 +21,8 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
     """
 
-    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles)
+    parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles,
+                          disable_local_refs=disable_local_refs)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
@@ -43,36 +44,44 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
 
 def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main',
-            root_list_path='main', rollup=False, root_id=None, use_titles=False, xml=False, id_name='id',  **_):
+            root_list_path='main', root_is_list=False, sheet_prefix='', filter_field=None, filter_value=None,
+            rollup=False, root_id=None, use_titles=False, xml=False, id_name='id', disable_local_refs=False, **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
     """
+
+    if (filter_field is None and filter_value is not None) or (filter_field is not None and filter_value is None):
+        raise Exception('You must use filter_field and filter_value together')
 
     if schema:
         schema_parser = SchemaParser(
             schema_filename=schema,
             rollup=rollup,
             root_id=root_id,
-            use_titles=use_titles)
+            use_titles=use_titles,
+            disable_local_refs=disable_local_refs)
         schema_parser.parse()
     else:
         schema_parser = None
     parser = JSONParser(
         json_filename=input_name,
-        root_list_path=root_list_path,
+        root_list_path=None if root_is_list else root_list_path,
         schema_parser=schema_parser,
         root_id=root_id,
         use_titles=use_titles,
         xml=xml,
-        id_name=id_name)
+        id_name=id_name,
+        filter_field=filter_field,
+        filter_value=filter_value)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
             main_sheet_name=main_sheet_name,
-            output_name=name)
+            output_name=name,
+            sheet_prefix=sheet_prefix)
         spreadsheet_output.write_sheets()
 
     if output_format == 'all':
@@ -111,13 +120,15 @@ def decimal_default(o):
 
 
 def unflatten(input_name, base_json=None, input_format=None, output_name=None,
-              root_list_path=None, encoding='utf8', timezone_name='UTC',
+              root_list_path=None, root_is_list=False, encoding='utf8', timezone_name='UTC',
               root_id=None, schema='', convert_titles=False, cell_source_map=None,
-              heading_source_map=None, id_name='id', xml=False,
+              heading_source_map=None, id_name=None, xml=False,
               vertical_orientation=False,
               metatab_name=None, metatab_only=False, metatab_schema='',
               metatab_vertical_orientation=False,
+              xml_schemas=None,
               default_configuration='',
+              disable_local_refs=False,
               **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -130,7 +141,9 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     if metatab_name and base_json:
         raise Exception('Not allowed to use base_json with metatab')
 
-    if base_json:
+    if root_is_list:
+        base = None
+    elif base_json:
         with open(base_json) as fp:
             base = json.load(fp, object_pairs_hook=OrderedDict)
     else:
@@ -144,7 +157,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
     cell_source_map_data = OrderedDict()
     heading_source_map_data = OrderedDict()
 
-    if metatab_name:
+    if metatab_name and not root_is_list:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
         spreadsheet_input = spreadsheet_input_class(
             input_name=input_name,
@@ -158,7 +171,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             use_configuration=False
         )
         if metatab_schema:
-            parser = SchemaParser(schema_filename=metatab_schema)
+            parser = SchemaParser(schema_filename=metatab_schema, disable_local_refs=disable_local_refs)
             parser.parse()
             spreadsheet_input.parser = parser
         spreadsheet_input.encoding = encoding
@@ -181,13 +194,16 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
 
     if root_list_path is None:
         root_list_path = base_configuration.get('RootListPath', 'main')
+    if id_name is None:
+        id_name = base_configuration.get('IDName', 'id')
 
-    if not metatab_only:
+    if not metatab_only or root_is_list:
         spreadsheet_input_class = INPUT_FORMATS[input_format]
         spreadsheet_input = spreadsheet_input_class(
             input_name=input_name,
             timezone_name=timezone_name,
             root_list_path=root_list_path,
+            root_is_list=root_is_list,
             root_id=root_id,
             convert_titles=convert_titles,
             exclude_sheets=[metatab_name],
@@ -197,7 +213,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             base_configuration=base_configuration
         )
         if schema:
-            parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id)
+            parser = SchemaParser(schema_filename=schema, rollup=True, root_id=root_id, disable_local_refs=disable_local_refs)
             parser.parse()
             spreadsheet_input.parser = parser
         spreadsheet_input.encoding = encoding
@@ -208,18 +224,22 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
         )
         cell_source_map_data.update(cell_source_map_data_main or {})
         heading_source_map_data.update(heading_source_map_data_main or {})
-        base[root_list_path] = list(result)
+        if root_is_list:
+            base = list(result)
+        else:
+            base[root_list_path] = list(result)
 
     if xml:
         xml_root_tag = base_configuration.get('XMLRootTag', 'iati-activities')
+        xml_output = toxml(base, xml_root_tag, xml_schemas=xml_schemas, root_list_path=root_list_path)
         if output_name is None:
             if sys.version > '3':
-                sys.stdout.buffer.write(toxml(base, xml_root_tag))
+                sys.stdout.buffer.write(xml_output)
             else:
-                sys.stdout.write(toxml(base, xml_root_tag))
+                sys.stdout.write(xml_output)
         else:
             with codecs.open(output_name, 'wb') as fp:
-                fp.write(toxml(base, xml_root_tag))
+                fp.write(xml_output)
     else:
         if output_name is None:
             print(json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False))

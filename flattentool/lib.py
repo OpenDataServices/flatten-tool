@@ -21,4 +21,6 @@ def parse_sheet_configuration(configuration_list):
             configuration['XMLRootTag'] = parts[1]
         if (len(parts) == 2 and parts[0].lower() == "rootlistpath"):
             configuration['RootListPath'] = parts[1]
+        if (len(parts) == 2 and parts[0].lower() == "idname"):
+            configuration['IDName'] = parts[1]
     return configuration

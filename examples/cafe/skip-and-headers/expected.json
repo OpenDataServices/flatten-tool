@@ -1,0 +1,18 @@
+{
+    "cafe": [
+        {
+            "name": "Healthy Cafe",
+            "address": {
+                "street": "123 City Street",
+                "city": "London"
+            }
+        },
+        {
+            "name": "Vegetarian Cafe",
+            "address": {
+                "street": "42 Town Road",
+                "city": "Bristol"
+            }
+        }
+    ]
+}

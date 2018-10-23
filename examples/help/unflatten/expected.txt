@@ -9,7 +9,9 @@ usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
                               [--metatab-schema METATAB_SCHEMA]
                               [--metatab-only]
                               [--metatab-vertical-orientation]
+                              [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
                               [--default-configuration DEFAULT_CONFIGURATION]
+                              [--root-is-list] [--disable-local-refs]
                               input_name
 
 positional arguments:
@@ -61,7 +63,11 @@ optional arguments:
   --metatab-vertical-orientation
                         Read metatab so that headings are in the first column
                         and data is read vertically. Only for XLSX not CSV
+  --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
+                        Path to one or more XML schemas (used for sorting)
   --default-configuration DEFAULT_CONFIGURATION
                         Comma seperated list of default parsing commands for
                         all sheets. Only for XLSX not CSV
-
+  --root-is-list        The root element is a list. --root-list-path and meta
+                        data will be ignored.
+  --disable-local-refs  Disable local refs when parsing JSON Schema.

@@ -1,0 +1,492 @@
+{
+  "id": "components.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "version": "0.1",
+  "definitions": {
+    "StatementDate": {
+      "title": "Statement date",
+      "description": "The date on which this statement was made.",
+      "type": "string",
+      "format": "date"
+    },
+    "Source": {
+      "title": "Source",
+      "description": "The source object is used to explain where information in a statement originated from, and to link to supporting information.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Source type",
+          "description": "What type of source is this? Multiple tags can be combined. Values should come from the [source type](#sourcetype) codelist.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "selfDeclaration",
+              "officialRegister",
+              "thirdParty",
+              "primaryResearch",
+              "verified"
+            ],
+            "codelist": "sourceType.csv",
+            "openCodelist": false
+          }
+        },
+        "description": {
+          "title": "Description",
+          "description": "Where required, additional free-text information about the source of this statement can be provided here.",
+          "type": "string"
+        },
+        "url": {
+          "title": "Source URL",
+          "description": "If this information was fetched from an external URL, or a machine or human readable web page is available that provides addition information on how this statement was sourced, provide the URL.",
+          "type": "string"
+        },
+        "retrievedAt": {
+          "title": "Retrieved at",
+          "description": "If this statement was imported from some external system, include a timestamp indicating when this took place. The statement's own date should be set based on the source information. ",
+          "type": "string",
+          "format": "datetime"
+        },
+        "assertedBy": {
+          "title": "Asserted by",
+          "description": "Who is making this statement? This may be the name of the person or organisation making a self-declaration (in which case, please make sure the name field matches the organisation or person name field), or the name or description of some other party. If this statment has been verified, this may also include the name of the organisation providing verification.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agent"
+          }
+        }
+      }
+    },
+    "Agent": {
+      "type": "object",
+      "title": "Agent",
+      "description": "An individual, organisation or other responsible agent making, or supporting, a given statement or annotation.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "description": "The name of the agent",
+          "type": "string"
+        },
+        "uri": {
+          "title": "URI",
+          "description": "An optional URI to identify the agent.",
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "ReplacesStatements": {
+      "title": "Replaces statement(s)",
+      "description": "If this statement replaces a previous statement or statements, provide the identifier(s) for the previous statement(s) here. Consuming applications are advised to mark the identified statements as no longer active.",
+      "type":"array",
+      "items":{
+        "title":"Statement identifier",
+        "description":"The identifier of a statement that is no longer active.",
+        "type": "string",
+        "minLength":32,
+        "maxLength":64  
+      }
+      
+    },
+    "Identifier": {
+      "title": "Identifier",
+      "description": "An identifier that has been assigned to this entity. The scheme or list from which the identifier is drawn should be declared.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "description": "The identifier for this entity as provided in the declared scheme.",
+          "type": "string"
+        },
+        "scheme": {
+          "title": "Scheme",
+          "description": "For entity statements, the scheme should be a entry from the [org-id.guide](http://www.org-id.guide) codelist. For person statements, recognised values include 'passport', 'internal' and 'id-card'.",
+          "type": "string"
+        },
+        "schemeName": {
+          "title": "Scheme name",
+          "Description": "The name of this scheme, where the org-id code is unknown or only an unvalidated string is provided.",
+          "type": "string"
+        },
+        "uri": {
+          "title": "URI",
+          "description": "Where this identifier has a [canonical URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) this may be included",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "scheme"
+          ]
+        },
+        {
+          "required": [
+            "schemeName"
+          ]
+        },
+        {
+          "required": [
+            "scheme",
+            "schemeName"
+          ]
+        }
+      ]
+    },
+    "ID": {
+      "title": "Statement Identifier",
+      "description": "A persistent globally unique identifier for this statement.",
+      "type": "string",
+      "minLength": 32,
+      "maxLenth":64
+    },
+    "Address": {
+      "title": "Address",
+      "description": "A free text address string, providing as much address data as is relevant, suitable for processing using address parsing algorithms. For some uses (for example, Place of Birth) only a town and country are required.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "description": "What type of address is this?",
+          "type": "string",
+          "enum": [
+            "placeOfBirth",
+            "home",
+            "residence",
+            "registered",
+            "service",
+            "alternative"
+          ],
+          "codelist": "addressType.csv",
+          "openCodelist": false
+        },
+        "address": {
+          "title": "Address",
+          "description": "The address, with each line or component of the address separated by a line-break or comma. This field may also include the postal code. ",
+          "type": "string"
+        },
+        "postCode": {
+          "title": "Postcode",
+          "description": "The postal code for this address.",
+          "type": "string"
+        },
+        "country": {
+          "title": "Country",
+          "description": "The ISO 2-Digit county code for this address.",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        }
+      }
+    },
+    "Name": {
+      "title": "Name",
+      "description": "An name by which this individual is known. Names should be provided in fullName, and may optionally be broken down in the familyName, givenName and patronymicName fields, based on the [EC ISA Core Person Vocabulary](https://joinup.ec.europa.eu/solution/e-government-core-vocabularies) definitions.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "description": "What kind of name is this? See the [nameType](#nametype) codelist.",
+          "type": "string",
+          "enum": [
+            "individual",
+            "translation",
+            "former",
+            "alias",
+            "aka",
+            "nick",
+            "birth"
+          ],
+          "codelist": "nameType.csv",
+          "openCodelist": false
+        },
+        "fullName": {
+          "title": "Full name",
+          "description": "The full name contains the complete name of a person as one string.",
+          "type": "string"
+        },
+        "familyName": {
+          "title": "Family name",
+          "description": "A family name is usually shared by members of a family. This attribute also carries prefixes or suffixes which are part of the Family Name, e.g. 'de Boer', 'van de Putte', 'von und zu Orlow'. Multiple family names, such as are commonly found in Hispanic countries, are recorded in the single Family Name field so that, for example, Miguel de Cervantes Saavedra's Family Name would be recorded as 'Cervantes Saavedra.'",
+          "type": "string"
+        },
+        "givenName": {
+          "title": "Given names",
+          "description": "A given name, or multiple given names, are the denominator(s) that identify an individual within a family. These are given to a person by his or her parents at birth or may be legally recognised as 'given names' through a formal process. All given names are ordered in one field so that, for example, the given name for Johann Sebastian Bach is 'Johann Sebastian.'",
+          "type": "string"
+        },
+        "patronymicName": {
+          "title": "Patronymic Name",
+          "description": "Patronymic names are important in some countries. Iceland does not have a concept of family name in the way that many other European countries do, for example. In Bulgaria and Russia, patronymic names are in every day usage, for example, the 'Sergeyevich' in 'Mikhail Sergeyevich Gorbachev'",
+          "type": "string"
+        }
+      }
+    },
+    "Interest": {
+      "title": "Interest",
+      "description": "A description of the interest held by an interestedParty in another entity.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type of interest",
+          "description": "A codelist value indicating the nature of the interest. See the [interestType codelist](#interesttype)",
+          "type": "string",
+          "enum": [
+            "shareholding",
+            "voting-rights",
+            "appointment-of-board",
+            "influence-or-control",
+            "senior-managing-official",
+            "settlor-of-trust",
+            "trustee-of-trust",
+            "protector-of-trust",
+            "beneficiary-of-trust",
+            "other-influence-or-control-of-trust",
+            "rights-to-surplus-assets",
+            "rights-to-profit-or-income"
+          ],
+          "codelist": "interestType.csv",
+          "openCodelist": false
+        },
+        "interestLevel": {
+          "title": "Interest level",
+          "description": "Is this interest held directly or indirectly?",
+          "type": "string",
+          "enum": [
+            "direct",
+            "indirect",
+            "unknown"
+          ],
+          "codelist": "interestLevel.csv",
+          "openCodelist": false
+        },
+        "beneficialOwnershipOrControl":{
+          "title":"Beneficial ownership or control",
+          "description":"Does this statement assert this as a beneficial ownership or control interest? A beneficial ownership or control interest is always between a natural person and some entity, and exists where the person ultimately benefits from, or has a degree of control over, the entity. There may be cases where a person has an interest in an entity, but where there are arrangements or other conditions that mean this interest does not constitute beneficial ownership or control.",
+          "type":"boolean"
+        },
+        "details": {
+          "title": "Details",
+          "description": "This field may be used to provide the local name given to this kind of interest, or any further semi-structured or unstructured information to clarify the nature of the interest held.",
+          "type": "string"
+        },
+        "share": {
+          "title": "Percentage share",
+          "description": "Where an exact percentage is available, this should be given, and maximum and minimum values set to the same as the exact percentage. Otherwise, maximum and minimum can be used to record the range into which the share of this kind of interest falls.",
+          "type": "object",
+          "properties": {
+            "exact": {
+              "title": "Exact share",
+              "description": "The exact share of this interest held (where available).",
+              "type": "number",
+              "maximum": 100,
+              "minimum": 0
+            },
+            "maximum": {
+              "title": "Maximum share",
+              "description": "The upper bound of the share of this interest known to be held.",
+              "type": "number",
+              "maximum": 100,
+              "minimum": 0
+            },
+            "minimum": {
+              "title": "Minimum share",
+              "description": "The lower bound of the share of this interest known to be held.",
+              "type": "number",
+              "maximum": 100,
+              "minimum": 0
+            },
+            "exclusiveMinimum": {
+              "title": "Exclusive minimum",
+              "description": "If exclusiveMinimum is true, then the share is at least greater than the minimum value given. E.g. if minimum is 25, the share is at least 25.1, and not simply 25.",
+              "type": "boolean",
+              "default": false
+            },
+            "exclusiveMaximum": {
+              "title": "Exclusive maximum",
+              "description": "If exclusiveMaximum is true, then the share is at least less than the maximum value given. E.g. if maximum is 50, the share is less than 49.999, and not simply 50.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "startDate": {
+          "title": "State date",
+          "description": "When did this interest first occur. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+          "type": "string",
+          "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "endDate": {
+          "title": "End date",
+          "description": "When did this interest cease. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+          "type": "string",
+          "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+      }
+    },
+    "Annotation": {
+      "title": "Annotation",
+      "description": "An annotation provides additional information about ownership or control data being provided. Annotations can be provided in free-text, and can apply to a whole statement, an object or a single field. Additional extended properties can be included on the annotation object to provide structured data where required.",
+      "type": "object",
+      "properties": {
+        "statementPointerTarget": {
+          "title": "Statement Fragment Pointer",
+          "description": "An [RFC6901 JSON Pointer](https://tools.ietf.org/html/rfc6901) describing the target fragment of the statement that this annotation applies to, starting from the root of the statement. A value of '/' indicates that the annotation applies to the whole statement.",
+          "type": "string"
+        },
+        "creationDate": {
+          "title": "Creation Date",
+          "description": "The date this annotation was created.",
+          "type": "string",
+          "format": "date"
+        },
+        "createdBy": {
+          "title": "Created By",
+          "description": "The person, organisation or agent that created this annotation.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "description": "The name of the person, organisation or agent that created this annotation.",
+              "type": "string"
+            },
+            "uri": {
+              "title": "URI",
+              "description": "An optional URI to identify person, organisation or agent that created this annotation.",
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "motivation": {
+          "title": "Motivation",
+          "description": "The motivation for this annotation, chosen from a codelist. See the [annotationMotivation](#annotationmotivation) codelist.",
+          "type": "string",
+          "enum": [
+            "commenting",
+            "correcting",
+            "identifying",
+            "linking",
+            "transformation"
+          ],
+          "codelist": "annotationMotivation.csv",
+          "openCodelist": true
+        },
+        "description": {
+          "title": "Description",
+          "description": "A free-text description to annotate this statment or field.",
+          "type": "string"
+        },
+        "transformedContent": {
+          "type": "string",
+          "title": "Transformed content",
+          "description": "A representation of the annotation target after the transformation in the description field has been applied. This field SHOULD only be used when the motivation is transformation."
+        },
+        "url": {
+          "title": "URL",
+          "description": "A linked resource that annotates, provides context for or enhances this statement. The content of the resource, or the relationship to the statement, MAY be described in the description field.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "motivation": {
+              "enum": [
+                "linking"
+              ]
+            }
+          },
+          "required": [
+            "statementPointerTarget",
+            "motivation"
+          ]
+        },
+        {
+          "properties": {
+            "motivation": {
+              "enum": [
+                "linking",
+                "identifying",
+                "commenting",
+                "correcting",
+                "transformation"
+              ]
+            }
+          },
+          "required": [
+            "statementPointerTarget",
+            "motivation"
+          ]
+        }
+      ]
+    },
+    "Country": {
+      "title": "Country",
+      "description": "A country MUST have a name. A country SHOULD have an ISO 2-Digit county code.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "description": "The name of the country",
+          "type": "string"
+        },
+        "code": {
+          "title": "Country code",
+          "description": "The ISO 2-digit code for the country.",
+          "type": "string",
+          "maxLength": 2,
+          "minLength": 2
+        }
+      }
+    },
+    "Jurisdiction": {
+      "title": "Jurisdiction",
+      "description": "A jurisdiction MUST have a name. A jurisdiction SHOULD have an ISO ISO_3166-2 2-Digit country code, or ISO_3166-2 sub-division code.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "description": "The name of the jurisdiction",
+          "type": "string"
+        },
+        "code": {
+          "title": "Country code",
+          "description": "The ISO_3166-2 2-Digit country code, or ISO_3166-2 sub-division code of the jurisdiction",
+          "type": "string",
+          "maxLength": 6,
+          "minLength": 2
+        }
+      }
+    },
+    "PepStatus": {
+      "title": "PEP Status",
+      "description": "A description of a politically-exposed person status.",
+      "type": "object",
+      "properties": {
+        "reason": {
+          "title": "Reason",
+          "description": "The reason for this person being declared a politically-exposed person.",
+          "type": "string"
+        },
+        "jurisdiction": {
+          "$ref": "#/definitions/Jurisdiction"
+        },
+        "startDate": {
+          "title": "State date",
+          "description": "When did this PEP status begin. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+          "type": "string",
+          "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "endDate": {
+          "title": "End date",
+          "description": "When did this PEP status end. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+          "type": "string",
+          "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+      }
+    }
+  }
+}

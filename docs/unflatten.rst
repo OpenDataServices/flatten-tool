@@ -72,6 +72,17 @@ That's what we expected. Great.
     `building/cafe`, it only accepts a single key.
 
 
+The Root is a list
+------------------
+
+You can also specify the data outputted is just a list, using the `--root-is-list` option.
+
+.. literalinclude:: ../examples/cafe/root-is-list/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/root-is-list/expected.json
+   :language: json
+
+
 Writing output to a file
 ------------------------
 
@@ -1232,6 +1243,47 @@ Just return the metatab information and not the rest of the doc. Using the examp
 `--metatab-vertical-orientation`
 
 Say that the metatab data runs vertically rather that horizontally see example above.
+
+Configuration properties: skip and header rows
+==============================================
+
+Flattentool supports directives in the first row of a file to tell it to:
+
+* **skiprows** - start processing data from n rows down
+* **headerrows** - the total number of header rows. Note that the first header row will be treated as field paths.
+
+Example usage
+-------------
+
+You have a CSV file named "mydata.csv" that contains:
+
+* Two rows of general provenance information or notes;
+* The field paths;
+* Two rows that explain the meaning of the fields
+
+This pattern may occur, for example, when you export from a spreadsheet that includes formatted header rows that explain the data.
+
+By adding a row containing a cell with '#', and then a set of configuration directives, you can instruct flattentool to skip rows at the top of the file, and to recognise that the field paths are followed by a set of additional header lines. 
+
+.. csv-table::
+   :file: ../examples/cafe/skip-and-headers/data.csv
+
+Flatten tool will interpret the '#' configuration row, and generate the appropriate output with no additional parameters needed at the command line.
+
+.. literalinclude:: ../examples/cafe/skip-and-headers/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/cafe/skip-and-headers/expected.json
+   :language: json
+
+List of configuration features
+------------------------------
+
+There is also the 'ignore' command, which can be used to ignore sheets in a multi-tab workbook. 
+
+When configuration options are set in metatab, they apply to all sheets unless they are overridden. 
+
+Further configuration options can be seen at https://github.com/OpenDataServices/flatten-tool/blob/7fa96933b8fc3ba07a3d44fe07dccf2791165686/flattentool/lib.py 
 
 
 Source maps

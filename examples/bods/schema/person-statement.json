@@ -1,0 +1,144 @@
+{
+  "id": "person-statment.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "version": "0.1",
+  "type": "object",
+  "title": "Person statement",
+  "description": "A person statement describes the information known about a natural person at a particular point in time, or from a given submission of information",
+  "properties": {
+    "statementID": {
+      "$ref": "components.json#/definitions/ID",
+      "propertyOrder": 1
+    },
+    "statementType": {
+      "title": "Statement type",
+      "description": "This should always be 'personStatement.",
+      "type": "string",
+      "enum": [
+        "personStatement"
+      ],
+      "propertyOrder": 2,
+      "openCodelist": false,
+      "codelist": "statementType.csv"
+    },
+    "statementDate": {
+      "$ref": "components.json#/definitions/StatementDate",
+      "propertyOrder": 3
+    },
+    "personType": {
+      "title": "Person type",
+      "description": "Use the [personType codelist](#persontype). The ultimate beneficial owner of a legal entity is always a natural person. Where the beneficial owner has been identified, but information about them cannot be disclosed, use 'anonymousPerson'. Where the beneficial owner has not been clearly identified, use 'unknownPerson'. Where the beneficial owner has been identified use knownPerson.",
+      "type": "string",
+      "enum": [
+        "anonymousPerson",
+        "unknownPerson",
+        "knownPerson"
+      ],
+      "propertyOrder": 4,
+      "codelist": "personType.csv",
+      "openCodelist": false
+    },
+    "missingInfoReason": {
+      "title": "Missing information reason(s)",
+      "description": "For PersonStatements with the type 'anonymousPerson' or 'unknownPerson' this field should contain an explanation of the reason that detailed information on the person is not provided. This may be a standard descriptive phrase from the source system, or a free-text justification.",
+      "type": "string",
+      "propertyOrder": 5
+    },
+    "names": {
+      "title": "Names",
+      "description": "One or more known names for this individual.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Name"
+      },
+      "propertyOrder": 10
+    },
+    "identifiers": {
+      "title": "Identifiers",
+      "description": "One or more official identifiers for this perrson. Where available, official registration numbers should be provided.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Identifier"
+      },
+      "propertyOrder": 20
+    },
+    "nationalities": {
+      "title": "Nationality",
+      "description": "An array of ISO 2-Digit country codes representing nationalities held by this individual.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Country"
+      },
+      "propertyOrder": 30
+    },
+    "placeOfBirth": {
+      "title": "Place of birth",
+      "$ref": "components.json#/definitions/Address",
+      "propertyOrder": 40
+    },
+    "birthDate": {
+      "title": "Date of birth",
+      "description": "The date of birth for this individual. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+      "type": "string",
+      "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+      "propertyOrder": 35
+    },
+    "deathDate": {
+      "title": "Death date",
+      "description": "If this individual is no longer alive, provide their date of death. Please provide as precise a date as possible in ISO 8601 format. When only the year or year and month is known, these can be given as YYYY or YYYY-MM.",
+      "type": "string",
+      "pattern": "^([\\+-]?\\d{4}(?!\\d{2}\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+      "propertyOrder": 36
+    },
+    "placeOfResidence": {
+      "title": "Place of residence",
+      "$ref": "components.json#/definitions/Address",
+      "propertyOrder": 50
+    },
+    "addresses": {
+      "title": "Addresses",
+      "description": "One or more addresses for this entity.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Address"
+      },
+      "propertyOrder": 60
+    },
+    "pepStatus": {
+      "title": "Politically Exposed Person Status",
+      "description": "One or more descriptions of this person's Politically-Exposed Person (PEP) status.",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/PepStatus"
+      },
+      "propertyOrder": 80
+    },
+    "source": {
+      "title": "Source",
+      "description": "The source of the information that links the entity and the interested party, or that supports a null statement.",
+      "$ref": "components.json#/definitions/Source",
+      "propertyOrder":89
+    },
+    "annotations": {
+      "title": "Annotations",
+      "description": "Annotations about this statement or parts of this statement",
+      "type": "array",
+      "items": {
+        "$ref": "components.json#/definitions/Annotation"
+      },
+      "propertyOrder": 90
+    },
+    "replacesStatements": {
+      "$ref": "components.json#/definitions/ReplacesStatements"
+    }
+  },
+  "required": [
+    "statementID",
+    "statementType"
+  ],
+  "dependencies": {
+    "missingPersonReason": [
+      "missingPersonType"
+    ]
+  }
+}

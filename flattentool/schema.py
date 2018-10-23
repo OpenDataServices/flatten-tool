@@ -9,6 +9,13 @@ import jsonref
 from warnings import warn
 from flattentool.sheet import Sheet
 import codecs
+import os
+import sys
+if sys.version_info[:2] > (3, 0):
+    import pathlib
+else:
+    import urlparse, urllib
+
 
 def get_property_type_set(property_schema_dict):
     property_type = property_schema_dict.get('type', [])
@@ -68,10 +75,25 @@ class TitleLookup(UserDict):
             return key.replace(' ', '').lower() in self.data
 
 
+class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(Exception):
+    pass
+
+class JsonLoaderLocalRefsDisabled(jsonref.JsonLoader):
+    def __call__(self, uri, **kwargs):
+        if self.is_ref_local(uri):
+            raise JsonLoaderLocalRefUsedWhenLocalRefsDisabled("Local Ref Used When Local Refs Disabled: " + uri)
+        else:
+            return super(JsonLoaderLocalRefsDisabled, self).__call__(uri, **kwargs)
+
+    def is_ref_local(self, uri):
+        return uri[:7].lower() != 'http://' and uri[:8].lower() != 'https://'
+
+
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False):
+    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False,
+                 disable_local_refs=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
@@ -91,8 +113,20 @@ class SchemaParser(object):
                 r = requests.get(schema_filename)
                 self.root_schema_dict = jsonref.loads(r.text, object_pairs_hook=OrderedDict)
             else:
-                with codecs.open(schema_filename, encoding="utf-8") as schema_file:
-                    self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict)
+                if disable_local_refs:
+                    with codecs.open(schema_filename, encoding="utf-8") as schema_file:
+                        self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict,
+                                                             loader=JsonLoaderLocalRefsDisabled())
+                else:
+                    if sys.version_info[:2] > (3, 0):
+                        base_uri = pathlib.Path(os.path.realpath(schema_filename)).as_uri()
+                    else:
+                        base_uri = urlparse.urljoin('file:', urllib.pathname2url(os.path.abspath(schema_filename)))
+                    with codecs.open(schema_filename, encoding="utf-8") as schema_file:
+                        self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict,
+                                                             base_uri=base_uri)
+
+
         else:
             self.root_schema_dict = root_schema_dict
 
@@ -113,7 +147,23 @@ class SchemaParser(object):
             parent_path = parent_path + '/'
         parent_id_fields = parent_id_fields or []
         title_lookup = self.title_lookup if title_lookup is None else title_lookup
-        if 'properties' in schema_dict:
+
+        if 'type' in schema_dict and schema_dict['type'] == 'array' \
+                and 'items' in schema_dict and 'oneOf' in schema_dict['items']:
+            for oneOf in schema_dict['items']['oneOf']:
+                if 'type' in oneOf and oneOf['type'] == 'object':
+                    for field, child_title in self.parse_schema_dict(
+                                parent_path,
+                                oneOf,
+                                parent_id_fields=parent_id_fields,
+                                title_lookup=title_lookup,
+                                parent_title=parent_title):
+                            yield (
+                                field,
+                                child_title
+                            )
+
+        elif 'properties' in schema_dict:
             if 'id' in schema_dict['properties']:
                 if self.use_titles:
                     id_fields = parent_id_fields + [(parent_title if parent_title is not None else parent_path)+(schema_dict['properties']['id'].get('title') or 'id')]

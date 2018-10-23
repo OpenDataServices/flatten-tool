@@ -1,0 +1,19 @@
+{
+  "id": "bods-package.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "version": "0.1",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "$ref": "entity-statement.json"
+      },
+      {
+        "$ref": "person-statement.json"
+      },
+      {
+        "$ref": "ownership-or-control-statement.json"
+      }
+    ]
+  }
+}

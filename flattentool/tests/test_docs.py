@@ -28,6 +28,11 @@ def test_examples_in_docs():
                 if os.path.exists(join(root, 'actual')) and os.path.isdir(join(root, 'actual')):
                     os.rename(join(root, 'actual'), join(root, 'actual.'+text_type(uuid.uuid4())))
                 os.mkdir(join(root, 'actual'))
+                expected_return_code = 0
+                expected_stdout = b''
+                if os.path.exists(join(root, 'expected_return_code.txt')):
+                    with open(join(root, 'expected_return_code.txt'), 'rb') as fp:
+                        expected_return_code = int(fp.read().strip())
                 with open(join(root, filename), 'rb') as fp:
                     cmds = text_type(fp.read(), 'utf8').strip().split('\n')
                     actual_stdout = b''
@@ -49,7 +54,7 @@ def test_examples_in_docs():
                         process = subprocess.Popen(cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         (cmd_actual_stdout, cmd_actual_stderr) = process.communicate()
                         process.wait()
-                        assert process.returncode == 0, cmd
+                        assert process.returncode == expected_return_code, cmd
                         actual_stdout += (cmd_actual_stdout or b'')
                         actual_stderr += (cmd_actual_stderr or b'')
                 if os.path.exists(join(root, 'expected')) and os.path.isdir(join(root, 'expected')):
@@ -77,6 +82,10 @@ def test_examples_in_docs():
                 else:
                     assert _strip(actual_stdout) == _strip(expected_stdout), "Different stdout: {}".format(cmds)
                 expected_stderr = b''
+                if os.path.exists(join(root, 'expected_stderr_partial.txt')):
+                    with open(join(root, 'expected_stderr_partial.txt'), 'rb') as fstderr:
+                        data = fstderr.read()
+                    assert data in actual_stderr
                 if os.path.exists(join(root, 'expected_stderr.json')):
                     with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
                         data = fstderr.read()
@@ -90,9 +99,9 @@ def test_examples_in_docs():
                 tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 36
+        assert tests_passed == 44
     else:
-        assert tests_passed == 37
+        assert tests_passed == 45
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])

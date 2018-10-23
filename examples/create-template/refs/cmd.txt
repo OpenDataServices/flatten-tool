@@ -1,0 +1,1 @@
+$ flatten-tool create-template --schema=examples/create-template/refs/main.json -f csv -o examples/create-template/refs/actual

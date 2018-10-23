@@ -65,6 +65,63 @@ CSV files for you, populated with the data from the input JSON file.
    generate empty a single empty sheet called `main`, which probably isn't what
    you want.
 
+If your data has a list as a root, use the `--root-is-list` option.
+
+.. literalinclude:: ../examples/flatten/root-is-list/data.json
+   :language: json
+
+.. literalinclude:: ../examples/flatten/root-is-list/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: main.csv
+   :file: ../examples/flatten/root-is-list/expected/main.csv
+
+Sheet Prefix
+------------
+
+You can pass a string that will be added at the start of all CSV file names, or all Excel sheet names.
+
+
+.. literalinclude:: ../examples/flatten/sheet-prefix/cmd.txt
+   :language: bash
+
+Will produce:
+
+.. csv-table:: sheet: test-cafe.csv
+   :file: ../examples/flatten/sheet-prefix/expected/test-cafe.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: test-table.csv
+   :file: ../examples/flatten/sheet-prefix/expected/test-table.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: test-tab_dish.csv
+   :file: ../examples/flatten/sheet-prefix/expected/test-tab_dish.csv
+
+Filter
+------
+
+When flattening, you can optionally choose to only process some of the data.
+
+Currently, only simple filters can be specified using the `--filter-field` and `--filter-value` option.
+
+.. literalinclude:: ../examples/flatten/filter/input.json
+   :language: json
+
+.. literalinclude:: ../examples/flatten/filter/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: main.csv
+   :file: ../examples/flatten/filter/expected/main.csv
+   :header-rows: 1
+
+.. csv-table:: sheet: pints.csv
+   :file: ../examples/flatten/filter/expected/pints.csv
+   :header-rows: 1
+
+No `dishes` sheet is produced, and the main sheet does not have a `coffee` column.
+
+The field specified must be a field directly on the data object - it's not possible to filter on fields like `pints/0/title` .
 
 All flatten options
 -------------------

@@ -61,6 +61,10 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_create_template.add_argument(
+        "--disable-local-refs",
+        action='store_true',
+        help="Disable local refs when parsing JSON Schema.")
 
     parser_flatten = subparsers.add_parser(
         'flatten',
@@ -102,6 +106,24 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_flatten.add_argument(
+        "--root-is-list",
+        action='store_true',
+        help="The root element is a list. --root-list-path and meta data will be ignored.")
+    parser_flatten.add_argument(
+        "--sheet-prefix",
+        help="A string to prefix to the start of every sheet (or file) name.")
+    parser_flatten.add_argument(
+        "--filter-field",
+        help="Data Filter - only data with this will be processed. Use with --filter-value")
+    parser_flatten.add_argument(
+        "--filter-value",
+        help="Data Filter - only data with this will be processed. Use with --filter-field")
+    parser_flatten.add_argument(
+        "--disable-local-refs",
+        action='store_true',
+        help="Disable local refs when parsing JSON Schema.")
+
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
@@ -171,8 +193,22 @@ def create_parser():
         action='store_true',
         help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
     parser_unflatten.add_argument(
+        "--xml-schema",
+        dest='xml_schemas',
+        metavar='XML_SCHEMA',
+        nargs='*',
+        help="Path to one or more XML schemas (used for sorting)")
+    parser_unflatten.add_argument(
         "--default-configuration",
         help="Comma seperated list of default parsing commands for all sheets. Only for XLSX not CSV")
+    parser_unflatten.add_argument(
+        "--root-is-list",
+        action='store_true',
+        help="The root element is a list. --root-list-path and meta data will be ignored.")
+    parser_unflatten.add_argument(
+        "--disable-local-refs",
+        action='store_true',
+        help="Disable local refs when parsing JSON Schema.")
 
     return parser
 

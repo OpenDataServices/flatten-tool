@@ -61,13 +61,18 @@ def test_360_fields_case_insensitive(tmpdir):
 
 @pytest.mark.parametrize('dirname', ['examples/iati', 'examples/iati_multilang'])
 def test_unflatten_xml(tmpdir, dirname):
+    schema_path = 'examples/iati'
+    schemas = ['iati-activities-schema.xsd', 'iati-common.xsd']
+    schema_filepaths = ['{}/{}'.format(schema_path, schema) for schema in schemas]
     unflatten(
         input_name=dirname,
         output_name=tmpdir.join('output.xml').strpath,
         input_format='csv',
         root_list_path='iati-activity',
         id_name='iati-identifier',
-        xml=True)
+        xml=True,
+        xml_schemas=schema_filepaths,
+        )
     assert open(os.path.join(dirname, 'expected.xml')).read() == tmpdir.join('output.xml').read()
 
 

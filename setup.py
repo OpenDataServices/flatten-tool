@@ -8,7 +8,7 @@ if sys.version < '3':
 
 setup(
     name='flattentool',
-    version='0.0.0',
+    version='0.3.0',
     author='Ben Webb',
     author_email='bjwebb67@googlemail.com',
     packages=['flattentool'],
@@ -17,7 +17,7 @@ setup(
     license='MIT',
     description='Tools for generating CSV and other flat versions of the structured data',
     install_requires=install_requires,
-    extras_requires = {
+    extras_require = {
         'HTTP': ['requests']
     }
 )
