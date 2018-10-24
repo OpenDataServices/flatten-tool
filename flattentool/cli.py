@@ -126,7 +126,10 @@ def create_parser():
         "--disable-local-refs",
         action='store_true',
         help="Disable local refs when parsing JSON Schema.")
-
+    parser_flatten.add_argument(
+        "--remove-empty-schema-columns",
+        action='store_true',
+        help="Remove columns from the schema that contain no data.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
