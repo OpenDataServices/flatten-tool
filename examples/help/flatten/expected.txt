@@ -48,4 +48,5 @@ optional arguments:
                         Use with --filter-field
   --disable-local-refs  Disable local refs when parsing JSON Schema.
   --remove-empty-schema-columns
-                        Remove columns from the schema that contain no data.
+                        When using flatten with a schema, remove columns and
+                        sheets from the output that contain no data.

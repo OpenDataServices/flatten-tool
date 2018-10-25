@@ -129,7 +129,7 @@ def create_parser():
     parser_flatten.add_argument(
         "--remove-empty-schema-columns",
         action='store_true',
-        help="Remove columns from the schema that contain no data.")
+        help="When using flatten with a schema, remove columns and sheets from the output that contain no data.")
 
     parser_unflatten = subparsers.add_parser(
         'unflatten',
