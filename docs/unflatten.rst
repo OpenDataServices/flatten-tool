@@ -79,7 +79,7 @@ You can also specify the data outputted is just a list, using the `--root-is-lis
 
 .. literalinclude:: ../examples/cafe/root-is-list/cmd.txt
    :language: bash
-.. literalinclude:: ../examples/cafe/root-is-list/expected.json
+.. literalinclude:: ../examples/cafe/root-is-list/expected/out.json
    :language: json
 
 
