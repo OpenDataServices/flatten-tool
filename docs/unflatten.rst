@@ -115,7 +115,7 @@ and the data looks like this:
    :header-rows: 1
 
 you can run this command using the ``--base-json`` option to see the ``base.json``
-data with the with the spreadsheet rows merged in:
+data with the spreadsheet rows merged in:
 
 .. literalinclude:: ../examples/cafe/simple-base-json/cmd.txt
    :language: bash
@@ -171,17 +171,17 @@ spreadsheet lies in knowing about the `JSON Pointer specification
 intuitive way to reference values in a JSON document.
 
 To briefly describe how it works, each ``/`` character after the first one drills
-down into a JSON structure. If they value after the ``/`` is a string, then a key
+down into a JSON structure. If the value after the ``/`` is a string, then a key
 is looked up, if it is an integer then an array index is taken.
 
-For example, in the JSON pointer ``/cafe/0/name`` is equivalent to taking the
+For example, the JSON pointer ``/cafe/0/name`` is equivalent to taking the
 following value out of a JSON document named ``document``:
 
 .. code-block:: python
 
     >>> document['cafe'][0]['name']
 
-In JSON document above, the JSON pointer ``/cafe/0/name`` would return ``Healthy Cafe``.
+In the JSON document above, the JSON pointer ``/cafe/0/name`` would return ``Healthy Cafe``.
 
 .. note::
 
