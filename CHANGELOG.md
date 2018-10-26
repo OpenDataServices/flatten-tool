@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add --disable-local-refs to flatten, unflatten and create-template.
 - Add --remove-empty-schema-columns flag to flatten  https://github.com/OpenDataServices/cove/issues/1019
+- Add --xml-comment to unflatten.
 
 ## [0.3.0] - 2018-10-12
 
