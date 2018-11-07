@@ -191,7 +191,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             ## strip off meta/ from start of source map as actually data is at top level
             heading_source_map_data[key[5:]] = value
 
-        base_configuration = spreadsheet_input.sheet_configuration.get(metatab_name) or base_configuration
+        # update individual keys from base configuration
+        base_configuration.update(spreadsheet_input.sheet_configuration.get(metatab_name, {}))
 
         if result:
             base.update(result[0])

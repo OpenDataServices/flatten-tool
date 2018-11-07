@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add --remove-empty-schema-columns flag to flatten  https://github.com/OpenDataServices/cove/issues/1019
 - Add --xml-comment to unflatten.
 
+### Changed
+
+- Commands from command line overridden individually by commands in the metatab. Previously all commands taken from metatab and the rest ignored if only one was added.
+
 ## [0.3.0] - 2018-10-12
 
 ### Added
