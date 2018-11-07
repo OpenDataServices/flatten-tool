@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Commands from command line overridden individually by commands in the metatab. Previously all commands taken from metatab and the rest ignored if only one was added.
 
+### Fixed
+
+- In setup.py, set author and author_email to general values.
+
 ## [0.3.0] - 2018-10-12
 
 ### Added
