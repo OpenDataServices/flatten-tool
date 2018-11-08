@@ -24,6 +24,10 @@ class BadlyFormedJSONError(ValueError):
     pass
 
 
+class BadlyFormedJSONErrorUTF8(BadlyFormedJSONError):
+    pass
+
+
 def sheet_key_field(sheet, key):
     if key not in sheet:
         sheet.append(key)
@@ -99,6 +103,8 @@ class JSONParser(object):
             with codecs.open(json_filename, encoding='utf-8') as json_file:
                 try:
                     self.root_json_dict = json.load(json_file, object_pairs_hook=OrderedDict, parse_float=Decimal)
+                except UnicodeError as err:
+                    raise BadlyFormedJSONErrorUTF8(*err.args)
                 except ValueError as err:
                     raise BadlyFormedJSONError(*err.args)
         else:
