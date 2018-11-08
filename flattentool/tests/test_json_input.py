@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from flattentool.json_input import JSONParser, BadlyFormedJSONError
+import os
+from flattentool.json_input import JSONParser, BadlyFormedJSONError, BadlyFormedJSONErrorUTF8
 from flattentool.schema import SchemaParser
 from flattentool.tests.test_schema_parser import object_in_array_example_properties
 import pytest
@@ -17,9 +18,22 @@ def test_jsonparser_bad_json(tmpdir):
     test_json.write('{"a":"b",}')
     with pytest.raises(BadlyFormedJSONError):
         JSONParser(json_filename=test_json.strpath)
-    # JSONInputValueError also matches against ValueError
+    # matches against Python base error type
     with pytest.raises(ValueError):
         JSONParser(json_filename=test_json.strpath)
+
+
+def test_jsonparser_bad_json_utf8():
+    name = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'bad-utf8.json')
+    # matches against the special error type
+    with pytest.raises(BadlyFormedJSONErrorUTF8):
+        JSONParser(json_filename=name)
+    # matches against our base error type
+    with pytest.raises(BadlyFormedJSONError):
+        JSONParser(json_filename=name)
+    # matches against Python base error type
+    with pytest.raises(ValueError):
+        JSONParser(json_filename=name)
 
 
 def test_jsonparser_arguments_exceptions(tmpdir):
