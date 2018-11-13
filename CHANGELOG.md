@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [0.5.0] - 2018-11-13
+
 ### Added
 
 - While trying to decode JSON, if there is a UTF8 error raise the new exception class BadlyFormedJSONErrorUTF8. 
