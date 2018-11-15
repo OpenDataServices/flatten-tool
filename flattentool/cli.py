@@ -254,40 +254,41 @@ def main():
 
     if args.subparser_name is None:
         parser.print_help()
-    else:
-        def handler(type, value, traceback):
-            if args.verbose:
-                sys.__excepthook__(type, value, traceback)
-            elif type == BadlyFormedJSONError:
-                sys.stderr.write('JSON error: {}\n'.format(value))
+        return
+
+    def handler(type, value, traceback):
+        if args.verbose:
+            sys.__excepthook__(type, value, traceback)
+        elif type == BadlyFormedJSONError:
+            sys.stderr.write('JSON error: {}\n'.format(value))
+        else:
+            sys.stderr.write(str(value) + '\n')
+
+    sys.excepthook = handler
+
+    if not args.verbose:
+        def custom_warning_formatter(message, category, filename, lineno, line=None):
+            if category == UserWarning:
+                return str(message) + '\n'
             else:
-                sys.stderr.write(str(value) + '\n')
+                return default_warning_formatter(message, category, filename, lineno, line)
 
-        sys.excepthook = handler
+        default_warning_formatter = warnings.formatwarning
+        warnings.formatwarning = custom_warning_formatter
 
-        if not args.verbose:
-            def custom_warning_formatter(message, category, filename, lineno, line=None):
-                if category == UserWarning:
-                    return str(message) + '\n'
-                else:
-                    return default_warning_formatter(message, category, filename, lineno, line)
-
-            default_warning_formatter = warnings.formatwarning
-            warnings.formatwarning = custom_warning_formatter
-
-        if args.subparser_name == 'create-template':
-            # Pass the arguments to the create_template function
-            # If the schema file does not exist we catch it in this exception
-            try:
-                # Note: Ensures that empty arguments are not passed to the create_template function
-                create_template(**kwargs_from_parsed_args(args))
-            except (OSError, IOError) as e:
-                print(text_type(e))
-                return
-        elif args.subparser_name == 'flatten':
-            flatten(**kwargs_from_parsed_args(args))
-        elif args.subparser_name == 'unflatten':
-            unflatten(**kwargs_from_parsed_args(args))
+    if args.subparser_name == 'create-template':
+        # Pass the arguments to the create_template function
+        # If the schema file does not exist we catch it in this exception
+        try:
+            # Note: Ensures that empty arguments are not passed to the create_template function
+            create_template(**kwargs_from_parsed_args(args))
+        except (OSError, IOError) as e:
+            print(text_type(e))
+            return
+    elif args.subparser_name == 'flatten':
+        flatten(**kwargs_from_parsed_args(args))
+    elif args.subparser_name == 'unflatten':
+        unflatten(**kwargs_from_parsed_args(args))
 
 
 if __name__ == '__main__':
