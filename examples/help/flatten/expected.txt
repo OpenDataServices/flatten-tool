@@ -5,6 +5,8 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
                             [--root-is-list] [--sheet-prefix SHEET_PREFIX]
                             [--filter-field FILTER_FIELD]
                             [--filter-value FILTER_VALUE]
+                            [--disable-local-refs]
+                            [--remove-empty-schema-columns]
                             input_name
 
 positional arguments:
@@ -44,3 +46,7 @@ optional arguments:
   --filter-value FILTER_VALUE
                         Data Filter - only data with this will be processed.
                         Use with --filter-field
+  --disable-local-refs  Disable local refs when parsing JSON Schema.
+  --remove-empty-schema-columns
+                        When using flatten with a schema, remove columns and
+                        sheets from the output that contain no data.

@@ -1,0 +1,1 @@
+$ flatten-tool flatten --remove-empty-schema-columns --root-list-path=cafe --main-sheet-name=cafe --schema=examples/receipt/cafe.schema examples/flatten/remove-empty-schema-columns/input.json -o examples/flatten/remove-empty-schema-columns/actual
