@@ -20,6 +20,8 @@ examples/flatten/simple/actual
 examples/flatten/simple/actual.*
 examples/flatten/sheet-prefix/actual
 examples/flatten/sheet-prefix/actual.*
+examples/flatten/remove-empty-schema-columns/actual
+examples/flatten/remove-empty-schema-columns/actual.*
 examples/flatten/root-is-list/actual
 examples/flatten/root-is-list/actual.*
 examples/receipt/source-map/actual

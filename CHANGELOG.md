@@ -6,6 +6,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [0.5.0] - 2018-11-13
+
+### Added
+
+- While trying to decode JSON, if there is a UTF8 error raise the new exception class BadlyFormedJSONErrorUTF8. 
+  (This extends the old BadlyFormedJSONError exception, so existing code that checks sensibly should be fine.)
+
+## [0.4.0] - 2018-11-07
+
+### Added
+
+- Add --disable-local-refs to flatten, unflatten and create-template.
+- Add --remove-empty-schema-columns flag to flatten  https://github.com/OpenDataServices/cove/issues/1019
+- Add --xml-comment to unflatten.
+
+### Changed
+
+- Commands from command line overridden individually by commands in the metatab. Previously all commands taken from metatab and the rest ignored if only one was added.
+
+### Fixed
+
+- In setup.py, set author and author_email to general values.
+
 ## [0.3.0] - 2018-10-12
 
 ### Added

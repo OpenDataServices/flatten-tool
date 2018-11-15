@@ -123,6 +123,34 @@ No `dishes` sheet is produced, and the main sheet does not have a `coffee` colum
 
 The field specified must be a field directly on the data object - it's not possible to filter on fields like `pints/0/title` .
 
+Remove Empty Schema Columns
+---------------------------
+
+By default, when using this with `schema` specified columns that are empty (have no data) will be kept in the output.
+
+But you can pass the `remove-empty-schema-columns` flag to have these removed.
+
+If all columns are removed from a sheet and it is empty, the whole sheet will be removed too.
+
+This shows without and with the flag:
+
+.. literalinclude:: ../examples/flatten/simple/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: cafe.csv
+   :file: ../examples/flatten/simple/expected/cafe.csv
+   :header-rows: 1
+
+.. literalinclude:: ../examples/flatten/remove-empty-schema-columns/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: cafe.csv
+   :file: ../examples/flatten/remove-empty-schema-columns/expected/cafe.csv
+   :header-rows: 1
+
+(Using this without the `schema` option does nothing.)
+
+
 All flatten options
 -------------------
 

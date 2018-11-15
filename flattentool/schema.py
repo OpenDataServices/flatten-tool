@@ -75,10 +75,25 @@ class TitleLookup(UserDict):
             return key.replace(' ', '').lower() in self.data
 
 
+class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(Exception):
+    pass
+
+class JsonLoaderLocalRefsDisabled(jsonref.JsonLoader):
+    def __call__(self, uri, **kwargs):
+        if self.is_ref_local(uri):
+            raise JsonLoaderLocalRefUsedWhenLocalRefsDisabled("Local Ref Used When Local Refs Disabled: " + uri)
+        else:
+            return super(JsonLoaderLocalRefsDisabled, self).__call__(uri, **kwargs)
+
+    def is_ref_local(self, uri):
+        return uri[:7].lower() != 'http://' and uri[:8].lower() != 'https://'
+
+
 class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
-    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False):
+    def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False,
+                 disable_local_refs=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
@@ -98,12 +113,20 @@ class SchemaParser(object):
                 r = requests.get(schema_filename)
                 self.root_schema_dict = jsonref.loads(r.text, object_pairs_hook=OrderedDict)
             else:
-                if sys.version_info[:2] > (3, 0):
-                    base_uri = pathlib.Path(os.path.realpath(schema_filename)).as_uri()
+                if disable_local_refs:
+                    with codecs.open(schema_filename, encoding="utf-8") as schema_file:
+                        self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict,
+                                                             loader=JsonLoaderLocalRefsDisabled())
                 else:
-                    base_uri = urlparse.urljoin('file:', urllib.pathname2url(os.path.abspath(schema_filename)))
-                with codecs.open(schema_filename, encoding="utf-8") as schema_file:
-                    self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict, base_uri=base_uri)
+                    if sys.version_info[:2] > (3, 0):
+                        base_uri = pathlib.Path(os.path.realpath(schema_filename)).as_uri()
+                    else:
+                        base_uri = urlparse.urljoin('file:', urllib.pathname2url(os.path.abspath(schema_filename)))
+                    with codecs.open(schema_filename, encoding="utf-8") as schema_file:
+                        self.root_schema_dict = jsonref.load(schema_file, object_pairs_hook=OrderedDict,
+                                                             base_uri=base_uri)
+
+
         else:
             self.root_schema_dict = root_schema_dict
 

@@ -1,0 +1,1 @@
+$ flatten-tool create-template --disable-local-refs --schema=examples/create-template/refs-disable-local-refs/main.json -f csv -o examples/create-template/refs-disable-local-refs/actual
