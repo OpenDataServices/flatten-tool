@@ -12,14 +12,14 @@ But, consider two audiences for this dataset:
 
 **The analyst** needs flat data - tables that can be sorted, filtered and explored in a spreadsheet. 
 
-Which format should the data be published in? Flattten-Tool thinks it should be both. 
+Which format should the data be published in? Flatten Tool thinks it should be both. 
 
-By introducing a couple of simple rules, Flatten-Tool is aiming to allow data to be round-tripped between JSON and flat formats, sticking to sensible idioms in both flat-land and a structured world. 
+By introducing a couple of simple rules, Flatten Tool is aiming to allow data to be round-tripped between JSON and flat formats, sticking to sensible idioms in both flat-land and a structured world. 
 
 How 
 ---
 
-Flatten-Tool was designed to work along with a JSON Schema. Flatten-Tool likes
+Flatten Tool was designed to work along with a JSON Schema. Flatten Tool likes
 JSON Schemas which:
 
 **(1) Provide an "id" at every level of the structure**
@@ -31,7 +31,7 @@ version. It turns out this is also pretty useful for JSON-LD mapping.
 
 Often in a data structure, there are only a few properties that exist at the
 root level, with most properties at least one level deep in the structure.
-However, if Flatten-Tool hides away all the important properties in sub tables,
+However, if Flatten Tool hides away all the important properties in sub tables,
 then the spreadsheet user has to hunt all over the place for the properties
 that matter to them.
 
@@ -47,7 +47,7 @@ a single table.
 **(3) Provide unique field titles**
 
 "Recipient Org: Name" is a lot friendlier to spreadsheet users than
-'receipientOrganisation/name'. So, Flatten-Tool includes support for using the
+'recipientOrganization/name'. So, Flatten Tool includes support for using the
 titles of JSON fields instead of the field names when creating a spreadsheet
 template and converting data.
 
@@ -56,7 +56,7 @@ unique.
 
 **(4) Don't nest too deep**
 
-Whilst Flatten-Tool can cope with multiple laters of nesting in a data
+Whilst Flatten Tool can cope with multiple layers of nesting in a data
 structure, the deeper the structure gets, the trickier it is for the
 spreadsheet user to understand what is going on. So, we try and just go a few
-layers deep at most in data for Flatten-Tool to work with. 
+layers deep at most in data for Flatten Tool to work with. 
