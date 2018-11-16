@@ -1,1 +1,1 @@
-$ flatten-tool unflatten -f=csv --root-list-path=cafe examples/cafe/simple/
+$ flatten-tool unflatten -f=csv examples/cafe/simple/ --root-list-path=cafe

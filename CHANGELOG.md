@@ -6,9 +6,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [0.5.0] - 2018-11-13
+
+### Added
+
+- While trying to decode JSON, if there is a UTF8 error raise the new exception class BadlyFormedJSONErrorUTF8. 
+  (This extends the old BadlyFormedJSONError exception, so existing code that checks sensibly should be fine.)
+
+## [0.4.0] - 2018-11-07
+
 ### Added
 
 - Add --disable-local-refs to flatten, unflatten and create-template.
+- Add --remove-empty-schema-columns flag to flatten  https://github.com/OpenDataServices/cove/issues/1019
+- Add --xml-comment to unflatten.
+
+### Changed
+
+- Commands from command line overridden individually by commands in the metatab. Previously all commands taken from metatab and the rest ignored if only one was added.
+
+### Fixed
+
+- In setup.py, set author and author_email to general values.
 
 ### Fixed
 
@@ -27,11 +47,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-- Ignore elements that don't exist in the schema, whilst sorting xml. Previously an exception was raised. https://github.com/OpenDataServices/flatten-tool/pull/218
+- Ignore elements that don't exist in the schema, whilst sorting XML. Previously an exception was raised. https://github.com/OpenDataServices/flatten-tool/pull/218
 - Fix: unflatten would crash if given a csv with an empty first row https://github.com/OpenDataServices/flatten-tool/pull/229
 - Clarified meaning of headerrows in docs. https://github.com/OpenDataServices/flatten-tool/issues/230
-- Tool can work with schema's that have refs to local files (part of https://github.com/OpenDataServices/flatten-tool/issues/225 )
-- Schema loader can work with schema's that have 'oneOf' (part of https://github.com/OpenDataServices/flatten-tool/issues/225 )
+- Tool can work with schemas that have refs to local files (part of https://github.com/OpenDataServices/flatten-tool/issues/225 )
+- Schema loader can work with schemas that have 'oneOf' (part of https://github.com/OpenDataServices/flatten-tool/issues/225 )
 
 ## [0.2.0] - 2018-08-13
 
@@ -62,8 +82,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Add missing comma to CSV fixture https://github.com/OpenDataServices/flatten-tool/pull/203
-- Do not hardcode iati-activities for top level for all xml https://github.com/OpenDataServices/flatten-tool/issues/150
-- Don't split text value of xml array https://github.com/OpenDataServices/flatten-tool/pull/208
+- Do not hard code iati-activities for top level for all XML https://github.com/OpenDataServices/flatten-tool/issues/150
+- Don't split text value of XML array https://github.com/OpenDataServices/flatten-tool/pull/208
 
 ## [0.1.1] - 2018-03-28
 
