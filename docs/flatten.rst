@@ -42,10 +42,6 @@ The input JSON file looks like this:
 If you run the example above, Flatten Tool will generate the following
 CSV files for you, populated with the data from the input JSON file.
 
-.. warning ::
-
-   You can't use ``--use-titles`` with flatten.
-
 .. csv-table:: sheet: cafe.csv
    :file: ../examples/flatten/simple/expected/cafe.csv
    :header-rows: 1
