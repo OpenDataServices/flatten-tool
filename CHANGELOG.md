@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Output on the command line is not by default less verbose
+- Output on the command line is by default less verbose
 
 
 ## [0.5.0] - 2018-11-13
