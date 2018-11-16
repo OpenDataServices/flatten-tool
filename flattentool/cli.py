@@ -241,6 +241,22 @@ def kwargs_from_parsed_args(args):
     return {k: v for k, v in vars(args).items() if v is not None}
 
 
+def non_verbose_error_handler(type, value, traceback):
+    if type == BadlyFormedJSONError:
+        sys.stderr.write('JSON error: {}\n'.format(value))
+    else:
+        sys.stderr.write(str(value) + '\n')
+
+
+default_warning_formatter = warnings.formatwarning
+
+def non_verbose_warning_formatter(message, category, filename, lineno, line=None):
+    if issubclass(category, UserWarning):
+        return str(message) + '\n'
+    else:
+        return default_warning_formatter(message, category, filename, lineno, line)
+
+
 def main():
     """
     Use ``create_parser`` to get the commandline arguments, and pass them to
@@ -256,25 +272,9 @@ def main():
         parser.print_help()
         return
 
-    def handler(type, value, traceback):
-        if args.verbose:
-            sys.__excepthook__(type, value, traceback)
-        elif type == BadlyFormedJSONError:
-            sys.stderr.write('JSON error: {}\n'.format(value))
-        else:
-            sys.stderr.write(str(value) + '\n')
-
-    sys.excepthook = handler
-
     if not args.verbose:
-        def custom_warning_formatter(message, category, filename, lineno, line=None):
-            if category == UserWarning:
-                return str(message) + '\n'
-            else:
-                return default_warning_formatter(message, category, filename, lineno, line)
-
-        default_warning_formatter = warnings.formatwarning
-        warnings.formatwarning = custom_warning_formatter
+        sys.excepthook = non_verbose_error_handler
+        warnings.formatwarning = non_verbose_warning_formatter
 
     if args.subparser_name == 'create-template':
         # Pass the arguments to the create_template function
