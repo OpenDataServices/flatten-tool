@@ -45,7 +45,7 @@ Contents:
    usage-bods
 
 Get started by reading the Spreadsheet Designer's Guide to understand the core
-concepts, how to use the `flatten-tool` command and how to structure your own
+concepts, how to use the ``flatten-tool`` command and how to structure your own
 data as spreadsheet sheets.
 
 The Developer Guide (work in progress) will go into more detail about how
