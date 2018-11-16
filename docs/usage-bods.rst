@@ -54,7 +54,7 @@ You will have a set of sheets:
 
 ``birthDate`` only appears in ``1_person_main.csv`` and ``foundingDate`` only appears in ``2_entity_main.csv``, so it is clear which column is for which type.
 
-Note this works in csv mode.
+Note this works in CSV mode.
 If you want to use Excel mode, you'll need to specify 3 separate output files and then combine the sheets in them into one file afterwards by hand.
 
 .. code-block:: bash

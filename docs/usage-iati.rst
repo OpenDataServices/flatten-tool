@@ -13,7 +13,7 @@ For an XLSX file called ``filename.xlsx``:
     flatten-tool unflatten --xml --id-name iati-identifier --root-list-path iati-activity -o iati.xml -f xlsx filename.xlsx 
 
 
-For a directory of csv files called ``csv_directory``:
+For a directory of CSV files called ``csv_directory``:
 
 .. code-block:: bash
 

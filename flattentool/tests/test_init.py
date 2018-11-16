@@ -1227,6 +1227,30 @@ def test_commands_single_sheet_default(tmpdir):
 
     assert unflattened == {'main': [{'actual': 'other', 'headings': 'headings', 'some': 'some'}, {'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
 
+
+def test_commands_default_override(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_in_metatab_defaulted.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('command_metatab_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('command_metatab_source_map.json').strpath,
+        heading_source_map=tmpdir.join('command_metatab_heading_source_map.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True,
+        default_configuration="headerrows 2",
+        )
+
+    unflattened = json.load(tmpdir.join('command_metatab_unflattened.json'))
+
+    # In this case want both 'headerrows 2' and 'skiprows 1' (which is defined in the metatab) to be used,
+    # as we only override individual commands not all of them,
+    # So the results in this case will be the same as if using commands_in_metatab.xlsx (where all commands are in metatab).
+
+    assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
+                           'some': 'data'}
+
+
 def test_commands_ignore(tmpdir):
 
     unflatten(

@@ -45,7 +45,8 @@ def create_template(schema, output_name='template', output_format='all', main_sh
 
 def flatten(input_name, schema=None, output_name='flattened', output_format='all', main_sheet_name='main',
             root_list_path='main', root_is_list=False, sheet_prefix='', filter_field=None, filter_value=None,
-            rollup=False, root_id=None, use_titles=False, xml=False, id_name='id', disable_local_refs=False, **_):
+            rollup=False, root_id=None, use_titles=False, xml=False, id_name='id', disable_local_refs=False,
+            remove_empty_schema_columns=False, **_):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
 
@@ -73,7 +74,9 @@ def flatten(input_name, schema=None, output_name='flattened', output_format='all
         xml=xml,
         id_name=id_name,
         filter_field=filter_field,
-        filter_value=filter_value)
+        filter_value=filter_value,
+        remove_empty_schema_columns=remove_empty_schema_columns,
+        )
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):
@@ -129,6 +132,7 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
               xml_schemas=None,
               default_configuration='',
               disable_local_refs=False,
+              xml_comment=None,
               **_):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
@@ -187,7 +191,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
             ## strip off meta/ from start of source map as actually data is at top level
             heading_source_map_data[key[5:]] = value
 
-        base_configuration = spreadsheet_input.sheet_configuration.get(metatab_name) or base_configuration
+        # update individual keys from base configuration
+        base_configuration.update(spreadsheet_input.sheet_configuration.get(metatab_name, {}))
 
         if result:
             base.update(result[0])
@@ -231,7 +236,8 @@ def unflatten(input_name, base_json=None, input_format=None, output_name=None,
 
     if xml:
         xml_root_tag = base_configuration.get('XMLRootTag', 'iati-activities')
-        xml_output = toxml(base, xml_root_tag, xml_schemas=xml_schemas, root_list_path=root_list_path)
+        xml_output = toxml(
+            base, xml_root_tag, xml_schemas=xml_schemas, root_list_path=root_list_path, xml_comment=xml_comment)
         if output_name is None:
             if sys.version > '3':
                 sys.stdout.buffer.write(xml_output)

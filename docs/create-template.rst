@@ -29,7 +29,7 @@ If you don't specify ``-o``, Flatten Tool will choose a spreadsheet called
 If you don't specify a format with ``-f``, Flatten Tool will create a
 ``template.xlsx`` file and a set of CSV files under ``template/``.
 
-The schema is the same as the one used in the user guide and looks like this:
+The schema is the same as the one used in the :doc:`user guide <unflatten>` and looks like this:
 
 .. literalinclude:: ../examples/receipt/cafe.schema
    :language: json
@@ -88,7 +88,7 @@ Here are the resulting sheets:
    :file: ../examples/create-template/rollup/expected/tab_dish.csv
 
 
-Notice how ``Table: Number`` has now been moved into the ``cafe.csv`` file.
+Notice how ``Table: Number`` now appears in both the ``cafe.csv`` and ``table.csv`` files.
 
 .. caution ::
 
