@@ -22,5 +22,5 @@ optional arguments:
                         schema.
   -r ROOT_ID, --root-id ROOT_ID
                         Root ID of the data format, e.g. ocid for OCDS
-  --use-titles          Convert titles. Requires a schema to be specified.
+  --use-titles          Convert titles.
   --disable-local-refs  Disable local refs when parsing JSON Schema.
