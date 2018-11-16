@@ -41,7 +41,7 @@ We can use these Spreadsheets:
    :file: ../examples/array_multisheet/main.csv
    :header-rows: 1
 
-These are also the spreadsheets that flatten-tool's `flatten` (JSON to Spreadsheet) will produce.
+These are also the spreadsheets that flatten-tool's ``flatten`` (JSON to Spreadsheet) will produce.
 
 Commands used to generate this:
 

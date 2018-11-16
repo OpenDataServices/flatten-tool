@@ -1,4 +1,4 @@
-Flatten-Tool for IATI
+Flatten Tool for IATI
 =====================
 
 Currently flatten-tool only supports Spreadsheet->XML for IATI (unflatten), not conversion in the other direction, or automated template creation.
@@ -6,14 +6,14 @@ Currently flatten-tool only supports Spreadsheet->XML for IATI (unflatten), not 
 Convert a spreadsheet to XML
 ----------------------------
 
-For an xlsx file called ``filename.xlsx``:
+For an XLSX file called ``filename.xlsx``:
 
 .. code-block:: bash
 
     flatten-tool unflatten --xml --id-name iati-identifier --root-list-path iati-activity -o iati.xml -f xlsx filename.xlsx 
 
 
-For a directory of csv files called ``csv_directory``:
+For a directory of CSV files called ``csv_directory``:
 
 .. code-block:: bash
 
