@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from flattentool.json_input import JSONParser, BadlyFormedJSONError
+import os
+from flattentool.json_input import JSONParser, BadlyFormedJSONError, BadlyFormedJSONErrorUTF8
 from flattentool.schema import SchemaParser
 from flattentool.tests.test_schema_parser import object_in_array_example_properties
 import pytest
@@ -17,9 +18,22 @@ def test_jsonparser_bad_json(tmpdir):
     test_json.write('{"a":"b",}')
     with pytest.raises(BadlyFormedJSONError):
         JSONParser(json_filename=test_json.strpath)
-    # JSONInputValueError also matches against ValueError
+    # matches against Python base error type
     with pytest.raises(ValueError):
         JSONParser(json_filename=test_json.strpath)
+
+
+def test_jsonparser_bad_json_utf8():
+    name = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'bad-utf8.json')
+    # matches against the special error type
+    with pytest.raises(BadlyFormedJSONErrorUTF8):
+        JSONParser(json_filename=name)
+    # matches against our base error type
+    with pytest.raises(BadlyFormedJSONError):
+        JSONParser(json_filename=name)
+    # matches against Python base error type
+    with pytest.raises(ValueError):
+        JSONParser(json_filename=name)
 
 
 def test_jsonparser_arguments_exceptions(tmpdir):
@@ -264,13 +278,23 @@ class TestParseIDs(object):
 
 
 class TestParseUsingSchema(object):
-    def test_sub_sheet_names(self, tmpdir):
+    @pytest.mark.parametrize('remove_empty_schema_columns', [False, True])
+    def test_sub_sheets(self, tmpdir, remove_empty_schema_columns):
         test_schema = tmpdir.join('test.json')
         test_schema.write('''{
             "properties": {
                 "c": {
                     "type": "array",
                     "items": {"$ref": "#/testB"}
+                },
+                "g": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "h": { "type": "string"}
+                        }
+                    }
                 }
             },
             "testB": {
@@ -291,15 +315,20 @@ class TestParseUsingSchema(object):
                 ('a', 'b'),
                 ('c', [OrderedDict([('d', 'e')])]),
             ])],
-            schema_parser=schema_parser
+            schema_parser=schema_parser,
+            remove_empty_schema_columns=remove_empty_schema_columns,
         )
         parser.parse()
         assert list(parser.main_sheet) == [ 'a' ]
         assert parser.main_sheet.lines == [
             {'a': 'b'}
         ]
-        assert len(parser.sub_sheets) == 1
-        assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d', 'c/0/f'])
+        assert len(parser.sub_sheets) == 2 if not remove_empty_schema_columns else 1
+        if not remove_empty_schema_columns:
+            assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d', 'c/0/f'])
+            assert list(parser.sub_sheets['g']) == list(['ocid', 'g/0/h'])
+        else:
+            assert list(parser.sub_sheets['c']) == list(['ocid', 'c/0/d'])
         assert parser.sub_sheets['c'].lines == [{'c/0/d':'e'}]
 
     def test_column_matching(self, tmpdir): 
