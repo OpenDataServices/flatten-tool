@@ -2,6 +2,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
                             [--id-name ID_NAME] [-m MAIN_SHEET_NAME]
                             [-o OUTPUT_NAME] [--root-list-path ROOT_LIST_PATH]
                             [--rollup] [-r ROOT_ID] [--use-titles]
+                            [--truncation-length TRUNCATION_LENGTH]
                             [--root-is-list] [--sheet-prefix SHEET_PREFIX]
                             [--filter-field FILTER_FIELD]
                             [--filter-value FILTER_VALUE]
@@ -35,6 +36,9 @@ optional arguments:
   -r ROOT_ID, --root-id ROOT_ID
                         Root ID of the data format, e.g. ocid for OCDS
   --use-titles          Convert titles. Requires a schema to be specified.
+  --truncation-length TRUNCATION_LENGTH
+                        The length of components of sub-sheet names (default
+                        3).
   --root-is-list        The root element is a list. --root-list-path and meta
                         data will be ignored.
   --sheet-prefix SHEET_PREFIX

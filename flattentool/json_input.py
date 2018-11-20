@@ -55,12 +55,13 @@ class JSONParser(object):
 
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
                  root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None, filter_value=None,
-                 remove_empty_schema_columns=False):
+                 remove_empty_schema_columns=False, truncation_length=3):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
         self.root_id = root_id
         self.use_titles = use_titles
+        self.truncation_length = truncation_length
         self.id_name = id_name
         self.xml = xml
         self.filter_field = filter_field
@@ -214,7 +215,7 @@ class JSONParser(object):
                                 if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
-                    sub_sheet_name = make_sub_sheet_name(parent_name, key) 
+                    sub_sheet_name = make_sub_sheet_name(parent_name, key, truncation_length=self.truncation_length)
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
 

@@ -1,0 +1,1 @@
+$ flatten-tool flatten --truncation-length 5 --root-list-path=cafe --schema=examples/receipt/cafe.schema examples/receipt/normalised/expected.json -f csv -o examples/flatten/truncation-length/actual

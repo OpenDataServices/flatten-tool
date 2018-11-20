@@ -25,8 +25,8 @@ def get_property_type_set(property_schema_dict):
         return set(property_type)
 
 
-def make_sub_sheet_name(parent_path, property_name):
-    return ('_'.join(x[:3] for x in parent_path.split('/') if x != '0') + property_name)[:31]
+def make_sub_sheet_name(parent_path, property_name, truncation_length=3):
+    return ('_'.join(x[:truncation_length] for x in parent_path.split('/') if x != '0') + property_name)[:31]
 
 
 
@@ -93,13 +93,14 @@ class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
     def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False,
-                 disable_local_refs=False):
+                 disable_local_refs=False, truncation_length=3):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
         self.rollup = rollup
         self.root_id = root_id
         self.use_titles = use_titles
+        self.truncation_length = truncation_length
         self.title_lookup = TitleLookup()
         self.flattened = {}
 
@@ -215,7 +216,8 @@ class SchemaParser(object):
                         if title:
                             title_lookup[title].property_name = property_name
 
-                        sub_sheet_name = make_sub_sheet_name(parent_path, property_name) 
+                        sub_sheet_name = make_sub_sheet_name(parent_path, property_name,
+                                                             truncation_length=self.truncation_length)
                         #self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
