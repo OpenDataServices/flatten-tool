@@ -1,4 +1,2 @@
-... DataErrorWarning: You may have a duplicate Identifier: We couldn't merge these rows with the id "CAFE-HEALTH": field "name" in sheet "data": one cell has the value: "Healthy Cafe", the other cell has the value: "Vegetarian Cafe"
-  DataErrorWarning)
-... DataErrorWarning: You may have a duplicate Identifier: We couldn't merge these rows with the id "CAFE-HEALTH": field "number_of_tables" in sheet "data": one cell has the value: "3", the other cell has the value: "4"
-  DataErrorWarning)
+You may have a duplicate Identifier: We couldn't merge these rows with the id "CAFE-HEALTH": field "name" in sheet "data": one cell has the value: "Healthy Cafe", the other cell has the value: "Vegetarian Cafe"
+You may have a duplicate Identifier: We couldn't merge these rows with the id "CAFE-HEALTH": field "number_of_tables" in sheet "data": one cell has the value: "3", the other cell has the value: "4"

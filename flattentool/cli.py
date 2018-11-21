@@ -1,12 +1,15 @@
 from __future__ import print_function
 
 import argparse
+import warnings
+import sys
 
 from six import text_type
 
 from flattentool import create_template, unflatten, flatten
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.output import FORMATS as OUTPUT_FORMATS
+from flattentool.json_input import BadlyFormedJSONError
 
 """
 This file does most of the work of the flatten-tool commandline command.
@@ -35,6 +38,11 @@ def create_parser():
 
     output_formats = sorted(OUTPUT_FORMATS) + ['all']
     input_formats = sorted(INPUT_FORMATS)
+
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='Print detailed output when warnings or errors occur.')
 
     parser_create_template = subparsers.add_parser(
         'create-template',
@@ -241,6 +249,22 @@ def kwargs_from_parsed_args(args):
     return {k: v for k, v in vars(args).items() if v is not None}
 
 
+def non_verbose_error_handler(type, value, traceback):
+    if type == BadlyFormedJSONError:
+        sys.stderr.write('JSON error: {}\n'.format(value))
+    else:
+        sys.stderr.write(str(value) + '\n')
+
+
+default_warning_formatter = warnings.formatwarning
+
+def non_verbose_warning_formatter(message, category, filename, lineno, line=None):
+    if issubclass(category, UserWarning):
+        return str(message) + '\n'
+    else:
+        return default_warning_formatter(message, category, filename, lineno, line)
+
+
 def main():
     """
     Use ``create_parser`` to get the commandline arguments, and pass them to
@@ -254,7 +278,13 @@ def main():
 
     if args.subparser_name is None:
         parser.print_help()
-    elif args.subparser_name == 'create-template':
+        return
+
+    if not args.verbose:
+        sys.excepthook = non_verbose_error_handler
+        warnings.formatwarning = non_verbose_warning_formatter
+
+    if args.subparser_name == 'create-template':
         # Pass the arguments to the create_template function
         # If the schema file does not exist we catch it in this exception
         try:
