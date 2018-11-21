@@ -1,0 +1,1 @@
+$ flatten-tool create-template --truncation-length 5 --schema=examples/receipt/cafe.schema -f csv -o examples/create-template/truncation-length/actual

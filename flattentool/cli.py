@@ -76,6 +76,10 @@ def create_parser():
         "--disable-local-refs",
         action='store_true',
         help="Disable local refs when parsing JSON Schema.")
+    parser_create_template.add_argument(
+        "--truncation-length",
+        type=int, default=3,
+        help="The length of components of sub-sheet names (default 3).")
 
     parser_flatten = subparsers.add_parser(
         'flatten',
@@ -117,6 +121,10 @@ def create_parser():
         "--use-titles",
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
+    parser_flatten.add_argument(
+        "--truncation-length",
+        type=int, default=3,
+        help="The length of components of sub-sheet names (default 3).")
     parser_flatten.add_argument(
         "--root-is-list",
         action='store_true',
