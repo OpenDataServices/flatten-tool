@@ -4,7 +4,6 @@ usage: flatten-tool unflatten [-h] -f {csv,xlsx} [--xml] [--id-name ID_NAME]
                               [-a HEADING_SOURCE_MAP]
                               [--timezone-name TIMEZONE_NAME] [-r ROOT_ID]
                               [-s SCHEMA] [--convert-titles]
-                              [--truncation-length TRUNCATION_LENGTH]
                               [--vertical-orientation]
                               [--metatab-name METATAB_NAME]
                               [--metatab-schema METATAB_SCHEMA]
@@ -52,9 +51,6 @@ optional arguments:
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.
   --convert-titles      Convert titles. Requires a schema to be specified.
-  --truncation-length TRUNCATION_LENGTH
-                        The length of components of sub-sheet names (default
-                        3).
   --vertical-orientation
                         Read spreadsheet so that headings are in the first
                         column and data is read vertically. Only for XLSX not

@@ -189,10 +189,6 @@ def create_parser():
         action='store_true',
         help="Convert titles. Requires a schema to be specified.")
     parser_unflatten.add_argument(
-        "--truncation-length",
-        type=int, default=3,
-        help="The length of components of sub-sheet names (default 3).")
-    parser_unflatten.add_argument(
         "--vertical-orientation",
         action='store_true',
         help="Read spreadsheet so that headings are in the first column and data is read vertically. Only for XLSX not CSV")
