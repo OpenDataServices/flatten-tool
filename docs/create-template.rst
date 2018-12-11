@@ -118,6 +118,24 @@ You can pass a ``--disable-local-refs`` flag for a special mode that will disabl
 
 You may want to do this if running the command against JSON Schema files you don't trust.
 
+
+Deprecated Fields
+-----------------
+
+Fields which are deprecated can be marked in the JSON schema by setting the "deprecated" key to a value.
+
+
+.. literalinclude:: ../examples/create-template/deprecated.schema
+   :language: json
+
+You can then choose whether deprecated fields appear in the output by passing the ``--no-deprecated-fields`` or the ``--deprecated-fields`` option.
+
+.. literalinclude:: ../examples/create-template/deprecated-yes/cmd.txt
+   :language: bash
+
+.. literalinclude:: ../examples/create-template/deprecated-no/cmd.txt
+   :language: bash
+
 All create-template options
 ---------------------------
 

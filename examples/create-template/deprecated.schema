@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "TableObject": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Identifier"
+                },
+                "number": {
+                    "type": "integer",
+                    "title": "Number"
+                },
+                "dish": {
+                    "items": {
+                        "$ref": "#/definitions/DishObject"
+                    },
+                    "type": "array",
+                    "title": "Dish"
+                }
+            }
+        },
+        "DishObject": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Identifier"
+                },
+                "name": {
+                    "type": "string",
+                    "title": "Name"
+                },
+                "cost": {
+                    "type": "number",
+                    "title": "Cost"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Identifier"
+        },
+        "name": {
+            "type": "string",
+            "title": "Name"
+        },
+        "formalname": {
+            "type": "string",
+            "title": "Formal Name",
+            "deprecated": {
+                "description": "We found people prefer to be addressed by their nick names",
+                "deprecatedVersion": "v17"
+            }
+        },
+        "address": {
+            "type": "string",
+            "title": "Address"
+        },
+        "table": {
+            "items": {
+                "$ref": "#/definitions/TableObject"
+            },
+            "type": "array",
+            "title": "Table"
+        },
+        "coats": {
+            "deprecated": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    }
+                }
+            },
+            "type": "array",
+            "title": "Coats"
+        }
+    }
+}

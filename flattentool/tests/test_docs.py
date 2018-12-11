@@ -99,9 +99,9 @@ def test_examples_in_docs():
                 tests_passed += 1
     # Check that the number of tests were run that we expected
     if sys.version_info[:2] < (3,4):
-        assert tests_passed == 48
+        assert tests_passed == 50
     else:
-        assert tests_passed == 49
+        assert tests_passed == 51
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
