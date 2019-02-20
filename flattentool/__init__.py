@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 def create_template(schema, output_name=None, output_format='all', main_sheet_name='main',
                     rollup=False, root_id=None, use_titles=False, disable_local_refs=False, truncation_length=3,
-                    no_deprecated_fields=False, deprecated_fields=False, **_):
+                    no_deprecated_fields=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -22,20 +22,9 @@ def create_template(schema, output_name=None, output_format='all', main_sheet_na
 
     """
 
-    # Currently set to False so default behaviour matches old behaviour but that may change in the future
-    exclude_deprecated_fields = False
-    if no_deprecated_fields and deprecated_fields:
-        raise Exception("You can not set both no_deprecated_fields and deprecated_fields to True at once!")
-    elif no_deprecated_fields:
-        exclude_deprecated_fields = True
-    elif deprecated_fields:
-        # Yes, this is technically unneeded right now ...
-        # but if the default value of this var changes it will be needed, so lets leave it in
-        exclude_deprecated_fields = False
-
     parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles,
                           disable_local_refs=disable_local_refs, truncation_length=truncation_length,
-                          exclude_deprecated_fields=exclude_deprecated_fields)
+                          exclude_deprecated_fields=no_deprecated_fields)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):

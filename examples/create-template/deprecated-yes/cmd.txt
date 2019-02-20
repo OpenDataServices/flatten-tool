@@ -1,1 +1,1 @@
-$ flatten-tool create-template --deprecated-fields --use-titles --main-sheet-name=cafe --schema=examples/create-template/deprecated.schema -f csv -o examples/create-template/deprecated-yes/actual
+$ flatten-tool create-template --use-titles --main-sheet-name=cafe --schema=examples/create-template/deprecated.schema -f csv -o examples/create-template/deprecated-yes/actual

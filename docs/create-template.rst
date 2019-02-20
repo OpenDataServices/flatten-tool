@@ -128,7 +128,7 @@ Fields which are deprecated can be marked in the JSON schema by setting the "dep
 .. literalinclude:: ../examples/create-template/deprecated.schema
    :language: json
 
-You can then choose whether deprecated fields appear in the output by passing the ``--no-deprecated-fields`` or the ``--deprecated-fields`` option.
+You can then choose whether deprecated fields appear in the output by passing the ``--no-deprecated-fields`` option. This is off by default.
 
 .. literalinclude:: ../examples/create-template/deprecated-yes/cmd.txt
    :language: bash

@@ -77,13 +77,9 @@ def create_parser():
         action='store_true',
         help="Disable local refs when parsing JSON Schema.")
     parser_create_template.add_argument(
-        "--deprecated-fields",
-        action='store_true',
-        help="Include Fields marked as deprecated in the JSON Schema. (Do not use with --no-deprecated-fields!)")
-    parser_create_template.add_argument(
         "--no-deprecated-fields",
         action='store_true',
-        help="Exclude Fields marked as deprecated in the JSON Schema. (Do not use with --deprecated-fields!)")
+        help="Exclude Fields marked as deprecated in the JSON Schema.")
     parser_create_template.add_argument(
         "--truncation-length",
         type=int, default=3,
