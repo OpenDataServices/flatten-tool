@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Output on the command line is by default less verbose
-
+- openpyxl version 2.5 is required; not tested with version 2.6
 
 ## [0.5.0] - 2018-11-13
 
