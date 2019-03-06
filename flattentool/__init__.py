@@ -13,7 +13,8 @@ from collections import OrderedDict
 
 
 def create_template(schema, output_name=None, output_format='all', main_sheet_name='main',
-                    rollup=False, root_id=None, use_titles=False, disable_local_refs=False, truncation_length=3, **_):
+                    rollup=False, root_id=None, use_titles=False, disable_local_refs=False, truncation_length=3,
+                    no_deprecated_fields=False, **_):
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
@@ -22,7 +23,8 @@ def create_template(schema, output_name=None, output_format='all', main_sheet_na
     """
 
     parser = SchemaParser(schema_filename=schema, rollup=rollup, root_id=root_id, use_titles=use_titles,
-                          disable_local_refs=disable_local_refs, truncation_length=truncation_length)
+                          disable_local_refs=disable_local_refs, truncation_length=truncation_length,
+                          exclude_deprecated_fields=no_deprecated_fields)
     parser.parse()
 
     def spreadsheet_output(spreadsheet_output_class, name):

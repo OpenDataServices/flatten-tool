@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - A -v verbose option to the cli to generate more verbose output.
 - A --truncation-length option to create-template and flatten
+- A --no-deprecated-fields option to create-template.
 
 ### Changed
 

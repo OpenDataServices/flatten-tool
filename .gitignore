@@ -12,6 +12,10 @@ examples/create-template/rollup/actual
 examples/create-template/rollup/actual.*
 examples/create-template/simple/actual
 examples/create-template/simple/actual.*
+examples/create-template/deprecated-yes/actual
+examples/create-template/deprecated-yes/actual.*
+examples/create-template/deprecated-no/actual
+examples/create-template/deprecated-no/actual.*
 examples/create-template/refs/actual
 examples/create-template/refs/actual.*
 examples/create-template/truncation-length/actual

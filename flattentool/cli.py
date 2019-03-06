@@ -77,6 +77,10 @@ def create_parser():
         action='store_true',
         help="Disable local refs when parsing JSON Schema.")
     parser_create_template.add_argument(
+        "--no-deprecated-fields",
+        action='store_true',
+        help="Exclude Fields marked as deprecated in the JSON Schema.")
+    parser_create_template.add_argument(
         "--truncation-length",
         type=int, default=3,
         help="The length of components of sub-sheet names (default 3).")

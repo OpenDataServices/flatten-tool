@@ -93,7 +93,7 @@ class SchemaParser(object):
     """Parse the fields of a JSON schema into a flattened structure."""
 
     def __init__(self, schema_filename=None, root_schema_dict=None, rollup=False, root_id=None, use_titles=False,
-                 disable_local_refs=False, truncation_length=3):
+                 disable_local_refs=False, truncation_length=3, exclude_deprecated_fields=False):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
@@ -103,6 +103,7 @@ class SchemaParser(object):
         self.truncation_length = truncation_length
         self.title_lookup = TitleLookup()
         self.flattened = {}
+        self.exclude_deprecated_fields = exclude_deprecated_fields
 
         if root_schema_dict is None and schema_filename is  None:
             raise ValueError('One of schema_filename or root_schema_dict must be supplied')
@@ -174,6 +175,9 @@ class SchemaParser(object):
                 id_fields = parent_id_fields
 
             for property_name, property_schema_dict in schema_dict['properties'].items():
+                if self.exclude_deprecated_fields and property_schema_dict.get('deprecated'):
+                    continue
+
                 property_type_set = get_property_type_set(property_schema_dict)
 
                 title = property_schema_dict.get('title')
