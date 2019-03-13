@@ -49,6 +49,45 @@ def sheet_key_title(sheet, key):
         return key
 
 
+def lists_of_dicts_paths(xml_dict):
+    for key, value in xml_dict.items():
+        if isinstance(value, list) and value and isinstance(value[0], dict):
+            yield (key,)
+            for x in value:
+                if isinstance(x, dict):
+                    for path in lists_of_dicts_paths(x):
+                        yield (key,) + path
+        elif isinstance(value, dict):
+            for path in lists_of_dicts_paths(value):
+                yield (key,) + path
+
+
+def dicts_to_list_of_dicts(lists_of_dicts_paths_set, xml_dict, path=()):
+    for key, value in xml_dict.items():
+        if isinstance(value, list):
+            for x in value:
+                if isinstance(x, dict):
+                    dicts_to_list_of_dicts(lists_of_dicts_paths_set, x, path+(key,))
+        elif isinstance(value, dict):
+            child_path = path+(key,)
+            dicts_to_list_of_dicts(lists_of_dicts_paths_set, value, child_path)
+            if child_path in lists_of_dicts_paths_set:
+                xml_dict[key] = [value]
+
+
+def list_dict_consistency(xml_dict):
+    '''
+        For use with XML files opened with xmltodict.
+
+        If there is only one tag, xmltodict produces a dict. If there are
+        multiple, xmltodict produces a list of dicts. This functions replaces
+        dicts with lists of dicts, if there exists a list of dicts for the same
+        path elsewhere in the file.
+    '''
+    lists_of_dicts_paths_set = set(lists_of_dicts_paths(xml_dict))
+    dicts_to_list_of_dicts(lists_of_dicts_paths_set, xml_dict)
+
+
 class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
     # Similarily with methods like parse_json_dict
@@ -92,6 +131,7 @@ class JSONParser(object):
                 # AFAICT, this should be true for *all* XML files
                 assert len(top_dict) == 1
                 root_json_dict = list(top_dict.values())[0]
+                list_dict_consistency(root_json_dict)
             json_filename = None
 
         if json_filename is None and root_json_dict is None:
