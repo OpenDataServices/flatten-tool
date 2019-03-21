@@ -39,7 +39,7 @@ After following the installation above, run ``py.test``.
 
 Note that the tests require the Python test suite. This should come with Python,
 but some distributions split it out. On Ubuntu you will need to install a
-package like ``libpython3.4-testsuite`` (depending on which Python version you
+package like ``libpython3.5-testsuite`` (depending on which Python version you
 are using).
 
 

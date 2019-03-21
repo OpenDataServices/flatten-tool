@@ -30,12 +30,11 @@ will print help information specific to that sub-command.
 Python Version Support
 ----------------------
 
-This code supports Python 2.7 and Python 3.3 (and later). Python 3 is
+This code supports Python 2.7 and Python 3.5 (and later). Python 3 is
 strongly preferred. Only severe Python 2 specific bugs will be fixed, see the
 `python2-wontfix <https://github.com/OpenDataServices/flatten-tool/issues?q=is%3Aissue+label%3Apython2-wontfix+is%3Aclosed>`_
 label on GitHub for known minor issues.
 
 Python 2.6 and earlier are not supported at all because our code makes use new
-language constructs introduced in Python 3 and 2.7. Python 3.2 (also 3.1 and
-3.0) is not supported, because one of the dependencies (openpyxl) does not
+language constructs introduced in Python 3 and 2.7. Python 3.4 (and earlier Python 3 versions) is not supported, because one of the dependencies (openpyxl) does not
 support it.
