@@ -34,9 +34,7 @@ def test_blank_sheets(tmpdir):
     wb = openpyxl.load_workbook(tmpdir.join('release.xlsx').strpath)
     assert wb.sheetnames == ['release']
     rows = list(wb['release'].rows)
-    assert len(rows) == 1
-    assert len(rows[0]) == 1
-    assert rows[0][0].value == None
+    assert len(rows) == 0
     
     # Check CSV is Empty
     assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
