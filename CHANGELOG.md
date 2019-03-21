@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Output on the command line is by default less verbose
-- openpyxl version 2.5 is required; not tested with version 2.6
+- openpyxl of at least 2.6 is required https://github.com/OpenDataServices/flatten-tool/issues/287
+- For Python 3, 3.5 or later is required
 
 ## [0.5.0] - 2018-11-13
 
