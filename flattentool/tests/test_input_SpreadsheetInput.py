@@ -143,9 +143,13 @@ class TestInputFailure(object):
                 csvinput.read_sheets()
 
     def test_xlsx_no_file(self, tmpdir):
-        xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'))
-        with pytest.raises(openpyxl.utils.exceptions.InvalidFileException):
-            xlsxinput.read_sheets()
+        xlsxinput = XLSXInput(input_name=tmpdir.join('test.xlsx').strpath)
+        if sys.version > '3':
+            with pytest.raises(FileNotFoundError):
+                xlsxinput.read_sheets()
+        else:
+            with pytest.raises(IOError):
+                xlsxinput.read_sheets()
 
 
 class TestUnicodeInput(object):
