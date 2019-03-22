@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Output on the command line is by default less verbose
 - openpyxl version 2.5 is required; not tested with version 2.6
-- XML only - ensure the same path isn't split across multiple sheets - https://github.com/OpenDataServices/flatten-tool/pull/293
+- (XML only) Ensure the same path isn't split across multiple sheets - https://github.com/OpenDataServices/flatten-tool/pull/293
 
 ## [0.5.0] - 2018-11-13
 

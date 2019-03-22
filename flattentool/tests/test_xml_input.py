@@ -1,4 +1,5 @@
 from flattentool.json_input import JSONParser
+from flattentool.json_input import lists_of_dicts_paths, dicts_to_list_of_dicts, list_dict_consistency
 
 def test_xml_empty():
     parser = JSONParser(
@@ -43,3 +44,61 @@ def test_xml_basic_example():
         {'iati-identifier': 'AA-AAA-123456789-ABC124', 'recipient-country/0/@code': 'AG', 'recipient-country/0/@percentage': '30'},
         {'iati-identifier': 'AA-AAA-123456789-ABC124', 'recipient-country/0/@code': 'XK', 'recipient-country/0/@percentage': '70'}
     ]
+
+
+def test_lists_of_dicts_paths():
+    assert list(lists_of_dicts_paths({})) == []
+    assert list(lists_of_dicts_paths({'a': [{}]})) == [('a',)]
+    assert list(lists_of_dicts_paths({'a': [{'d': 'str1'}]})) == [('a',)]
+    assert list(lists_of_dicts_paths({'a': [{'b': [{'d': 'str1'}]}]})) == [('a',), ('a', 'b')]
+    assert list(lists_of_dicts_paths({'a': [{'b': {'d': 'str1'}}]})) == [('a',)]
+    assert list(lists_of_dicts_paths({'a': [{'b': {'d': 'str1'}}, {'b': [{}]}]})) == [('a',), ('a', 'b')]
+    assert list(lists_of_dicts_paths({'a': {'b': {'c': [{'d': 'str1'}]}}})) == [('a', 'b', 'c')]
+
+
+def test_dicts_to_list_of_dicts():
+    xml_dict = {'a': {'b': {'c': {'d': 'aStr'}}}}
+    dicts_to_list_of_dicts({('x', 'y', 'z'), ('a', 'b', 'c')}, xml_dict)
+    assert xml_dict == {'a': {'b': {'c': [{'d': 'aStr'}]}}}
+
+
+def test_list_dict_consistency():
+    xml_dict = {'a': [{'b': {'d': 'str1'}}, {'b': {'d': 'str2'}}]}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'a': [{'b': {'d': 'str1'}}, {'b': {'d': 'str2'}}]}
+
+    xml_dict = {'a': [{'b': {'d': 'str1'}}, {'b': [{'d': 'str2'}]}]}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}
+
+    xml_dict = {'a': [{'b': [{'d': 'str1'}]}, {'b': {'d': 'str2'}}]}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}
+
+    # Wrapped in a dict
+
+    xml_dict = {'c': {'a': [{'b': {'d': 'str1'}}, {'b': {'d': 'str2'}}]}}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'c': {'a': [{'b': {'d': 'str1'}}, {'b': {'d': 'str2'}}]}}
+
+    xml_dict = {'c': {'a': [{'b': {'d': 'str1'}}, {'b': [{'d': 'str2'}]}]}}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'c': {'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}}
+
+    xml_dict = {'c': {'a': [{'b': [{'d': 'str1'}]}, {'b': {'d': 'str2'}}]}}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'c': {'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}}
+
+    # Wrapped in a list of dicts
+
+    xml_dict = {'c': [{'a': [{'b': {'d': 'str1'}}, {'b': {'d': 'str2'}}]}]}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'c': [{'a': [{'b': {'d': 'str1'}}, {'b': {'d': 'str2'}}]}]}
+
+    xml_dict = {'c': [{'a': [{'b': {'d': 'str1'}}, {'b': [{'d': 'str2'}]}]}]}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'c': [{'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}]}
+
+    xml_dict = {'c': [{'a': [{'b': [{'d': 'str1'}]}, {'b': {'d': 'str2'}}]}]}
+    list_dict_consistency(xml_dict)
+    assert xml_dict == {'c': [{'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}]}
