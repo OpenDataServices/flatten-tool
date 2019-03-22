@@ -1,0 +1,23 @@
+<iati-activities>
+  <iati-activity>
+    <iati-identifier>AA-AAA-123456789-ABC123</iati-identifier>
+    <transaction>
+      <transaction-date iso-date="2012-01-01"/>
+      <value value-date="2012-01-01">10</value>
+    </transaction>
+    <transaction>
+      <transaction-date iso-date="2012-02-02"/>
+      <value value-date="2012-02-02">20</value>
+    </transaction>
+  </iati-activity>
+  <iati-activity>
+    <iati-identifier>AA-AAA-123456789-ABC124</iati-identifier>
+  </iati-activity>
+  <iati-activity>
+    <iati-identifier>AA-AAA-123456789-ABC125</iati-identifier>
+    <transaction>
+      <transaction-date iso-date="2012-03-03"/>
+      <value value-date="2012-03-03">30</value>
+    </transaction>
+  </iati-activity>
+</iati-activities>

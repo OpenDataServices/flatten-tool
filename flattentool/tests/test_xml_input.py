@@ -46,6 +46,30 @@ def test_xml_basic_example():
     ]
 
 
+def test_varyin_transaction_count():
+    parser = JSONParser(
+        json_filename='flattentool/tests/fixtures/varying_transaction_count.xml',
+        root_list_path='iati-activity',
+        schema_parser=None,
+        root_id='',
+        xml=True,
+        id_name='iati-identifier')
+    parser.parse()
+    assert list(parser.main_sheet) == ['iati-identifier']
+    assert parser.main_sheet.lines == [
+        {'iati-identifier': 'AA-AAA-123456789-ABC123'},
+        {'iati-identifier': 'AA-AAA-123456789-ABC124'},
+        {'iati-identifier': 'AA-AAA-123456789-ABC125'},
+    ]
+    assert set(parser.sub_sheets.keys()) == set(['transaction'])
+    assert list(parser.sub_sheets['transaction']) == ['iati-identifier', 'transaction/0/transaction-date/@iso-date', 'transaction/0/value/@value-date', 'transaction/0/value']
+    assert parser.sub_sheets['transaction'].lines == [
+       {'iati-identifier': 'AA-AAA-123456789-ABC123', 'transaction/0/value/@value-date': '2012-01-01', 'transaction/0/transaction-date/@iso-date': '2012-01-01', 'transaction/0/value': '10'},
+       {'iati-identifier': 'AA-AAA-123456789-ABC123', 'transaction/0/value/@value-date': '2012-02-02', 'transaction/0/transaction-date/@iso-date': '2012-02-02', 'transaction/0/value': '20'},
+       {'iati-identifier': 'AA-AAA-123456789-ABC125', 'transaction/0/value/@value-date': '2012-03-03', 'transaction/0/transaction-date/@iso-date': '2012-03-03', 'transaction/0/value': '30'},
+    ]
+
+
 def test_lists_of_dicts_paths():
     assert list(lists_of_dicts_paths({})) == []
     assert list(lists_of_dicts_paths({'a': [{}]})) == [('a',)]
