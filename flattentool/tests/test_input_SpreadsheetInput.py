@@ -143,7 +143,7 @@ class TestInputFailure(object):
                 csvinput.read_sheets()
 
     def test_xlsx_no_file(self, tmpdir):
-        xlsxinput = XLSXInput(input_name=tmpdir.strpath.join('test.xlsx'))
+        xlsxinput = XLSXInput(input_name=tmpdir.join('test.xlsx').strpath)
         if sys.version > '3':
             with pytest.raises(FileNotFoundError):
                 xlsxinput.read_sheets()
