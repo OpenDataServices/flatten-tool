@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2019-03-25
+
 ### Added
 
 - A -v verbose option to the cli to generate more verbose output.

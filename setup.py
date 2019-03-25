@@ -8,9 +8,9 @@ if sys.version < '3':
 
 setup(
     name='flattentool',
-    version='0.5.0',
+    version='0.6.0',
     author='Open Data Services',
-    author_email='data@opendataservices.coop',
+    author_email='code@opendataservices.coop',
     packages=['flattentool'],
     scripts=['flatten-tool'],
     url='https://github.com/OpenDataServices/flatten-tool',
