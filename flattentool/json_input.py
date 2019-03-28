@@ -127,6 +127,7 @@ class JSONParser(object):
                     xml_file,
                     force_list=(root_list_path,),
                     force_cdata=True,
+                    strip_whitespace=False,
                     )
                 # AFAICT, this should be true for *all* XML files
                 assert len(top_dict) == 1
