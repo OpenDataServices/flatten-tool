@@ -127,7 +127,6 @@ class JSONParser(object):
                     xml_file,
                     force_list=(root_list_path,),
                     force_cdata=True,
-                    strip_whitespace=False,
                     )
                 # AFAICT, this should be true for *all* XML files
                 assert len(top_dict) == 1
@@ -259,9 +258,9 @@ class JSONParser(object):
                     sub_sheet_name = make_sub_sheet_name(parent_name, key, truncation_length=self.truncation_length)
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
-
-
                     for json_dict in value:
+                        if json_dict is None:
+                            continue
                         self.parse_json_dict(
                             json_dict,
                             sheet=self.sub_sheets[sub_sheet_name],
