@@ -1,0 +1,469 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--This is example XML for the IATI activity standard.  No reference to actual data, real organisations or development cooperation models is intended.-->
+
+<!--iati-activities starts-->
+<iati-activities generated-datetime="2014-09-10T07:15:37Z" version="2.03" linked-data-default="http://data.example.org/">
+
+ <!--iati-activity starts-->
+ <iati-activity xml:lang="en" default-currency="USD" last-updated-datetime="2014-09-10T07:15:37Z" humanitarian="1" linked-data-uri="http://data.example.org/123456789" hierarchy="1" budget-not-provided="1">
+
+  <!--iati-identifier starts-->
+  <iati-identifier>AA-AAA-123456789-ABC123</iati-identifier>
+  <!--iati-identifier ends-->
+
+  <!--reporting-org starts-->
+  <reporting-org ref="AA-AAA-123456789" type="40" secondary-reporter="0">
+   <narrative>Organisation name</narrative>
+   <narrative xml:lang="fr">Nom de l'organisme</narrative>
+  </reporting-org>
+  <!--reporting-org ends-->
+
+  <!--title starts-->
+  <title>
+   <narrative>Activity title</narrative>
+   <narrative xml:lang="fr">Titre de l'activité</narrative>
+   <narrative xml:lang="es">Título de la actividad</narrative>
+  </title>
+  <!--title ends-->
+
+  <!--description starts-->
+  <description type="1">
+   <narrative>General activity description text.  Long description of the activity with no particular structure.</narrative>
+   <narrative xml:lang="fr">Activité générale du texte de description. Longue description de l'activité sans structure particulière.</narrative>
+  </description>
+  <description type="2">
+   <narrative>Objectives for the activity, for example from a logical framework.</narrative>
+   <narrative xml:lang="fr">Objectifs de l'activité, par exemple à partir d'un cadre logique.</narrative>
+  </description>
+  <description type="3">
+   <narrative>Statement of groups targeted to benefit from the activity.</narrative>
+   <narrative xml:lang="fr">Déclaration de groupes ciblés pour bénéficier de l'activité.</narrative>
+  </description>
+  <!--description ends-->
+
+  <!--participating-org starts-->
+  <participating-org ref="BB-BBB-123456789" role="1" type="40" activity-id="BB-BBB-123456789-1234">
+   <narrative>Name of Agency B</narrative>
+  </participating-org>
+  <participating-org ref="CC-CCC-123456789" role="2" type="10" activity-id="CC-CCC-123456789-1234">
+   <narrative>Name of Agency C</narrative>
+  </participating-org>
+  <participating-org ref="AA-AAA-123456789" role="3" type="21" activity-id="AA-AAA-123456789-1234" crs-channel-code="000000">
+   <narrative>Name of Agency A</narrative>
+   <narrative xml:lang="fr">Nom de l'agence A</narrative>
+  </participating-org>
+  <!--participating-org ends-->
+
+  <!--other-identifier starts-->
+  <other-identifier ref="ABC123-XYZ" type="A1">
+   <owner-org ref="AA-AAA-123456789">
+    <narrative>Organisation name</narrative>
+   </owner-org>
+  </other-identifier>
+  <!--other-identifier ends-->
+
+  <!--activity-status starts-->
+  <activity-status code="2" />
+  <!--activity-status ends-->
+
+  <!--activity-date starts-->
+  <activity-date iso-date="2012-04-15" type="1">
+   <narrative>Planned start date of the activity</narrative>
+   <narrative xml:lang="fr">Date prévue de début de l'activité</narrative>
+  </activity-date>
+  <activity-date iso-date="2012-04-28" type="2" />
+  <activity-date iso-date="2015-12-31" type="3" />
+  <!--activity-date ends-->
+
+  <!--contact-info starts-->
+  <contact-info type="1">
+   <organisation>
+    <narrative>Agency A</narrative>
+   </organisation>
+   <department>
+    <narrative>Department B</narrative>
+   </department>
+   <person-name>
+    <narrative>A. Example</narrative>
+   </person-name>
+   <job-title>
+    <narrative>Transparency Lead</narrative>
+   </job-title>
+   <telephone>0044111222333444</telephone>
+   <email>transparency@example.org</email>
+   <website>http://www.example.org</website>
+   <mailing-address>
+    <narrative>Transparency House, The Street, Town, City, Postcode</narrative>
+   </mailing-address>
+  </contact-info>
+  <!--contact-info ends-->
+
+  <!--activity-scope starts-->
+  <activity-scope code="3" />
+  <!--activity-scope ends-->
+
+  <!--recipient-country starts-->
+  <recipient-country code="AF" percentage="25" />
+  <recipient-country code="AG" percentage="25" />
+  <!--recipient-country ends-->
+
+  <!--recipient-region starts-->
+  <recipient-region code="489" vocabulary="1" percentage="25" />
+  <recipient-region code="A1" vocabulary="99" vocabulary-uri="http://example.com/vocab.html" percentage="25" />
+  <!--recipient-region ends-->
+
+  <!--location-single starts-->
+  <location ref="AF-KAN">
+   <location-reach code="1" />
+   <location-id vocabulary="G1" code="1453782" />
+   <name>
+  <narrative>Location name</narrative>
+   </name>
+   <description>
+  <narrative>Location description</narrative>
+   </description>
+   <activity-description>
+  <narrative>A description that qualifies the activity taking place at the location.</narrative>
+   </activity-description>
+   <administrative vocabulary="G1" level="1" code="1453782" />
+   <point srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+    <pos>31.616944 65.716944</pos>
+   </point>
+   <exactness code="1"/>
+   <location-class code="2"/>
+   <feature-designation code="ADMF"/>
+  </location>
+  <!--location-single ends-->
+
+  <!--location-additional starts-->
+  <location ref="KH-PNH">
+   <location-reach code="1" />
+   <location-id vocabulary="G1" code="1821306" />
+   <name>
+  <narrative>Location #2 name</narrative>
+   </name>
+   <description>
+  <narrative>Location #2 description</narrative>
+   </description>
+   <activity-description>
+  <narrative>A description that qualifies the activity taking place at location #2</narrative>
+   </activity-description>
+   <administrative vocabulary="G1" level="1" code="1453782" />
+   <point srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+    <pos>11.5500 104.9167</pos>
+   </point>
+   <exactness code="1" />
+   <location-class code="2" />
+   <feature-designation code="ADMF" />
+  </location>
+  <!--location-additional ends-->
+
+  <!--sector starts-->
+  <sector vocabulary="2" code="111" percentage="50" />
+  <sector vocabulary="2" code="112" percentage="50" />
+  <sector vocabulary="98" vocabulary-uri="http://example.com/vocab.html" code="A1" percentage="100" />
+  <!--sector ends-->
+
+  <!--tag starts-->
+  <tag vocabulary="1" code="1">
+    <narrative>A description of the tag</narrative>
+  </tag>
+  <tag vocabulary="99" vocabulary-uri="http://example.com/vocab.html" code="T1">
+    <narrative>A description of the tag</narrative>
+  </tag>
+  <!--tag ends-->
+
+  <!--country-budget-items starts-->
+  <country-budget-items vocabulary="4">
+   <budget-item code="1844" percentage="50">
+    <description>
+     <narrative>Description text</narrative>
+    </description>
+   </budget-item>
+   <budget-item code="1900" percentage="50">
+    <description>
+     <narrative>Description text</narrative>
+    </description>
+   </budget-item>
+  </country-budget-items>
+  <!--country-budget-items ends-->
+
+  <!--humanitarian-scope starts-->
+  <humanitarian-scope type="1" vocabulary="1-2" code="EQ-2015-000048-NPL">
+ 	  <narrative>Nepal Earthquake April 2015</narrative>
+    <narrative xml:lang="fr"> Népal Earthquake Avril 2015</narrative>
+  </humanitarian-scope>
+  <humanitarian-scope type="1" vocabulary="99" vocabulary-uri="http://example.com/vocab.html" code="A1">
+   <narrative xml:lang="en">Nepal Earthquake April 2015</narrative>
+   <narrative> </narrative>
+  </humanitarian-scope>
+  <!--humanitarian-scope ends-->
+
+  <!--policy-marker starts-->
+  <policy-marker vocabulary="1" code="2" significance="3" />
+  <policy-marker vocabulary="1" code="9" significance="4" />
+  <policy-marker vocabulary="99" vocabulary-uri="http://example.com/vocab.html" code="A1" significance="3" />
+  <!--policy-marker ends-->
+
+  <!--collaboration-type starts-->
+  <collaboration-type code="1" />
+  <!--collaboration-type ends-->
+
+  <!--default-flow-type starts-->
+  <default-flow-type code="10" />
+  <!--default-flow-type ends-->
+
+  <!--default-finance-type starts-->
+  <default-finance-type code="110" />
+  <!--default-finance-type ends-->
+
+  <!--default-aid-type starts-->
+  <default-aid-type code="A01" vocabulary="1" />
+  <default-aid-type code="1" vocabulary="2" />
+  <!--default-aid-type ends-->
+
+  <!--default-tied-status starts-->
+  <default-tied-status code="3" />
+  <!--default-tied-status ends-->
+
+  <!--budget starts-->
+  <budget type="1" status="1">
+   <period-start iso-date="2014-01-01" />
+   <period-end iso-date="2014-12-31" />
+   <value currency="EUR" value-date="2014-01-01">3000</value>
+  </budget>
+  <!--budget ends-->
+
+  <!--planned-disbursement starts-->
+  <planned-disbursement type="1">
+   <period-start iso-date="2014-01-01" />
+   <period-end iso-date="2014-12-31" />
+   <value currency="EUR" value-date="2014-01-01">3000</value>
+   <provider-org provider-activity-id="BB-BBB-123456789-1234AA" type="10" ref="BB-BBB-123456789">
+    <narrative>Agency B</narrative>
+   </provider-org>
+   <receiver-org receiver-activity-id="AA-AAA-123456789-1234" type="23" ref="AA-AAA-123456789">
+    <narrative>Agency A</narrative>
+   </receiver-org>
+  </planned-disbursement>
+  <!--planned-disbursement ends-->
+
+  <!--planned-disbursement-single-date starts-->
+  <planned-disbursement type="1">
+   <period-start iso-date="2014-01-01" />
+   <period-end iso-date="2014-12-31" />
+   <value currency="EUR" value-date="2014-01-01">3000</value>
+  </planned-disbursement>
+  <!--planned-disbursement ends-->
+
+  <!--capital-spend starts-->
+  <capital-spend percentage="88.8" />
+  <!--capital-spend ends-->
+
+  <!--transaction starts-->
+  <transaction ref="1234" humanitarian="1">
+   <transaction-type code="1" />
+   <transaction-date iso-date="2012-01-01" />
+   <value currency="EUR" value-date="2012-01-01">1000</value>
+   <description>
+    <narrative>Transaction description text</narrative>
+   </description>
+   <provider-org provider-activity-id="BB-BBB-123456789-1234AA" type="10" ref="BB-BBB-123456789">
+    <narrative>Agency B</narrative>
+   </provider-org>
+   <receiver-org receiver-activity-id="AA-AAA-123456789-1234" type="23" ref="AA-AAA-123456789">
+    <narrative>Agency A</narrative>
+   </receiver-org>
+   <disbursement-channel code="1" />
+   <recipient-region code="616" vocabulary="1" />
+   <flow-type code="10" />
+   <finance-type code="110" />
+   <aid-type code="A01" vocabulary="1" />
+   <aid-type code="1" vocabulary="2" />
+   <tied-status code="3" />
+  </transaction>
+  <!--transaction ends-->
+
+  <!--document-link starts-->
+  <document-link format="application/vnd.oasis.opendocument.text" url="http:www.example.org/docs/report_en.odt">
+   <title>
+    <narrative>Project Report 2013</narrative>
+    <narrative xml:lang="fr">Rapport de projet 2013</narrative>
+   </title>
+   <description>
+     <narrative> Description of the content of the project report or guidance on where to access the relevant information in this report </narrative>
+   </description>
+   <category code="A01" />
+   <language code="en" />
+   <document-date iso-date="2014-02-05" />
+  </document-link>
+  <!--document-link ends-->
+
+  <!--related-activity starts-->
+  <related-activity ref="AA-AAA-123456789-6789" type="1" />
+  <!--related-activity ends-->
+
+  <!--legacy-data starts-->
+  <legacy-data name="Project Status" value="7" iati-equivalent="activity-status" />
+  <legacy-data name="cost" value="1000" iati-equivalent="transaction" />
+  <!--legacy-data ends-->
+
+  <!--conditions starts-->
+  <conditions attached="1">
+   <condition type="1">
+    <narrative>Conditions text</narrative>
+    <narrative xml:lang="fr">Conditions texte</narrative>
+   </condition>
+  </conditions>
+  <!--conditions ends-->
+
+  <!--result starts-->
+  <result type="1" aggregation-status="1">
+   <title>
+    <narrative>Result title</narrative>
+   </title>
+   <description>
+    <narrative>Result description text</narrative>
+   </description>
+   <!--result-document-link example starts-->
+   <document-link format="application/vnd.oasis.opendocument.text" url="http:www.example.org/docs/result_en.odt">
+    <title>
+     <narrative>Results Report 2013</narrative>
+    </title>
+    <description>
+      <narrative>Report of results</narrative>
+    </description>
+    <category code="A01" />
+    <language code="en" />
+    <document-date iso-date="2014-02-05" />
+   </document-link>
+<!--result-document-link example ends-->
+<!--result-reference starts-->
+   <reference vocabulary="99" code="B1" vocabulary-uri="http://example.com/indicators.html" />
+<!--result-reference ends-->
+<!--result-indicator starts-->
+   <indicator measure="1" ascending="1" aggregation-status="1">
+     <title>
+      <narrative>Indicator title</narrative>
+     </title>
+     <description>
+      <narrative>Indicator description text</narrative>
+     </description>
+     <document-link format="application/vnd.oasis.opendocument.text" url="http:www.example.org/docs/result_indicator_en.odt">
+      <title>
+       <narrative>Results Indicator Report 2013</narrative>
+      </title>
+      <description>
+        <narrative>Report of results indicator</narrative>
+      </description>
+      <category code="A01" />
+      <language code="en" />
+      <document-date iso-date="2014-02-05" />
+     </document-link>
+     <reference vocabulary="1" code="3429" />
+     <reference vocabulary="7" code="861" />
+     <reference vocabulary="99" code="B1" indicator-uri="http://example.com/indicators.html" />
+<!--result-baseline starts-->
+     <baseline year="2012" iso-date="2012-01-01" value="10">
+      <location ref="AF-KAN" />
+      <location ref="KH-PNH" />
+      <dimension name="sex" value="female" />
+      <dimension name="age" value="adult" />
+      <document-link format="application/vnd.oasis.opendocument.text" url="http:www.example.org/docs/result_baseline_en.odt">
+       <title>
+        <narrative>Results Baseline Report 2013</narrative>
+       </title>
+       <description>
+         <narrative>Report of results baseline</narrative>
+       </description>
+       <category code="A01" />
+       <language code="en" />
+       <document-date iso-date="2014-02-05" />
+      </document-link>
+      <comment>
+       <narrative>Baseline comment text</narrative>
+      </comment>
+     </baseline>
+     <!--result-baseline ends-->
+     <!--result-period starts-->
+     <period>
+      <period-start iso-date="2013-01-01" />
+      <period-end iso-date="2013-03-31" />
+      <target value="10">
+       <location ref="AF-KAN" />
+       <location ref="KH-PNH" />
+       <dimension name="sex" value="female" />
+       <dimension name="age" value="adult" />
+       <comment>
+        <narrative>Target comment text</narrative>
+       </comment>
+       <document-link format="application/vnd.oasis.opendocument.text" url="http:www.example.org/docs/result_period_target_en.odt">
+        <title>
+         <narrative>Results Period Target Report 2013</narrative>
+        </title>
+        <description>
+          <narrative>Report of results period target</narrative>
+        </description>
+        <category code="A01" />
+        <language code="en" />
+        <document-date iso-date="2014-02-05" />
+       </document-link>
+      </target>
+      <actual value="11">
+       <location ref="AF-KAN" />
+       <location ref="KH-PNH" />
+       <dimension name="sex" value="female" />
+       <dimension name="age" value="adult" />
+       <comment>
+         <narrative>Actual comment text</narrative>
+       </comment>
+       <document-link format="application/vnd.oasis.opendocument.text" url="http:www.example.org/docs/result_period_actual_en.odt">
+        <title>
+         <narrative>Results Period Actual Report 2013</narrative>
+        </title>
+        <description>
+          <narrative>Report of results period actual</narrative>
+        </description>
+        <category code="A01" />
+        <language code="en" />
+        <document-date iso-date="2014-02-05" />
+       </document-link>
+      </actual>
+     </period>
+     <!--result-period ends-->
+   </indicator>
+   <!--result-indicator ends-->
+  </result>
+  <!--result ends-->
+
+  <!--crs-add starts-->
+  <crs-add>
+   <other-flags code="1" significance="1" />
+   <loan-terms rate-1="4" rate-2="3">
+    <repayment-type code="1" />
+    <repayment-plan code="4" />
+    <commitment-date iso-date="2013-09-01"/>
+    <repayment-first-date iso-date="2014-01-01" />
+    <repayment-final-date iso-date="2020-12-31" />
+   </loan-terms>
+   <loan-status year="2014" currency="GBP" value-date="2013-05-24">
+     <interest-received>200000</interest-received>
+     <principal-outstanding>1500000</principal-outstanding>
+     <principal-arrears>0</principal-arrears>
+     <interest-arrears>0</interest-arrears>
+   </loan-status>
+   <channel-code>21039</channel-code>
+  </crs-add>
+  <!--crs-add ends-->
+
+  <!--fss starts-->
+  <fss extraction-date="2014-05-06" priority="1" phaseout-year="2016">
+   <forecast year="2014" value-date="2013-07-03" currency="GBP">10000</forecast>
+  </fss>
+  <!--fss ends-->
+
+ </iati-activity>
+  <!--iati-activity ends-->
+
+</iati-activities>
+<!--iati-activities ends-->
