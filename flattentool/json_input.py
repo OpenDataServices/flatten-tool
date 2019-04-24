@@ -5,6 +5,7 @@ JSON schema, for that see schema.py).
 
 """
 
+import csv
 import json
 import six
 import copy
@@ -94,7 +95,7 @@ class JSONParser(object):
 
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
                  root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None, filter_value=None,
-                 remove_empty_schema_columns=False, truncation_length=3):
+                 preserve_fields=None, remove_empty_schema_columns=False, truncation_length=3):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -121,6 +122,18 @@ class JSONParser(object):
         else:
             self.rollup = False
 
+        if preserve_fields:
+            # Extract fields to be preserved from input CSV file (uses every row)
+            preserve_fields_list = []
+            with open(preserve_fields, newline='') as csvfile:
+                csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+            for row in csvreader:
+                preserve_fields_list = preserve_fields_list + row
+            self.preserve_fields = preserve_fields_list
+        else:
+            self.preserve_fields = None
+
+
         if self.xml:
             with codecs.open(json_filename, 'rb') as xml_file:
                 top_dict = xmltodict.parse(
@@ -139,7 +152,7 @@ class JSONParser(object):
 
         if json_filename is not None and root_json_dict is not None:
             raise ValueError('Only one of json_file or root_json_dict should be supplied')
- 
+
         if json_filename:
             with codecs.open(json_filename, encoding='utf-8') as json_file:
                 try:
@@ -168,7 +181,7 @@ class JSONParser(object):
             for sheet_name, sheet in list(self.sub_sheets.items()):
                 if not sheet.lines:
                     del self.sub_sheets[sheet_name]
-    
+
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
         """
         Parse a json dictionary.
@@ -214,6 +227,8 @@ class JSONParser(object):
 
 
         for key, value in json_dict.items():
+            if self.preserve_fields and key not in self.preserve_fields:
+                continue
             if type(value) in BASIC_TYPES:
                 if self.xml and key == '#text':
                     # Handle the text output from xmltodict
@@ -271,6 +286,6 @@ class JSONParser(object):
                             top_level_of_sub_sheet=True)
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
-        
+
         if top:
             sheet.lines.append(flattened_dict)
