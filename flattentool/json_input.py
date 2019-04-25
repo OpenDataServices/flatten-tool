@@ -127,8 +127,8 @@ class JSONParser(object):
             preserve_fields_list = []
             with open(preserve_fields, newline='') as csvfile:
                 csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-            for row in csvreader:
-                preserve_fields_list = preserve_fields_list + row
+                for row in csvreader:
+                    preserve_fields_list = preserve_fields_list + row
             self.preserve_fields = preserve_fields_list
         else:
             self.preserve_fields = None
