@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2019-04-08
+
+## Fixed
+
+- Ignore NoneType in json instead of giving a TypeError.
+
 ## [0.6.0] - 2019-03-25
 
 ### Added

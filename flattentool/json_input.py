@@ -259,8 +259,9 @@ class JSONParser(object):
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
 
-
                     for json_dict in value:
+                        if json_dict is None:
+                            continue
                         self.parse_json_dict(
                             json_dict,
                             sheet=self.sub_sheets[sub_sheet_name],

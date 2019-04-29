@@ -126,3 +126,18 @@ def test_list_dict_consistency():
     xml_dict = {'c': [{'a': [{'b': [{'d': 'str1'}]}, {'b': {'d': 'str2'}}]}]}
     list_dict_consistency(xml_dict)
     assert xml_dict == {'c': [{'a': [{'b': [{'d': 'str1'}]}, {'b': [{'d': 'str2'}]}]}]}
+
+
+def test_xml_whitespace():
+    parser = JSONParser(
+        json_filename='flattentool/tests/fixtures/narrative_whitespace.xml',
+        root_list_path='iati-activity',
+        schema_parser=None,
+        root_id='',
+        xml=True,
+        id_name='iati-identifier')
+
+    try:
+        parser.parse()
+    except TypeError as e:
+        raise e
