@@ -1,6 +1,17 @@
 Getting Started
 ===============
 
+Prerequisites
+-------------
+
+You will need Python 3.5 or later, including the venv module.
+
+Generally the venv module should come with your default Python install, but not on Ubuntu.  On Ubuntu run:
+
+.. code-block:: bash
+
+   sudo apt-get install python3 python3-venv
+
 Installation
 ------------
 
@@ -8,7 +19,7 @@ Installation
 
     git clone https://github.com/OpenDataServices/flatten-tool.git
     cd flatten-tool
-    virtualenv -p $(which python3) .ve
+    python3 -m venv .ve
     source .ve/bin/activate
     pip install -r requirements_dev.txt
 
