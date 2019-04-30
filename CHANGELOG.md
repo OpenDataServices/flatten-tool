@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Add --preserve-fields option to flatten.
+
 ## [0.7.0] - 2019-04-08
 
-## Fixed
+### Fixed
 
 - Ignore NoneType in json instead of giving a TypeError.
 
@@ -31,7 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- While trying to decode JSON, if there is a UTF8 error raise the new exception class BadlyFormedJSONErrorUTF8. 
+- While trying to decode JSON, if there is a UTF8 error raise the new exception class BadlyFormedJSONErrorUTF8.
   (This extends the old BadlyFormedJSONError exception, so existing code that checks sensibly should be fine.)
 
 ## [0.4.0] - 2018-11-07
