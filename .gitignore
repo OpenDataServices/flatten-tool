@@ -32,6 +32,8 @@ examples/flatten/root-is-list/actual
 examples/flatten/root-is-list/actual.*
 examples/flatten/truncation-length/actual
 examples/flatten/truncation-length/actual.*
+examples/flatten/preserve-fields/actual
+examples/flatten/preserve-fields/actual.*
 examples/receipt/source-map/actual
 examples/receipt/source-map/actual.*
 examples/bods/unflatten/actual
