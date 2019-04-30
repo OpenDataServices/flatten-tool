@@ -145,6 +145,27 @@ This shows without and with the flag:
 
 (Using this without the `schema` option does nothing.)
 
+Preserve Fields
+---------------
+
+By default, all fields in the input JSON are turned into columns in the CSV output. If you wish to keep only a subset of fields, you can pass the fields you want as a comma-separated list in a file using the ``preserve-fields`` option.
+
+.. literalinclude:: ../examples/flatten/preserve-fields/input.json
+   :language: json
+
+.. literalinclude:: ../examples/flatten/preserve-fields/fields_to_preserve.csv
+   :language: json
+
+.. literalinclude:: ../examples/flatten/preserve-fields/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: main.csv
+   :file: ../examples/flatten/preserve-fields/expected/main.csv
+   :header-rows: 1
+
+If the input list is broken over multiple rows, they are all used. The order of the fields in the input is not significant.
+
+You must pass each key separately, even when they are nested. For example, if you want to preserve ``dishes/title`` you need to pass ``dishes,title``. If you pass only ``title`` you will get the top level ``titles`` and if you pass only ``dishes`` you will get nothing. If you want to preserve ``dishes/title`` and ``pints/title`` you should pass ``dishes,pints,title``.
 
 All flatten options
 -------------------
