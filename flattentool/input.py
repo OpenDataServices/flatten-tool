@@ -227,7 +227,7 @@ class SpreadsheetInput(object):
 
     def configure_sheets(self):
         for sub_sheet_name in self.sub_sheet_names:
-            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name)) 
+            self.sheet_configuration[sub_sheet_name] = parse_sheet_configuration(self.get_sheet_configuration(sub_sheet_name))
 
     def get_sheet_configuration(self, sheet_name):
         return []
@@ -510,14 +510,14 @@ class CSVInput(SpreadsheetInput):
             fieldnames = dictreader.fieldnames
         else:
             # unicodecsv dictreader always reads the headingline first
-            # so in the case of there being any rows to skip look at 
+            # so in the case of there being any rows to skip look at
             # previous row and use that for fieldnames.
             if (configuration_line + skip_rows):
                 fieldnames = previous_row
                 dictreader.fieldnames = fieldnames
                 dictreader.unicode_fieldnames = fieldnames
             else:
-                fieldnames = dictreader.unicode_fieldnames 
+                fieldnames = dictreader.unicode_fieldnames
         for i in range(0, header_rows - 1):
             next(dictreader.reader)
         for line in dictreader:

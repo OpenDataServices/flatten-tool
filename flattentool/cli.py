@@ -143,6 +143,9 @@ def create_parser():
         "--filter-value",
         help="Data Filter - only data with this will be processed. Use with --filter-field")
     parser_flatten.add_argument(
+        "--preserve-fields",
+        help="Only these fields will be processed. Pass a file with JSON paths to be preserved one per line.")
+    parser_flatten.add_argument(
         "--disable-local-refs",
         action='store_true',
         help="Disable local refs when parsing JSON Schema.")

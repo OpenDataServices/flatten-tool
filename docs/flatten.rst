@@ -145,6 +145,25 @@ This shows without and with the flag:
 
 (Using this without the `schema` option does nothing.)
 
+Preserve Fields
+---------------
+
+By default, all fields in the input JSON are turned into columns in the CSV output. If you wish to keep only a subset of fields, you can pass the fields you want as a file using the ``preserve-fields`` option.
+
+.. literalinclude:: ../examples/flatten/preserve-fields/input.json
+   :language: json
+
+.. literalinclude:: ../examples/flatten/preserve-fields/fields_to_preserve.csv
+   :language: json
+
+.. literalinclude:: ../examples/flatten/preserve-fields/cmd.txt
+   :language: bash
+
+.. csv-table:: sheet: main.csv
+   :file: ../examples/flatten/preserve-fields/expected/main.csv
+   :header-rows: 1
+
+The input file should contain the full JSON paths of the fields you want to preserve, one per line. If any of the fields passed contain objects, all child fields will be preserved. Eg. if you pass `title`, the top level `title` fields will be preserved, but `dishes/title` will not; if you pass `dishes`, the `dishes/title` field will automatically be preserved. The order of the fields in the input is not significant.
 
 All flatten options
 -------------------

@@ -93,8 +93,9 @@ class JSONParser(object):
     # Similarily with methods like parse_json_dict
 
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
-                 root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None, filter_value=None,
-                 remove_empty_schema_columns=False, truncation_length=3):
+                 root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None,
+                 filter_value=None, preserve_fields=None, remove_empty_schema_columns=False,
+                 truncation_length=3):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -106,6 +107,7 @@ class JSONParser(object):
         self.filter_field = filter_field
         self.filter_value = filter_value
         self.remove_empty_schema_columns = remove_empty_schema_columns
+        self.seen_paths = set()
         if schema_parser:
             self.main_sheet = copy.deepcopy(schema_parser.main_sheet)
             self.sub_sheets = copy.deepcopy(schema_parser.sub_sheets)
@@ -139,7 +141,7 @@ class JSONParser(object):
 
         if json_filename is not None and root_json_dict is not None:
             raise ValueError('Only one of json_file or root_json_dict should be supplied')
- 
+
         if json_filename:
             with codecs.open(json_filename, encoding='utf-8') as json_file:
                 try:
@@ -150,6 +152,25 @@ class JSONParser(object):
                     raise BadlyFormedJSONError(*err.args)
         else:
             self.root_json_dict = root_json_dict
+
+        if preserve_fields:
+            # Extract fields to be preserved from input file (one path per line)
+            preserve_fields_all = []
+            preserve_fields_input = []
+            with open(preserve_fields) as preserve_fields_file:
+                for line in preserve_fields_file:
+                    line = line.strip()
+                    path_fields = line.rsplit('/', 1)
+                    preserve_fields_all = preserve_fields_all + path_fields + [line.rstrip('/')]
+                    preserve_fields_input = preserve_fields_input + [line.rstrip('/')]
+
+            # TODO warning if input paths aren't in schema
+            # TODO dishes/allergens/label isn't coming through
+            self.preserve_fields = set(preserve_fields_all)
+            self.preserve_fields_input = set(preserve_fields_input)
+        else:
+            self.preserve_fields = None
+            self.preserve_fields_input = None
 
     def parse(self):
         if self.root_list_path is None:
@@ -168,7 +189,15 @@ class JSONParser(object):
             for sheet_name, sheet in list(self.sub_sheets.items()):
                 if not sheet.lines:
                     del self.sub_sheets[sheet_name]
-    
+
+        if self.preserve_fields_input:
+            nonexistent_input_paths = []
+            for field in self.preserve_fields_input:
+                if field not in self.seen_paths:
+                    nonexistent_input_paths.append(field)
+            if len(nonexistent_input_paths) > 0:
+                warn('You wanted to preserve the following fields which were not found in the data: {}'.format(nonexistent_input_paths))
+
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
         """
         Parse a json dictionary.
@@ -214,6 +243,21 @@ class JSONParser(object):
 
 
         for key, value in json_dict.items():
+
+            # Keep a unique list of all the JSON paths in the data that have been seen.
+            parent_path = parent_name.replace('/0', '')
+            full_path = parent_path + key
+            self.seen_paths.add(full_path)
+
+            if self.preserve_fields:
+
+                siblings = False
+                for field in self.preserve_fields:
+                    if parent_path in field:
+                        siblings = True
+                if siblings and full_path not in self.preserve_fields:
+                    continue
+
             if type(value) in BASIC_TYPES:
                 if self.xml and key == '#text':
                     # Handle the text output from xmltodict
@@ -271,6 +315,6 @@ class JSONParser(object):
                             top_level_of_sub_sheet=True)
             else:
                 raise ValueError('Unsupported type {}'.format(type(value)))
-        
+
         if top:
             sheet.lines.append(flattened_dict)
