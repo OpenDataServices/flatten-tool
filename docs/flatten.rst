@@ -163,7 +163,7 @@ By default, all fields in the input JSON are turned into columns in the CSV outp
    :file: ../examples/flatten/preserve-fields/expected/main.csv
    :header-rows: 1
 
-The input file should contain the full JSON paths of the fields you want to preserve, one per line. If any of the fields passed contain objects, all child fields will be preserved. Eg. if you pass `title`, the top level `title` fields will be preserved, but `dishes/title` will not; if you pass `dishes`, the `dishes/title` field will automatically be preserved. The order of the fields in the input is not significant.
+The input file should contain the full JSON paths of the fields you want to preserve, one per line. If any of the fields passed contain objects, all child fields will be preserved. Eg. if you pass `title`, the top level `title` fields will be preserved, but `dishes/title` will not; if you pass `dishes`, the `dishes/title` and any other children of `dishes` will automatically be preserved. If you pass `dishes` *and* `dishes/title`, *only* `dishes/title` will be preserved, other children of `dishes` will be excluded. The order of the fields in the input is not significant.
 
 All flatten options
 -------------------
