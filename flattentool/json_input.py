@@ -164,13 +164,19 @@ class JSONParser(object):
                     preserve_fields_all = preserve_fields_all + path_fields + [line.rstrip('/')]
                     preserve_fields_input = preserve_fields_input + [line.rstrip('/')]
 
-            # TODO warning if input paths aren't in schema
-            # TODO dishes/allergens/label isn't coming through
             self.preserve_fields = set(preserve_fields_all)
             self.preserve_fields_input = set(preserve_fields_input)
+
+            if self.schema_parser:
+                input_not_in_schema = set()
+                for field in self.preserve_fields_input:
+                    if field not in self.schema_parser.flattened.keys():
+                        input_not_in_schema.add(field)
+                warn('You wanted to preserve the following fields which are not present in the supplied schema: {}'.format(list(input_not_in_schema)))
         else:
             self.preserve_fields = None
             self.preserve_fields_input = None
+
 
     def parse(self):
         if self.root_list_path is None:
@@ -196,7 +202,8 @@ class JSONParser(object):
                 if field not in self.seen_paths:
                     nonexistent_input_paths.append(field)
             if len(nonexistent_input_paths) > 0:
-                warn('You wanted to preserve the following fields which were not found in the data: {}'.format(nonexistent_input_paths))
+                warn('You wanted to preserve the following fields which are not present in the input data: {}'.format(nonexistent_input_paths))
+
 
     def parse_json_dict(self, json_dict, sheet, json_key=None, parent_name='', flattened_dict=None, parent_id_fields=None, top_level_of_sub_sheet=False):
         """
