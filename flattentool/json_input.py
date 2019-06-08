@@ -95,7 +95,7 @@ class JSONParser(object):
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
                  root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None,
                  filter_value=None, preserve_fields=None, remove_empty_schema_columns=False,
-                 truncation_length=3):
+                 rollup=None, truncation_length=3):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -117,9 +117,14 @@ class JSONParser(object):
                 self.main_sheet.columns = []
                 for sheet_name, sheet in list(self.sub_sheets.items()):
                     sheet.columns = []
-            # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified
+            # If rollup is present in the schema this takes precedent over direct input.
             self.rollup = schema_parser.rollup
             self.schema_parser = schema_parser
+        elif rollup:
+            # Rollup from direct or file input
+            # Is it a file? Parse file
+            # If not parse input
+            self.rollup = rollup
         else:
             self.rollup = False
 
