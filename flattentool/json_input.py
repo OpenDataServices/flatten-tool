@@ -167,12 +167,15 @@ class JSONParser(object):
             self.preserve_fields = set(preserve_fields_all)
             self.preserve_fields_input = set(preserve_fields_input)
 
-            if self.schema_parser:
+            try:
                 input_not_in_schema = set()
                 for field in self.preserve_fields_input:
                     if field not in self.schema_parser.flattened.keys():
                         input_not_in_schema.add(field)
                 warn('You wanted to preserve the following fields which are not present in the supplied schema: {}'.format(list(input_not_in_schema)))
+            except AttributeError:
+                # no schema
+                pass
         else:
             self.preserve_fields = None
             self.preserve_fields_input = None
