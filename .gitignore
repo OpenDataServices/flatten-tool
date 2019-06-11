@@ -22,6 +22,8 @@ examples/create-template/truncation-length/actual
 examples/create-template/truncation-length/actual.*
 examples/flatten/filter/actual
 examples/flatten/filter/actual.*
+examples/flatten/preserve-fields/actual
+examples/flatten/preserve-fields/actual.*
 examples/flatten/simple/actual
 examples/flatten/simple/actual.*
 examples/flatten/sheet-prefix/actual

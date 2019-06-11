@@ -1,0 +1,1 @@
+$ flatten-tool flatten --preserve-fields examples/flatten/preserve-fields/fields_to_preserve.csv examples/flatten/preserve-fields/input.json -o examples/flatten/preserve-fields/actual
