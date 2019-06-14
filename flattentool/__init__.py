@@ -72,10 +72,12 @@ def flatten(input_name, schema=None, output_name=None, output_format='all', main
         schema_parser.parse()
     else:
         schema_parser = None
+
     parser = JSONParser(
         json_filename=input_name,
         root_list_path=None if root_is_list else root_list_path,
         schema_parser=schema_parser,
+        rollup=rollup,
         root_id=root_id,
         use_titles=use_titles,
         xml=xml,
