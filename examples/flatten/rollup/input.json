@@ -1,0 +1,54 @@
+{
+  "cafe": [
+    {
+      "id": "1",
+      "type": "cafe",
+      "title": "Cafe Open",
+      "owners": [
+        {
+          "firstname": "Clark",
+          "lastname": "Kent",
+          "email": "contact@cafeopen.example"
+        }
+      ],
+      "dishes": [
+        {
+          "id": "bfast",
+          "title": "All Day Breakfast",
+          "allergens": {
+            "freefrom": ["dairy", "eggs"],
+            "contains": ["gluten", "soy"],
+            "label": ["vegan", "vegetarian"]
+          }
+        },
+        {
+          "id": "soup",
+          "title": "Jack's Soup",
+          "allergens": {
+            "freefrom": ["onion", "garlic"],
+            "contains": ["dairy"],
+            "label": ["vegetarian"]
+          }
+        }
+      ],
+      "coffee": "passable"
+    },
+    {
+      "id": "2",
+      "type": "pub",
+      "title": "Pints R Us",
+      "owners": [
+        {
+          "firstname": "Jim",
+          "lastname": "Kirk",
+          "email": "pintsrus@protonmail.com"
+        }
+      ],
+      "pints": [
+        { "title": "Beer", "price": "2gbp" },
+        { "title": "Larger" }
+      ],
+      "coke": "pepsi"
+    }
+  ]
+}

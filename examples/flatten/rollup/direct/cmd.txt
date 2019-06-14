@@ -1,0 +1,1 @@
+$ flatten-tool flatten --root-list-path=cafe --use-titles --main-sheet-name=cafe --rollup=owners examples/flatten/rollup/input.json -o examples/flatten/rollup/direct/actual

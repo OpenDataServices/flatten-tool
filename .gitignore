@@ -34,6 +34,14 @@ examples/flatten/root-is-list/actual
 examples/flatten/root-is-list/actual.*
 examples/flatten/truncation-length/actual
 examples/flatten/truncation-length/actual.*
+examples/flatten/rollup/actual
+examples/flatten/rollup/actual.*
+examples/flatten/rollup/schema/actual
+examples/flatten/rollup/schema/actual.*
+examples/flatten/rollup/direct/actual
+examples/flatten/rollup/direct/actual.*
+examples/flatten/rollup/file/actual
+examples/flatten/rollup/file/actual.*
 examples/receipt/source-map/actual
 examples/receipt/source-map/actual.*
 examples/bods/unflatten/actual
