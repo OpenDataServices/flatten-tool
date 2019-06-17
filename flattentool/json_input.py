@@ -123,23 +123,27 @@ class JSONParser(object):
         else:
             self.schema_parser = None
 
+        self.rollup = False
         if rollup:
             if schema_parser:
                 # If rollup is present in the schema this takes precedence over direct input.
                 self.rollup = schema_parser.rollup
-            elif len(rollup) == 1 and os.path.isfile(rollup[0]):
-                # Parse file, one json path per line.
-                rollup_from_file = set()
-                with open(rollup[0]) as rollup_file:
-                    for line in rollup_file:
-                        line = line.strip()
-                        rollup_from_file.add(line)
-                self.rollup = rollup_from_file
             elif isinstance(rollup, (list,)):
-                # Rollup args passed directly at the commandline
-                self.rollup = set(rollup)
-        else:
-            self.rollup = False
+                if len(rollup) == 1 and os.path.isfile(rollup[0]):
+                    # Parse file, one json path per line.
+                    rollup_from_file = set()
+                    with open(rollup[0]) as rollup_file:
+                        for line in rollup_file:
+                            line = line.strip()
+                            rollup_from_file.add(line)
+                    self.rollup = rollup_from_file
+                    # Rollup args passed directly at the commandline
+                elif len(rollup) == 1 and rollup[0] is True:
+                    warn('No fields to rollup found (pass json path directly, as a list in a file, or via a schema)')
+                else:
+                    self.rollup = set(rollup)
+            else:
+                warn('Invalid value passed for rollup (pass json path directly, as a list in a file, or via a schema)')
 
         if self.xml:
             with codecs.open(json_filename, 'rb') as xml_file:
