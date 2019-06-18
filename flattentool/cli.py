@@ -64,7 +64,7 @@ def create_parser():
     parser_create_template.add_argument(
         "--rollup",
         action='store_true',
-        help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema, passed individually as arguements, or passed as a line-by-line")
+        help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
     parser_create_template.add_argument(
         "-r", "--root-id",
         help="Root ID of the data format, e.g. ocid for OCDS")
