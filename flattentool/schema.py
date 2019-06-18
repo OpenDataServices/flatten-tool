@@ -242,10 +242,8 @@ class SchemaParser(object):
                                 title_lookup=title_lookup.get(title),
                                 parent_title=parent_title+title+':' if parent_title is not None and title else None)
                         
-
                         for field, child_title in fields:
                             full_path = parent_path+property_name+'/0/'+field
-                            full_path_no_index = full_path.replace('/0', '')
                             if self.use_titles:
                                 if not child_title or parent_title is None:
                                     warn('Field {}{}/0/{} is missing a title, skipping.'.format(parent_path, property_name, field))
@@ -260,7 +258,7 @@ class SchemaParser(object):
                                 sub_sheet.add_field(full_path)
                             if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
                                 rolledUp.add(field)
-                                rolledUp_full_paths.add(full_path_no_index)
+                                rolledUp_full_paths.add(full_path)
                                 yield property_name+'/0/'+field, (title+':'+child_title if title and child_title else None)
 
                         # Check that all items in rollUp are in the schema
@@ -289,10 +287,6 @@ class SchemaParser(object):
                              repr(property_type_set),
                              property_name,
                              parent_path))
-            
-            # Update the rollup list with what was parsed from the schema
-            # This overrides any direct input or file passed to --rollup
-            # TODO: this doesn't use the full path with index
-            self.rollup = rolledUp_full_paths
+
         else:
             warn('Skipping field "{}", because it has no properties.'.format(parent_path))

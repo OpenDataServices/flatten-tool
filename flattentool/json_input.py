@@ -328,7 +328,7 @@ class JSONParser(object):
                                         elif not self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                                 flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     elif parent_name+key in self.rollup:
-                                        flattened_dict[sheet_key(sheet, parent_name+key+'/'+k)] = v
+                                        flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                         
                         elif key in self.rollup and len(value) > 1:
                             for k in set(sum((list(x.keys()) for x in value), [])):
@@ -336,7 +336,7 @@ class JSONParser(object):
                                 if self.schema_parser and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
                                 else:
-                                    flattened_dict[sheet_key(sheet, parent_name+key+'/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+                                    flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
                     sub_sheet_name = make_sub_sheet_name(parent_name, key, truncation_length=self.truncation_length)
                     if sub_sheet_name not in self.sub_sheets:
