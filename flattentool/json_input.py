@@ -329,13 +329,14 @@ class JSONParser(object):
                                                 flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     elif parent_name+key in self.rollup:
                                         flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
-                                        
-                        elif key in self.rollup and len(value) > 1:
+                        
+                        elif len(value) > 1:
+                            warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
                             for k in set(sum((list(x.keys()) for x in value), [])):
-                                warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
+
                                 if self.schema_parser and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
-                                else:
+                                elif parent_name+key+'/0/'+k in self.rollup:
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
                     sub_sheet_name = make_sub_sheet_name(parent_name, key, truncation_length=self.truncation_length)
