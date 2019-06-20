@@ -57,7 +57,7 @@ actually represent one to one relationships, you can *roll up* certain
 properties.
 
 This means taking the values and rather than having them as a separate sheet,
-have the values listed on the main sheet.
+creating column headings for them on the main sheet.
 
 To enable roll up behaviour you have to:
 
@@ -90,15 +90,8 @@ Here are the resulting sheets:
 
 Notice how ``Table: Number`` now appears in both the ``cafe.csv`` and ``table.csv`` files.
 
-.. caution ::
-
-   If you try to roll up multiple values you'll get a warning like this:
-
-   .. code-block:: bash
-
-       UserWarning: More than one value supplied for "table". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.
-         warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
-
+``rollup`` can also be used to rollup actual data with ``flatten``, with or 
+without a schema: :ref:`flattening`
 
 Empty objects
 -------------
