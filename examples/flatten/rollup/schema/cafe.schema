@@ -82,8 +82,7 @@
                 "$ref": "#/definitions/OwnerObject"
             },
             "type": "array",
-            "title": "Owner",
-            "rollUp": ["firstname", "lastname", "email"]
+            "title": "Owner"
         },
         "dishes": {
             "items": {

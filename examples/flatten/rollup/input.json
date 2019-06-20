@@ -44,10 +44,6 @@
           "email": "pintsrus@protonmail.com"
         }
       ],
-      "pints": [
-        { "title": "Beer", "price": "2gbp" },
-        { "title": "Larger" }
-      ],
       "coke": "pepsi"
     }
   ]
