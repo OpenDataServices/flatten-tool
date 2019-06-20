@@ -321,19 +321,27 @@ class JSONParser(object):
                         if len(value) == 1:
                             for k, v in value[0].items():
 
+                                if self.preserve_fields and parent_name+key+'/'+k not in self.preserve_fields:
+                                    continue
+
                                 if type(v) not in BASIC_TYPES:
                                     raise ValueError('Rolled up values must be basic types')
                                 else:
                                     if self.schema_parser:
-                                        if self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
+                                        if self.use_titles and \
+                                        parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
                                             flattened_dict[sheet_key_title(sheet, parent_name+key+'/0/'+k)] = v
-                                        elif not self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+                                        elif not self.use_titles and \
+                                        parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                                 flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                                     elif parent_name+key in self.rollup:
                                         flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                         
                         elif len(value) > 1:
                             for k in set(sum((list(x.keys()) for x in value), [])):
+
+                                if self.preserve_fields and parent_name+key+'/'+k not in self.preserve_fields:
+                                    continue
 
                                 if self.schema_parser and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
                                     warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
