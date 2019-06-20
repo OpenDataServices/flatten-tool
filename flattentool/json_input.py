@@ -128,6 +128,8 @@ class JSONParser(object):
             if schema_parser:
                 # If rollup is present in the schema this takes precedence over direct input.
                 self.rollup = schema_parser.rollup
+                if isinstance(rollup, (list,)) and (len(rollup) > 1 or (len(rollup) == 1 and rollup[0] is not True)):
+                    warn('Using rollUp values from schema, ignoring direct input.')
             elif isinstance(rollup, (list,)):
                 if len(rollup) == 1 and os.path.isfile(rollup[0]):
                     # Parse file, one json path per line.
