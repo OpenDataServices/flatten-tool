@@ -1283,6 +1283,35 @@ def test_commands_hashcomments(tmpdir):
                            'some': 'data'}
 
 
+def test_commands_hashcomments_sourcemap(tmpdir):
+
+    unflatten(
+        'flattentool/tests/fixtures/xlsx/commands_hashcomments_sourcemap.xlsx',
+        input_format='xlsx',
+        output_name=tmpdir.join('commands_hashcomments_unflattened.json').strpath,
+        cell_source_map=tmpdir.join('commands_hashcomments_source_map.json').strpath,
+        heading_source_map=tmpdir.join('commands_hashcomments_heading_source_map.json').strpath,
+        metatab_name='Meta',
+        metatab_vertical_orientation=True
+        )
+
+    unflattened = json.load(tmpdir.join('commands_hashcomments_unflattened.json'))
+    cell_source_map = json.load(tmpdir.join('commands_hashcomments_source_map.json'))
+
+    assert unflattened == {'publishedDate': '2019-06-20T00:00:00Z',
+                           'publisher': {
+                               'name': 'Open Data Services Co-operative'
+                           },
+                           'uri': 'http://www.example.com',
+                           'version': '1.1',
+                           'main': [{'date': '2010-03-15T09:30:00Z', 'id': 'Ocds-1'}]
+                          }
+
+    # check fields have correct column letters
+    assert cell_source_map['main/0/date'][0][1] == 'E'
+    assert cell_source_map['main/0/id'][0][1] == 'C'
+
+
 def test_commands_id_name(tmpdir):
 
     unflatten(

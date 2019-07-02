@@ -625,14 +625,21 @@ class XLSXInput(SpreadsheetInput):
 
         coli_to_header = {}
         for i, header in enumerate(header_row):
-            if header.value is None:
-                continue
-            if sheet_configuration.get("hashcomments") and str(header.value).startswith('#'):
-                continue
             coli_to_header[i] = header.value
-        for row in remaining_rows:
-            yield OrderedDict((coli_to_header[i], x.value) for i, x in enumerate(row) if i in coli_to_header)
 
+        for row in remaining_rows:
+            output_row = OrderedDict()
+            for i, x in enumerate(row):
+                header = coli_to_header[i]
+                value = x.value
+                if not header:
+                    # None means that the cell will be ignored
+                    value = None
+                elif sheet_configuration.get("hashcomments") and header.startswith('#'):
+                    # None means that the cell will be ignored
+                    value = None
+                output_row[header] = value
+            yield output_row
 
 FORMATS = {
     'xlsx': XLSXInput,
