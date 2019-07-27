@@ -191,6 +191,9 @@ And do one of:
 If you pass direct input or file input, *and* a schema which contains a ``rollUp`` attribute,
 the schema is used and the direct input or file input are ignored.
 
+However, if you pass direct or file input, *and* and a schema which *does not* contain a ``rollUp`` 
+attribute, the direct or file input *will* be used.
+
 For the following examples, we use this input data:
 
 .. literalinclude:: ../examples/flatten/rollup/input.json

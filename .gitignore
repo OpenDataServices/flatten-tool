@@ -38,6 +38,8 @@ examples/flatten/rollup/actual
 examples/flatten/rollup/actual.*
 examples/flatten/rollup/schema/actual
 examples/flatten/rollup/schema/actual.*
+examples/flatten/rollup/badschema/actual
+examples/flatten/rollup/badschema/actual.*
 examples/flatten/rollup/direct/actual
 examples/flatten/rollup/direct/actual.*
 examples/flatten/rollup/file/actual

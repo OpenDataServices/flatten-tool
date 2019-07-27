@@ -125,8 +125,8 @@ class JSONParser(object):
 
         self.rollup = False
         if rollup:
-            if schema_parser:
-                # If rollup is present in the schema this takes precedence over direct input.
+            if schema_parser and len(schema_parser.rollup) > 0:
+                # If rollUp is present in the schema this takes precedence over direct input.
                 self.rollup = schema_parser.rollup
                 if isinstance(rollup, (list,)) and (len(rollup) > 1 or (len(rollup) == 1 and rollup[0] is not True)):
                     warn('Using rollUp values from schema, ignoring direct input.')
@@ -328,12 +328,28 @@ class JSONParser(object):
                                     raise ValueError('Rolled up values must be basic types')
                                 else:
                                     if self.schema_parser:
+                                        # We want titles and there's a schema and rollUp is in it
                                         if self.use_titles and \
                                         parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
                                             flattened_dict[sheet_key_title(sheet, parent_name+key+'/0/'+k)] = v
+                                        
+                                        # We want titles and there's a schema but rollUp isn't in it
+                                        # so the titles for rollup properties aren't in the main sheet
+                                        # so we need to try to get the titles from a subsheet
+                                        elif self.use_titles and parent_name+key in self.rollup and \
+                                        parent_name+key in self.schema_parser.sub_sheets:
+                                            relevant_subsheet = self.schema_parser.sub_sheets.get(parent_name+key)
+                                            if relevant_subsheet is not None:
+                                                rollup_field_title = sheet_key_title(relevant_subsheet, parent_name+key+'/0/'+k)
+                                                flattened_dict[sheet_key(sheet, rollup_field_title)] = v
+                                        
+                                        # We don't want titles even though there's a schema
                                         elif not self.use_titles and \
-                                        parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
-                                                flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
+                                        (parent_name+key+'/0/'+k in self.schema_parser.main_sheet or \
+                                        parent_name+key in self.rollup):
+                                            flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
+
+                                    # No schema, so no titles
                                     elif parent_name+key in self.rollup:
                                         flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
                         
