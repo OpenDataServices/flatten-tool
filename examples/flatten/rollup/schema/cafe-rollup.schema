@@ -1,0 +1,104 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "OwnerObject": {
+            "type": "object",
+            "properties": {
+                "firstname": {
+                    "type": "string",
+                    "title": "First name"
+                },
+                "lastname": {
+                    "type": "string",
+                    "title": "Last name"
+                },
+                "email": {
+                    "type": "string",
+                    "title": "Email"
+                }
+            }
+        },
+        "DishObject": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Identifier"
+                },
+                "title": {
+                    "type": "string",
+                    "title": "Name"
+                },
+                "allergens": {
+                    "type": "object",
+                    "title": "Allergens",
+                    "properties": {
+                        "freefrom": {
+                            "type": "array",
+                            "title": "Free from",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "contains": {
+                            "type": "array",
+                            "title": "Contains",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "label": {
+                            "type": "array",
+                            "title": "Label",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Identifier"
+        },
+        "type": {
+            "type": "string",
+            "title": "Type"
+        },
+        "title": {
+            "type": "string",
+            "title": "Name"
+        },
+        "address": {
+            "type": "string",
+            "title": "Address"
+        },
+        "owners": {
+            "items": {
+                "$ref": "#/definitions/OwnerObject"
+            },
+            "type": "array",
+            "title": "Owner",
+            "rollUp": ["firstname", "lastname", "email"]
+        },
+        "dishes": {
+            "items": {
+                "$ref": "#/definitions/DishObject"
+            },
+            "type": "array",
+            "title": "Dish"
+        },
+        "coffee": {
+            "type": "string",
+            "title": "Coffee quality"
+        },
+        "coke": {
+            "type": "string",
+            "title": "Type of coke"
+        }
+    }
+}

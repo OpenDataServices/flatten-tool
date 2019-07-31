@@ -1,3 +1,5 @@
+.. _flattening:
+
 Flattening
 ++++++++++
 
@@ -164,6 +166,136 @@ By default, all fields in the input JSON are turned into columns in the CSV outp
    :header-rows: 1
 
 The input file should contain the full JSON paths of the fields you want to preserve, one per line. If any of the fields passed contain objects, all child fields will be preserved. Eg. if you pass `title`, the top level `title` fields will be preserved, but `dishes/title` will not; if you pass `dishes`, the `dishes/title` and any other children of `dishes` will automatically be preserved. If you pass `dishes` *and* `dishes/title`, *only* `dishes/title` will be preserved, other children of `dishes` will be excluded. The order of the fields in the input is not significant.
+
+Rollup
+------
+
+If you have a JSON schema where objects are modeled as lists of objects but
+actually represent one to one relationships, you can *roll up* certain
+properties.
+
+This means taking the values and rather than having them as a separate sheet,
+have the values listed on the main sheet.
+
+To enable roll up behaviour you have to:
+
+* Use the ``--rollup`` flag
+
+And do one of:
+
+* Via schema: Add the ``rollUp`` key to the JSON Schema to the child object with a value that
+  is an array of the fields to roll up
+* Direct input: Pass one or more field at the command line
+* File input: Pass a file with a line-separated list of fields
+
+If you pass direct input or file input, *and* a schema which contains a ``rollUp`` attribute,
+the schema is used and the direct input or file input are ignored.
+
+However, if you pass direct or file input, *and* and a schema which *does not* contain a ``rollUp`` 
+attribute, the direct or file input *will* be used.
+
+For the following examples, we use this input data:
+
+.. literalinclude:: ../examples/flatten/rollup/input.json
+   :language: json
+
+Here, the ``owners`` property contains a list with a single object. The ``dishes`` 
+property is also a list of objects, but cannot be rolled up, as the cafe has more 
+than one dish.
+
+Rollup via schema
+^^^^^^^^^^^^^^^^^
+
+Here are the changes we make to the schema:
+
+.. literalinclude:: ../examples/flatten/rollup/schema/cafe-rollup.schema
+   :diff: ../examples/flatten/rollup/schema/cafe.schema
+
+Here's the command we run:
+
+.. literalinclude:: ../examples/flatten/rollup/schema/cmd.txt
+   :language: bash
+
+Here are the resulting sheets:
+
+.. csv-table:: sheet: cafe.csv
+   :file: ../examples/flatten/rollup/schema/expected/cafe.csv
+
+.. csv-table:: sheet: owners.csv
+   :file: ../examples/flatten/rollup/schema/expected/owners.csv
+
+Notice how ``Owner: First name``, ``Owner: Last name`` and ``Owner: Email`` now 
+appear in both the ``cafe.csv`` and ``owners.csv`` files.
+
+.. caution ::
+
+   If you try to roll up multiple values you'll get a warning like this:
+
+   .. code-block:: bash
+
+       UserWarning: More than one value supplied for "dishes". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.
+         warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
+
+Rollup via direct input
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Run this command to rollup all properties of the ``owners`` object:
+
+.. literalinclude:: ../examples/flatten/rollup/direct/cmd.txt
+   :language: bash
+
+You can include multiple fields to rollup by passing ``--rollup`` multiple times:
+
+.. code-block:: bash
+
+   $ flatten-tool flatten --root-list-path=cafe --main-sheet-name=cafe --rollup=owners --rollup=dishes examples/flatten/rollup/input.json -o examples/flatten/rollup/direct/actual
+
+For the result:
+
+.. csv-table:: sheet: cafe.csv
+   :file: ../examples/flatten/rollup/direct/expected/cafe.csv
+
+Rollup via file input
+^^^^^^^^^^^^^^^^^^^^^
+
+Run this command to rollup all properties of the ``owners`` object:
+
+.. literalinclude:: ../examples/flatten/rollup/file/cmd.txt
+   :language: bash
+
+Where the file contains:
+
+.. literalinclude:: ../examples/flatten/rollup/file/fields_to_rollup.xt
+   :language: bash
+
+You can include multiple fields to rollup by passing ``--rollup`` multiple times:
+
+For the result:
+
+.. csv-table:: sheet: cafe.csv
+   :file: ../examples/flatten/rollup/file/expected/cafe.csv
+
+Selective rollup
+^^^^^^^^^^^^^^^^
+
+If you don't want to include all of the properties of a rolled up object in the main
+sheet, you can use ``rollup`` in combination with ``preserve-fields``, eg.
+
+.. code-block:: bash
+
+   $ flatten-tool flatten --root-list-path=cafe --main-sheet-name=cafe --rollup=owners --preserve-fields fields-to-preserve.txt examples/flatten/rollup/input.json -o examples/flatten/rollup/direct/actual
+
+Where ``fields-to-preserve.txt`` contains:
+
+.. code-block:: bash
+   
+   id
+   type
+   title
+   owners/email
+
+This excludes ``owners/firstname`` and ``owners/lastname`` from *both* the main sheet 
+and the owners sheet.
 
 All flatten options
 -------------------
