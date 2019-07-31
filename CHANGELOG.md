@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.0] - 2019-07-31
+
 ### Added
 
 - --preserve-fields option to the cli so the user can specify which fields to keep when flattening, instead of defaulting to all of them
@@ -17,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Using --rollup with `flatten` accepts fields to roll up as input directly and via a file, as well as via a schema.
+- Fixed pytest version at <5 because of breaking changes to the tests.
 
 ## [0.7.0] - 2019-04-08
 
