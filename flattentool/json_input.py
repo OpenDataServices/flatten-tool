@@ -5,6 +5,7 @@ JSON schema, for that see schema.py).
 
 """
 
+import os
 import json
 import six
 import copy
@@ -95,7 +96,7 @@ class JSONParser(object):
     def __init__(self, json_filename=None, root_json_dict=None, schema_parser=None, root_list_path=None,
                  root_id='ocid', use_titles=False, xml=False, id_name='id', filter_field=None,
                  filter_value=None, preserve_fields=None, remove_empty_schema_columns=False,
-                 truncation_length=3):
+                 rollup=False, truncation_length=3):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.root_list_path = root_list_path
@@ -108,6 +109,7 @@ class JSONParser(object):
         self.filter_value = filter_value
         self.remove_empty_schema_columns = remove_empty_schema_columns
         self.seen_paths = set()
+        
         if schema_parser:
             self.main_sheet = copy.deepcopy(schema_parser.main_sheet)
             self.sub_sheets = copy.deepcopy(schema_parser.sub_sheets)
@@ -117,11 +119,33 @@ class JSONParser(object):
                 self.main_sheet.columns = []
                 for sheet_name, sheet in list(self.sub_sheets.items()):
                     sheet.columns = []
-            # Rollup is pulled from the schema_parser, as rollup is only possible if a schema parser is specified
-            self.rollup = schema_parser.rollup
             self.schema_parser = schema_parser
         else:
-            self.rollup = False
+            self.schema_parser = None
+
+        self.rollup = False
+        if rollup:
+            if schema_parser and len(schema_parser.rollup) > 0:
+                # If rollUp is present in the schema this takes precedence over direct input.
+                self.rollup = schema_parser.rollup
+                if isinstance(rollup, (list,)) and (len(rollup) > 1 or (len(rollup) == 1 and rollup[0] is not True)):
+                    warn('Using rollUp values from schema, ignoring direct input.')
+            elif isinstance(rollup, (list,)):
+                if len(rollup) == 1 and os.path.isfile(rollup[0]):
+                    # Parse file, one json path per line.
+                    rollup_from_file = set()
+                    with open(rollup[0]) as rollup_file:
+                        for line in rollup_file:
+                            line = line.strip()
+                            rollup_from_file.add(line)
+                    self.rollup = rollup_from_file
+                    # Rollup args passed directly at the commandline
+                elif len(rollup) == 1 and rollup[0] is True:
+                    warn('No fields to rollup found (pass json path directly, as a list in a file, or via a schema)')
+                else:
+                    self.rollup = set(rollup)
+            else:
+                warn('Invalid value passed for rollup (pass json path directly, as a list in a file, or via a schema)')
 
         if self.xml:
             with codecs.open(json_filename, 'rb') as xml_file:
@@ -238,7 +262,7 @@ class JSONParser(object):
                 return
 
         if top_level_of_sub_sheet:
-            # Only add the IDs for the top level of object in an array
+            # Add the IDs for the top level of object in an array
             for k, v in parent_id_fields.items():
                 if self.xml:
                     flattened_dict[sheet_key(sheet, k)] = v['#text']
@@ -250,7 +274,6 @@ class JSONParser(object):
 
         if self.id_name in json_dict:
             parent_id_fields[sheet_key(sheet, parent_name+self.id_name)] = json_dict[self.id_name]
-
 
         for key, value in json_dict.items():
 
@@ -291,22 +314,56 @@ class JSONParser(object):
                     flattened_dict[sheet_key(sheet, parent_name+key)] = ';'.join(map(six.text_type, value))
                 else:
                     if self.rollup and parent_name == '': # Rollup only currently possible to main sheet
+                        
+                        if self.use_titles and not self.schema_parser:
+                            warn('Warning: No schema was provided so column headings are JSON keys, not titles.')
+
                         if len(value) == 1:
                             for k, v in value[0].items():
-                                if self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
-                                    if type(v) in BASIC_TYPES:
-                                        flattened_dict[sheet_key_title(sheet, parent_name+key+'/0/'+k)] = v
-                                    else:
-                                        raise ValueError('Rolled up values must be basic types')
-                                elif not self.use_titles and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
-                                    if type(v) in BASIC_TYPES:
+
+                                if self.preserve_fields and parent_name+key+'/'+k not in self.preserve_fields:
+                                    continue
+
+                                if type(v) not in BASIC_TYPES:
+                                    raise ValueError('Rolled up values must be basic types')
+                                else:
+                                    if self.schema_parser:
+                                        # We want titles and there's a schema and rollUp is in it
+                                        if self.use_titles and \
+                                        parent_name+key+'/0/'+k in self.schema_parser.main_sheet.titles:
+                                            flattened_dict[sheet_key_title(sheet, parent_name+key+'/0/'+k)] = v
+                                        
+                                        # We want titles and there's a schema but rollUp isn't in it
+                                        # so the titles for rollup properties aren't in the main sheet
+                                        # so we need to try to get the titles from a subsheet
+                                        elif self.use_titles and parent_name+key in self.rollup and \
+                                        parent_name+key in self.schema_parser.sub_sheets:
+                                            relevant_subsheet = self.schema_parser.sub_sheets.get(parent_name+key)
+                                            if relevant_subsheet is not None:
+                                                rollup_field_title = sheet_key_title(relevant_subsheet, parent_name+key+'/0/'+k)
+                                                flattened_dict[sheet_key(sheet, rollup_field_title)] = v
+                                        
+                                        # We don't want titles even though there's a schema
+                                        elif not self.use_titles and \
+                                        (parent_name+key+'/0/'+k in self.schema_parser.main_sheet or \
+                                        parent_name+key in self.rollup):
+                                            flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
+
+                                    # No schema, so no titles
+                                    elif parent_name+key in self.rollup:
                                         flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = v
-                                    else:
-                                        raise ValueError('Rolled up values must be basic types')
+                        
                         elif len(value) > 1:
                             for k in set(sum((list(x.keys()) for x in value), [])):
-                                warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
-                                if parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+
+                                if self.preserve_fields and parent_name+key+'/'+k not in self.preserve_fields:
+                                    continue
+
+                                if self.schema_parser and parent_name+key+'/0/'+k in self.schema_parser.main_sheet:
+                                    warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
+                                    flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
+                                elif parent_name+key in self.rollup:
+                                    warn('More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(parent_name+key))
                                     flattened_dict[sheet_key(sheet, parent_name+key+'/0/'+k)] = 'WARNING: More than one value supplied, consult the relevant sub-sheet for the data.'
 
                     sub_sheet_name = make_sub_sheet_name(parent_name, key, truncation_length=self.truncation_length)

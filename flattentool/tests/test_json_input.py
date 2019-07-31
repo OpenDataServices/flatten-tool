@@ -380,7 +380,8 @@ class TestParseUsingSchema(object):
                 ('testA', [OrderedDict([('testB', '1'), ('testC', '2')])]),
             ])],
             schema_parser=schema_parser,
-            root_id='ocid'
+            root_id='ocid',
+            rollup=True
         )
         parser.parse()
         assert list(parser.main_sheet) == [ 'testA/0/testB' ]
@@ -415,7 +416,8 @@ class TestParseUsingSchema(object):
                     OrderedDict([('testB', '3'), ('testC', '4')])
                     ]),
             ])],
-            schema_parser=schema_parser
+            schema_parser=schema_parser,
+            rollup=True
         )
         parser.parse()
         assert list(parser.main_sheet) == [ 'testA/0/testB' ]

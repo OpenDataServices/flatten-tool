@@ -116,8 +116,10 @@ def create_parser():
         help="Path of the root list, defaults to main")
     parser_flatten.add_argument(
         "--rollup",
-        action='store_true',
-        help="\"Roll up\" columns from subsheets into the main sheet if they are specified in a rollUp attribute in the schema.")
+        nargs='?',
+        const=True,
+        action='append',
+        help="\"Roll up\" columns from subsheets into the main sheet. Pass one or more JSON paths directly, or a file with one JSON path per line, or no value and use a schema containing (a) rollUp attribute(s). Schema takes precedence if both direct input and schema with rollUps are present.")
     parser_flatten.add_argument(
         "-r", "--root-id",
         help="Root ID of the data format, e.g. ocid for OCDS")

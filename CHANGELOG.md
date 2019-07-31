@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - --preserve-fields option to the cli so the user can specify which fields to keep when flattening, instead of defaulting to all of them
 
+### Changed
+
+- Using --rollup with `flatten` accepts fields to roll up as input directly and via a file, as well as via a schema.
+
 ## [0.7.0] - 2019-04-08
 
 ## Fixed

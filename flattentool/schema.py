@@ -97,7 +97,8 @@ class SchemaParser(object):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
         self.sub_sheet_mapping = {}
-        self.rollup = rollup
+        self.do_rollup = rollup
+        self.rollup = set()
         self.root_id = root_id
         self.use_titles = use_titles
         self.truncation_length = truncation_length
@@ -238,8 +239,8 @@ class SchemaParser(object):
                                 parent_id_fields=id_fields,
                                 title_lookup=title_lookup.get(title),
                                 parent_title=parent_title+title+':' if parent_title is not None and title else None)
-                        rolledUp = set()
-
+                        
+                        rollup_fields = set()
                         for field, child_title in fields:
                             full_path = parent_path+property_name+'/0/'+field
                             if self.use_titles:
@@ -254,15 +255,17 @@ class SchemaParser(object):
                                     sub_sheet.titles[full_path] = full_title
                             else:
                                 sub_sheet.add_field(full_path)
-                            if self.rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
-                                rolledUp.add(field)
+                            if self.do_rollup and 'rollUp' in property_schema_dict and field in property_schema_dict['rollUp']:
+                                rollup_fields.add(field)
+                                self.rollup.add(full_path)
                                 yield property_name+'/0/'+field, (title+':'+child_title if title and child_title else None)
 
                         # Check that all items in rollUp are in the schema
-                        if self.rollup and 'rollUp' in property_schema_dict:
-                            missedRollUp = set(property_schema_dict['rollUp']) - rolledUp
+                        if self.do_rollup and 'rollUp' in property_schema_dict:
+                            missedRollUp = set(property_schema_dict['rollUp']) - rollup_fields
                             if missedRollUp:
                                 warn('{} in rollUp but not in schema'.format(', '.join(missedRollUp)))
+
                     else:
                         raise ValueError('Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'.format(type_set))
                 elif 'string' in property_type_set or not property_type_set:
@@ -283,5 +286,6 @@ class SchemaParser(object):
                              repr(property_type_set),
                              property_name,
                              parent_path))
+
         else:
             warn('Skipping field "{}", because it has no properties.'.format(parent_path))
