@@ -12,6 +12,10 @@ import sys
 from warnings import warn
 from flattentool.exceptions import DataErrorWarning
 
+from odf.opendocument import OpenDocumentSpreadsheet
+import odf.table
+import odf.text
+
 import csv
 
 
@@ -86,11 +90,58 @@ class CSVOutput(SpreadsheetOutput):
                 dictwriter.writerow(sheet_line)
 
 
+class ODSOutput(SpreadsheetOutput):
+    def open(self):
+        self.workbook = OpenDocumentSpreadsheet()
+
+    def _make_cell(self, value):
+        """ Util for creating an ods cell """
+
+        try:
+            # See if value parses as a float
+            cell = odf.table.TableCell(valuetype="float",
+                                       value=float(value))
+        except ValueError:
+            cell = odf.table.TableCell(valuetype="string")
+
+        p = odf.text.P(text=value)
+        cell.addElement(p)
+
+        return cell
+
+    def write_sheet(self, sheet_name, sheet):
+
+        worksheet = odf.table.Table(name=sheet_name)
+        sheet_header = list(sheet)
+
+        header_row = odf.table.TableRow()
+
+        for header in sheet_header:
+            header_row.addElement(self._make_cell(header))
+
+        worksheet.addElement(header_row)
+
+        for sheet_line in sheet.lines:
+            row = odf.table.TableRow()
+            for value in sheet_line.values():
+                row.addElement(self._make_cell(value))
+
+            worksheet.addElement(row)
+
+        self.workbook.spreadsheet.addElement(worksheet)
+
+    def close(self):
+        self.workbook.save(self.output_name)
+
+
 FORMATS = {
     'xlsx': XLSXOutput,
-    'csv': CSVOutput
+    'csv': CSVOutput,
+    'ods': ODSOutput
 }
+
 FORMATS_SUFFIX = {
     'xlsx': '.xlsx',
+    'ods': '.ods',
     'csv': ''  # This is the suffix for the directory
 }
