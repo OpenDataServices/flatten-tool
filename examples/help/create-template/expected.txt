@@ -1,4 +1,4 @@
-usage: flatten-tool create-template [-h] -s SCHEMA [-f {csv,xlsx,all}]
+usage: flatten-tool create-template [-h] -s SCHEMA [-f {csv,ods,xlsx,all}]
                                     [-m MAIN_SHEET_NAME] [-o OUTPUT_NAME]
                                     [--rollup] [-r ROOT_ID] [--use-titles]
                                     [--disable-local-refs]
@@ -10,7 +10,7 @@ optional arguments:
   -s SCHEMA, --schema SCHEMA
                         Path to the schema file you want to use to create the
                         template
-  -f {csv,xlsx,all}, --output-format {csv,xlsx,all}
+  -f {csv,ods,xlsx,all}, --output-format {csv,ods,xlsx,all}
                         Type of template you want to create. Defaults to all
                         available options
   -m MAIN_SHEET_NAME, --main-sheet-name MAIN_SHEET_NAME

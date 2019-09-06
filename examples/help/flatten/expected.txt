@@ -1,4 +1,4 @@
-usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,xlsx,all}] [--xml]
+usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,ods,xlsx,all}] [--xml]
                             [--id-name ID_NAME] [-m MAIN_SHEET_NAME]
                             [-o OUTPUT_NAME] [--root-list-path ROOT_LIST_PATH]
                             [--rollup [ROLLUP]] [-r ROOT_ID] [--use-titles]
@@ -18,7 +18,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.
-  -f {csv,xlsx,all}, --output-format {csv,xlsx,all}
+  -f {csv,ods,xlsx,all}, --output-format {csv,ods,xlsx,all}
                         Type of template you want to create. Defaults to all
                         available options
   --xml                 Use XML as the input format
