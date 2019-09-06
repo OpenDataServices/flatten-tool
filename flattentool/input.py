@@ -16,6 +16,11 @@ import datetime
 import pytz
 from openpyxl.utils import column_index_from_string
 from openpyxl.utils.cell import _get_column_letter
+
+from odf.opendocument import load as load_odf
+import odf.table
+from flattentool.ODSReader import ODSReader
+
 from flattentool.exceptions import DataErrorWarning
 from flattentool.lib import isint, parse_sheet_configuration
 from csv import DictReader
@@ -26,6 +31,7 @@ try:
     from zipfile import BadZipFile
 except ImportError:
     from zipfile import BadZipfile as BadZipFile
+
 
 
 class Cell:
@@ -444,6 +450,7 @@ def extract_dict_to_value(input):
             raise Exception('Unexpected result type in the JSON cell tree: {}'.format(input[k]))
     return output
 
+
 class CSVInput(SpreadsheetInput):
     encoding = 'utf-8'
 
@@ -613,9 +620,112 @@ class XLSXInput(SpreadsheetInput):
                 output_row[header] = value
             yield output_row
 
+
+class ODSInput(SpreadsheetInput):
+    def read_sheets(self):
+        self.workbook = ODSReader(self.input_name)
+        self.sheet_names_map = self.workbook.SHEETS
+
+        if self.include_sheets:
+            for sheet in list(self.sheet_names_map):
+                if sheet not in self.include_sheets:
+                    self.sheet_names_map.pop(sheet)
+        for sheet in self.exclude_sheets or []:
+            self.sheet_names_map.pop(sheet, None)
+
+        self.sub_sheet_names = self.sheet_names_map.keys()
+        self.configure_sheets()
+
+    def _resolve_sheet_configuration(self, sheet_name):
+        sheet_configuration = self.sheet_configuration[sheet_name]
+        if not sheet_configuration:
+            sheet_configuration = self.base_configuration
+        if not self.use_configuration:
+            sheet_configuration = {}
+
+        return sheet_configuration
+
+    def get_sheet_headings(self, sheet_name):
+        worksheet = self.sheet_names_map[sheet_name]
+        sheet_configuration = self._resolve_sheet_configuration(sheet_name)
+
+        configuration_line = 1 if sheet_configuration else 0
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        if (sheet_configuration.get("ignore") or
+           (sheet_configuration.get("hashcomments") and sheet_name.startswith('#'))):
+            # returning empty headers is a proxy for no data in the sheet.
+            return []
+
+        if self.vertical_orientation:
+            return [cell for cell in worksheet[(skip_rows + 1)][configuration_line:]]
+
+        try:
+            return [cell for cell in worksheet[skip_rows + configuration_line + 1]]
+        except IndexError:
+            # If the heading line is after data in the spreadsheet. i.e when skipRows
+            return []
+
+    def get_sheet_configuration(self, sheet_name):
+        # See if there are config properties in the spreadsheet
+        # https://flatten-tool.readthedocs.io/en/latest/unflatten/#configuration-properties-skip-and-header-rows
+        worksheet = self.sheet_names_map[sheet_name]
+
+        try:
+            # cell A1
+            if worksheet[0][0] == '#':
+                return worksheet[0]
+
+        except IndexError:
+            pass
+
+        return []
+
+    def get_sheet_lines(self, sheet_name):
+        # This generator should yield an ordered dict in the format
+        # see examples/simple/
+        # yield OrderedDict([('a/b', '1'), ('a/c', '2'), ('d', '3')])
+        # yield OrderedDict([('a/b', '4'), ('a/c', '5'), ('d', '6')])
+
+        sheet_configuration = self._resolve_sheet_configuration(sheet_name)
+        configuration_line = 1 if sheet_configuration else 0
+
+        skip_rows = sheet_configuration.get("skipRows", 0)
+        header_rows = sheet_configuration.get("headerRows", 1)
+
+        worksheet = self.sheet_names_map[sheet_name]
+        if self.vertical_orientation:
+            # TODO
+            raise NotImplementedError
+        else:
+            header_row = worksheet[skip_rows + configuration_line]
+            remaining_rows = worksheet[(skip_rows + configuration_line
+                                        + header_rows):]
+
+        coli_to_header = {}
+        for i, header in enumerate(header_row):
+            coli_to_header[i] = header
+
+
+        for row in remaining_rows:
+            output_row = OrderedDict()
+            for i, x in enumerate(row):
+                header = coli_to_header[i]
+                value = x
+                if not header:
+                    # None means that the cell will be ignored
+                    value = None
+                elif sheet_configuration.get("hashcomments") and header.startswith('#'):
+                    # None means that the cell will be ignored
+                    value = None
+                output_row[header] = value
+            yield output_row
+
+
 FORMATS = {
     'xlsx': XLSXInput,
-    'csv': CSVInput
+    'csv': CSVInput,
+    'ods': ODSInput
 }
 
 
