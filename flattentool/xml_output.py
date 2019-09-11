@@ -86,6 +86,6 @@ def toxml(data, xml_root_tag, xml_schemas=None, root_list_path='iati-activity', 
     comment = ET.Comment(xml_comment)
     root.insert(0, comment)
     if USING_LXML:
-        return ET.tostring(root, pretty_print=True)
+        return ET.tostring(root, pretty_print=True, xml_declaration=True, encoding='utf-8')
     else:
         return ET.tostring(root)
