@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.0] - 2019-08-11
+
+### Added
+
+- Add an XML declaration to outputted XML files https://github.com/OpenDataServices/cove/issues/1206
+
 ## [0.8.0] - 2019-07-31
 
 ### Added
