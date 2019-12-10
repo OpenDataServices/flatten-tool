@@ -668,6 +668,7 @@ class ODSInput(SpreadsheetInput):
         sheet_configuration = self.sheet_configuration[sheet_name]
         if not sheet_configuration:
             sheet_configuration = self.base_configuration
+            sheet_configuration['base_configuration'] = True
         if not self.use_configuration:
             sheet_configuration = {}
 
@@ -677,7 +678,7 @@ class ODSInput(SpreadsheetInput):
         worksheet = self.sheet_names_map[sheet_name]
         sheet_configuration = self._resolve_sheet_configuration(sheet_name)
 
-        configuration_line = 1 if sheet_configuration else 0
+        configuration_line = 1 if sheet_configuration and 'base_configuration' not in sheet_configuration else 0
 
         skip_rows = sheet_configuration.get("skipRows", 0)
         if (sheet_configuration.get("ignore") or
@@ -716,7 +717,7 @@ class ODSInput(SpreadsheetInput):
         # yield OrderedDict([('a/b', '4'), ('a/c', '5'), ('d', '6')])
 
         sheet_configuration = self._resolve_sheet_configuration(sheet_name)
-        configuration_line = 1 if sheet_configuration else 0
+        configuration_line = 1 if sheet_configuration and 'base_configuration' not in sheet_configuration else 0
 
         skip_rows = sheet_configuration.get("skipRows", 0)
         header_rows = sheet_configuration.get("headerRows", 1)
