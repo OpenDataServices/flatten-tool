@@ -659,7 +659,7 @@ class ODSInput(SpreadsheetInput):
             return []
 
         if self.vertical_orientation:
-            return [cell for cell in worksheet[(skip_rows + 1)][configuration_line:]]
+            return [row[skip_rows] for row in worksheet[configuration_line:]]
 
         try:
             return [cell for cell in worksheet[skip_rows + configuration_line + 1]]
@@ -696,8 +696,8 @@ class ODSInput(SpreadsheetInput):
 
         worksheet = self.sheet_names_map[sheet_name]
         if self.vertical_orientation:
-            # TODO
-            raise NotImplementedError
+            header_row = [row[skip_rows] for row in worksheet[configuration_line:]]
+            remaining_rows = [[row[i+1] for row in worksheet[(configuration_line):]] for i, _ in enumerate(header_row)]
         else:
             header_row = worksheet[skip_rows + configuration_line]
             remaining_rows = worksheet[(skip_rows + configuration_line
