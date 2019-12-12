@@ -4,7 +4,9 @@ import pytest
 import os
 from flattentool import output, schema
 from flattentool.sheet import Sheet
+from flattentool.ODSReader import ODSReader
 import openpyxl
+
 
 
 class MockParser(object):
@@ -39,6 +41,11 @@ def test_blank_sheets(tmpdir):
     # Check CSV is Empty
     assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
     assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == ''
+
+    # Check XLSX is empty
+    odswb = ODSReader(tmpdir.join('release.ods').strpath)
+    rows = odswb.getSheet('release')
+    assert len(rows) == 0
 
 
 def test_populated_header(tmpdir):
