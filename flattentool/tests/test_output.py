@@ -42,7 +42,7 @@ def test_blank_sheets(tmpdir):
     assert tmpdir.join('release').listdir() == [ tmpdir.join('release').join('release.csv') ]
     assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == ''
 
-    # Check XLSX is empty
+    # Check ODS is empty
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
     rows = odswb.getSheet('release')
     assert len(rows) == 0
@@ -76,6 +76,15 @@ def test_populated_header(tmpdir):
     assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a,d'
     assert tmpdir.join('release', 'b.csv').read().strip('\r\n') == 'ocid,c'
 
+    # Check ODS
+    odswb = ODSReader(tmpdir.join('release.ods').strpath)
+    rows = odswb.getSheet('release')
+    assert len(rows) == 1
+    assert [ x for x in rows[0] ] == [ 'a', 'd' ]
+    b_rows = odswb.getSheet('b')
+    assert len(b_rows) == 1
+    assert [ x for x in b_rows[0] ] == [ 'ocid', 'c' ]
+
 
 def test_empty_lines(tmpdir):
     subsheet = Sheet(root_id='ocid')
@@ -107,6 +116,15 @@ def test_empty_lines(tmpdir):
     assert tmpdir.join('release', 'release.csv').read().strip('\r\n') == 'a,d'
     assert tmpdir.join('release', 'b.csv').read().strip('\r\n') == 'ocid,c'
 
+    # Check ODS
+    odswb = ODSReader(tmpdir.join('release.ods').strpath)
+    rows = odswb.getSheet('release')
+    assert len(rows) == 1
+    assert [ x for x in rows[0] ] == [ 'a', 'd' ]
+    b_rows = odswb.getSheet('b')
+    assert len(b_rows) == 1
+    assert [ x for x in b_rows[0] ] == [ 'ocid', 'c' ]
+
 
 def test_populated_lines(tmpdir):
     subsheet = Sheet(root_id='ocid')
@@ -132,6 +150,7 @@ def test_populated_lines(tmpdir):
     assert [ x.value for x in rows[2] ] == [ 'cell2' ]
     b_rows = list(wb['b'].rows)
     assert len(b_rows) == 3
+    import pdb; pdb.set_trace()
     assert [ x.value for x in b_rows[0] ] == [ 'ocid', 'c' ]
     assert [ x.value for x in b_rows[1] ] == [ None, 'cell3' ]
     assert [ x.value for x in b_rows[2] ] == [ None, 'cell4' ]
@@ -144,6 +163,18 @@ def test_populated_lines(tmpdir):
     assert tmpdir.join('release', 'release.csv').read().strip('\r\n').replace('\r', '') == 'a\ncell1\ncell2'
     assert tmpdir.join('release', 'b.csv').read().strip('\r\n').replace('\r', '') == 'ocid,c\n,cell3\n,cell4'
 
+    # Check ODS - currently broken test
+    odswb = ODSReader(tmpdir.join('release.ods').strpath)
+    rows = odswb.getSheet('release')
+    assert len(rows) == 3
+    assert [ x for x in rows[0] ] == [ 'a' ]
+    assert [ x for x in rows[1] ] == [ 'cell1' ]
+    assert [ x for x in rows[2] ] == [ 'cell2' ]
+    b_rows = odswb.getSheet('b')
+    assert len(b_rows) == 3
+    assert [ x for x in b_rows[0] ] == [ 'ocid', 'c' ]
+    assert [ x for x in b_rows[1] ] == [ None, 'cell3' ]
+    assert [ x for x in b_rows[2] ] == [ None, 'cell4' ]
 
 def test_utf8(tmpdir):
     parser = MockParser(['é'], {})
@@ -170,3 +201,11 @@ def test_utf8(tmpdir):
     ])
     release_csv_text = tmpdir.join('release', 'release.csv').read_text(encoding='utf-8')
     assert release_csv_text.strip('\r\n').replace('\r', '') == 'é\néαГ😼𝒞人\ncell2'
+
+    # Check ODS
+    odswb = ODSReader(tmpdir.join('release.ods').strpath)
+    rows = odswb.getSheet('release')
+    assert len(rows) == 3
+    assert [ x for x in rows[0] ] == [ 'é' ]
+    assert [ x for x in rows[1] ] == [ 'éαГ😼𝒞人' ]
+    assert [ x for x in rows[2] ] == [ 'cell2' ]
