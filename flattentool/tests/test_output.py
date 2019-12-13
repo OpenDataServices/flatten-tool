@@ -44,8 +44,8 @@ def test_blank_sheets(tmpdir):
 
     # Check ODS is empty
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
-    rows = odswb.getSheet('release')
-    assert len(rows) == 0
+    ods_rows = odswb.getSheet('release')
+    assert len(ods_rows) == 0
 
 
 def test_populated_header(tmpdir):
@@ -78,12 +78,12 @@ def test_populated_header(tmpdir):
 
     # Check ODS
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
-    rows = odswb.getSheet('release')
-    assert len(rows) == 1
-    assert [ x for x in rows[0] ] == [ 'a', 'd' ]
-    b_rows = odswb.getSheet('b')
-    assert len(b_rows) == 1
-    assert [ x for x in b_rows[0] ] == [ 'ocid', 'c' ]
+    ods_rows = odswb.getSheet('release')
+    assert len(ods_rows) == 1
+    assert [ x for x in ods_rows[0] ] == [ 'a', 'd' ]
+    ods_b_rows = odswb.getSheet('b')
+    assert len(ods_b_rows) == 1
+    assert [ x for x in ods_b_rows[0] ] == [ 'ocid', 'c' ]
 
 
 def test_empty_lines(tmpdir):
@@ -118,12 +118,12 @@ def test_empty_lines(tmpdir):
 
     # Check ODS
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
-    rows = odswb.getSheet('release')
-    assert len(rows) == 1
-    assert [ x for x in rows[0] ] == [ 'a', 'd' ]
-    b_rows = odswb.getSheet('b')
-    assert len(b_rows) == 1
-    assert [ x for x in b_rows[0] ] == [ 'ocid', 'c' ]
+    ods_rows = odswb.getSheet('release')
+    assert len(ods_rows) == 1
+    assert [ x for x in ods_rows[0] ] == [ 'a', 'd' ]
+    ods_b_rows = odswb.getSheet('b')
+    assert len(ods_b_rows) == 1
+    assert [ x for x in ods_b_rows[0] ] == [ 'ocid', 'c' ]
 
 
 def test_populated_lines(tmpdir):
@@ -150,7 +150,6 @@ def test_populated_lines(tmpdir):
     assert [ x.value for x in rows[2] ] == [ 'cell2' ]
     b_rows = list(wb['b'].rows)
     assert len(b_rows) == 3
-    import pdb; pdb.set_trace()
     assert [ x.value for x in b_rows[0] ] == [ 'ocid', 'c' ]
     assert [ x.value for x in b_rows[1] ] == [ None, 'cell3' ]
     assert [ x.value for x in b_rows[2] ] == [ None, 'cell4' ]
@@ -165,16 +164,16 @@ def test_populated_lines(tmpdir):
 
     # Check ODS - currently broken test
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
-    rows = odswb.getSheet('release')
-    assert len(rows) == 3
-    assert [ x for x in rows[0] ] == [ 'a' ]
-    assert [ x for x in rows[1] ] == [ 'cell1' ]
-    assert [ x for x in rows[2] ] == [ 'cell2' ]
-    b_rows = odswb.getSheet('b')
-    assert len(b_rows) == 3
-    assert [ x for x in b_rows[0] ] == [ 'ocid', 'c' ]
-    assert [ x for x in b_rows[1] ] == [ None, 'cell3' ]
-    assert [ x for x in b_rows[2] ] == [ None, 'cell4' ]
+    ods_rows = odswb.getSheet('release')
+    assert len(ods_rows) == 3
+    assert [ x for x in ods_rows[0] ] == [ 'a' ]
+    assert [ x for x in ods_rows[1] ] == [ 'cell1' ]
+    assert [ x for x in ods_rows[2] ] == [ 'cell2' ]
+    ods_b_rows = odswb.getSheet('b')
+    assert len(ods_b_rows) == 3
+    assert [ x for x in ods_b_rows[0] ] == [ 'ocid', 'c' ]
+    assert [ x for x in ods_b_rows[1] ] == [ None, 'cell3' ]
+    assert [ x for x in ods_b_rows[2] ] == [ None, 'cell4' ]
 
 def test_utf8(tmpdir):
     parser = MockParser(['é'], {})
@@ -204,8 +203,8 @@ def test_utf8(tmpdir):
 
     # Check ODS
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
-    rows = odswb.getSheet('release')
-    assert len(rows) == 3
-    assert [ x for x in rows[0] ] == [ 'é' ]
-    assert [ x for x in rows[1] ] == [ 'éαГ😼𝒞人' ]
-    assert [ x for x in rows[2] ] == [ 'cell2' ]
+    ods_rows = odswb.getSheet('release')
+    assert len(ods_rows) == 3
+    assert [ x for x in ods_rows[0] ] == [ 'é' ]
+    assert [ x for x in ods_rows[1] ] == [ 'éαГ😼𝒞人' ]
+    assert [ x for x in ods_rows[2] ] == [ 'cell2' ]
