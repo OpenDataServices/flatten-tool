@@ -1,7 +1,7 @@
 from setuptools import setup
 import sys
 
-install_requires = ['jsonref', 'schema', 'openpyxl>=2.6', 'six', 'pytz',
+install_requires = ['jsonref', 'schema', 'openpyxl>=2.6,<=3.0.1', 'six', 'pytz',
                     'xmltodict', 'lxml', 'odfpy']
 
 if sys.version < '3':
@@ -9,7 +9,7 @@ if sys.version < '3':
 
 setup(
     name='flattentool',
-    version='0.9.0',
+    version='0.8.0',
     author='Open Data Services',
     author_email='code@opendataservices.coop',
     packages=['flattentool'],
