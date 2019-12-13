@@ -110,12 +110,15 @@ class ODSOutput(SpreadsheetOutput):
     def _make_cell(self, value):
         """ Util for creating an ods cell """
 
-        try:
-            # See if value parses as a float
-            cell = odf.table.TableCell(valuetype="float",
-                                       value=float(value))
-        except ValueError:
-            cell = odf.table.TableCell(valuetype="string")
+        if value:
+            try:
+                # See if value parses as a float
+                cell = odf.table.TableCell(valuetype="float",
+                                        value=float(value))
+            except ValueError:
+                cell = odf.table.TableCell(valuetype="string")
+        else:
+            cell = odf.table.TableCell(valuetype="Nonetype")
 
         p = odf.text.P(text=value)
         cell.addElement(p)
@@ -136,9 +139,15 @@ class ODSOutput(SpreadsheetOutput):
 
         for sheet_line in sheet.lines:
             row = odf.table.TableRow()
-            for value in sheet_line.values():
+            for header in sheet_header:
+                value = sheet_line.get(header)
+                if isinstance(value, six.text_type):
+                    new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
+                    if new_value != value:
+                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
+                            DataErrorWarning)
+                    value = new_value
                 row.addElement(self._make_cell(value))
-
             worksheet.addElement(row)
 
         self.workbook.spreadsheet.addElement(worksheet)
