@@ -4,7 +4,7 @@ Tests of SpreadsheetInput class from input.py, and its chidlren.
 Tests of unflatten method are in test_input_SpreadsheetInput_unflatten.py
 """
 from __future__ import unicode_literals
-from flattentool.input import SpreadsheetInput, CSVInput, XLSXInput, convert_type
+from flattentool.input import SpreadsheetInput, CSVInput, XLSXInput, ODSInput, convert_type
 from decimal import Decimal
 from collections import OrderedDict
 import sys
@@ -61,6 +61,17 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
+    def test_ods_input(self):
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/basic.ods')
+
+        odsinput.read_sheets()
+
+        assert list(odsinput.sub_sheet_names) == ['main', 'subsheet']
+        assert list(odsinput.get_sheet_lines('main')) == \
+            [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+        assert list(odsinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
     def test_xlsx_vertical(self):
         xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/basic_transpose.xlsx', vertical_orientation=True)
 
@@ -70,6 +81,17 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines('main')) == \
             [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
+    def test_ods_vertical(self):
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/basic_transpose.ods', vertical_orientation=True)
+
+        odsinput.read_sheets()
+
+        assert list(odsinput.sub_sheet_names) == ['main', 'subsheet']
+        assert list(odsinput.get_sheet_lines('main')) == \
+            [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+        assert list(odsinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
     def test_xlsx_include_ignore(self):
@@ -131,10 +153,24 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 3, 'colD': 9}, {'colC': 4, 'colD': 12}]
 
+    def test_ods_input_formula(self):
+        """ When a forumla is present, we should use the value, rather than the
+        formula itself. """
+
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/formula.ods')
+
+        odsinput.read_sheets()
+
+        assert list(odsinput.sub_sheet_names) == ['main', 'subsheet']
+        assert list(odsinput.get_sheet_lines('main')) == \
+            [OrderedDict([('colA', '1'), ('colB', '2')]), OrderedDict([('colA', '2'), ('colB', '4')])]
+        assert list(odsinput.get_sheet_lines('subsheet')) == \
+            [OrderedDict([('colC', '3'), ('colD', '9')]), OrderedDict([('colC', '4'), ('colD', '12')])]
+
 
 class TestInputFailure(object):
     def test_csv_no_directory(self):
-        csvinput = CSVInput(input_name='nonesensedirectory')
+        csvinput = CSVInput(input_name='nonsensedirectory')
         if sys.version > '3':
             with pytest.raises(FileNotFoundError):
                 csvinput.read_sheets()
@@ -150,6 +186,15 @@ class TestInputFailure(object):
         else:
             with pytest.raises(IOError):
                 xlsxinput.read_sheets()
+
+    def test_ods_no_file(self, tmpdir):
+        odsinput = ODSInput(input_name=tmpdir.join('test.ods').strpath)
+        if sys.version > '3':
+            with pytest.raises(FileNotFoundError):
+                odsinput.read_sheets()
+        else:
+            with pytest.raises(IOError):
+                odsinput.read_sheets()
 
 
 class TestUnicodeInput(object):
@@ -187,10 +232,10 @@ class TestUnicodeInput(object):
 
     def test_xlsx_input_utf8(self):
         """This is an xlsx file saved by OpenOffice. It seems to use UTF8 internally."""
-        csvinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/unicode.xlsx')
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/unicode.xlsx')
 
-        csvinput.read_sheets()
-        assert list(csvinput.get_sheet_lines('main'))[0]['id'] == 'éαГ😼𝒞人'
+        xlsxinput.read_sheets()
+        assert list(xlsxinput.get_sheet_lines('main'))[0]['id'] == 'éαГ😼𝒞人'
 
 
 def test_convert_type(recwarn):
