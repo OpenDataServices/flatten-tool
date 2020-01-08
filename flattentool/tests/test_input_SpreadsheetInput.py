@@ -241,6 +241,13 @@ class TestUnicodeInput(object):
         xlsxinput.read_sheets()
         assert list(xlsxinput.get_sheet_lines('main'))[0]['id'] == 'éαГ😼𝒞人'
 
+    def test_ods_input_utf8(self):
+        """This is an ods file saved by OpenOffice. It seems to use UTF8 internally."""
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/unicode.ods')
+
+        odsinput.read_sheets()
+        assert list(odsinput.get_sheet_lines('main'))[0]['id'] == 'éαГ😼𝒞人'
+
 
 def test_convert_type(recwarn):
     si = SpreadsheetInput()
