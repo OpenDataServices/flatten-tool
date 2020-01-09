@@ -18,6 +18,7 @@
 import odf.opendocument
 from odf.table import Table, TableRow, TableCell
 from odf.text import P
+from collections import OrderedDict
 
 
 # http://stackoverflow.com/a/4544699/1846474
@@ -34,7 +35,7 @@ class ODSReader:
     def __init__(self, file, clonespannedcolumns=None):
         self.clonespannedcolumns = clonespannedcolumns
         self.doc = odf.opendocument.load(file)
-        self.SHEETS = {}
+        self.SHEETS = OrderedDict()
         for sheet in self.doc.spreadsheet.getElementsByType(Table):
             self.readSheet(sheet)
 
