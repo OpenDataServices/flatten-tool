@@ -558,12 +558,17 @@ class CSVInput(SpreadsheetInput):
                     yield row
 
 
+class BadXLSXZipFile(BadZipFile):
+    pass
+
+
 class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         try:
             self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
         except BadZipFile as e:
-            raise Exception("The supplied file has extension .xlsx but isn't an XLSX file.")
+            # TODO when we have python3 only add 'from e' to show exception chain
+            raise BadXLSXZipFile("The supplied file has extension .xlsx but isn't an XLSX file.")
 
         self.sheet_names_map = OrderedDict((sheet_name, sheet_name) for sheet_name in self.workbook.sheetnames)
         if self.include_sheets:
