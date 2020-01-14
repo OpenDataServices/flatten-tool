@@ -131,6 +131,19 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 3, 'colD': 9}, {'colC': 4, 'colD': 12}]
 
+    def test_bad_xlsx(self):
+        """ XLSX file that is not a XLSX"""
+
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/file.xlsx')
+
+        try:
+            xlsxinput.read_sheets()
+        except Exception as e:
+            assert str(e) == "The supplied file has extension .xlsx but isn't an XLSX file."
+            return
+
+        assert False, "No Exception Raised"
+
 
 class TestInputFailure(object):
     def test_csv_no_directory(self):
