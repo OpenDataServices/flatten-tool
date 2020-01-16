@@ -6,6 +6,7 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 # Apparently six must be installed first, otherwise setup.py will be unhappy
 install:
   - pip install --upgrade six
