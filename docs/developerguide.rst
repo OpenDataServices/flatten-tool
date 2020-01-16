@@ -55,6 +55,18 @@ Testing coverage of documentation examples
     coverage report --omit=flattentool/tests/**
 
 
+Versioning and CHANGELOG
+========================
+
+This library is versioned and a changelog is kept in the CHANGELOG.md file. See that file for more.
+
+Any pull request to this library should include updating the CHANGELOG.md file.
+
+PyPi
+====
+
+This is published on `pypi.org <https://pypi.org/project/flattentool/>`_.
+
 What's coming up
 ================
 
@@ -143,20 +155,8 @@ More documentation
 * Using Flatten Tool as a library
 * Source maps
 
-Naming and Versioning
----------------------
+Naming
+------
 
-The next release of Flatten Tool will likely start a version numbering schema.
-We could also name the command line tool ``flattentool`` rather than
+We could name the command line tool ``flattentool`` rather than
 ``flatten-tool`` so that everything is consistent.
-
-Other possible directions
--------------------------
-
-It might be also be good to add a ``CHANGELOG.txt`` which could document changes
-such as:
-
-* This documentation
-* Changed stdout behaviour for unflatten and loss of the default - writing to
-  ``unflattened.json``.
-* Publishing on PyPi
