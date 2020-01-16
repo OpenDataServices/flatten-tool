@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Documentation on Change Logs, Versioning and PyPi updated to match current practice.
 
+## Fixed
+
+- Add BadXLSXZipFile exception type for BadZipFile exception when handling broken XLSX files related to cove issue https://github.com/OpenDataServices/cove/issues/514
+
 ## [0.9.0] - 2019-08-11
 
 ### Added
