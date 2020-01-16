@@ -2,9 +2,7 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
-from collections import OrderedDict
-from six.moves import UserDict
-from six import text_type
+from collections import OrderedDict, UserDict
 import jsonref
 from warnings import warn
 from flattentool.sheet import Sheet
@@ -34,7 +32,7 @@ class TitleLookup(UserDict):
     property_name = None
 
     def lookup_header(self, title_header):
-        if type(title_header) == text_type:
+        if type(title_header) == str:
             return self.lookup_header_list(title_header.split(':'))
         else:
             return title_header

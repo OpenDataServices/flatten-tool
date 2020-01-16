@@ -5,7 +5,6 @@ import sys
 import uuid
 
 from os.path import join, getsize
-from six import text_type
 
 
 def test_examples_in_docs():
@@ -26,7 +25,7 @@ def test_examples_in_docs():
                 continue
             if 'cmd.txt' in filename:
                 if os.path.exists(join(root, 'actual')) and os.path.isdir(join(root, 'actual')):
-                    os.rename(join(root, 'actual'), join(root, 'actual.'+text_type(uuid.uuid4())))
+                    os.rename(join(root, 'actual'), join(root, 'actual.'+str(uuid.uuid4())))
                 os.mkdir(join(root, 'actual'))
                 expected_return_code = 0
                 expected_stdout = b''
@@ -34,7 +33,7 @@ def test_examples_in_docs():
                     with open(join(root, 'expected_return_code.txt'), 'rb') as fp:
                         expected_return_code = int(fp.read().strip())
                 with open(join(root, filename), 'rb') as fp:
-                    cmds = text_type(fp.read(), 'utf8').strip().split('\n')
+                    cmds = str(fp.read(), 'utf8').strip().split('\n')
                     actual_stdout = b''
                     actual_stderr = b''
                     for cmd in cmds:
@@ -89,7 +88,7 @@ def test_examples_in_docs():
                 if os.path.exists(join(root, 'expected_stderr.json')):
                     with open(join(root, 'expected_stderr.json'), 'rb') as fstderr:
                         data = fstderr.read()
-                        expected_stderr_lines = text_type(data, 'utf8').split('\n')
+                        expected_stderr_lines = str(data, 'utf8').split('\n')
                         for line in expected_stderr_lines:
                             if line:
                                 expected_stderr += (line + '\n').encode('utf8')
@@ -98,10 +97,7 @@ def test_examples_in_docs():
                     assert _simplify_warnings(_strip(actual_stderr)) == _simplify_warnings(_strip(expected_stderr)), "Different stderr: {}".format(cmds)
                 tests_passed += 1
     # Check that the number of tests were run that we expected
-    if sys.version_info[:2] < (3,4):
-        assert tests_passed == 55
-    else:
-        assert tests_passed == 56
+    assert tests_passed == 56
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
@@ -115,7 +111,7 @@ def _simplify_line(line):
 # https://bugs.python.org/issue16333
 def _strip(output):
     # Don't worry about any extra blank lines at the end either
-    outstr = text_type(output, 'utf8').rstrip('\n')
+    outstr = str(output, 'utf8').rstrip('\n')
     return '\n'.join(line.rstrip(' ') for line in outstr.split('\n'))
 
 

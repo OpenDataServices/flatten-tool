@@ -12,7 +12,6 @@ import pytest
 import openpyxl
 import datetime
 import pytz
-from six import text_type
 
 class ListInput(SpreadsheetInput):
     def __init__(self, sheets, **kwargs):
@@ -148,21 +147,13 @@ class TestSuccessfulInput(object):
 class TestInputFailure(object):
     def test_csv_no_directory(self):
         csvinput = CSVInput(input_name='nonesensedirectory')
-        if sys.version > '3':
-            with pytest.raises(FileNotFoundError):
-                csvinput.read_sheets()
-        else:
-            with pytest.raises(OSError):
-                csvinput.read_sheets()
+        with pytest.raises(FileNotFoundError):
+            csvinput.read_sheets()
 
     def test_xlsx_no_file(self, tmpdir):
         xlsxinput = XLSXInput(input_name=tmpdir.join('test.xlsx').strpath)
-        if sys.version > '3':
-            with pytest.raises(FileNotFoundError):
-                xlsxinput.read_sheets()
-        else:
-            with pytest.raises(IOError):
-                xlsxinput.read_sheets()
+        with pytest.raises(FileNotFoundError):
+            xlsxinput.read_sheets()
 
 
 class TestUnicodeInput(object):
@@ -235,15 +226,15 @@ def test_convert_type(recwarn):
     assert convert_type('boolean', 0) is False
     assert convert_type('boolean', '0') is False
     convert_type('boolean', 2)
-    assert 'Unrecognised value for boolean: "2"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Unrecognised value for boolean: "2"' in str(recwarn.pop(UserWarning).message)
     convert_type('boolean', 'test')
-    assert 'Unrecognised value for boolean: "test"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Unrecognised value for boolean: "test"' in str(recwarn.pop(UserWarning).message)
 
     convert_type('integer', 'test')
-    assert 'Non-integer value "test"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Non-integer value "test"' in str(recwarn.pop(UserWarning).message)
 
     convert_type('number', 'test')
-    assert 'Non-numeric value "test"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Non-numeric value "test"' in str(recwarn.pop(UserWarning).message)
 
     assert convert_type('string', '') is None
     assert convert_type('number', '') is None
@@ -260,16 +251,16 @@ def test_convert_type(recwarn):
         assert convert_type(type_string, 'one') == ['one']
         assert convert_type(type_string, 'one;two') == ['one', 'two']
         assert convert_type(type_string, 'one,two;three,four') == [['one', 'two'], ['three', 'four']]
-    assert 'Non-numeric value "one"' in text_type(recwarn.pop(UserWarning).message)
-    assert 'Non-numeric value "one;two"' in text_type(recwarn.pop(UserWarning).message)
-    assert 'Non-numeric value "one,two;three,four"' in text_type(recwarn.pop(UserWarning).message)
+    assert 'Non-numeric value "one"' in str(recwarn.pop(UserWarning).message)
+    assert 'Non-numeric value "one;two"' in str(recwarn.pop(UserWarning).message)
+    assert 'Non-numeric value "one,two;three,four"' in str(recwarn.pop(UserWarning).message)
     assert convert_type('number_array', '1') == [1]
     assert convert_type('number_array', '1;2') == [1, 2]
     assert convert_type('number_array', '1,2;3,4') == [[1, 2], [3, 4]]
 
     with pytest.raises(ValueError) as e:
         convert_type('notatype', 'test')
-    assert 'Unrecognised type: "notatype"' in text_type(e)
+    assert 'Unrecognised type: "notatype"' in str(e)
 
     assert convert_type('string', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
     assert convert_type('', datetime.datetime(2015, 1, 1)) == '2015-01-01T00:00:00+00:00'
