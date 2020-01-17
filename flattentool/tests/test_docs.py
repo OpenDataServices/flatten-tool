@@ -3,12 +3,27 @@ import shlex
 import subprocess
 import sys
 import uuid
+import pytest
 
 from os.path import join, getsize
 
 
-def test_examples_in_docs():
+examples_in_docs_data = []
 
+def _get_examples_in_docs_data():
+    global examples_in_docs_data
+    examples_in_docs_data = []
+    for root, dirs, files in os.walk('examples'):
+        for filename in files:
+            if 'xlsx' in root and sys.version_info[:2] < (3,4):
+                continue
+            if 'cmd.txt' in filename:
+                examples_in_docs_data.append((root, filename))
+
+_get_examples_in_docs_data()
+
+
+def test_examples_receipt():
     with open('examples/receipt/source-map/expected.json', 'rb') as fp:
         expected = fp.read()
         for expected_filename in [
@@ -16,14 +31,13 @@ def test_examples_in_docs():
             'combine-table-into-cafe/expected.json',
             'combine-table-into-cafe-2/expected.json',
         ]:
-            with open('examples/receipt/'+expected_filename, 'rb') as fp2:
-                assert fp2.read() == expected, "Files differ: examples/receipt/source-map/expected.json, examples/receipt/{}".format(expected_filename)
-    tests_passed = 0
-    for root, dirs, files in os.walk('examples'):
-        for filename in files:
-            if 'xlsx' in root and sys.version_info[:2] < (3,4):
-                continue
-            if 'cmd.txt' in filename:
+            with open('examples/receipt/' + expected_filename, 'rb') as fp2:
+                assert fp2.read() == expected, "Files differ: examples/receipt/source-map/expected.json, examples/receipt/{}".format(
+                    expected_filename)
+
+
+@pytest.mark.parametrize("root, filename", examples_in_docs_data)
+def test_example_in_doc(root, filename):
                 if os.path.exists(join(root, 'actual')) and os.path.isdir(join(root, 'actual')):
                     os.rename(join(root, 'actual'), join(root, 'actual.'+str(uuid.uuid4())))
                 os.mkdir(join(root, 'actual'))
@@ -95,9 +109,11 @@ def test_examples_in_docs():
                             else:
                                  expected_stderr += b'\n'
                     assert _simplify_warnings(_strip(actual_stderr)) == _simplify_warnings(_strip(expected_stderr)), "Different stderr: {}".format(cmds)
-                tests_passed += 1
-    # Check that the number of tests were run that we expected
-    assert tests_passed == 56
+
+
+def test_expected_number_of_examples_in_docs_data():
+    assert len(examples_in_docs_data) == 56
+
 
 def _simplify_warnings(lines):
     return '\n'.join([_simplify_line(line) for line in lines.split('\n')])
@@ -117,4 +133,6 @@ def _strip(output):
 
 # Useful for a coverage check - see developer docs for how to run the check
 if __name__ == '__main__':
-    test_examples_in_docs()
+    test_examples_receipt()
+    for root, filename in examples_in_docs_data:
+        test_example_in_doc(root, filename)
