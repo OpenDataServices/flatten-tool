@@ -630,6 +630,7 @@ class ODSInput(SpreadsheetInput):
             for sheet in list(self.sheet_names_map):
                 if sheet not in self.include_sheets:
                     self.sheet_names_map.pop(sheet)
+
         for sheet in self.exclude_sheets or []:
             self.sheet_names_map.pop(sheet, None)
 
@@ -638,11 +639,11 @@ class ODSInput(SpreadsheetInput):
 
     def _resolve_sheet_configuration(self, sheet_name):
         sheet_configuration = self.sheet_configuration[sheet_name]
+        if not self.use_configuration:
+            return {'unused_config_line': True} if sheet_configuration else {}
         if not sheet_configuration:
             sheet_configuration = self.base_configuration
             sheet_configuration['base_configuration'] = True
-        if not self.use_configuration:
-            sheet_configuration = {}
 
         return sheet_configuration
 
@@ -659,7 +660,7 @@ class ODSInput(SpreadsheetInput):
             return []
 
         if self.vertical_orientation:
-            return [row[skip_rows] for row in worksheet[configuration_line:]]
+            return [row[skip_rows] for row in worksheet[configuration_line:] if len(row) > skip_rows]
 
         try:
             return [cell for cell in worksheet[skip_rows + configuration_line + 1]]
@@ -696,8 +697,10 @@ class ODSInput(SpreadsheetInput):
 
         worksheet = self.sheet_names_map[sheet_name]
         if self.vertical_orientation:
-            header_row = [row[skip_rows] for row in worksheet[configuration_line:]]
-            remaining_rows = [[row[i+1] for row in worksheet[(configuration_line):]] for i, _ in enumerate(header_row)]
+            header_row = [row[skip_rows] for row in worksheet[configuration_line:] if len(row) > skip_rows]
+            #remaining_rows = [[row[i] for row in worksheet[configuration_line:] if len(row) > i] for i in range(1, len(worksheet[configuration_line:][0]))]
+            longest_horizonal_row = max(len(row) for row in worksheet[configuration_line])
+            remaining_rows = [[row[i] if len(row) > i else None for row in worksheet[configuration_line:] if row] for i in range(1, longest_horizonal_row)]
         else:
             header_row = worksheet[skip_rows + configuration_line]
             remaining_rows = worksheet[(skip_rows + configuration_line
@@ -711,6 +714,7 @@ class ODSInput(SpreadsheetInput):
         for row in remaining_rows:
             output_row = OrderedDict()
             for i, x in enumerate(row):
+
                 header = coli_to_header[i]
                 value = x
                 if not header:
@@ -719,8 +723,10 @@ class ODSInput(SpreadsheetInput):
                 elif sheet_configuration.get("hashcomments") and header.startswith('#'):
                     # None means that the cell will be ignored
                     value = None
-                output_row[header] = value
-            yield output_row
+                if value is not None:
+                    output_row[header] = value
+            if output_row:
+                yield output_row
 
 
 FORMATS = {

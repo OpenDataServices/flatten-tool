@@ -112,6 +112,25 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
+    def test_ods_include_ignore(self):
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/basic_meta.ods', 
+                              include_sheets=['Meta'], vertical_orientation=True
+                             )
+        odsinput.read_sheets()
+        assert list(odsinput.sub_sheet_names) == ['Meta']
+        assert list(odsinput.get_sheet_lines('Meta')) == \
+            [{'a': 'a1', 'b': 'b1', 'c': 'c1'}]
+
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/basic_meta.ods',
+                              exclude_sheets=['Meta'])
+        odsinput.read_sheets()
+
+        assert list(odsinput.sub_sheet_names) == ['main', 'subsheet']
+        assert list(odsinput.get_sheet_lines('main')) == \
+            [{'colA': 'cell1', 'colB': 'cell2'}, {'colA': 'cell3', 'colB': 'cell4'}]
+        assert list(odsinput.get_sheet_lines('subsheet')) == \
+            [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
+
     def test_xlsx_input_integer(self):
         xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer.xlsx')
 
