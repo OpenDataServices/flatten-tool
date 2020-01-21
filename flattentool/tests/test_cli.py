@@ -1,6 +1,6 @@
 import pytest
 from flattentool import cli
-# hint: test_argparse is provided by libpython-x-testsuite on ubuntu
+# hint: test_argparse is provided by libpythonX.Y-testsuite on ubuntu
 from test.test_argparse import stderr_to_parser_error, ArgumentParserError
 
 

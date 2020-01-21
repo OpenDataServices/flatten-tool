@@ -79,19 +79,14 @@ class ODSReader:
                             textContent = u'{}{}'.format(textContent, n.data)
 
                 if(textContent):
-                    if(textContent[0] != "#"):  # ignore comments cells
-                        for rr in range(int(repeat)):  # repeated?
-                            arrCells[count] = textContent
-                            count += 1
-                    else:
-                        row_comment = row_comment + textContent + " "
+                    for rr in range(int(repeat)):  # repeated?
+                        arrCells[count] = textContent
+                        count += 1
                 else:
                     for rr in range(int(repeat)):
                         count += 1
 
-            # if row contained something
-            if(len(arrCells)):
-                arrRows.append(arrCells)
+            arrRows.append(arrCells)
 
             # else:
             #    print ("Empty or commented row (", row_comment, ")")

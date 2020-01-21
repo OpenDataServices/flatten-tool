@@ -97,11 +97,12 @@ def test_unflatten_xml_comment(tmpdir, dirname):
     assert open(os.path.join(dirname, 'expected.xml')).read() == tmpdir.join('output.xml').read()
 
 
-def test_unflatten_org_xml(tmpdir):
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_unflatten_org_xml_xlsx(tmpdir, input_format):
     unflatten(
-        input_name='flattentool/tests/fixtures/xlsx/iati-org.xlsx',
+        input_name='flattentool/tests/fixtures/{}/iati-org.{}'.format(input_format, input_format),
         output_name=tmpdir.join('output.xml').strpath,
-        input_format='xlsx',
+        input_format=input_format,
         id_name='organisation-identifier',
         xml=True,
         metatab_name='Meta'

@@ -45,7 +45,7 @@ def test_blank_sheets(tmpdir):
     # Check ODS is empty
     odswb = ODSReader(tmpdir.join('release.ods').strpath)
     ods_rows = odswb.getSheet('release')
-    assert len(ods_rows) == 0
+    assert ods_rows == [[]]
 
 
 def test_populated_header(tmpdir):
