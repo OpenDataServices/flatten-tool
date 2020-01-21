@@ -1028,23 +1028,26 @@ def test_unflatten_csv_latin1(tmpdir):
     assert reloaded_json == {'main': [{'ocid': '1', 'id': 'é'}]}
 
 
-def test_unflatten_xslx_unicode(tmpdir):
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_unflatten_unicode(tmpdir, input_format):
     unflatten(
-        'flattentool/tests/fixtures/xlsx/unicode.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/unicode.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'main': [{'ocid': 1 if sys.version > '3' else '1', 'id': 'éαГ😼𝒞人'}]}
+    assert reloaded_json == {'main': [{'ocid': 1 if input_format == 'xlsx' else '1', 'id': 'éαГ😼𝒞人'}]}
 
-def test_metatab(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_metatab(tmpdir, input_format):
     tmpdir.join('metatab_schema.json').write(
         '{"properties": {}}' 
     )
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/basic_meta.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('meta_unflattened.json').strpath,
         metatab_name='Meta',
         metatab_vertical_orientation=True,
@@ -1093,11 +1096,13 @@ def test_metatab(tmpdir):
                                   'main/colC': [['subsheet', 'colC']],
                                   'main/colD': [['subsheet', 'colD']]}
 
-def test_metatab_only(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_metatab_only(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/basic_meta.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('meta_unflattened.json').strpath,
         metatab_name='Meta',
         metatab_vertical_orientation=True,
@@ -1126,41 +1131,47 @@ def test_metatab_only(tmpdir):
                                   'b': [['Meta', 'b']],
                                   'c': [['Meta', 'c']]}
 
-def test_metatab_with_base(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_metatab_with_base(tmpdir, input_format):
     tmpdir.join('base_json.json').write(
         '{}' 
     )
 
     with pytest.raises(Exception):
         unflatten(
-            'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
-            input_format='xlsx',
+            'flattentool/tests/fixtures/{}/basic_meta.{}'.format(input_format, input_format),
+            input_format=input_format,
             output_name=tmpdir.join('meta_unflattened.json').strpath,
             metatab_name='Meta',
             metatab_vertical_orientation=True,
             base_json = tmpdir.join('base_json.json').strpath,
             )
 
-def test_bad_format(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_bad_format(tmpdir, input_format):
     with pytest.raises(Exception):
         unflatten(
-            'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+            'flattentool/tests/fixtures/{}/basic_meta.{}'.format(input_format, input_format),
             input_format='what',
             output_name=tmpdir.join('meta_unflattened.json').strpath,
             )
 
     with pytest.raises(Exception):
         unflatten(
-            'flattentool/tests/fixtures/xlsx/basic_meta.xlsx',
+            'flattentool/tests/fixtures/{}/basic_meta.{}'.format(input_format, input_format),
             input_format=None,
             output_name=tmpdir.join('meta_unflattened.json').strpath,
             )
 
-def test_commands_single_sheet_xlsx(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_single_sheet_spreadsheet(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_in_file.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_in_file.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('command_single_unflattened.json').strpath,
         cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
         heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
@@ -1181,11 +1192,13 @@ def test_commands_single_sheet_csv(tmpdir):
     unflattened = json.load(tmpdir.join('command_single_unflattened.json'))
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
 
-def test_commands_metatab(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_metatab(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_in_metatab.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_in_metatab.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('command_metatab_unflattened.json').strpath,
         cell_source_map=tmpdir.join('command_metatab_source_map.json').strpath,
         heading_source_map=tmpdir.join('command_metatab_heading_source_map.json').strpath,
@@ -1198,11 +1211,13 @@ def test_commands_metatab(tmpdir):
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
                            'some': 'data'}
 
-def test_commands_single_sheet_default(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_single_sheet_default(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_defaulted.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_defaulted.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('command_single_unflattened.json').strpath,
         cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
         heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
@@ -1215,8 +1230,8 @@ def test_commands_single_sheet_default(tmpdir):
 
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_defaulted.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_defaulted.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('command_single_unflattened.json').strpath,
         cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
         heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
@@ -1228,11 +1243,12 @@ def test_commands_single_sheet_default(tmpdir):
     assert unflattened == {'main': [{'actual': 'other', 'headings': 'headings', 'some': 'some'}, {'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
 
 
-def test_commands_default_override(tmpdir):
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_default_override(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_in_metatab_defaulted.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_in_metatab_defaulted.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('command_metatab_unflattened.json').strpath,
         cell_source_map=tmpdir.join('command_metatab_source_map.json').strpath,
         heading_source_map=tmpdir.join('command_metatab_heading_source_map.json').strpath,
@@ -1251,11 +1267,12 @@ def test_commands_default_override(tmpdir):
                            'some': 'data'}
 
 
-def test_commands_ignore(tmpdir):
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_ignore(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_ignore.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_ignore.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('command_single_unflattened.json').strpath,
         cell_source_map=tmpdir.join('command_single_source_map.json').strpath,
         heading_source_map=tmpdir.join('command_single_heading_source_map.json').strpath,
@@ -1265,11 +1282,13 @@ def test_commands_ignore(tmpdir):
 
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}]}
 
-def test_commands_hashcomments(tmpdir):
+
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_hashcomments(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_hashcomments.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_hashcomments.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('commands_hashcomments_unflattened.json').strpath,
         cell_source_map=tmpdir.join('commands_hashcomments_source_map.json').strpath,
         heading_source_map=tmpdir.join('commands_hashcomments_heading_source_map.json').strpath,
@@ -1283,11 +1302,12 @@ def test_commands_hashcomments(tmpdir):
                            'some': 'data'}
 
 
-def test_commands_hashcomments_sourcemap(tmpdir):
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_hashcomments_sourcemap(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_hashcomments_sourcemap.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_hashcomments_sourcemap.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('commands_hashcomments_unflattened.json').strpath,
         cell_source_map=tmpdir.join('commands_hashcomments_source_map.json').strpath,
         heading_source_map=tmpdir.join('commands_hashcomments_heading_source_map.json').strpath,
@@ -1312,11 +1332,12 @@ def test_commands_hashcomments_sourcemap(tmpdir):
     assert cell_source_map['main/0/id'][0][1] == 'C'
 
 
-def test_commands_id_name(tmpdir):
+@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+def test_commands_id_name(tmpdir, input_format):
 
     unflatten(
-        'flattentool/tests/fixtures/xlsx/commands_id_name.xlsx',
-        input_format='xlsx',
+        'flattentool/tests/fixtures/{}/commands_id_name.{}'.format(input_format, input_format),
+        input_format=input_format,
         output_name=tmpdir.join('commands_id_name_unflattened.json').strpath,
         cell_source_map=tmpdir.join('commands_id_name_source_map.json').strpath,
         heading_source_map=tmpdir.join('commands_id_name_heading_source_map.json').strpath,
