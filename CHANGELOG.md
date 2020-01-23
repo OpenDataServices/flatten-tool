@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- Drop Python 2 support https://github.com/OpenDataServices/flatten-tool/issues/299
 - Documentation on Change Logs, Versioning and PyPi updated to match current practice.
 
 ## Fixed

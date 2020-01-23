@@ -1035,7 +1035,7 @@ def test_unflatten_xslx_unicode(tmpdir):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'main': [{'ocid': 1 if sys.version > '3' else '1', 'id': 'éαГ😼𝒞人'}]}
+    assert reloaded_json == {'main': [{'ocid': 1, 'id': 'éαГ😼𝒞人'}]}
 
 def test_metatab(tmpdir):
     tmpdir.join('metatab_schema.json').write(

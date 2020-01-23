@@ -11,7 +11,6 @@ import sys
 import pytest
 import openpyxl
 import datetime
-from six import text_type
 
 
 def test_path_search():

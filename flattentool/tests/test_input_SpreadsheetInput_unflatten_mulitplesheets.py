@@ -14,7 +14,6 @@ import sys
 import pytest
 import openpyxl
 import datetime
-from six import text_type
 
 
 testdata_multiplesheets = [

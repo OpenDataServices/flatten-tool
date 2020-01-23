@@ -10,13 +10,9 @@ import csv
 import os
 import sys
 from warnings import warn
-import six
 from flattentool.exceptions import DataErrorWarning
 
-if sys.version > '3':
-    import csv
-else:
-    import unicodecsv as csv  # pylint: disable=F0401
+import csv
 
 
 class SpreadsheetOutput(object):
@@ -60,7 +56,7 @@ class XLSXOutput(SpreadsheetOutput):
             line = []
             for header in sheet_header:
                 value = sheet_line.get(header)
-                if isinstance(value, six.text_type):
+                if isinstance(value, str):
                     new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
                     if new_value != value:
                         warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
@@ -83,20 +79,11 @@ class CSVOutput(SpreadsheetOutput):
 
     def write_sheet(self, sheet_name, sheet):
         sheet_header = list(sheet)
-        if sys.version > '3':  # If Python 3 or greater
-            # Pass the encoding to the open function
-            with open(os.path.join(self.output_name, self.sheet_prefix + sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
-                dictwriter = csv.DictWriter(csv_file, sheet_header)
-                dictwriter.writeheader()
-                for sheet_line in sheet.lines:
-                    dictwriter.writerow(sheet_line)
-        else:  # If Python 2
-            # Pass the encoding to DictReader
-            with open(os.path.join(self.output_name, self.sheet_prefix + sheet_name+'.csv'), 'w') as csv_file:
-                dictwriter = csv.DictWriter(csv_file, sheet_header, encoding='utf-8')
-                dictwriter.writeheader()
-                for sheet_line in sheet.lines:
-                    dictwriter.writerow(sheet_line)
+        with open(os.path.join(self.output_name, self.sheet_prefix + sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
+            dictwriter = csv.DictWriter(csv_file, sheet_header)
+            dictwriter.writeheader()
+            for sheet_line in sheet.lines:
+                dictwriter.writerow(sheet_line)
 
 
 FORMATS = {

@@ -6,7 +6,6 @@ from flattentool.schema import SchemaParser
 from flattentool.tests.test_schema_parser import object_in_array_example_properties
 import pytest
 from collections import OrderedDict
-from six import text_type
 
 
 def listify(d):
@@ -433,7 +432,7 @@ class TestParseUsingSchema(object):
             {'testA/0/testB':'3', 'testA/0/testC': '4'}
             ]
         w = recwarn.pop(UserWarning)
-        assert 'Could not provide rollup' in text_type(w.message)
+        assert 'Could not provide rollup' in str(w.message)
 
     def test_two_parents(self):
         # This is a copy of test_two_parents from test_schema_parser.py, in

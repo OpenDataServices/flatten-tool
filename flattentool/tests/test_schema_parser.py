@@ -1,6 +1,5 @@
 import pytest
 from collections import OrderedDict
-from six import text_type
 from flattentool.schema import SchemaParser, JsonLoaderLocalRefsDisabled, get_property_type_set
 from flattentool.sheet import Sheet
 
@@ -368,7 +367,7 @@ def test_bad_rollup(recwarn):
     parser.parse()
 
     w = recwarn.pop(UserWarning)
-    assert 'Btest in rollUp but not in schema' in text_type(w.message)
+    assert 'Btest in rollUp but not in schema' in str(w.message)
 
     assert set(parser.main_sheet) == set()
     assert set(parser.sub_sheets) == set(['Atest'])
@@ -468,7 +467,7 @@ def test_use_titles(recwarn, use_titles):
         assert list(parser.sub_sheets['Atest']) == []
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
-        assert 'Field Atest does not have a title' in text_type(w.message)
+        assert 'Field Atest does not have a title' in str(w.message)
     else:
         assert len(recwarn) == 0
 
@@ -507,7 +506,7 @@ def test_use_titles(recwarn, use_titles):
         assert list(parser.sub_sheets['Xte_Atest']) == []
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
-        assert 'Field Xtest/Atest/0/Btest is missing a title' in text_type(w.message)
+        assert 'Field Xtest/Atest/0/Btest is missing a title' in str(w.message)
     else:
         assert len(recwarn) == 0
 
@@ -547,7 +546,7 @@ def test_use_titles3(recwarn, use_titles):
         assert list(parser.sub_sheets['Atest']) == []
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
-        assert 'Field Atest/0/Btest/Ctest is missing a title' in text_type(w.message)
+        assert 'Field Atest/0/Btest/Ctest is missing a title' in str(w.message)
     else:
         assert len(recwarn) == 0
 
@@ -583,7 +582,7 @@ def test_use_titles2(recwarn, use_titles):
         assert set(parser.sub_sheets) == set([])
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
-        assert 'Field Xtest/Atest/Btest does not have a title, skipping' in text_type(w.message)
+        assert 'Field Xtest/Atest/Btest does not have a title, skipping' in str(w.message)
     else:
         assert len(recwarn) == 0
 
@@ -615,7 +614,7 @@ def test_use_titles2(recwarn, use_titles):
         assert list(parser.sub_sheets['Atest']) == ['ATitle:BTitle']
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
-        assert 'Field Ctest does not have a title' in text_type(w.message)
+        assert 'Field Ctest does not have a title' in str(w.message)
     else:
         assert len(recwarn) == 0
 
@@ -647,7 +646,7 @@ def test_use_titles5(recwarn):
     assert set(parser.sub_sheets) == set(['Atest'])
     assert list(parser.sub_sheets['Atest']) == []
     w = recwarn.pop(UserWarning)
-    assert 'Field Atest/0/Btest is missing a title' in text_type(w.message)
+    assert 'Field Atest/0/Btest is missing a title' in str(w.message)
 
 
 def test_titles_rollup():
