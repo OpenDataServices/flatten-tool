@@ -698,7 +698,6 @@ class ODSInput(SpreadsheetInput):
         worksheet = self.sheet_names_map[sheet_name]
         if self.vertical_orientation:
             header_row = [row[skip_rows] for row in worksheet[configuration_line:] if len(row) > skip_rows]
-            #remaining_rows = [[row[i] for row in worksheet[configuration_line:] if len(row) > i] for i in range(1, len(worksheet[configuration_line:][0]))]
             longest_horizonal_row = max(len(row) for row in worksheet[configuration_line])
             remaining_rows = [[row[i] if len(row) > i else None for row in worksheet[configuration_line:] if row] for i in range(1, longest_horizonal_row)]
         else:

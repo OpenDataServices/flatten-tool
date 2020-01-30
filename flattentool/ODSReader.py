@@ -64,32 +64,12 @@ class ODSReader:
                     if self.clonespannedcolumns is not None and spanned > 1:
                         repeat = spanned
 
-                ps = cell.getElementsByType(P)
-                textContent = ""
-
-                # for each text/text:span node
-                for p in ps:
-                    for n in p.childNodes:
-                        if (n.nodeType == 1 and n.tagName == "text:span"):
-                            for c in n.childNodes:
-                                if (c.nodeType == 3):
-                                    textContent = u'{}{}'.format(textContent, c.data)
-
-                        if (n.nodeType == 3):
-                            textContent = u'{}{}'.format(textContent, n.data)
-
-                if(textContent):
-                    for rr in range(int(repeat)):  # repeated?
-                        arrCells[count] = textContent
-                        count += 1
-                else:
-                    for rr in range(int(repeat)):
-                        count += 1
+                for rr in range(int(repeat)):  # repeated?
+                    if str(cell):
+                        arrCells[count] = str(cell)
+                    count += 1
 
             arrRows.append(arrCells)
-
-            # else:
-            #    print ("Empty or commented row (", row_comment, ")")
 
         self.SHEETS[name] = arrRows
 
