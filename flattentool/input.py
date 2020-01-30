@@ -690,8 +690,8 @@ class ODSInput(SpreadsheetInput):
 
     def get_sheet_headings(self, sheet_name):
         worksheet = self.sheet_names_map[sheet_name]
-        sheet_configuration = self._resolve_sheet_configuration(sheet_name)
 
+        sheet_configuration = self._resolve_sheet_configuration(sheet_name)
         configuration_line = 1 if sheet_configuration and 'base_configuration' not in sheet_configuration else 0
 
         skip_rows = sheet_configuration.get("skipRows", 0)
@@ -704,7 +704,7 @@ class ODSInput(SpreadsheetInput):
             return [row[skip_rows] for row in worksheet[configuration_line:] if len(row) > skip_rows]
 
         try:
-            return [cell for cell in worksheet[skip_rows + configuration_line + 1]]
+            return [cell for cell in worksheet[skip_rows + configuration_line]]
         except IndexError:
             # If the heading line is after data in the spreadsheet. i.e when skipRows
             return []
@@ -763,10 +763,10 @@ class ODSInput(SpreadsheetInput):
                 elif sheet_configuration.get("hashcomments") and header.startswith('#'):
                     # None means that the cell will be ignored
                     value = None
-                if value is not None:
-                    output_row[header] = value
+                output_row[header] = value
             if output_row:
-                yield output_row
+                if not all(value is None for value in output_row.values()):
+                    yield output_row
 
 
 FORMATS = {
