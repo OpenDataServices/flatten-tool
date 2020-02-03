@@ -14,7 +14,6 @@ import pytest
 import openpyxl
 import datetime
 import copy
-from six import text_type
 
 ROOT_ID_TITLES = {
     'ocid': 'Open Contracting ID',

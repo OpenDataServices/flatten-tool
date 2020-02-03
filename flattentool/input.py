@@ -10,7 +10,6 @@ from decimal import Decimal, InvalidOperation
 import os
 from collections import OrderedDict
 import openpyxl
-from six import text_type
 from warnings import warn
 import traceback
 import datetime
@@ -24,6 +23,9 @@ from flattentool.ODSReader import ODSReader
 
 from flattentool.exceptions import DataErrorWarning
 from flattentool.lib import isint, parse_sheet_configuration
+from csv import DictReader
+from csv import reader as csvreader
+from collections import UserDict
 
 try:
     from zipfile import BadZipFile
@@ -38,19 +40,6 @@ class Cell:
         self.cell_location = cell_location
         self.sub_cells = []
 
-# The "pylint: disable" lines exist to ignore warnings about the imports we expect not to work not working
-
-if sys.version > '3':
-    from csv import DictReader
-    from csv import reader as csvreader
-else:
-    from unicodecsv import DictReader  # pylint: disable=F0401
-    from unicodecsv import reader as csvreader  # pylint: disable=F0401
-
-try:
-    from collections import UserDict  # pylint: disable=E0611
-except ImportError:
-    from UserDict import UserDict  # pylint: disable=F0401
 
 
 def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
@@ -62,16 +51,16 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         except (TypeError, ValueError, InvalidOperation):
             warn('Non-numeric value "{}" found in number column, returning as string instead.'.format(value),
                 DataErrorWarning)
-            return text_type(value)
+            return str(value)
     elif type_string == 'integer':
         try:
             return int(value)
         except (TypeError, ValueError):
             warn('Non-integer value "{}" found in integer column, returning as string instead.'.format(value),
                 DataErrorWarning)
-            return text_type(value)
+            return str(value)
     elif type_string == 'boolean':
-        value = text_type(value)
+        value = str(value)
         if value.lower() in ['true', '1']:
             return True
         elif value.lower() in ['false', '0']:
@@ -79,9 +68,9 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
         else:
             warn('Unrecognised value for boolean: "{}", returning as string instead'.format(value),
                 DataErrorWarning)
-            return text_type(value)
+            return str(value)
     elif type_string in ('array', 'array_array', 'string_array', 'number_array'):
-        value = text_type(value)
+        value = str(value)
         if type_string == 'number_array':
             try:
                 if ',' in value:
@@ -98,17 +87,17 @@ def convert_type(type_string, value, timezone = pytz.timezone('UTC')):
     elif type_string == 'string':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
-        return text_type(value)
+        return str(value)
     elif type_string == 'date':
         if type(value) == datetime.datetime:
             return value.date().isoformat()
-        return text_type(value)
+        return str(value)
     elif type_string == '':
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
         if type(value) == float and int(value) == value:
             return int(value)
-        return value if type(value) in [int] else text_type(value)
+        return value if type(value) in [int] else str(value)
     else:
         raise ValueError('Unrecognised type: "{}"'.format(type_string))
 
@@ -477,18 +466,11 @@ class CSVInput(SpreadsheetInput):
             # returning empty headers is a proxy for no data in the sheet.
             return []
 
-        if sys.version > '3':  # If Python 3 or greater
-            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
-                r = csvreader(main_sheet_file)
-                for num, row in enumerate(r):
-                    if num == (skip_rows + configuration_line):
-                        return row
-        else:  # If Python 2
-            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-                r = csvreader(main_sheet_file, encoding=self.encoding)
-                for num, row in enumerate(r):
-                    if num == (skip_rows + configuration_line):
-                        return row
+        with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+            r = csvreader(main_sheet_file)
+            for num, row in enumerate(r):
+                if num == (skip_rows + configuration_line):
+                    return row
 
     def read_sheets(self):
         sheet_file_names = os.listdir(self.input_name)
@@ -518,32 +500,16 @@ class CSVInput(SpreadsheetInput):
         header_rows = sheet_configuration.get("headerRows", 1)
         for i in range(0, configuration_line + skip_rows):
             previous_row = next(dictreader.reader)
-        if sys.version > '3':  # If Python 3 or greater
-            fieldnames = dictreader.fieldnames
-        else:
-            # unicodecsv dictreader always reads the headingline first
-            # so in the case of there being any rows to skip look at
-            # previous row and use that for fieldnames.
-            if (configuration_line + skip_rows):
-                fieldnames = previous_row
-                dictreader.fieldnames = fieldnames
-                dictreader.unicode_fieldnames = fieldnames
-            else:
-                fieldnames = dictreader.unicode_fieldnames
+        fieldnames = dictreader.fieldnames
         for i in range(0, header_rows - 1):
             next(dictreader.reader)
         for line in dictreader:
             yield OrderedDict((fieldname, line[fieldname]) for fieldname in fieldnames)
 
     def get_sheet_configuration(self, sheet_name):
-        if sys.version > '3':  # If Python 3 or greater
-            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
-                r = csvreader(main_sheet_file)
-                heading_row = next(r)
-        else:  # If Python 2
-            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-                r = csvreader(main_sheet_file, encoding=self.encoding)
-                heading_row = next(r)
+        with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+            r = csvreader(main_sheet_file)
+            heading_row = next(r)
         if len(heading_row) > 0 and heading_row[0] == '#':
             return heading_row[1:]
         return []
@@ -551,18 +517,11 @@ class CSVInput(SpreadsheetInput):
 
 
     def get_sheet_lines(self, sheet_name):
-        if sys.version > '3':  # If Python 3 or greater
-            # Pass the encoding to the open function
-            with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
-                dictreader = DictReader(main_sheet_file)
-                for row in self.generate_rows(dictreader, sheet_name):
-                    yield row
-        else:  # If Python 2
-            # Pass the encoding to DictReader
-            with open(os.path.join(self.input_name, sheet_name+'.csv')) as main_sheet_file:
-                dictreader = DictReader(main_sheet_file, encoding=self.encoding)
-                for row in self.generate_rows(dictreader, sheet_name):
-                    yield row
+        # Pass the encoding to the open function
+        with open(os.path.join(self.input_name, sheet_name+'.csv'), encoding=self.encoding) as main_sheet_file:
+            dictreader = DictReader(main_sheet_file)
+            for row in self.generate_rows(dictreader, sheet_name):
+                yield row
 
 
 class BadXLSXZipFile(BadZipFile):
@@ -803,7 +762,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
         if cell.cell_value is None or cell.cell_value == '':
             continue
         current_path = unflattened
-        path_list = [item.rstrip('[]') for item in text_type(path).split('/')]
+        path_list = [item.rstrip('[]') for item in str(path).split('/')]
         for num, path_item in enumerate(path_list):
             if isint(path_item):
                 if num == 0:

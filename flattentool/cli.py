@@ -4,8 +4,6 @@ import argparse
 import warnings
 import sys
 
-from six import text_type
-
 from flattentool import create_template, unflatten, flatten
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.output import FORMATS as OUTPUT_FORMATS
@@ -300,7 +298,7 @@ def main():
             # Note: Ensures that empty arguments are not passed to the create_template function
             create_template(**kwargs_from_parsed_args(args))
         except (OSError, IOError) as e:
-            print(text_type(e))
+            print(str(e))
             return
     elif args.subparser_name == 'flatten':
         flatten(**kwargs_from_parsed_args(args))

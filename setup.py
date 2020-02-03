@@ -1,11 +1,7 @@
 from setuptools import setup
-import sys
 
-install_requires = ['jsonref', 'schema', 'openpyxl>=2.6,<=3.0.1', 'six', 'pytz',
+install_requires = ['jsonref', 'schema', 'openpyxl>=2.6,<=3.0.1', 'pytz',
                     'xmltodict', 'lxml', 'odfpy']
-
-if sys.version < '3':
-    install_requires.append('unicodecsv')
 
 setup(
     name='flattentool',
