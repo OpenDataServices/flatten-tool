@@ -1,7 +1,8 @@
 from setuptools import setup
 
-install_requires = ['jsonref', 'schema', 'openpyxl>=2.6', 'pytz',
+install_requires = ['jsonref', 'schema', 'openpyxl>=2.6,!=3.0.2', 'pytz',
                     'xmltodict', 'lxml', 'odfpy']
+
 setup(
     name='flattentool',
     version='0.10.0',
