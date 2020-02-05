@@ -66,7 +66,16 @@ class ODSReader:
 
                 for rr in range(int(repeat)):  # repeated?
                     if str(cell):
-                        arrCells[count] = str(cell)
+                        value_type = cell.attributes.get(('urn:oasis:names:tc:opendocument:xmlns:office:1.0', 'value-type'))
+                        if value_type == 'float':
+                            if '.' in str(cell):
+                                arrCells[count] = float(str(cell))
+                            else:
+                                arrCells[count] = int(str(cell))
+                        elif value_type == 'date':
+                            arrCells[count] = cell.attributes.get(('urn:oasis:names:tc:opendocument:xmlns:office:1.0', 'date-value'))
+                        else:
+                            arrCells[count] = str(cell)
                     count += 1
 
             arrRows.append(arrCells)

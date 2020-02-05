@@ -131,18 +131,35 @@ class TestSuccessfulInput(object):
         assert list(odsinput.get_sheet_lines('subsheet')) == \
             [{'colC': 'cell5', 'colD': 'cell6'}, {'colC': 'cell7', 'colD': 'cell8'}]
 
-    def test_xlsx_input_integer(self):
-        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer.xlsx')
+    def test_xlsx_input_types(self):
+        xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/types.xlsx')
 
         xlsxinput.read_sheets()
 
         assert list(xlsxinput.get_sheet_lines('main')) == \
-            [{'colA': 1}]
-        if sys.version_info[0] == 2:
-            assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colA']) == long
-        else:
-            assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colA']) == int
+            [{
+                'colInt': 1,
+                'colFloat': 1.2,
+                'colDate': datetime.datetime(2020, 3, 5)
+            }]
+        assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colInt']) == int
+        assert type(list(xlsxinput.get_sheet_lines('main'))[0]['colFloat']) == float
         assert xlsxinput.sub_sheet_names == ['main']
+        
+    def test_ods_input_types(self):
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/types.ods')
+
+        odsinput.read_sheets()
+
+        assert list(odsinput.get_sheet_lines('main')) == \
+            [{
+                'colInt': 1,
+                'colFloat': 1.2,
+                'colDate': '2020-03-05'
+            }]
+        assert type(list(odsinput.get_sheet_lines('main'))[0]['colInt']) == int
+        assert type(list(odsinput.get_sheet_lines('main'))[0]['colFloat']) == float
+        assert list(odsinput.sub_sheet_names) == ['main']
 
     def test_xlsx_input_integer2(self):
         xlsxinput = XLSXInput(input_name='flattentool/tests/fixtures/xlsx/integer2.xlsx')
@@ -156,6 +173,16 @@ class TestSuccessfulInput(object):
         # 'Basic with float'
         assert type(list(xlsxinput.get_sheet_lines('Sheet1'))[0]['activity-status/@code']) == float
         assert xlsxinput.sub_sheet_names == ['Sheet1']
+
+    def test_ods_input_integer2(self):
+        odsinput = ODSInput(input_name='flattentool/tests/fixtures/ods/integer2.ods')
+
+        odsinput.read_sheets()
+
+        assert list(odsinput.get_sheet_lines('Sheet1')) == \
+            [{'activity-status/@code': 2}]
+        assert type(list(odsinput.get_sheet_lines('Sheet1'))[0]['activity-status/@code']) == int
+        assert list(odsinput.sub_sheet_names) == ['Sheet1']
 
     def test_xlsx_input_formula(self):
         """ When a forumla is present, we should use the value, rather than the
@@ -181,9 +208,9 @@ class TestSuccessfulInput(object):
 
         assert list(odsinput.sub_sheet_names) == ['main', 'subsheet']
         assert list(odsinput.get_sheet_lines('main')) == \
-            [OrderedDict([('colA', '1'), ('colB', '2')]), OrderedDict([('colA', '2'), ('colB', '4')])]
+            [OrderedDict([('colA', 1), ('colB', 2)]), OrderedDict([('colA', 2), ('colB', 4)])]
         assert list(odsinput.get_sheet_lines('subsheet')) == \
-            [OrderedDict([('colC', '3'), ('colD', '9')]), OrderedDict([('colC', '4'), ('colD', '12')])]
+            [OrderedDict([('colC', 3), ('colD', 9)]), OrderedDict([('colC', 4), ('colD', 12)])]
 
     def test_bad_xlsx(self):
         """ XLSX file that is not a XLSX"""

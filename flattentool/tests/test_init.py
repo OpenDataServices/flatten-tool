@@ -1036,7 +1036,7 @@ def test_unflatten_unicode(tmpdir, input_format):
         output_name=tmpdir.join('release.json').strpath,
         main_sheet_name='main')
     reloaded_json = json.load(tmpdir.join('release.json'))
-    assert reloaded_json == {'main': [{'ocid': 1 if input_format == 'xlsx' else '1', 'id': 'éαГ😼𝒞人'}]}
+    assert reloaded_json == {'main': [{'ocid': 1 , 'id': 'éαГ😼𝒞人'}]}
 
 
 @pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
