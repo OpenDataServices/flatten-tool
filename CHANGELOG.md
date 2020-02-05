@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Add .ods (OpenDocument Spreadsheet) file format support https://github.com/OpenDataServices/flatten-tool/pull/326
+
 ## [0.10.0] - 2020-02-06
 
 ### Changed
@@ -22,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - Add an XML declaration to outputted XML files https://github.com/OpenDataServices/cove/issues/1206
+
 
 ## [0.8.0] - 2019-07-31
 
