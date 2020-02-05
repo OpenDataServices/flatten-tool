@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Drop Python 2 support https://github.com/OpenDataServices/flatten-tool/issues/299
 - Documentation on Change Logs, Versioning and PyPi updated to match current practice.
+- Add .ods (OpenDocument Spreadsheet) file format support https://github.com/OpenDataServices/flatten-tool/pull/326
 
 ## Fixed
 
