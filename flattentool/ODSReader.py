@@ -19,6 +19,7 @@ import odf.opendocument
 from odf.table import Table, TableRow, TableCell
 from odf.text import P
 from collections import OrderedDict
+import re
 
 
 # http://stackoverflow.com/a/4544699/1846474
@@ -73,7 +74,11 @@ class ODSReader:
                             else:
                                 arrCells[count] = int(str(cell))
                         elif value_type == 'date':
-                            arrCells[count] = cell.attributes.get(('urn:oasis:names:tc:opendocument:xmlns:office:1.0', 'date-value'))
+                            date_value = cell.attributes.get(('urn:oasis:names:tc:opendocument:xmlns:office:1.0', 'date-value'))
+                            # Add UTC timezone to naive datetime strings
+                            if re.match(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$', date_value):
+                                date_value += 'Z'
+                            arrCells[count] = date_value
                         else:
                             arrCells[count] = str(cell)
                     count += 1
