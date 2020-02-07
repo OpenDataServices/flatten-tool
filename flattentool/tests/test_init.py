@@ -1209,7 +1209,7 @@ def test_commands_metatab(tmpdir, input_format):
     unflattened = json.load(tmpdir.join('command_metatab_unflattened.json'))
 
     assert unflattened == {'main': [{'actual': 'actual', 'headings': 'data', 'some': 'some'}, {'actual': 'actual', 'headings': 'Other data', 'some': 'some'}],
-                           'some': 'data'}
+                           'some': 'data', 'anumber': 2}
 
 
 @pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
