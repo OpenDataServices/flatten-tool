@@ -8,15 +8,12 @@ import openpyxl
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 import csv
 import os
-import sys
 from warnings import warn
 from flattentool.exceptions import DataErrorWarning
 
 from odf.opendocument import OpenDocumentSpreadsheet
 import odf.table
 import odf.text
-
-import csv
 
 
 class SpreadsheetOutput(object):
@@ -128,7 +125,7 @@ class ODSOutput(SpreadsheetOutput):
             row = odf.table.TableRow()
             for header in sheet_header:
                 value = sheet_line.get(header)
-                if isinstance(value, six.text_type):
+                if isinstance(value, str):
                     new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
                     if new_value != value:
                         warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
