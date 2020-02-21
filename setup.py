@@ -5,7 +5,7 @@ install_requires = ['jsonref', 'schema', 'openpyxl>=2.6,!=3.0.2', 'pytz',
 
 setup(
     name='flattentool',
-    version='0.10.0',
+    version='0.11.0',
     author='Open Data Services',
     author_email='code@opendataservices.coop',
     packages=['flattentool'],
