@@ -17,16 +17,37 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from flattentool.exceptions import DataErrorWarning
 
 
+def sanitise(value):
+    if isinstance(value, str):
+        new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
+        if new_value != value:
+            warn(
+                "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
+                    value
+                ),
+                DataErrorWarning,
+            )
+        return new_value
+    else:
+        return value
+
+
 class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
     def __init__(
-        self, parser, main_sheet_name="main", output_name="unflattened", sheet_prefix=""
+        self,
+        parser,
+        main_sheet_name="main",
+        output_name="unflattened",
+        sheet_prefix="",
+        vertical_orientation=False,
     ):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
         self.sheet_prefix = sheet_prefix
+        self.vertical_orientation = vertical_orientation
 
     def open(self):
         pass
@@ -55,23 +76,23 @@ class XLSXOutput(SpreadsheetOutput):
         sheet_header = list(sheet)
         worksheet = self.workbook.create_sheet()
         worksheet.title = self.sheet_prefix + sheet_name
-        worksheet.append(sheet_header)
-        for sheet_line in sheet.lines:
-            line = []
+        if self.vertical_orientation:
             for header in sheet_header:
-                value = sheet_line.get(header)
-                if isinstance(value, str):
-                    new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
-                    if new_value != value:
-                        warn(
-                            "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
-                                value
-                            ),
-                            DataErrorWarning,
-                        )
-                    value = new_value
-                line.append(value)
-            worksheet.append(line)
+                line = []
+                line.append(header)
+                for sheet_line in sheet.lines:
+                    value = sanitise(sheet_line.get(header))
+                    line.append(value)
+                worksheet.append(line)
+
+        else:
+            worksheet.append(sheet_header)
+            for sheet_line in sheet.lines:
+                line = []
+                for header in sheet_header:
+                    value = sanitise(sheet_line.get(header))
+                    line.append(value)
+                worksheet.append(line)
 
     def close(self):
         self.workbook.remove(self.workbook.active)
@@ -125,29 +146,29 @@ class ODSOutput(SpreadsheetOutput):
         worksheet = odf.table.Table(name=sheet_name)
         sheet_header = list(sheet)
 
-        header_row = odf.table.TableRow()
-
-        for header in sheet_header:
-            header_row.addElement(self._make_cell(header))
-
-        worksheet.addElement(header_row)
-
-        for sheet_line in sheet.lines:
-            row = odf.table.TableRow()
+        if self.vertical_orientation:
             for header in sheet_header:
-                value = sheet_line.get(header)
-                if isinstance(value, str):
-                    new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
-                    if new_value != value:
-                        warn(
-                            "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
-                                value
-                            ),
-                            DataErrorWarning,
-                        )
-                    value = new_value
-                row.addElement(self._make_cell(value))
-            worksheet.addElement(row)
+                row = odf.table.TableRow()
+                row.addElement(self._make_cell(header))
+                for sheet_line in sheet.lines:
+                    value = sanitise(sheet_line.get(header))
+                    row.addElement(self._make_cell(value))
+                worksheet.addElement(row)
+
+        else:
+            header_row = odf.table.TableRow()
+
+            for header in sheet_header:
+                header_row.addElement(self._make_cell(header))
+
+            worksheet.addElement(header_row)
+
+            for sheet_line in sheet.lines:
+                row = odf.table.TableRow()
+                for header in sheet_header:
+                    value = sanitise(sheet_line.get(header))
+                    row.addElement(self._make_cell(value))
+                worksheet.addElement(row)
 
         self.workbook.spreadsheet.addElement(worksheet)
 

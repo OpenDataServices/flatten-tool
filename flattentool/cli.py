@@ -97,6 +97,26 @@ def create_parser():
         default=3,
         help="The length of components of sub-sheet names (default 3).",
     )
+    parser_create_template.add_argument(
+        "--vertical-orientation",
+        action="store_true",
+        help="Read spreadsheet so that headings are in the first column and data is read vertically. Only for XLSX not CSV",
+    )
+    parser_create_template.add_argument(
+        "--metatab-name",
+        help="If supplied will assume there is a metadata tab with the given name",
+    )
+    parser_create_template.add_argument(
+        "--metatab-schema", help="The jsonschema of the metadata tab"
+    )
+    parser_create_template.add_argument(
+        "--metatab-only", action="store_true", help="Parse the metatab and nothing else"
+    )
+    parser_create_template.add_argument(
+        "--metatab-vertical-orientation",
+        action="store_true",
+        help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV",
+    )
 
     parser_flatten = subparsers.add_parser("flatten", help="Flatten a JSON file")
     parser_flatten.add_argument("input_name", help="Name of the input JSON file.")
@@ -177,6 +197,26 @@ def create_parser():
         "--remove-empty-schema-columns",
         action="store_true",
         help="When using flatten with a schema, remove columns and sheets from the output that contain no data.",
+    )
+    parser_flatten.add_argument(
+        "--vertical-orientation",
+        action="store_true",
+        help="Read spreadsheet so that headings are in the first column and data is read vertically. Only for XLSX not CSV",
+    )
+    parser_flatten.add_argument(
+        "--metatab-name",
+        help="If supplied will assume there is a metadata tab with the given name",
+    )
+    parser_flatten.add_argument(
+        "--metatab-schema", help="The jsonschema of the metadata tab"
+    )
+    parser_flatten.add_argument(
+        "--metatab-only", action="store_true", help="Parse the metatab and nothing else"
+    )
+    parser_flatten.add_argument(
+        "--metatab-vertical-orientation",
+        action="store_true",
+        help="Read metatab so that headings are in the first column and data is read vertically. Only for XLSX not CSV",
     )
 
     parser_unflatten = subparsers.add_parser(

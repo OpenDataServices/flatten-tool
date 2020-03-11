@@ -1,0 +1,4 @@
+ ./flatten-tool create-template --root-id='' --output-format='ods' --output-name='metatab-test.ods' --schema=../360Giving/standard/schema/360-giving-schema.json --main-sheet-name=grants --vertical-orientation
+ wget 'https://scvo.scot/funding/cyber-essentials-fund/projects/data.json' -O svco.soct.json.gz
+ ./flatten-tool flatten --root-id='' --output-format='ods' --output-name='metatab-test.ods' --schema=../360Giving/standard/schema/360-giving-schema.json --main-sheet-name=grants --root-list-path=grants --vertical-orientation svco.soct.json
+
