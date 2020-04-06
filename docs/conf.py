@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Flatten Tool'
-copyright = '2016, Open Data Services'
+copyright = '2016-2020, Open Data Services'
 author = 'Open Data Services'
 
 # The version info for the project you're documenting, acts as replacement for
