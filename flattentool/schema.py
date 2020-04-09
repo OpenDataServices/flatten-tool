@@ -201,7 +201,11 @@ class SchemaParser(object):
                 elif 'array' in property_type_set:
                     flattened_key = parent_path.replace('/0/', '/')+property_name
                     self.flattened[flattened_key] = "array"
-                    type_set = get_property_type_set(property_schema_dict['items'])
+                    if isinstance(property_schema_dict['items'], list):
+                        # If we have a list under items, just use the first one
+                        type_set = get_property_type_set(property_schema_dict['items'][0])
+                    else:
+                        type_set = get_property_type_set(property_schema_dict['items'])
                     if 'string' in type_set or not type_set:
                         self.flattened[flattened_key] = "string_array"
                         yield property_name, title
