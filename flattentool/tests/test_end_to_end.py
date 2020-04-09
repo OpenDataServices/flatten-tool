@@ -1,4 +1,4 @@
-'''
+"""
 The tests in these functions are the minimal cases necessary to give you a good
 understanding of the expected behaviour of flattentool.
 
@@ -36,24 +36,27 @@ To resolve the $ref entries in the schema, the whole schema is passed through
 `jsonref`.
 
 TODO: Extra columns
-'''
+"""
 
 from __future__ import unicode_literals
+
 from collections import OrderedDict
 from decimal import Decimal
-import warnings
 
-from jsonref import JsonRef
 import pytest
+from jsonref import JsonRef
 
-from flattentool.input import SpreadsheetInput, convert_type
-from flattentool.tests.test_init import original_cell_and_row_locations, original_headings
-from flattentool.schema import SchemaParser
 from flattentool.exceptions import DataErrorWarning
+from flattentool.input import SpreadsheetInput
+from flattentool.schema import SchemaParser
+from flattentool.tests.test_init import (
+    original_cell_and_row_locations,
+    original_headings,
+)
 
 
 def test_type_conversion_no_schema():
-    '''\
+    """\
     Without a schema flattentool keeps integers as they are, but makes
     everything else a string.
 
@@ -61,27 +64,35 @@ def test_type_conversion_no_schema():
 
     QUESTION: Is this behaviour predictable? Should everything be treated
     as a string perhaps?
-    '''
+    """
     sheets = [
         {
-            'name': 'main',
-            'headings': ['int', 'string', 'decimal', 'float'],
-            'rows': [
-                [1, 'a', Decimal('1.2'), 1.3],
-                ['1', 'a', '1.2', '1.3'],
-                ['InvalidInt', 1, 'InvalidDecimal', 'InvalidFloat'],
-            ]
+            "name": "main",
+            "headings": ["int", "string", "decimal", "float"],
+            "rows": [
+                [1, "a", Decimal("1.2"), 1.3],
+                ["1", "a", "1.2", "1.3"],
+                ["InvalidInt", 1, "InvalidDecimal", "InvalidFloat"],
+            ],
         }
     ]
     expected = [
-        OrderedDict([('int', 1), ('string', 'a'), ('decimal', '1.2'),
-                     ('float', '1.3')]),
+        OrderedDict(
+            [("int", 1), ("string", "a"), ("decimal", "1.2"), ("float", "1.3")]
+        ),
         # Note how int is 1 the first time, and '1' the second, with
         # everything else unchanged.
-        OrderedDict([('int', '1'), ('string', 'a'), ('decimal', '1.2'),
-                     ('float', '1.3')]),
-        OrderedDict([('int', 'InvalidInt'), ('string', 1),
-                     ('decimal', 'InvalidDecimal'), ('float', 'InvalidFloat')])
+        OrderedDict(
+            [("int", "1"), ("string", "a"), ("decimal", "1.2"), ("float", "1.3")]
+        ),
+        OrderedDict(
+            [
+                ("int", "InvalidInt"),
+                ("string", 1),
+                ("decimal", "InvalidDecimal"),
+                ("float", "InvalidFloat"),
+            ]
+        ),
     ]
     # TODO It would be nice to assert there are no warnings here, but py.test
     # doesn't seem to make this easy
@@ -89,56 +100,65 @@ def test_type_conversion_no_schema():
 
 
 def test_type_conversion_with_schema():
-    '''
+    """
     With a schema flattentool converts input to the correct types. It returns
     int, float and decimal as `Decimal` instances though because the underlying
     schema treats them all just as 'number'.
-    '''
+    """
     sheets = [
         {
-            'name': 'main',
-            'headings': ['int', 'string', 'decimal', 'float'],
-            'rows': [
-                [1, 'a', Decimal('1.2'), 1.3],
-                ['1', 'a', '1.2', '1.3'],
-                ['InvalidInt', 1, 'InvalidDecimal', 'InvalidFloat'],
-            ]
+            "name": "main",
+            "headings": ["int", "string", "decimal", "float"],
+            "rows": [
+                [1, "a", Decimal("1.2"), 1.3],
+                ["1", "a", "1.2", "1.3"],
+                ["InvalidInt", 1, "InvalidDecimal", "InvalidFloat"],
+            ],
         }
     ]
     schema = {
-        '$schema': 'http://json-schema.org/draft-04/schema#',
-        'type': 'object',
-        'properties': {
-            'int': {'type': 'number'},
-            'string': {'type': 'string'},
-            'decimal': {'type': 'number'},
-            'float': {'type': 'number'},
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+            "int": {"type": "number"},
+            "string": {"type": "string"},
+            "decimal": {"type": "number"},
+            "float": {"type": "number"},
         },
     }
     expected = [
-        OrderedDict([
-            ('int', Decimal('1')),
-            ('string', 'a'),
-            ('decimal', Decimal('1.2')),
-            ('float', Decimal(
-                '1.3000000000000000444089209850062616169452667236328125'
-            ))
-        ]),
+        OrderedDict(
+            [
+                ("int", Decimal("1")),
+                ("string", "a"),
+                ("decimal", Decimal("1.2")),
+                (
+                    "float",
+                    Decimal("1.3000000000000000444089209850062616169452667236328125"),
+                ),
+            ]
+        ),
         # Notice how the decimal representation of the float isn't quite right
         # because of float errors. Probably better to put input in as strings
         # to avoid this issue.
-        OrderedDict([
-            ('int', Decimal('1')),
-            ('string', 'a'),
-            ('decimal', Decimal('1.2')),
-            ('float', Decimal('1.3'))]),
+        OrderedDict(
+            [
+                ("int", Decimal("1")),
+                ("string", "a"),
+                ("decimal", Decimal("1.2")),
+                ("float", Decimal("1.3")),
+            ]
+        ),
         # Notice how the schema validator allows through invalid data, but
         # converts things to strings if it can
-        OrderedDict([
-            ('int', 'InvalidInt'),
-            ('string', '1'),
-            ('decimal', 'InvalidDecimal'),
-            ('float', 'InvalidFloat')]),
+        OrderedDict(
+            [
+                ("int", "InvalidInt"),
+                ("string", "1"),
+                ("decimal", "InvalidDecimal"),
+                ("float", "InvalidFloat"),
+            ]
+        ),
     ]
     with pytest.warns(DataErrorWarning) as type_warnings:
         assert (expected, None, None) == run(sheets, schema)
@@ -155,64 +175,56 @@ def test_type_conversion_with_schema():
 
 @pytest.mark.xfail
 def test_merging_cols():
-    '''
+    """
     This test demonstrates two problems:
 
     * Single rows are returned as a row, not as a list of rows with length 1
     * Columns with the same name result in the first being overwritten and
       not appearing in the cell source map
-    '''
-    sheets = [
-        {
-            'name': 'main',
-            'headings': ['int', 'int'],
-            'rows': [
-                [1, 2],
-            ]
-        }
-    ]
+    """
+    sheets = [{"name": "main", "headings": ["int", "int"], "rows": [[1, 2],]}]
     # XXX We don't correctly get a list of lists here, just [OrderedDict([(u'int', 2)])]
-    expected_result = [
-        [OrderedDict([(u'int', 2)])]
-    ]
+    expected_result = [[OrderedDict([("int", 2)])]]
     # XXX Fails to keep the source map to cell B2 because the value is lost early on in
     #     converting the row to a dictionary
-    expected_cell_source_map = OrderedDict([
-        (u'main/0/int', [('main', 'A', 2, 'int'), ('main', 'B', 2, 'int')]),
-        (u'main/0', [('main', 2)]),
-    ])
-    expected_heading_source_map = OrderedDict([
-        (u'main/int', [('main', 'int')]),
-    ])
+    expected_cell_source_map = OrderedDict(
+        [
+            ("main/0/int", [("main", "A", 2, "int"), ("main", "B", 2, "int")]),
+            ("main/0", [("main", 2)]),
+        ]
+    )
+    expected_heading_source_map = OrderedDict([("main/int", [("main", "int")]),])
     expected = (expected_result, expected_cell_source_map, expected_heading_source_map)
     assert expected == run(sheets, source_maps=True)
 
 
 test_dict_data_result = [
-    OrderedDict([('name', 'James'), ('address',  OrderedDict([('house', '15')]))]),
+    OrderedDict([("name", "James"), ("address", OrderedDict([("house", "15")]))]),
 ]
 
 test_dict_data_sheets = [
     {
-        'name': 'main',
-        'headings': ['name', 'address/house'],
-        'rows': [
-            ['James', '15'],
-        ],
+        "name": "main",
+        "headings": ["name", "address/house"],
+        "rows": [["James", "15"],],
     },
 ]
 
-test_dict_data_cell_source_map = OrderedDict([
-    ('main/0/address/house', [('main', 'B', 2, 'address/house')]),
-    ('main/0/name', [('main', 'A', 2, 'name')]),
-    ('main/0/address', [('main', 2)]),
-    ('main/0', [('main', 2)]),
-])
+test_dict_data_cell_source_map = OrderedDict(
+    [
+        ("main/0/address/house", [("main", "B", 2, "address/house")]),
+        ("main/0/name", [("main", "A", 2, "name")]),
+        ("main/0/address", [("main", 2)]),
+        ("main/0", [("main", 2)]),
+    ]
+)
 
-test_dict_data_heading_source_map = OrderedDict([
-    ('main/address/house', [('main', 'address/house')]),
-    ('main/name', [('main', 'name')]),
-])
+test_dict_data_heading_source_map = OrderedDict(
+    [
+        ("main/address/house", [("main", "address/house")]),
+        ("main/name", [("main", "name")]),
+    ]
+)
 
 test_dict_data = [
     # No schema case
@@ -227,21 +239,17 @@ test_dict_data = [
     (
         test_dict_data_sheets,
         {
-            '$schema': 'http://json-schema.org/draft-04/schema#',
-            'definitions': {
-                'Address': {
-                    'type': 'object',
-                    'properties': {
-                        'house': {'type': 'string'},
-                    },
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "definitions": {
+                "Address": {
+                    "type": "object",
+                    "properties": {"house": {"type": "string"},},
                 }
             },
-            'type': 'object',
-            'properties': {
-                'name': {'type': 'string'},
-                'address': {
-                    '$ref': '#/definitions/Address'
-                },
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "address": {"$ref": "#/definitions/Address"},
             },
         },
         test_dict_data_result,
@@ -252,23 +260,19 @@ test_dict_data = [
     (
         test_dict_data_sheets,
         {
-            '$schema': 'http://json-schema.org/draft-04/schema#',
-            'title': 'Person Title',
-            'definitions': {
-                'Address': {
-                    'type': 'object',
-                    'title': 'Address Title',
-                    'properties': {
-                        'house': {'type': 'string'},
-                    },
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "title": "Person Title",
+            "definitions": {
+                "Address": {
+                    "type": "object",
+                    "title": "Address Title",
+                    "properties": {"house": {"type": "string"},},
                 }
             },
-            'type': 'object',
-            'properties': {
-                'name': {'type': 'string'},
-                'address': {
-                    '$ref': '#/definitions/Address'
-                }
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "address": {"$ref": "#/definitions/Address"},
             },
         },
         test_dict_data_result,
@@ -279,126 +283,119 @@ test_dict_data = [
     (
         [
             {
-                'name': 'main',
-                'headings': [' NAmE TiTLe ', ' ADDresS TiTLe : HOusE TiTLe '],
-                'rows': [
-                    ['James', '15'],
-                ],
+                "name": "main",
+                "headings": [" NAmE TiTLe ", " ADDresS TiTLe : HOusE TiTLe "],
+                "rows": [["James", "15"],],
             },
         ],
         {
-            '$schema': 'http://json-schema.org/draft-04/schema#',
-            'title': 'Person Title',
-            'definitions': {
-                'Address': {
-                    'type': 'object',
-                    'title': 'Address Title',
-                    'properties': {
-                        'house': {
-                            'type': 'string',
-                            'title': 'House Title',
-                        },
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "title": "Person Title",
+            "definitions": {
+                "Address": {
+                    "type": "object",
+                    "title": "Address Title",
+                    "properties": {
+                        "house": {"type": "string", "title": "House Title",},
                     },
                 }
             },
-            'type': 'object',
-            'properties': {
-                'name': {
-                    'type': 'string',
-                    'title': 'Name Title',
-                },
-                'address': {
-                    '$ref': '#/definitions/Address'
-                },
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "title": "Name Title",},
+                "address": {"$ref": "#/definitions/Address"},
             },
         },
         [
-            OrderedDict([('name', 'James'), ('address',  OrderedDict([('house', '15')]))]),
+            OrderedDict(
+                [("name", "James"), ("address", OrderedDict([("house", "15")]))]
+            ),
         ],
-        OrderedDict([
-            ('main/0/address/house', [('main', 'B', 2, ' ADDresS TiTLe : HOusE TiTLe ')]),
-            ('main/0/name', [('main', 'A', 2, ' NAmE TiTLe ')]),
-            ('main/0/address', [('main', 2)]),
-            ('main/0', [('main', 2)]),
-        ]),
-        OrderedDict([
-            ('main/address/house', [('main', ' ADDresS TiTLe : HOusE TiTLe ')]),
-            ('main/name', [('main', ' NAmE TiTLe ')]),
-        ]),
-    )
+        OrderedDict(
+            [
+                (
+                    "main/0/address/house",
+                    [("main", "B", 2, " ADDresS TiTLe : HOusE TiTLe ")],
+                ),
+                ("main/0/name", [("main", "A", 2, " NAmE TiTLe ")]),
+                ("main/0/address", [("main", 2)]),
+                ("main/0", [("main", 2)]),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("main/address/house", [("main", " ADDresS TiTLe : HOusE TiTLe ")]),
+                ("main/name", [("main", " NAmE TiTLe ")]),
+            ]
+        ),
+    ),
 ]
 
 
 @pytest.mark.parametrize(
-    'sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map',
-    test_dict_data
+    "sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map",
+    test_dict_data,
 )
-def test_dict(sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map):
-    result, cell_source_map, heading_source_map = run(sheets, schema=schema, source_maps=True)
+def test_dict(
+    sheets,
+    schema,
+    expected_result,
+    expected_cell_source_map,
+    expected_heading_source_map,
+):
+    result, cell_source_map, heading_source_map = run(
+        sheets, schema=schema, source_maps=True
+    )
     assert expected_result == result
     assert expected_cell_source_map == cell_source_map
     assert expected_heading_source_map == heading_source_map
 
 
 test_list_of_dicts_data_result = [
-     OrderedDict([
-        ('name', 'James'),
-        ('address',  [
-            OrderedDict([
-                ('house', '15'),
-            ])
-        ])])
+    OrderedDict([("name", "James"), ("address", [OrderedDict([("house", "15"),])])])
 ]
 
 test_list_of_dicts_data_sheets = [
     {
-        'name': 'main',
-        'headings': ['name', 'address/0/house'],
-        'rows': [
-            ['James', '15'],
-        ],
+        "name": "main",
+        "headings": ["name", "address/0/house"],
+        "rows": [["James", "15"],],
     },
 ]
 
-test_list_of_dicts_data_cell_source_map = OrderedDict([
-    (u'main/0/address/0/house', [('main', 'B', 2, 'address/0/house')]),
-    (u'main/0/name', [('main', 'A', 2, 'name')]),
-    (u'main/0/address/0', [('main', 2)]),
-    (u'main/0', [('main', 2)])
-])
+test_list_of_dicts_data_cell_source_map = OrderedDict(
+    [
+        ("main/0/address/0/house", [("main", "B", 2, "address/0/house")]),
+        ("main/0/name", [("main", "A", 2, "name")]),
+        ("main/0/address/0", [("main", 2)]),
+        ("main/0", [("main", 2)]),
+    ]
+)
 
-test_list_of_dicts_data_heading_source_map = OrderedDict([
-    ('main/address/house', [('main', 'address/0/house')]),
-    ('main/name', [('main', 'name')]),
-])
+test_list_of_dicts_data_heading_source_map = OrderedDict(
+    [
+        ("main/address/house", [("main", "address/0/house")]),
+        ("main/name", [("main", "name")]),
+    ]
+)
 
 test_list_of_dicts_data_schema_with_titles = {
-    '$schema': 'http://json-schema.org/draft-04/schema#',
-    'type': 'object',
-    'title': 'Person Title',
-    'definitions': {
-        'Address': {
-            'type': 'object',
-            'title': 'Address Item Title',
-            'properties': {
-                'house': {
-                    'type': 'string',
-                    'title': 'House Title',
-                },
-            },
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "Person Title",
+    "definitions": {
+        "Address": {
+            "type": "object",
+            "title": "Address Item Title",
+            "properties": {"house": {"type": "string", "title": "House Title",},},
         },
     },
-    'properties': {
-        'name': {
-            'type': 'string',
-            'title': 'Name Title',
-        },
-        'address': {
-            'items': {
-                '$ref': '#/definitions/Address',
-            },
-            'type': 'array',
-            'title': 'Address Title',
+    "properties": {
+        "name": {"type": "string", "title": "Name Title",},
+        "address": {
+            "items": {"$ref": "#/definitions/Address",},
+            "type": "array",
+            "title": "Address Title",
         },
     },
 }
@@ -416,28 +413,20 @@ test_list_of_dicts_data = [
     (
         test_list_of_dicts_data_sheets,
         {
-            '$schema': 'http://json-schema.org/draft-04/schema#',
-            'type': 'object',
-            'definitions': {
-                'Address': {
-                    'type': 'object',
-                    'title': 'Address Item Title',
-                    'properties': {
-                        'house': {
-                            'type': 'string',
-                        },
-                    },
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "definitions": {
+                "Address": {
+                    "type": "object",
+                    "title": "Address Item Title",
+                    "properties": {"house": {"type": "string",},},
                 },
             },
-            'properties': {
-                'name': {
-                    'type': 'string',
-                },
-                'address': {
-                    'items': {
-                        '$ref': '#/definitions/Address',
-                    },
-                    'type': 'array',
+            "properties": {
+                "name": {"type": "string",},
+                "address": {
+                    "items": {"$ref": "#/definitions/Address",},
+                    "type": "array",
                 },
             },
         },
@@ -457,113 +446,112 @@ test_list_of_dicts_data = [
     (
         [
             {
-                'name': 'main',
-                'headings': [' NAmE TiTLe ', ' ADDresS TiTLe : 0 : HOusE TiTLe '],
-                'rows': [
-                    ['James', '15'],
-                ],
+                "name": "main",
+                "headings": [" NAmE TiTLe ", " ADDresS TiTLe : 0 : HOusE TiTLe "],
+                "rows": [["James", "15"],],
             },
         ],
         test_list_of_dicts_data_schema_with_titles,
         test_list_of_dicts_data_result,
-        OrderedDict([
-            (u'main/0/address/0/house', [('main', 'B', 2, ' ADDresS TiTLe : 0 : HOusE TiTLe ')]),
-            (u'main/0/name', [('main', 'A', 2, ' NAmE TiTLe ')]),
-            (u'main/0/address/0', [('main', 2)]),
-            (u'main/0', [('main', 2)])
-        ]),
-        OrderedDict([
-            ('main/address/house', [('main', ' ADDresS TiTLe : 0 : HOusE TiTLe ')]),
-            ('main/name', [('main', ' NAmE TiTLe ')]),
-        ]),
-    )
+        OrderedDict(
+            [
+                (
+                    "main/0/address/0/house",
+                    [("main", "B", 2, " ADDresS TiTLe : 0 : HOusE TiTLe ")],
+                ),
+                ("main/0/name", [("main", "A", 2, " NAmE TiTLe ")]),
+                ("main/0/address/0", [("main", 2)]),
+                ("main/0", [("main", 2)]),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("main/address/house", [("main", " ADDresS TiTLe : 0 : HOusE TiTLe ")]),
+                ("main/name", [("main", " NAmE TiTLe ")]),
+            ]
+        ),
+    ),
 ]
 
 
 @pytest.mark.parametrize(
-    'sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map',
-    test_list_of_dicts_data
+    "sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map",
+    test_list_of_dicts_data,
 )
-def test_list_of_dicts(sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map):
-    result, cell_source_map, heading_source_map = run(sheets, schema=schema, source_maps=True)
+def test_list_of_dicts(
+    sheets,
+    schema,
+    expected_result,
+    expected_cell_source_map,
+    expected_heading_source_map,
+):
+    result, cell_source_map, heading_source_map = run(
+        sheets, schema=schema, source_maps=True
+    )
     assert expected_result == result
     assert expected_cell_source_map == cell_source_map
     assert expected_heading_source_map == heading_source_map
 
 
 test_list_of_dicts_with_ids_data_result = [
-     OrderedDict([
-        ('id', 'person1'),
-        ('name', 'James'),
-        ('address',  [
-            OrderedDict([
-                ('id', 'address1'),
-                ('house', '15'),
-            ])
-        ])])
+    OrderedDict(
+        [
+            ("id", "person1"),
+            ("name", "James"),
+            ("address", [OrderedDict([("id", "address1"), ("house", "15"),])]),
+        ]
+    )
 ]
 
 test_list_of_dicts_with_ids_data_sheets = [
     {
-        'name': 'main',
-        'headings': ['id', 'name', 'address/0/id', 'address/0/house'],
-        'rows': [
-            ['person1', 'James', 'address1', '15'],
-        ],
+        "name": "main",
+        "headings": ["id", "name", "address/0/id", "address/0/house"],
+        "rows": [["person1", "James", "address1", "15"],],
     },
 ]
 
-test_list_of_dicts_with_ids_data_cell_source_map = OrderedDict([
-    (u'main/0/address/0/house', [('main', 'D', 2, 'address/0/house')]),
-    (u'main/0/address/0/id', [('main', 'C', 2, 'address/0/id')]),
-    (u'main/0/id', [('main', 'A', 2, 'id')]),
-    (u'main/0/name', [('main', 'B', 2, 'name')]),
-    (u'main/0/address/0', [('main', 2)]),
-    (u'main/0', [('main', 2)])
-])
+test_list_of_dicts_with_ids_data_cell_source_map = OrderedDict(
+    [
+        ("main/0/address/0/house", [("main", "D", 2, "address/0/house")]),
+        ("main/0/address/0/id", [("main", "C", 2, "address/0/id")]),
+        ("main/0/id", [("main", "A", 2, "id")]),
+        ("main/0/name", [("main", "B", 2, "name")]),
+        ("main/0/address/0", [("main", 2)]),
+        ("main/0", [("main", 2)]),
+    ]
+)
 
-test_list_of_dicts_with_ids_data_heading_source_map = OrderedDict([
-    ('main/address/house', [('main', 'address/0/house')]),
-    ('main/address/id', [('main', 'address/0/id')]),
-    ('main/id', [('main', 'id')]),
-    ('main/name', [('main', 'name')]),
-])
+test_list_of_dicts_with_ids_data_heading_source_map = OrderedDict(
+    [
+        ("main/address/house", [("main", "address/0/house")]),
+        ("main/address/id", [("main", "address/0/id")]),
+        ("main/id", [("main", "id")]),
+        ("main/name", [("main", "name")]),
+    ]
+)
 
 test_list_of_dicts_with_ids_data_schema_with_titles = {
-    '$schema': 'http://json-schema.org/draft-04/schema#',
-    'type': 'object',
-    'title': 'Person Title',
-    'definitions': {
-        'Address': {
-            'type': 'object',
-            'title': 'Address Item Title',
-            'properties': {
-                'house': {
-                    'type': 'string',
-                    'title': 'House Title',
-                },
-                'id': {
-                    'type': 'string',
-                    'title': 'Identifier',
-                },
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "Person Title",
+    "definitions": {
+        "Address": {
+            "type": "object",
+            "title": "Address Item Title",
+            "properties": {
+                "house": {"type": "string", "title": "House Title",},
+                "id": {"type": "string", "title": "Identifier",},
             },
         },
     },
-    'properties': {
-        'id': {
-            'type': 'string',
-            'title': 'Identifier',
-        },
-        'name': {
-            'type': 'string',
-            'title': 'Name Title',
-        },
-        'address': {
-            'items': {
-                '$ref': '#/definitions/Address',
-            },
-            'type': 'array',
-            'title': 'Address Title',
+    "properties": {
+        "id": {"type": "string", "title": "Identifier",},
+        "name": {"type": "string", "title": "Name Title",},
+        "address": {
+            "items": {"$ref": "#/definitions/Address",},
+            "type": "array",
+            "title": "Address Title",
         },
     },
 }
@@ -581,33 +569,23 @@ test_list_of_dicts_with_ids_data = [
     (
         test_list_of_dicts_with_ids_data_sheets,
         {
-            '$schema': 'http://json-schema.org/draft-04/schema#',
-            'type': 'object',
-            'definitions': {
-                'Address': {
-                    'type': 'object',
-                    'properties': {
-                        'house': {
-                            'type': 'string',
-                        },
-                        'id': {
-                            'type': 'string',
-                        },
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "definitions": {
+                "Address": {
+                    "type": "object",
+                    "properties": {
+                        "house": {"type": "string",},
+                        "id": {"type": "string",},
                     },
                 },
             },
-            'properties': {
-                'id': {
-                    'type': 'string',
-                },
-                'name': {
-                    'type': 'string',
-                },
-                'address': {
-                    'items': {
-                        '$ref': '#/definitions/Address',
-                    },
-                    'type': 'array',
+            "properties": {
+                "id": {"type": "string",},
+                "name": {"type": "string",},
+                "address": {
+                    "items": {"$ref": "#/definitions/Address",},
+                    "type": "array",
                 },
             },
         },
@@ -627,44 +605,60 @@ test_list_of_dicts_with_ids_data = [
     (
         [
             {
-                'name': 'main',
-                'headings': [
-                    ' IDENtifiER ',
-                    ' NAmE TiTLe ',
-                    ' ADDresS TiTLe : 0 : IDENtifiER ',
-                    ' ADDresS TiTLe : 0 : HOusE TiTLe '
+                "name": "main",
+                "headings": [
+                    " IDENtifiER ",
+                    " NAmE TiTLe ",
+                    " ADDresS TiTLe : 0 : IDENtifiER ",
+                    " ADDresS TiTLe : 0 : HOusE TiTLe ",
                 ],
-                'rows': [
-                    ['person1', 'James', 'address1', '15'],
-                ],
+                "rows": [["person1", "James", "address1", "15"],],
             },
         ],
         test_list_of_dicts_with_ids_data_schema_with_titles,
         test_list_of_dicts_with_ids_data_result,
-        OrderedDict([
-            (u'main/0/address/0/house', [('main', 'D', 2, ' ADDresS TiTLe : 0 : HOusE TiTLe ')]),
-            (u'main/0/address/0/id', [('main', 'C', 2, ' ADDresS TiTLe : 0 : IDENtifiER ')]),
-            (u'main/0/id', [('main', 'A', 2, ' IDENtifiER ')]),
-            (u'main/0/name', [('main', 'B', 2, ' NAmE TiTLe ')]),
-            (u'main/0/address/0', [('main', 2)]),
-            (u'main/0', [('main', 2)])
-        ]),
-        OrderedDict([
-            ('main/address/house', [('main', ' ADDresS TiTLe : 0 : HOusE TiTLe ')]),
-            ('main/address/id', [('main', ' ADDresS TiTLe : 0 : IDENtifiER ')]),
-            ('main/id', [('main', ' IDENtifiER ')]),
-            ('main/name', [('main', ' NAmE TiTLe ')]),
-        ]),
-    )
+        OrderedDict(
+            [
+                (
+                    "main/0/address/0/house",
+                    [("main", "D", 2, " ADDresS TiTLe : 0 : HOusE TiTLe ")],
+                ),
+                (
+                    "main/0/address/0/id",
+                    [("main", "C", 2, " ADDresS TiTLe : 0 : IDENtifiER ")],
+                ),
+                ("main/0/id", [("main", "A", 2, " IDENtifiER ")]),
+                ("main/0/name", [("main", "B", 2, " NAmE TiTLe ")]),
+                ("main/0/address/0", [("main", 2)]),
+                ("main/0", [("main", 2)]),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("main/address/house", [("main", " ADDresS TiTLe : 0 : HOusE TiTLe ")]),
+                ("main/address/id", [("main", " ADDresS TiTLe : 0 : IDENtifiER ")]),
+                ("main/id", [("main", " IDENtifiER ")]),
+                ("main/name", [("main", " NAmE TiTLe ")]),
+            ]
+        ),
+    ),
 ]
 
 
 @pytest.mark.parametrize(
-    'sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map',
-    test_list_of_dicts_with_ids_data
+    "sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map",
+    test_list_of_dicts_with_ids_data,
 )
-def test_list_of_dicts_with_ids(sheets, schema, expected_result, expected_cell_source_map, expected_heading_source_map):
-    result, cell_source_map, heading_source_map = run(sheets, schema=schema, source_maps=True)
+def test_list_of_dicts_with_ids(
+    sheets,
+    schema,
+    expected_result,
+    expected_cell_source_map,
+    expected_heading_source_map,
+):
+    result, cell_source_map, heading_source_map = run(
+        sheets, schema=schema, source_maps=True
+    )
     assert expected_result == result
     assert expected_cell_source_map == cell_source_map
     assert expected_heading_source_map == heading_source_map
@@ -675,290 +669,320 @@ test_arrangement_data_sheets = (
     (
         [
             {
-                'name': 'main',
-                'headings': ['id', 'name'],
-                'rows': [
-                    ['PERSON-james', 'James'],
-                    ['PERSON-bob',   'Bob'],
-                ]
+                "name": "main",
+                "headings": ["id", "name"],
+                "rows": [["PERSON-james", "James"], ["PERSON-bob", "Bob"],],
             },
             {
-                'name': 'addresses',
-                'headings': ['id', 'address/0/house', 'address/0/town'],
-                'rows': [
-                    ['PERSON-james', '1', 'London'],
-                    ['PERSON-james', '2', 'Birmingham'],
-                    ['PERSON-bob',   '3', 'Leeds'],
-                    ['PERSON-bob',   '4', 'Manchester'],
-                ]
+                "name": "addresses",
+                "headings": ["id", "address/0/house", "address/0/town"],
+                "rows": [
+                    ["PERSON-james", "1", "London"],
+                    ["PERSON-james", "2", "Birmingham"],
+                    ["PERSON-bob", "3", "Leeds"],
+                    ["PERSON-bob", "4", "Manchester"],
+                ],
             },
         ],
-        OrderedDict([
-            # Cells
-            ('main/0/address/0/house', [('addresses', 'B', 2, 'address/0/house')]),
-            ('main/0/address/0/town',  [('addresses', 'C', 2, 'address/0/town')]),
-            ('main/0/address/1/house', [('addresses', 'B', 3, 'address/0/house')]),
-            ('main/0/address/1/town',  [('addresses', 'C', 3, 'address/0/town')]),
-            ('main/0/id',              [('main', 'A', 2, 'id'), ('addresses', 'A', 2, 'id'), ('addresses', 'A', 3, 'id')]),
-            ('main/0/name',            [('main', 'B', 2, 'name')]),
-            ('main/1/address/0/house', [('addresses', 'B', 4, 'address/0/house')]),
-            ('main/1/address/0/town',  [('addresses', 'C', 4, 'address/0/town')]),
-            ('main/1/address/1/house', [('addresses', 'B', 5, 'address/0/house')]),
-            ('main/1/address/1/town',  [('addresses', 'C', 5, 'address/0/town')]),
-            ('main/1/id',              [('main', 'A', 3, 'id'), ('addresses', 'A', 4, 'id'), ('addresses', 'A', 5, 'id')]),
-            ('main/1/name',            [('main', 'B', 3, 'name')]),
-            # Rows
-            ('main/0/address/0', [('addresses', 2)]),
-            ('main/0/address/1', [('addresses', 3)]),
-            ('main/0',           [('main', 2), ('addresses', 2), ('addresses', 3)]),
-            ('main/1/address/0', [('addresses', 4)]),
-            ('main/1/address/1', [('addresses', 5)]),
-            ('main/1',           [('main', 3), ('addresses', 4), ('addresses', 5)])
-        ]),
-        OrderedDict([
-            ('main/address/house', [('addresses', 'address/0/house')]),
-            ('main/address/town',  [('addresses', 'address/0/town')]),
-            ('main/id',            [('main', 'id'), ('addresses', 'id')]),
-            ('main/name',          [('main', 'name')])
-        ]),
+        OrderedDict(
+            [
+                # Cells
+                ("main/0/address/0/house", [("addresses", "B", 2, "address/0/house")]),
+                ("main/0/address/0/town", [("addresses", "C", 2, "address/0/town")]),
+                ("main/0/address/1/house", [("addresses", "B", 3, "address/0/house")]),
+                ("main/0/address/1/town", [("addresses", "C", 3, "address/0/town")]),
+                (
+                    "main/0/id",
+                    [
+                        ("main", "A", 2, "id"),
+                        ("addresses", "A", 2, "id"),
+                        ("addresses", "A", 3, "id"),
+                    ],
+                ),
+                ("main/0/name", [("main", "B", 2, "name")]),
+                ("main/1/address/0/house", [("addresses", "B", 4, "address/0/house")]),
+                ("main/1/address/0/town", [("addresses", "C", 4, "address/0/town")]),
+                ("main/1/address/1/house", [("addresses", "B", 5, "address/0/house")]),
+                ("main/1/address/1/town", [("addresses", "C", 5, "address/0/town")]),
+                (
+                    "main/1/id",
+                    [
+                        ("main", "A", 3, "id"),
+                        ("addresses", "A", 4, "id"),
+                        ("addresses", "A", 5, "id"),
+                    ],
+                ),
+                ("main/1/name", [("main", "B", 3, "name")]),
+                # Rows
+                ("main/0/address/0", [("addresses", 2)]),
+                ("main/0/address/1", [("addresses", 3)]),
+                ("main/0", [("main", 2), ("addresses", 2), ("addresses", 3)]),
+                ("main/1/address/0", [("addresses", 4)]),
+                ("main/1/address/1", [("addresses", 5)]),
+                ("main/1", [("main", 3), ("addresses", 4), ("addresses", 5)]),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("main/address/house", [("addresses", "address/0/house")]),
+                ("main/address/town", [("addresses", "address/0/town")]),
+                ("main/id", [("main", "id"), ("addresses", "id")]),
+                ("main/name", [("main", "name")]),
+            ]
+        ),
         (
             [
-                'addresses:A2',
-                'addresses:A3',
-                'addresses:A4',
-                'addresses:A5',
-                'addresses:B2',
-                'addresses:B3',
-                'addresses:B4',
-                'addresses:B5',
-                'addresses:C2',
-                'addresses:C3',
-                'addresses:C4',
-                'addresses:C5',
-                'main:A2',
-                'main:A3',
-                'main:B2',
-                'main:B3',
+                "addresses:A2",
+                "addresses:A3",
+                "addresses:A4",
+                "addresses:A5",
+                "addresses:B2",
+                "addresses:B3",
+                "addresses:B4",
+                "addresses:B5",
+                "addresses:C2",
+                "addresses:C3",
+                "addresses:C4",
+                "addresses:C5",
+                "main:A2",
+                "main:A3",
+                "main:B2",
+                "main:B3",
             ],
             {
-                'main:2': 1,
-                'main:3': 1,
-                'addresses:2': 2,
-                'addresses:3': 2,
-                'addresses:5': 2,
-                'addresses:4': 2,
-            }
+                "main:2": 1,
+                "main:3": 1,
+                "addresses:2": 2,
+                "addresses:3": 2,
+                "addresses:5": 2,
+                "addresses:4": 2,
+            },
         ),
         [
-            'addresses:address/0/house',
-            'addresses:address/0/town',
-            'addresses:id',
-            'main:id',
-            'main:name'
-        ]
+            "addresses:address/0/house",
+            "addresses:address/0/town",
+            "addresses:id",
+            "main:id",
+            "main:name",
+        ],
     ),
     (
         # New columns for each item of the array
         [
             {
-                'name': 'main',
-                'headings': ['id', 'name', 'address/0/house', 'address/0/town', 'address/1/house', 'address/1/town'],
-                'rows': [
-                    ['PERSON-james', 'James', '1', 'London', '2', 'Birmingham'],
-                    ['PERSON-bob',   'Bob',   '3', 'Leeds',  '4', 'Manchester'],
-                ]
+                "name": "main",
+                "headings": [
+                    "id",
+                    "name",
+                    "address/0/house",
+                    "address/0/town",
+                    "address/1/house",
+                    "address/1/town",
+                ],
+                "rows": [
+                    ["PERSON-james", "James", "1", "London", "2", "Birmingham"],
+                    ["PERSON-bob", "Bob", "3", "Leeds", "4", "Manchester"],
+                ],
             },
         ],
-        OrderedDict([
-            ('main/0/address/0/house', [('main', 'C', 2, 'address/0/house')]),
-            ('main/0/address/0/town', [('main', 'D', 2, 'address/0/town')]),
-            ('main/0/address/1/house', [('main', 'E', 2, 'address/1/house')]),
-            ('main/0/address/1/town', [('main', 'F', 2, 'address/1/town')]),
-            ('main/0/id', [('main', 'A', 2, 'id')]),
-            ('main/0/name', [('main', 'B', 2, 'name')]),
-            ('main/1/address/0/house', [('main', 'C', 3, 'address/0/house')]),
-            ('main/1/address/0/town', [('main', 'D', 3, 'address/0/town')]),
-            ('main/1/address/1/house', [('main', 'E', 3, 'address/1/house')]),
-            ('main/1/address/1/town', [('main', 'F', 3, 'address/1/town')]),
-            ('main/1/id', [('main', 'A', 3, 'id')]),
-            ('main/1/name', [('main', 'B', 3, 'name')]),
-            ('main/0/address/0', [('main', 2)]),
-            ('main/0/address/1', [('main', 2)]),
-            ('main/0', [('main', 2)]),
-            ('main/1/address/0', [('main', 3)]),
-            ('main/1/address/1', [('main', 3)]),
-            ('main/1', [('main', 3)])
-        ]),
-        OrderedDict([
-            # Note that you get two headings because there are two de-normalised versions
-            ('main/address/house', [('main', 'address/0/house'), ('main', 'address/1/house')]),
-            ('main/address/town', [('main', 'address/0/town'), ('main', 'address/1/town')]),
-            ('main/id', [('main', 'id')]),
-            ('main/name', [('main', 'name')])
-        ]),
+        OrderedDict(
+            [
+                ("main/0/address/0/house", [("main", "C", 2, "address/0/house")]),
+                ("main/0/address/0/town", [("main", "D", 2, "address/0/town")]),
+                ("main/0/address/1/house", [("main", "E", 2, "address/1/house")]),
+                ("main/0/address/1/town", [("main", "F", 2, "address/1/town")]),
+                ("main/0/id", [("main", "A", 2, "id")]),
+                ("main/0/name", [("main", "B", 2, "name")]),
+                ("main/1/address/0/house", [("main", "C", 3, "address/0/house")]),
+                ("main/1/address/0/town", [("main", "D", 3, "address/0/town")]),
+                ("main/1/address/1/house", [("main", "E", 3, "address/1/house")]),
+                ("main/1/address/1/town", [("main", "F", 3, "address/1/town")]),
+                ("main/1/id", [("main", "A", 3, "id")]),
+                ("main/1/name", [("main", "B", 3, "name")]),
+                ("main/0/address/0", [("main", 2)]),
+                ("main/0/address/1", [("main", 2)]),
+                ("main/0", [("main", 2)]),
+                ("main/1/address/0", [("main", 3)]),
+                ("main/1/address/1", [("main", 3)]),
+                ("main/1", [("main", 3)]),
+            ]
+        ),
+        OrderedDict(
+            [
+                # Note that you get two headings because there are two de-normalised versions
+                (
+                    "main/address/house",
+                    [("main", "address/0/house"), ("main", "address/1/house")],
+                ),
+                (
+                    "main/address/town",
+                    [("main", "address/0/town"), ("main", "address/1/town")],
+                ),
+                ("main/id", [("main", "id")]),
+                ("main/name", [("main", "name")]),
+            ]
+        ),
         (
             [
-                'main:A2',
-                'main:A3',
-                'main:B2',
-                'main:B3',
-                'main:C2',
-                'main:C3',
-                'main:D2',
-                'main:D3',
-                'main:E2',
-                'main:E3',
-                'main:F2',
-                'main:F3',
+                "main:A2",
+                "main:A3",
+                "main:B2",
+                "main:B3",
+                "main:C2",
+                "main:C3",
+                "main:D2",
+                "main:D3",
+                "main:E2",
+                "main:E3",
+                "main:F2",
+                "main:F3",
             ],
             {
                 # XXX Note that this is 3 since there are 3 unique dictionaries
-                'main:2': 3,
-                'main:3': 3,
-            }
+                "main:2": 3,
+                "main:3": 3,
+            },
         ),
         [
-            'main:address/0/house',
-            'main:address/0/town',
-            'main:address/1/house',
-            'main:address/1/town',
-            'main:id',
-            'main:name',
-        ]
+            "main:address/0/house",
+            "main:address/0/town",
+            "main:address/1/house",
+            "main:address/1/town",
+            "main:id",
+            "main:name",
+        ],
     ),
     (
         # Repeated rows
         [
             {
-                'name': 'main',
-                'headings': ['id', 'name', 'address/0/house', 'address/0/town'],
-                'rows': [
-                    ['PERSON-james', 'James', '1', 'London'],
-                    ['PERSON-james', 'James', '2', 'Birmingham'],
-                    ['PERSON-bob',   'Bob',   '3', 'Leeds'],
-                    ['PERSON-bob',   'Bob',   '4', 'Manchester'],
-                ]
+                "name": "main",
+                "headings": ["id", "name", "address/0/house", "address/0/town"],
+                "rows": [
+                    ["PERSON-james", "James", "1", "London"],
+                    ["PERSON-james", "James", "2", "Birmingham"],
+                    ["PERSON-bob", "Bob", "3", "Leeds"],
+                    ["PERSON-bob", "Bob", "4", "Manchester"],
+                ],
             },
         ],
-        OrderedDict([
-            ('main/0/address/0/house', [('main', 'C', 2, 'address/0/house')]),
-            ('main/0/address/0/town', [('main', 'D', 2, 'address/0/town')]),
-            ('main/0/address/1/house', [('main', 'C', 3, 'address/0/house')]),
-            ('main/0/address/1/town', [('main', 'D', 3, 'address/0/town')]),
-            ('main/0/id', [('main', 'A', 2, 'id'), ('main', 'A', 3, 'id')]),
-            ('main/0/name', [('main', 'B', 2, 'name'), ('main', 'B', 3, 'name')]),
-
-            ('main/1/address/0/house', [('main', 'C', 4, 'address/0/house')]),
-            ('main/1/address/0/town', [('main', 'D', 4, 'address/0/town')]),
-            ('main/1/address/1/house', [('main', 'C', 5, 'address/0/house')]),
-            ('main/1/address/1/town', [('main', 'D', 5, 'address/0/town')]),
-            ('main/1/id', [('main', 'A', 4, 'id'), ('main', 'A', 5, 'id')]),
-            ('main/1/name', [('main', 'B', 4, 'name'), ('main', 'B', 5, 'name')]),
-
-            ('main/0/address/0', [('main', 2)]),
-            ('main/0/address/1', [('main', 3)]),
-            ('main/0', [('main', 2), ('main', 3)]),
-
-            ('main/1/address/0', [('main', 4)]),
-            ('main/1/address/1', [('main', 5)]),
-            ('main/1', [('main', 4), ('main', 5)])
-        ]),
-        OrderedDict([
-            ('main/address/house', [('main', 'address/0/house')]),
-            ('main/address/town', [('main', 'address/0/town')]),
-            ('main/id', [('main', 'id')]),
-            ('main/name', [('main', 'name')])
-        ]),
+        OrderedDict(
+            [
+                ("main/0/address/0/house", [("main", "C", 2, "address/0/house")]),
+                ("main/0/address/0/town", [("main", "D", 2, "address/0/town")]),
+                ("main/0/address/1/house", [("main", "C", 3, "address/0/house")]),
+                ("main/0/address/1/town", [("main", "D", 3, "address/0/town")]),
+                ("main/0/id", [("main", "A", 2, "id"), ("main", "A", 3, "id")]),
+                ("main/0/name", [("main", "B", 2, "name"), ("main", "B", 3, "name")]),
+                ("main/1/address/0/house", [("main", "C", 4, "address/0/house")]),
+                ("main/1/address/0/town", [("main", "D", 4, "address/0/town")]),
+                ("main/1/address/1/house", [("main", "C", 5, "address/0/house")]),
+                ("main/1/address/1/town", [("main", "D", 5, "address/0/town")]),
+                ("main/1/id", [("main", "A", 4, "id"), ("main", "A", 5, "id")]),
+                ("main/1/name", [("main", "B", 4, "name"), ("main", "B", 5, "name")]),
+                ("main/0/address/0", [("main", 2)]),
+                ("main/0/address/1", [("main", 3)]),
+                ("main/0", [("main", 2), ("main", 3)]),
+                ("main/1/address/0", [("main", 4)]),
+                ("main/1/address/1", [("main", 5)]),
+                ("main/1", [("main", 4), ("main", 5)]),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("main/address/house", [("main", "address/0/house")]),
+                ("main/address/town", [("main", "address/0/town")]),
+                ("main/id", [("main", "id")]),
+                ("main/name", [("main", "name")]),
+            ]
+        ),
         (
             [
-                'main:A2',
-                'main:A3',
-                'main:A4',
-                'main:A5',
-                'main:B2',
-                'main:B3',
-                'main:B4',
-                'main:B5',
-                'main:C2',
-                'main:C3',
-                'main:C4',
-                'main:C5',
-                'main:D2',
-                'main:D3',
-                'main:D4',
-                'main:D5',
+                "main:A2",
+                "main:A3",
+                "main:A4",
+                "main:A5",
+                "main:B2",
+                "main:B3",
+                "main:B4",
+                "main:B5",
+                "main:C2",
+                "main:C3",
+                "main:C4",
+                "main:C5",
+                "main:D2",
+                "main:D3",
+                "main:D4",
+                "main:D5",
             ],
-            {
-                'main:2': 2,
-                'main:3': 2,
-                'main:5': 2,
-                'main:4': 2
-            }
+            {"main:2": 2, "main:3": 2, "main:5": 2, "main:4": 2},
         ),
-        [
-            'main:address/0/house',
-            'main:address/0/town',
-            'main:id',
-            'main:name',
-        ],
-    )
+        ["main:address/0/house", "main:address/0/town", "main:id", "main:name",],
+    ),
 )
 
 
 @pytest.mark.parametrize(
     (
-        'sheets,'
-        'expected_cell_source_map,'
-        'expected_heading_source_map,'
-        'expected_original_cell_and_row_locations,'
-        'expected_original_heading_locations'
+        "sheets,"
+        "expected_cell_source_map,"
+        "expected_heading_source_map,"
+        "expected_original_cell_and_row_locations,"
+        "expected_original_heading_locations"
     ),
-    test_arrangement_data_sheets
+    test_arrangement_data_sheets,
 )
 def test_arrangement(
     sheets,
     expected_cell_source_map,
     expected_heading_source_map,
     expected_original_cell_and_row_locations,
-    expected_original_heading_locations
+    expected_original_heading_locations,
 ):
     expected_result = [
-        OrderedDict([
-            ('id', 'PERSON-james'),
-            ('name', 'James'),
-            ('address', [
-                OrderedDict([
-                    ('house', '1'),
-                    ('town', 'London'),
-                ]),
-                OrderedDict([
-                    ('house', '2'),
-                    ('town', 'Birmingham'),
-                ])
-            ]),
-        ]),
-        OrderedDict([
-            ('id', 'PERSON-bob'),
-            ('name', 'Bob'),
-            ('address', [
-                OrderedDict([
-                    ('house', '3'),
-                    ('town', 'Leeds'),
-                ]),
-                OrderedDict([
-                    ('house', '4'),
-                    ('town', 'Manchester'),
-                ])
-            ]),
-        ]),
+        OrderedDict(
+            [
+                ("id", "PERSON-james"),
+                ("name", "James"),
+                (
+                    "address",
+                    [
+                        OrderedDict([("house", "1"), ("town", "London"),]),
+                        OrderedDict([("house", "2"), ("town", "Birmingham"),]),
+                    ],
+                ),
+            ]
+        ),
+        OrderedDict(
+            [
+                ("id", "PERSON-bob"),
+                ("name", "Bob"),
+                (
+                    "address",
+                    [
+                        OrderedDict([("house", "3"), ("town", "Leeds"),]),
+                        OrderedDict([("house", "4"), ("town", "Manchester"),]),
+                    ],
+                ),
+            ]
+        ),
     ]
-    actual_result, actual_cell_source_map, actual_heading_source_map = run(sheets, source_maps=True)
-    actual_original_cell_and_row_locations = original_cell_and_row_locations(actual_cell_source_map or {})
-    actual_original_heading_locations = original_headings(actual_heading_source_map or {})
+    actual_result, actual_cell_source_map, actual_heading_source_map = run(
+        sheets, source_maps=True
+    )
+    actual_original_cell_and_row_locations = original_cell_and_row_locations(
+        actual_cell_source_map or {}
+    )
+    actual_original_heading_locations = original_headings(
+        actual_heading_source_map or {}
+    )
     assert expected_result == actual_result
     assert expected_cell_source_map == actual_cell_source_map
     assert expected_heading_source_map == actual_heading_source_map
-    assert expected_original_cell_and_row_locations == actual_original_cell_and_row_locations
+    assert (
+        expected_original_cell_and_row_locations
+        == actual_original_cell_and_row_locations
+    )
     assert expected_original_heading_locations == actual_original_heading_locations
 
 
@@ -983,36 +1007,36 @@ def run(sheets, schema=None, source_maps=False):
     input_sheets = OrderedDict()
     for sheet in sheets:
         rows = []
-        for row in sheet['rows']:
-            rows.append(OrderedDict(zip(sheet['headings'], row)))
-        input_sheets[sheet['name']] = rows
-        input_headings[sheet['name']] = sheet['headings']
+        for row in sheet["rows"]:
+            rows.append(OrderedDict(zip(sheet["headings"], row)))
+        input_sheets[sheet["name"]] = rows
+        input_headings[sheet["name"]] = sheet["headings"]
     if schema is not None:
         spreadsheet_input = HeadingListInput(
             input_sheets,
             input_headings,
-            root_id='',                         # QUESTION: I don't understand root_id
-            convert_titles=True,                # Without this, the titles aren't understood
+            root_id="",  # QUESTION: I don't understand root_id
+            convert_titles=True,  # Without this, the titles aren't understood
         )
         # Without this, the $ref entries in the schema aren't resolved.
         dereferenced_schema = JsonRef.replace_refs(schema)
         # raise Exception(dereferenced_schema)
         parser = SchemaParser(
-            root_schema_dict=dereferenced_schema,
-            root_id='main',
-            rollup=True
+            root_schema_dict=dereferenced_schema, root_id="main", rollup=True
         )
         parser.parse()
         spreadsheet_input.parser = parser
     else:
-        spreadsheet_input = HeadingListInput(
-            input_sheets,
-            input_headings,
-            root_id='',
-        )
+        spreadsheet_input = HeadingListInput(input_sheets, input_headings, root_id="",)
     spreadsheet_input.read_sheets()
     if source_maps:
-        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten(with_cell_source_map=True, with_heading_source_map=True)
+        (
+            result,
+            cell_source_map_data,
+            heading_source_map_data,
+        ) = spreadsheet_input.fancy_unflatten(
+            with_cell_source_map=True, with_heading_source_map=True
+        )
         return result, cell_source_map_data, heading_source_map_data
     else:
         return spreadsheet_input.unflatten(), None, None

@@ -26,19 +26,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from collections import OrderedDict
 from warnings import warn
+
 try:
     import lxml.etree as ET
+
     # Note that lxml is now "required" - it's listed as a requirement in
     # setup.py and is needed for the tests to pass.
     # However, stdlib etree still exists as an unsupported feature.
 except ImportError:
     import xml.etree.ElementTree as ET
-    warn('Using stdlib etree may work, but is not supported. Please install lxml.')
+
+    warn("Using stdlib etree may work, but is not supported. Please install lxml.")
 
 # Namespaces necessary for opening schema files
-namespaces = {
-    'xsd': 'http://www.w3.org/2001/XMLSchema'
-}
+namespaces = {"xsd": "http://www.w3.org/2001/XMLSchema"}
 
 
 class XMLSchemaWalker(object):
@@ -47,6 +48,7 @@ class XMLSchemaWalker(object):
 
     Based on the Schema2Doc class in https://github.com/IATI/IATI-Standard-SSOT/blob/version-2.02/gen.py
     """
+
     def __init__(self, schemas):
         """
         schema -- the filename of the schema to use, e.g.
@@ -64,7 +66,10 @@ class XMLSchemaWalker(object):
                           e.g. iati-activities
         """
         for tree in self.trees:
-            schema_element = tree.find("xsd:{0}[@name='{1}']".format(tag_name, name_attribute), namespaces=namespaces)
+            schema_element = tree.find(
+                "xsd:{0}[@name='{1}']".format(tag_name, name_attribute),
+                namespaces=namespaces,
+            )
             if schema_element is not None:
                 return schema_element
         return schema_element
@@ -75,33 +80,38 @@ class XMLSchemaWalker(object):
         """
         a = element.attrib
         type_elements = []
-        if 'type' in a:
-            complexType = self.get_schema_element('complexType', a['type'])
+        if "type" in a:
+            complexType = self.get_schema_element("complexType", a["type"])
             if complexType is not None:
-                type_elements = (
-                    complexType.findall('xsd:choice/xsd:element',
-                                        namespaces=namespaces) +
-                    complexType.findall('xsd:sequence/xsd:element',
-                                        namespaces=namespaces))
+                type_elements = complexType.findall(
+                    "xsd:choice/xsd:element", namespaces=namespaces
+                ) + complexType.findall(
+                    "xsd:sequence/xsd:element", namespaces=namespaces
+                )
 
         children = (
             element.findall(
-                'xsd:complexType/xsd:choice/xsd:element',
-                namespaces=namespaces)
+                "xsd:complexType/xsd:choice/xsd:element", namespaces=namespaces
+            )
             + element.findall(
-                'xsd:complexType/xsd:sequence/xsd:element',
-                namespaces=namespaces)
+                "xsd:complexType/xsd:sequence/xsd:element", namespaces=namespaces
+            )
             + element.findall(
-                'xsd:complexType/xsd:all/xsd:element',
-                namespaces=namespaces)
-            + type_elements)
+                "xsd:complexType/xsd:all/xsd:element", namespaces=namespaces
+            )
+            + type_elements
+        )
         child_tuples = []
         for child in children:
             a = child.attrib
-            if 'name' in a:
-                child_tuples.append((a['name'], child, None, a.get('minOccurs'), a.get('maxOccurs')))
+            if "name" in a:
+                child_tuples.append(
+                    (a["name"], child, None, a.get("minOccurs"), a.get("maxOccurs"))
+                )
             else:
-                child_tuples.append((a['ref'], None, child, a.get('minOccurs'), a.get('maxOccurs')))
+                child_tuples.append(
+                    (a["ref"], None, child, a.get("minOccurs"), a.get("maxOccurs"))
+                )
         return child_tuples
 
     def create_schema_dict(self, parent_name, parent_element=None):
@@ -110,13 +120,16 @@ class XMLSchemaWalker(object):
         elements in the provided schema.
         """
         if parent_element is None:
-            parent_element = self.get_schema_element('element', parent_name)
+            parent_element = self.get_schema_element("element", parent_name)
         if parent_element is None:
             return {}
 
-        return OrderedDict([
-            (name, self.create_schema_dict(name, element))
-            for name, element, _, _, _ in self.element_loop(parent_element, '')])
+        return OrderedDict(
+            [
+                (name, self.create_schema_dict(name, element))
+                for name, element, _, _, _ in self.element_loop(parent_element, "")
+            ]
+        )
 
 
 def sort_element(element, schema_subdict):

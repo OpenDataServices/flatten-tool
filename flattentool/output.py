@@ -4,22 +4,25 @@ formats.
 
 """
 
-import openpyxl
-from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 import csv
 import os
 from warnings import warn
-from flattentool.exceptions import DataErrorWarning
 
-from odf.opendocument import OpenDocumentSpreadsheet
 import odf.table
 import odf.text
+import openpyxl
+from odf.opendocument import OpenDocumentSpreadsheet
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+
+from flattentool.exceptions import DataErrorWarning
 
 
 class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
-    def __init__(self, parser, main_sheet_name='main', output_name='unflattened', sheet_prefix=''):
+    def __init__(
+        self, parser, main_sheet_name="main", output_name="unflattened", sheet_prefix=""
+    ):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
@@ -58,10 +61,14 @@ class XLSXOutput(SpreadsheetOutput):
             for header in sheet_header:
                 value = sheet_line.get(header)
                 if isinstance(value, str):
-                    new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
+                    new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
                     if new_value != value:
-                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
-                            DataErrorWarning)
+                        warn(
+                            "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
+                                value
+                            ),
+                            DataErrorWarning,
+                        )
                     value = new_value
                 line.append(value)
             worksheet.append(line)
@@ -80,7 +87,11 @@ class CSVOutput(SpreadsheetOutput):
 
     def write_sheet(self, sheet_name, sheet):
         sheet_header = list(sheet)
-        with open(os.path.join(self.output_name, self.sheet_prefix + sheet_name+'.csv'), 'w', encoding='utf-8') as csv_file:
+        with open(
+            os.path.join(self.output_name, self.sheet_prefix + sheet_name + ".csv"),
+            "w",
+            encoding="utf-8",
+        ) as csv_file:
             dictwriter = csv.DictWriter(csv_file, sheet_header)
             dictwriter.writeheader()
             for sheet_line in sheet.lines:
@@ -97,8 +108,7 @@ class ODSOutput(SpreadsheetOutput):
         if value:
             try:
                 # See if value parses as a float
-                cell = odf.table.TableCell(valuetype="float",
-                                        value=float(value))
+                cell = odf.table.TableCell(valuetype="float", value=float(value))
             except ValueError:
                 cell = odf.table.TableCell(valuetype="string")
         else:
@@ -126,10 +136,14 @@ class ODSOutput(SpreadsheetOutput):
             for header in sheet_header:
                 value = sheet_line.get(header)
                 if isinstance(value, str):
-                    new_value = ILLEGAL_CHARACTERS_RE.sub('', value)
+                    new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
                     if new_value != value:
-                        warn("Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(value),
-                            DataErrorWarning)
+                        warn(
+                            "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
+                                value
+                            ),
+                            DataErrorWarning,
+                        )
                     value = new_value
                 row.addElement(self._make_cell(value))
             worksheet.addElement(row)
@@ -140,14 +154,10 @@ class ODSOutput(SpreadsheetOutput):
         self.workbook.save(self.output_name)
 
 
-FORMATS = {
-    'xlsx': XLSXOutput,
-    'csv': CSVOutput,
-    'ods': ODSOutput
-}
+FORMATS = {"xlsx": XLSXOutput, "csv": CSVOutput, "ods": ODSOutput}
 
 FORMATS_SUFFIX = {
-    'xlsx': '.xlsx',
-    'ods': '.ods',
-    'csv': ''  # This is the suffix for the directory
+    "xlsx": ".xlsx",
+    "ods": ".ods",
+    "csv": "",  # This is the suffix for the directory
 }

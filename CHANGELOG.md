@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+### Changed
+
+- All code has had black and isort applied. These have been added to Travis.
+
 ## [0.11.0] - 2020-02-21
 
 ### Added
