@@ -1,110 +1,128 @@
-import os
 import json
+import os
+
 import pytest
 
 from flattentool import unflatten
 
-def test_360_main_sheetname_insensitive(tmpdir):
-    input_name = 'flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants.xlsx'
-    unflatten(
-        input_name=input_name,
-        output_name=tmpdir.join('output_grant.json').strpath,
-        input_format='xlsx',
-        schema='flattentool/tests/fixtures/360-giving-schema.json',
-        main_sheet_name='grants',
-        root_list_path='grants',
-        root_id='',
-        convert_titles=True)
-    output_json_grants = json.load(tmpdir.join('output_grant.json'))
 
-    input_name = 'flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants_sheet_title_case.xlsx'
+def test_360_main_sheetname_insensitive(tmpdir):
+    input_name = "flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants.xlsx"
     unflatten(
         input_name=input_name,
-        output_name=tmpdir.join('output_grant_sheet_title_case.json').strpath,
-        input_format='xlsx',
-        schema='flattentool/tests/fixtures/360-giving-schema.json',
-        main_sheet_name='grants',
-        root_list_path='grants',
-        root_id='',
-        convert_titles=True)
-    output_json_Grants = json.load(tmpdir.join('output_grant_sheet_title_case.json'))
+        output_name=tmpdir.join("output_grant.json").strpath,
+        input_format="xlsx",
+        schema="flattentool/tests/fixtures/360-giving-schema.json",
+        main_sheet_name="grants",
+        root_list_path="grants",
+        root_id="",
+        convert_titles=True,
+    )
+    output_json_grants = json.load(tmpdir.join("output_grant.json"))
+
+    input_name = "flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants_sheet_title_case.xlsx"
+    unflatten(
+        input_name=input_name,
+        output_name=tmpdir.join("output_grant_sheet_title_case.json").strpath,
+        input_format="xlsx",
+        schema="flattentool/tests/fixtures/360-giving-schema.json",
+        main_sheet_name="grants",
+        root_list_path="grants",
+        root_id="",
+        convert_titles=True,
+    )
+    output_json_Grants = json.load(tmpdir.join("output_grant_sheet_title_case.json"))
 
     assert output_json_grants == output_json_Grants
 
-def test_360_fields_case_insensitive(tmpdir):
-    input_name = 'flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants.xlsx'
-    unflatten(
-        input_name=input_name,
-        output_name=tmpdir.join('output_grant.json').strpath,
-        input_format='xlsx',
-        schema='flattentool/tests/fixtures/360-giving-schema.json',
-        main_sheet_name='grants',
-        root_list_path='grants',
-        root_id='',
-        convert_titles=True)
-    output_json_grants = json.load(tmpdir.join('output_grant.json'))
 
-    input_name = 'flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants_title_space_case.xlsx'
+def test_360_fields_case_insensitive(tmpdir):
+    input_name = "flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants.xlsx"
     unflatten(
         input_name=input_name,
-        output_name=tmpdir.join('output_space_case.json').strpath,
-        input_format='xlsx',
-        schema='flattentool/tests/fixtures/360-giving-schema.json',
-        main_sheet_name='grants',
-        root_list_path='grants',
-        root_id='',
-        convert_titles=True)
-    output_json_space_case = json.load(tmpdir.join('output_space_case.json'))
+        output_name=tmpdir.join("output_grant.json").strpath,
+        input_format="xlsx",
+        schema="flattentool/tests/fixtures/360-giving-schema.json",
+        main_sheet_name="grants",
+        root_list_path="grants",
+        root_id="",
+        convert_titles=True,
+    )
+    output_json_grants = json.load(tmpdir.join("output_grant.json"))
+
+    input_name = "flattentool/tests/fixtures/xlsx/fundingproviders-grants_2_grants_title_space_case.xlsx"
+    unflatten(
+        input_name=input_name,
+        output_name=tmpdir.join("output_space_case.json").strpath,
+        input_format="xlsx",
+        schema="flattentool/tests/fixtures/360-giving-schema.json",
+        main_sheet_name="grants",
+        root_list_path="grants",
+        root_id="",
+        convert_titles=True,
+    )
+    output_json_space_case = json.load(tmpdir.join("output_space_case.json"))
 
     assert output_json_grants == output_json_space_case
 
 
-@pytest.mark.parametrize('dirname', ['examples/iati', 'examples/iati_multilang'])
+@pytest.mark.parametrize("dirname", ["examples/iati", "examples/iati_multilang"])
 def test_unflatten_xml(tmpdir, dirname):
-    schema_path = 'examples/iati'
-    schemas = ['iati-activities-schema.xsd', 'iati-common.xsd']
-    schema_filepaths = ['{}/{}'.format(schema_path, schema) for schema in schemas]
+    schema_path = "examples/iati"
+    schemas = ["iati-activities-schema.xsd", "iati-common.xsd"]
+    schema_filepaths = ["{}/{}".format(schema_path, schema) for schema in schemas]
     unflatten(
         input_name=dirname,
-        output_name=tmpdir.join('output.xml').strpath,
-        input_format='csv',
-        root_list_path='iati-activity',
-        id_name='iati-identifier',
+        output_name=tmpdir.join("output.xml").strpath,
+        input_format="csv",
+        root_list_path="iati-activity",
+        id_name="iati-identifier",
         xml=True,
         xml_schemas=schema_filepaths,
-        )
-    assert open(os.path.join(dirname, 'expected.xml')).read() == tmpdir.join('output.xml').read()
+    )
+    assert (
+        open(os.path.join(dirname, "expected.xml")).read()
+        == tmpdir.join("output.xml").read()
+    )
 
 
-@pytest.mark.parametrize('dirname', ['examples/iati_xml_comment'])
+@pytest.mark.parametrize("dirname", ["examples/iati_xml_comment"])
 def test_unflatten_xml_comment(tmpdir, dirname):
     """
     Edit default xml comment 'XML generated by flatten-tool' by 'XML generated by ODS'
     """
-    schema_path = 'examples/iati'
-    schemas = ['iati-activities-schema.xsd', 'iati-common.xsd']
-    schema_filepaths = ['{}/{}'.format(schema_path, schema) for schema in schemas]
+    schema_path = "examples/iati"
+    schemas = ["iati-activities-schema.xsd", "iati-common.xsd"]
+    schema_filepaths = ["{}/{}".format(schema_path, schema) for schema in schemas]
     unflatten(
         input_name=dirname,
-        output_name=tmpdir.join('output.xml').strpath,
-        input_format='csv',
-        root_list_path='iati-activity',
-        id_name='iati-identifier',
+        output_name=tmpdir.join("output.xml").strpath,
+        input_format="csv",
+        root_list_path="iati-activity",
+        id_name="iati-identifier",
         xml=True,
         xml_schemas=schema_filepaths,
-        xml_comment='XML generated by ODS'
-        )
-    assert open(os.path.join(dirname, 'expected.xml')).read() == tmpdir.join('output.xml').read()
+        xml_comment="XML generated by ODS",
+    )
+    assert (
+        open(os.path.join(dirname, "expected.xml")).read()
+        == tmpdir.join("output.xml").read()
+    )
 
 
-@pytest.mark.parametrize('input_format', ['xlsx', 'ods'])
+@pytest.mark.parametrize("input_format", ["xlsx", "ods"])
 def test_unflatten_org_xml_xlsx(tmpdir, input_format):
     unflatten(
-        input_name='flattentool/tests/fixtures/{}/iati-org.{}'.format(input_format, input_format),
-        output_name=tmpdir.join('output.xml').strpath,
+        input_name="flattentool/tests/fixtures/{}/iati-org.{}".format(
+            input_format, input_format
+        ),
+        output_name=tmpdir.join("output.xml").strpath,
         input_format=input_format,
-        id_name='organisation-identifier',
+        id_name="organisation-identifier",
         xml=True,
-        metatab_name='Meta'
-        )
-    assert open('flattentool/tests/fixtures/iati-org.xml').read() == tmpdir.join('output.xml').read()
+        metatab_name="Meta",
+    )
+    assert (
+        open("flattentool/tests/fixtures/iati-org.xml").read()
+        == tmpdir.join("output.xml").read()
+    )

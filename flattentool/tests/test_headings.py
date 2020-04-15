@@ -1,25 +1,24 @@
 from collections import OrderedDict
+
+import pytest
+from jsonref import JsonRef
+
+from flattentool.exceptions import DataErrorWarning
 from flattentool.input import SpreadsheetInput
 from flattentool.schema import SchemaParser
-from flattentool.exceptions import DataErrorWarning
-from jsonref import JsonRef
-import pytest
-
 
 test_heading_warning_data = [
     (
-        ['a', 'a'],
+        ["a", "a"],
         [
             # Check we use the later values
             [1, 2],
         ],
-        [
-            'Duplicate heading "a" found, ignoring the data in column A.'
-        ],
-        ([OrderedDict([('a', 2)])], None, None),
+        ['Duplicate heading "a" found, ignoring the data in column A.'],
+        ([OrderedDict([("a", 2)])], None, None),
     ),
     (
-        ['a', 'b', 'c', 'b', 'c', 'c', 'd', 'd', 'd', 'd'],
+        ["a", "b", "c", "b", "c", "c", "d", "d", "d", "d"],
         [
             # Check for warnings even with empty cells
             [1,],
@@ -29,23 +28,18 @@ test_heading_warning_data = [
             'Duplicate heading "c" found, ignoring the data in columns C and E.',
             'Duplicate heading "d" found, ignoring the data in columns G, H and I.',
         ],
-        ([OrderedDict([('a', 1)])], None, None),
+        ([OrderedDict([("a", 1)])], None, None),
     ),
 ]
 
 
 @pytest.mark.parametrize(
-    'headings, rows, expected_warnings, expected_result',
-    test_heading_warning_data
+    "headings, rows, expected_warnings, expected_result", test_heading_warning_data
 )
-def test_duplicate_headings_give_warning(headings, rows, expected_warnings, expected_result):
-    sheets = [
-        {
-            'name': 'main',
-            'headings': headings,
-            'rows': rows,
-        }
-    ]
+def test_duplicate_headings_give_warning(
+    headings, rows, expected_warnings, expected_result
+):
+    sheets = [{"name": "main", "headings": headings, "rows": rows,}]
     with pytest.warns(DataErrorWarning) as type_warnings:
         result = run(sheets)
     # Check that only one warning was raised
@@ -77,36 +71,38 @@ def run(sheets, schema=None, source_maps=False):
     input_sheets = OrderedDict()
     for sheet in sheets:
         rows = []
-        for row in sheet['rows']:
-            rows.append(OrderedDict(zip(sheet['headings'], row)))
-        input_sheets[sheet['name']] = rows
-        input_headings[sheet['name']] = sheet['headings']
+        for row in sheet["rows"]:
+            rows.append(OrderedDict(zip(sheet["headings"], row)))
+        input_sheets[sheet["name"]] = rows
+        input_headings[sheet["name"]] = sheet["headings"]
     if schema is not None:
         spreadsheet_input = HeadingListInput(
             input_sheets,
             input_headings,
-            root_id='',
+            root_id="",
             # Without this, titles from a schema aren't understood
             convert_titles=True,
         )
         # Without this, the $ref entries in the schema aren't resolved.
         dereferenced_schema = JsonRef.replace_refs(schema)
         parser = SchemaParser(
-            root_schema_dict=dereferenced_schema,
-            root_id='main',
-            rollup=True
+            root_schema_dict=dereferenced_schema, root_id="main", rollup=True
         )
         parser.parse()
         spreadsheet_input.parser = parser
     else:
-        spreadsheet_input = HeadingListInput(
-            input_sheets,
-            input_headings,
-            root_id='',
-        )
+        spreadsheet_input = HeadingListInput(input_sheets, input_headings, root_id="",)
     spreadsheet_input.read_sheets()
     if source_maps:
-        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten(True, True)
+        (
+            result,
+            cell_source_map_data,
+            heading_source_map_data,
+        ) = spreadsheet_input.fancy_unflatten(True, True)
     else:
-        result, cell_source_map_data, heading_source_map_data = spreadsheet_input.fancy_unflatten(False, False)
+        (
+            result,
+            cell_source_map_data,
+            heading_source_map_data,
+        ) = spreadsheet_input.fancy_unflatten(False, False)
     return result, cell_source_map_data, heading_source_map_data

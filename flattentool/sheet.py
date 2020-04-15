@@ -4,7 +4,7 @@ class Sheet(object):
 
     """
 
-    def __init__(self, columns=None, root_id='', name=None):
+    def __init__(self, columns=None, root_id="", name=None):
         self.id_columns = []
         self.columns = columns if columns else []
         self.titles = {}

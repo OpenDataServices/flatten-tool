@@ -6,3 +6,5 @@ coveralls
 pytest-localserver
 sphinx
 sphinx_rtd_theme
+isort
+flake8
