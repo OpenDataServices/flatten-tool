@@ -90,6 +90,7 @@ class CSVOutput(SpreadsheetOutput):
         with open(
             os.path.join(self.output_name, self.sheet_prefix + sheet_name + ".csv"),
             "w",
+            newline="",
             encoding="utf-8",
         ) as csv_file:
             dictwriter = csv.DictWriter(csv_file, sheet_header)
