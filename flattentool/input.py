@@ -182,10 +182,7 @@ def merge(base, mergee, debug_info=None):
                             + id_info
                         )
                     warnings_for_ignored_columns(
-                        v,
-                        "because another column treats it as an array or object".format(
-                            key
-                        ),
+                        v, "because another column treats it as an array or object"
                     )
                     continue
                 base_value = base[key].cell_value
