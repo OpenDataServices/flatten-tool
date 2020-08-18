@@ -1,0 +1,2 @@
+$ flatten-tool unflatten -f=csv --root-list-path=cafe --schema=examples/cafe/plain-list-schema/tagsArraySchema.json examples/cafe/plain-list-schema/
+

@@ -475,10 +475,10 @@ section.
 Plain Lists (Unsupported)
 -------------------------
 
-Flatten Tool doesn't support arrays of JSON values other than objects (just
-described in the previous section).
+Flatten Tool doesn't recognise arrays of JSON values other than objects (just
+described in the previous section) unless a schema is used.
 
-As a result heading names such as ``tag/0`` and ``tag/1`` would be ignored and an
+Heading names such as ``tag/0`` and ``tag/1`` would be ignored and an
 empty array would be put into the JSON.
 
 Here's some example data:
@@ -493,6 +493,26 @@ And the result:
    :language: bash
 .. literalinclude:: ../examples/cafe/plain-list/expected.json
    :language: json
+
+However, an array of tags in the following format (semi-colon separated) can be handled if a schema is passed to Flatten Tool specifying the array type of the field.
+
+.. csv-table::
+   :file: ../examples/cafe/plain-list-schema/data.csv
+   :header-rows: 1
+
+The schema we'll pass is:
+
+.. literalinclude:: ../examples/cafe/plain-list-schema/tagsArraySchema.json
+   :language: json
+
+And the result:
+
+.. literalinclude:: ../examples/cafe/plain-list-schema/cmd.txt
+   :language: bash
+.. literalinclude:: ../examples/cafe/plain-list-schema/expected.json
+   :language: json
+
+Read on for more about typed fields and use of schemas.
 
 
 Typed fields
