@@ -9,7 +9,6 @@ from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.json_input import BadlyFormedJSONError
 from flattentool.output import FORMATS as OUTPUT_FORMATS
 
-
 """
 This file does most of the work of the flatten-tool commandline command.
 
