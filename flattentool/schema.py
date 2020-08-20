@@ -15,7 +15,9 @@ from flattentool.sheet import Sheet
 if sys.version_info[:2] > (3, 0):
     import pathlib
 else:
-    import urlparse, urllib
+    import urllib
+
+    import urlparse
 
 
 def get_property_type_set(property_schema_dict):
