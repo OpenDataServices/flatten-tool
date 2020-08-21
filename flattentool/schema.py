@@ -372,9 +372,16 @@ class SchemaParser(object):
                             )
                         )
                 elif "string" in property_type_set or not property_type_set:
-                    self.flattened[
-                        parent_path.replace("/0/", "/") + property_name
-                    ] = "string"
+                    # We only check for date here, because its the only format
+                    # for which we need to specially transform the input
+                    if property_schema_dict.get("format") == "date":
+                        self.flattened[
+                            parent_path.replace("/0/", "/") + property_name
+                        ] = "date"
+                    else:
+                        self.flattened[
+                            parent_path.replace("/0/", "/") + property_name
+                        ] = "string"
                     yield property_name, title
                 elif "number" in property_type_set:
                     self.flattened[
