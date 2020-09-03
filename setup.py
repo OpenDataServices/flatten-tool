@@ -12,7 +12,7 @@ install_requires = [
 
 setup(
     name="flattentool",
-    version="0.11.0",
+    version="0.12.0",
     author="Open Data Services",
     author_email="code@opendataservices.coop",
     packages=["flattentool"],

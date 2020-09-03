@@ -6,6 +6,7 @@ This file only covers tests for the main sheet. Tests for multiple sheets are in
 """
 from __future__ import unicode_literals
 
+import datetime
 from collections import OrderedDict
 from decimal import Decimal
 
@@ -48,6 +49,7 @@ testdata = [
         [{"ROOT_ID": "1", "id": 2, "testA": 3}],
         [],
         True,
+        True,
     ),
     (
         "Basic with float",
@@ -58,6 +60,7 @@ testdata = [
         [{"ROOT_ID": "1", "id": 2, "testA": 3}],
         [],
         True,
+        True,
     ),
     (
         "Basic with zero",
@@ -65,12 +68,30 @@ testdata = [
         [{"ROOT_ID": "1", "id": 2, "testA": 0}],
         [],
         True,
+        True,
+    ),
+    (
+        "Basic with date-time",
+        [{"ROOT_ID": "1", "id": 2, "testDateTime": datetime.datetime(2020, 1, 1)}],
+        [{"ROOT_ID": "1", "id": 2, "testDateTime": "2020-01-01T00:00:00+00:00"}],
+        [],
+        False,
+        True,
+    ),
+    (
+        "Basic with date",
+        [{"ROOT_ID": "1", "id": 2, "testDate": datetime.datetime(2020, 1, 1)}],
+        [{"ROOT_ID": "1", "id": 2, "testDate": "2020-01-01"}],
+        [],
+        False,
+        False,
     ),
     (
         "Nested",
         [{"ROOT_ID": "1", "id": 2, "testO/testB": 3, "testO/testC": 4,}],
         [{"ROOT_ID": "1", "id": 2, "testO": {"testB": 3, "testC": 4}}],
         [],
+        True,
         True,
     ),
     (
@@ -79,6 +100,7 @@ testdata = [
         [{"ROOT_ID": UNICODE_TEST_STRING, "testU": UNICODE_TEST_STRING}],
         [],
         True,
+        True,
     ),
     (
         "Single item array",
@@ -86,6 +108,7 @@ testdata = [
         [{"ROOT_ID": "1", "id": 2, "testL": [{"id": 3, "testB": 4}],}],
         [],
         False,
+        True,
     ),
     (
         "Single item array without parent ID",
@@ -93,6 +116,7 @@ testdata = [
         [{"ROOT_ID": "1", "testL": [{"id": "2", "testB": "3"}],}],
         [],
         False,
+        True,
     ),
     (
         "Empty",
@@ -110,6 +134,7 @@ testdata = [
         [],
         [],
         False,
+        True,
     ),
     (
         "Empty except for root id",
@@ -127,6 +152,7 @@ testdata = [
         [{"ROOT_ID": 1}],
         [],
         False,
+        True,
     ),
     # Previously this caused the error: TypeError: unorderable types: str() < int()
     # Now one of the columns is ignored
@@ -142,6 +168,7 @@ testdata = [
             "Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not."
         ],
         False,
+        True,
     ),
     # Previously this caused the error: TypeError: unorderable types: str() < int()
     # Now one of the columns is ignored
@@ -157,6 +184,7 @@ testdata = [
             "Column newtest/a has been ignored, because it treats newtest as an object, but another column does not."
         ],
         False,
+        True,
     ),
     # Previously this caused the error: 'Cell' object has no attribute 'get'
     # Now one of the columns is ignored
@@ -168,6 +196,7 @@ testdata = [
             "Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not."
         ],
         False,
+        True,
     ),
     (
         "str / object mixing",
@@ -177,6 +206,7 @@ testdata = [
             "Column newtest/a has been ignored, because it treats newtest as an object, but another column does not."
         ],
         False,
+        True,
     ),
     (
         "array / str mixing",
@@ -195,6 +225,7 @@ testdata = [
             "Column nest/newtest has been ignored, because another column treats it as an array or object"
         ],
         False,
+        True,
     ),
     (
         "object / str mixing",
@@ -204,6 +235,7 @@ testdata = [
             "Column newtest has been ignored, because another column treats it as an array or object"
         ],
         False,
+        True,
     ),
     (
         "Mismatch of object/array for field not in schema (multiline)",
@@ -216,6 +248,7 @@ testdata = [
             "Column nest/newtest/0/a has been ignored, because it treats newtest as an array, but another column does not"
         ],
         False,
+        True,
     ),
     # Previously this caused the error: TypeError: unorderable types: str() < int()
     # Now one of the columns is ignored
@@ -230,6 +263,7 @@ testdata = [
             "Column newtest/a has been ignored, because it treats newtest as an object, but another column does not"
         ],
         False,
+        True,
     ),
     # Previously this caused the error: 'Cell' object has no attribute 'get'
     # Now one of the columns is ignored
@@ -252,6 +286,7 @@ testdata = [
             "Column nest/newtest/0/b has been ignored, because it treats newtest as an array, but another column does not",
         ],
         False,
+        True,
     ),
     (
         "array / str mixing multiline",
@@ -265,6 +300,7 @@ testdata = [
             "Column nest/newtest has been ignored, because another column treats it as an array or object"
         ],
         False,
+        True,
     ),
     # WARNING: Conflict when merging field "newtest" for id "2" in sheet custom_main: "3"
     (
@@ -281,6 +317,7 @@ testdata = [
             "Column newtest/b has been ignored, because it treats newtest as an object, but another column does not",
         ],
         False,
+        True,
     ),
     (
         "object / str mixing multiline",
@@ -293,6 +330,7 @@ testdata = [
             "Column newtest has been ignored, because another column treats it as an array or object"
         ],
         False,
+        True,
     ),
     # Previously this caused the error: KeyError('ocid',)
     # Now it works, but probably not as intended
@@ -304,6 +342,7 @@ testdata = [
         [{"id": 2, "testA": 3}],
         [],
         False,
+        True,
     ),
     # We should be able to handle numbers as column headings
     (
@@ -329,6 +368,7 @@ testdata = [
             'Column "4" has been ignored because it is a number.',
         ],
         False,
+        True,
     ),
 ]
 
@@ -377,6 +417,8 @@ def create_schema(root_id):
         "properties": {
             "id": {"title": "Identifier", "type": "integer",},
             "testA": {"title": "A title", "type": "integer",},
+            "testDateTime": {"type": "string", "format": "date-time",},
+            "testDate": {"type": "string", "format": "date"},
             "testB": {
                 "title": "B title",
                 "type": "object",
@@ -685,7 +727,8 @@ ROOT_ID_PARAMS = [
 @pytest.mark.parametrize("use_schema", [True, False])
 @pytest.mark.parametrize("root_id,root_id_kwargs", ROOT_ID_PARAMS)
 @pytest.mark.parametrize(
-    "comment,input_list,expected_output_list,warning_messages,reversible", testdata
+    "comment,input_list,expected_output_list,warning_messages,reversible,works_without_schema",
+    testdata,
 )
 def test_unflatten(
     convert_titles,
@@ -698,7 +741,11 @@ def test_unflatten(
     comment,
     warning_messages,
     reversible,
+    works_without_schema,
 ):
+    if not use_schema and not works_without_schema:
+        pytest.skip()
+
     # Not sure why, but this seems to be necessary to have warnings picked up
     # on Python 2.7 and 3.3, but 3.4 and 3.5 are fine without it
     import warnings
@@ -764,6 +811,7 @@ def test_unflatten_pointer(
         comment=comment,
         warning_messages=warning_messages,
         reversible=False,
+        works_without_schema=True,
     )
 
 
@@ -802,4 +850,5 @@ def test_unflatten_titles(
         comment=comment,
         warning_messages=warning_messages,
         reversible=reversible,
+        works_without_schema=True,
     )

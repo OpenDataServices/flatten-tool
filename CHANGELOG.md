@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.0] - 2020-08-25
+
+### Added
+
+- Add support for `"format": "date"` in a JSON schema
 
 ### Changed
 
