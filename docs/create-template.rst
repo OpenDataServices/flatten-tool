@@ -40,11 +40,11 @@ CSV files for you:
 .. csv-table:: sheet: cafe.csv
    :file: ../examples/create-template/simple/expected/cafe.csv
 
-.. csv-table:: sheet: table.csv
-   :file: ../examples/create-template/simple/expected/table.csv
+.. csv-table:: sheet: Table.csv
+   :file: ../examples/create-template/simple/expected/Table.csv
 
-.. csv-table:: sheet: tab_dish.csv
-   :file: ../examples/create-template/simple/expected/tab_dish.csv
+.. csv-table:: sheet: Tab_Dish.csv
+   :file: ../examples/create-template/simple/expected/Tab_Dish.csv
 
 As you can see, by default Flatten Tool puts each item with an Identifier in
 its own sheet.
@@ -81,14 +81,14 @@ Here are the resulting sheets:
 .. csv-table:: sheet: cafe.csv
    :file: ../examples/create-template/rollup/expected/cafe.csv
 
-.. csv-table:: sheet: table.csv
-   :file: ../examples/create-template/rollup/expected/table.csv
+.. csv-table:: sheet: Table.csv
+   :file: ../examples/create-template/rollup/expected/Table.csv
 
-.. csv-table:: sheet: tab_dish.csv
-   :file: ../examples/create-template/rollup/expected/tab_dish.csv
+.. csv-table:: sheet: Tab_Dish.csv
+   :file: ../examples/create-template/rollup/expected/Tab_Dish.csv
 
 
-Notice how ``Table: Number`` now appears in both the ``cafe.csv`` and ``table.csv`` files.
+Notice how ``Table: Number`` now appears in both the ``Cafe.csv`` and ``Table.csv`` files.
 
 ``rollup`` can also be used to rollup actual data with ``flatten``, with or 
 without a schema: :ref:`flattening`

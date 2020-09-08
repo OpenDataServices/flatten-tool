@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- When `--use-titles` is specified, also use the titles for sheet names (ie. Excel tabs and CSV filenames)
+
 ## [0.12.0] - 2020-08-25
 
 ### Added
