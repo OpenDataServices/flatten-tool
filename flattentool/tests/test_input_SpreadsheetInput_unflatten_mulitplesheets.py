@@ -322,7 +322,7 @@ testdata_multiplesheets_titles = [
                 {"ROOT_ID": 1, "Identifier": 2,},
                 {"ROOT_ID": 1, "Identifier": 3,},
             ],
-            "testArr": [
+            "Arr title": [
                 {"ROOT_ID": 1, "Identifier": 2, "Arr title:C title": "3",},
                 {"ROOT_ID": 1, "Identifier": 2, "Arr title:C title": "4",},
             ],
@@ -345,7 +345,7 @@ testdata_multiplesheets_titles = [
                     "B title:C title": 4,
                 }
             ],
-            "tes_subField": [
+            "B t_Sub title": [
                 # It used to be neccesary to supply testA/id in this
                 # situation, but now it's optional
                 {
@@ -405,7 +405,7 @@ testdata_multiplesheets_titles = [
                     ],
                 ),
                 (
-                    "testArr",
+                    "Arr title",
                     [
                         {
                             "ROOT_ID": 1,
@@ -416,7 +416,7 @@ testdata_multiplesheets_titles = [
                     ],
                 ),
                 (
-                    "tes_testNest",
+                    "Arr_Nest title",
                     [
                         {
                             "ROOT_ID": 1,
@@ -448,7 +448,7 @@ testdata_multiplesheets_titles = [
         "Nested id",
         {
             "custom_main": [{"ROOT_ID": 1, "Identifier": 2,}],
-            "testArr": [
+            "Arr title": [
                 {
                     "ROOT_ID": 1,
                     "Identifier": 2,

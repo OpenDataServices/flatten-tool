@@ -221,11 +221,11 @@ Here are the resulting sheets:
 .. csv-table:: sheet: cafe.csv
    :file: ../examples/flatten/rollup/schema/expected/cafe.csv
 
-.. csv-table:: sheet: owners.csv
-   :file: ../examples/flatten/rollup/schema/expected/owners.csv
+.. csv-table:: sheet: Owners.csv
+   :file: ../examples/flatten/rollup/schema/expected/Owner.csv
 
 Notice how ``Owner: First name``, ``Owner: Last name`` and ``Owner: Email`` now 
-appear in both the ``cafe.csv`` and ``owners.csv`` files.
+appear in both the ``cafe.csv`` and ``Owner.csv`` files.
 
 .. caution ::
 
@@ -265,7 +265,7 @@ Run this command to rollup all properties of the ``owners`` object:
 
 Where the file contains:
 
-.. literalinclude:: ../examples/flatten/rollup/file/fields_to_rollup.xt
+.. literalinclude:: ../examples/flatten/rollup/file/fields_to_rollup.txt
    :language: bash
 
 You can include multiple fields to rollup by passing ``--rollup`` multiple times:

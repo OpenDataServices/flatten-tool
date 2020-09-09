@@ -403,11 +403,15 @@ class JSONParser(object):
                                         elif (
                                             self.use_titles
                                             and parent_name + key in self.rollup
-                                            and parent_name + key
+                                            and self.schema_parser.sub_sheet_titles.get(
+                                                (parent_name, key,)
+                                            )
                                             in self.schema_parser.sub_sheets
                                         ):
                                             relevant_subsheet = self.schema_parser.sub_sheets.get(
-                                                parent_name + key
+                                                self.schema_parser.sub_sheet_titles.get(
+                                                    (parent_name, key,)
+                                                )
                                             )
                                             if relevant_subsheet is not None:
                                                 rollup_field_title = sheet_key_title(
@@ -471,9 +475,14 @@ class JSONParser(object):
                                         sheet_key(sheet, parent_name + key + "/0/" + k)
                                     ] = "WARNING: More than one value supplied, consult the relevant sub-sheet for the data."
 
-                    sub_sheet_name = make_sub_sheet_name(
-                        parent_name, key, truncation_length=self.truncation_length
-                    )
+                    if self.use_titles and self.schema_parser:
+                        sub_sheet_name = self.schema_parser.sub_sheet_titles[
+                            (parent_name, key,)
+                        ]
+                    else:
+                        sub_sheet_name = make_sub_sheet_name(
+                            parent_name, key, truncation_length=self.truncation_length
+                        )
                     if sub_sheet_name not in self.sub_sheets:
                         self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
 
