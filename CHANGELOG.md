@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- Include sheet name with duplicate heading warnings.
+
 ## [0.13.0] - 2020-09-09
 
 ### Changed

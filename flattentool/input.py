@@ -333,7 +333,7 @@ class SpreadsheetInput(object):
                             warn(
                                 (
                                     'Duplicate heading "{}" found, ignoring '
-                                    "the data in columns {} and {}."
+                                    'the data in columns {} and {} (sheet: "{}").'
                                 ).format(
                                     actual_heading,
                                     ", ".join(
@@ -343,6 +343,7 @@ class SpreadsheetInput(object):
                                         ]
                                     ),
                                     _get_column_letter(ignoring[-1] + 1),
+                                    sheet_name,
                                 ),
                                 DataErrorWarning,
                             )
@@ -350,11 +351,12 @@ class SpreadsheetInput(object):
                             warn(
                                 (
                                     'Duplicate heading "{}" found, ignoring '
-                                    "the data in columns {} and {}."
+                                    'the data in columns {} and {} (sheet: "{}").'
                                 ).format(
                                     actual_heading,
                                     _get_column_letter(ignoring[0] + 1),
                                     _get_column_letter(ignoring[1] + 1),
+                                    sheet_name,
                                 ),
                                 DataErrorWarning,
                             )
@@ -362,9 +364,11 @@ class SpreadsheetInput(object):
                             warn(
                                 (
                                     'Duplicate heading "{}" found, ignoring '
-                                    "the data in column {}."
+                                    'the data in column {} (sheet: "{}").'
                                 ).format(
-                                    actual_heading, _get_column_letter(ignoring[0] + 1),
+                                    actual_heading,
+                                    _get_column_letter(ignoring[0] + 1),
+                                    sheet_name,
                                 ),
                                 DataErrorWarning,
                             )
