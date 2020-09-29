@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.14.0] - 2020-09-29
+
 ### Fixed
 
 - Fix use of titles for sheet names, to avoid KeyError when a field is missing from the schema
