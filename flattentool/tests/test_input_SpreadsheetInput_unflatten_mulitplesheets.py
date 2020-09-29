@@ -326,9 +326,18 @@ testdata_multiplesheets_titles = [
                 {"ROOT_ID": 1, "Identifier": 2, "Arr title:C title": "3",},
                 {"ROOT_ID": 1, "Identifier": 2, "Arr title:C title": "4",},
             ],
+            "arr_not_in_schema": [
+                {"ROOT_ID": 1, "Identifier": 2, "arr_not_in_schema/0/testD": "5",},
+                {"ROOT_ID": 1, "Identifier": 2, "arr_not_in_schema/0/testD": "6",},
+            ],
         },
         [
-            {"ROOT_ID": 1, "id": 2, "testArr": [{"testC": "3"}, {"testC": "4"},]},
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testArr": [{"testC": "3"}, {"testC": "4"},],
+                "arr_not_in_schema": [{"testD": "5"}, {"testD": "6"}],
+            },
             {"ROOT_ID": 1, "id": 3},
         ],
         [],

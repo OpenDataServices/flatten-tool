@@ -475,7 +475,11 @@ class JSONParser(object):
                                         sheet_key(sheet, parent_name + key + "/0/" + k)
                                     ] = "WARNING: More than one value supplied, consult the relevant sub-sheet for the data."
 
-                    if self.use_titles and self.schema_parser:
+                    if (
+                        self.use_titles
+                        and self.schema_parser
+                        and (parent_name, key,) in self.schema_parser.sub_sheet_titles
+                    ):
                         sub_sheet_name = self.schema_parser.sub_sheet_titles[
                             (parent_name, key,)
                         ]
