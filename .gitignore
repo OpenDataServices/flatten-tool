@@ -1,6 +1,7 @@
 *.egg-info
 *.pyc
 *.swp
+*.mo
 .vscode
 .cache
 .coverage
