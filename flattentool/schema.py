@@ -20,6 +20,10 @@ else:
     import urlparse
 
 
+def _(x):
+    return x
+
+
 def get_property_type_set(property_schema_dict):
     property_type = property_schema_dict.get("type", [])
     if not isinstance(property_type, list):
@@ -138,11 +142,11 @@ class SchemaParser(object):
 
         if root_schema_dict is None and schema_filename is None:
             raise ValueError(
-                "One of schema_filename or root_schema_dict must be supplied"
+                _("One of schema_filename or root_schema_dict must be supplied")
             )
         if root_schema_dict is not None and schema_filename is not None:
             raise ValueError(
-                "Only one of schema_filename or root_schema_dict should be supplied"
+                _("Only one of schema_filename or root_schema_dict should be supplied")
             )
         if schema_filename:
             if schema_filename.startswith("http"):
@@ -185,7 +189,7 @@ class SchemaParser(object):
         for field, title in fields:
             if self.use_titles:
                 if not title:
-                    warn("Field {} does not have a title, skipping.".format(field))
+                    warn(_("Field {} does not have a title, skipping.").format(field))
                 else:
                     self.main_sheet.append(title)
                     self.main_sheet.titles[field] = title
@@ -337,15 +341,15 @@ class SchemaParser(object):
                             if self.use_titles:
                                 if not child_title or parent_title is None:
                                     warn(
-                                        "Field {}{}/0/{} is missing a title, skipping.".format(
-                                            parent_path, property_name, field
-                                        )
+                                        _(
+                                            "Field {}{}/0/{} is missing a title, skipping."
+                                        ).format(parent_path, property_name, field)
                                     )
                                 elif not title:
                                     warn(
-                                        "Field {}{} does not have a title, skipping it and all its children.".format(
-                                            parent_path, property_name
-                                        )
+                                        _(
+                                            "Field {}{} does not have a title, skipping it and all its children."
+                                        ).format(parent_path, property_name)
                                     )
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
@@ -383,9 +387,9 @@ class SchemaParser(object):
 
                     else:
                         raise ValueError(
-                            'Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'.format(
-                                type_set
-                            )
+                            _(
+                                'Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'
+                            ).format(type_set)
                         )
                 elif "string" in property_type_set or not property_type_set:
                     # We only check for date here, because its the only format
@@ -416,13 +420,15 @@ class SchemaParser(object):
                     yield property_name, title
                 else:
                     warn(
-                        'Unrecognised types {} for property "{}" with context "{}",'
-                        "so this property has been ignored.".format(
-                            repr(property_type_set), property_name, parent_path
-                        )
+                        _(
+                            'Unrecognised types {} for property "{}" with context "{}",'
+                            "so this property has been ignored."
+                        ).format(repr(property_type_set), property_name, parent_path)
                     )
 
         else:
             warn(
-                'Skipping field "{}", because it has no properties.'.format(parent_path)
+                _('Skipping field "{}", because it has no properties.').format(
+                    parent_path
+                )
             )
