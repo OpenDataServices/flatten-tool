@@ -4,11 +4,6 @@ from warnings import warn
 from flattentool.exceptions import DataErrorWarning
 from flattentool.sort_xml import XMLSchemaWalker, sort_element
 
-
-def _(x):
-    return x
-
-
 try:
     import lxml.etree as ET
 

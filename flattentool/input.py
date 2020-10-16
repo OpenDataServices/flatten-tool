@@ -18,12 +18,9 @@ import pytz
 from openpyxl.utils.cell import _get_column_letter
 
 from flattentool.exceptions import DataErrorWarning
+from flattentool.i18n import _
 from flattentool.lib import isint, parse_sheet_configuration
 from flattentool.ODSReader import ODSReader
-
-
-def _(x):
-    return x
 
 try:
     from zipfile import BadZipFile

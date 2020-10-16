@@ -15,10 +15,7 @@ from odf.opendocument import OpenDocumentSpreadsheet
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 
 from flattentool.exceptions import DataErrorWarning
-
-
-def _(x):
-    return x
+from flattentool.i18n import _
 
 
 class SpreadsheetOutput(object):

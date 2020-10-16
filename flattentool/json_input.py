@@ -15,14 +15,10 @@ from warnings import warn
 
 import xmltodict
 
+from flattentool.i18n import _
 from flattentool.input import path_search
 from flattentool.schema import make_sub_sheet_name
 from flattentool.sheet import Sheet
-
-
-def _(x):
-    return x
-
 
 BASIC_TYPES = [str, bool, int, Decimal, type(None)]
 
