@@ -15,6 +15,7 @@ from warnings import warn
 
 import xmltodict
 
+from flattentool.i18n import _
 from flattentool.input import path_search
 from flattentool.schema import make_sub_sheet_name
 from flattentool.sheet import Sheet
@@ -146,7 +147,7 @@ class JSONParser(object):
                 if isinstance(rollup, (list,)) and (
                     len(rollup) > 1 or (len(rollup) == 1 and rollup[0] is not True)
                 ):
-                    warn("Using rollUp values from schema, ignoring direct input.")
+                    warn(_("Using rollUp values from schema, ignoring direct input."))
             elif isinstance(rollup, (list,)):
                 if len(rollup) == 1 and os.path.isfile(rollup[0]):
                     # Parse file, one json path per line.
@@ -159,13 +160,17 @@ class JSONParser(object):
                     # Rollup args passed directly at the commandline
                 elif len(rollup) == 1 and rollup[0] is True:
                     warn(
-                        "No fields to rollup found (pass json path directly, as a list in a file, or via a schema)"
+                        _(
+                            "No fields to rollup found (pass json path directly, as a list in a file, or via a schema)"
+                        )
                     )
                 else:
                     self.rollup = set(rollup)
             else:
                 warn(
-                    "Invalid value passed for rollup (pass json path directly, as a list in a file, or via a schema)"
+                    _(
+                        "Invalid value passed for rollup (pass json path directly, as a list in a file, or via a schema)"
+                    )
                 )
 
         if self.xml:
@@ -180,11 +185,13 @@ class JSONParser(object):
             json_filename = None
 
         if json_filename is None and root_json_dict is None:
-            raise ValueError("Etiher json_filename or root_json_dict must be supplied")
+            raise ValueError(
+                _("Etiher json_filename or root_json_dict must be supplied")
+            )
 
         if json_filename is not None and root_json_dict is not None:
             raise ValueError(
-                "Only one of json_file or root_json_dict should be supplied"
+                _("Only one of json_file or root_json_dict should be supplied")
             )
 
         if json_filename:
@@ -222,9 +229,9 @@ class JSONParser(object):
                     if field not in self.schema_parser.flattened.keys():
                         input_not_in_schema.add(field)
                 warn(
-                    "You wanted to preserve the following fields which are not present in the supplied schema: {}".format(
-                        list(input_not_in_schema)
-                    )
+                    _(
+                        "You wanted to preserve the following fields which are not present in the supplied schema: {}"
+                    ).format(list(input_not_in_schema))
                 )
             except AttributeError:
                 # no schema
@@ -260,9 +267,9 @@ class JSONParser(object):
                     nonexistent_input_paths.append(field)
             if len(nonexistent_input_paths) > 0:
                 warn(
-                    "You wanted to preserve the following fields which are not present in the input data: {}".format(
-                        nonexistent_input_paths
-                    )
+                    _(
+                        "You wanted to preserve the following fields which are not present in the input data: {}"
+                    ).format(nonexistent_input_paths)
                 )
 
     def parse_json_dict(
@@ -366,7 +373,9 @@ class JSONParser(object):
 
                         if self.use_titles and not self.schema_parser:
                             warn(
-                                "Warning: No schema was provided so column headings are JSON keys, not titles."
+                                _(
+                                    "Warning: No schema was provided so column headings are JSON keys, not titles."
+                                )
                             )
 
                         if len(value) == 1:
@@ -381,7 +390,7 @@ class JSONParser(object):
 
                                 if type(v) not in BASIC_TYPES:
                                     raise ValueError(
-                                        "Rolled up values must be basic types"
+                                        _("Rolled up values must be basic types")
                                     )
                                 else:
                                     if self.schema_parser:
@@ -458,22 +467,26 @@ class JSONParser(object):
                                     in self.schema_parser.main_sheet
                                 ):
                                     warn(
-                                        'More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(
-                                            parent_name + key
-                                        )
+                                        _(
+                                            'More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'
+                                        ).format(parent_name + key)
                                     )
                                     flattened_dict[
                                         sheet_key(sheet, parent_name + key + "/0/" + k)
-                                    ] = "WARNING: More than one value supplied, consult the relevant sub-sheet for the data."
+                                    ] = _(
+                                        "WARNING: More than one value supplied, consult the relevant sub-sheet for the data."
+                                    )
                                 elif parent_name + key in self.rollup:
                                     warn(
-                                        'More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'.format(
-                                            parent_name + key
-                                        )
+                                        _(
+                                            'More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'
+                                        ).format(parent_name + key)
                                     )
                                     flattened_dict[
                                         sheet_key(sheet, parent_name + key + "/0/" + k)
-                                    ] = "WARNING: More than one value supplied, consult the relevant sub-sheet for the data."
+                                    ] = _(
+                                        "WARNING: More than one value supplied, consult the relevant sub-sheet for the data."
+                                    )
 
                     if (
                         self.use_titles
@@ -502,7 +515,7 @@ class JSONParser(object):
                             top_level_of_sub_sheet=True,
                         )
             else:
-                raise ValueError("Unsupported type {}".format(type(value)))
+                raise ValueError(_("Unsupported type {}").format(type(value)))
 
         if top:
             sheet.lines.append(flattened_dict)

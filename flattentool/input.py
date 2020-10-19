@@ -18,6 +18,7 @@ import pytz
 from openpyxl.utils.cell import _get_column_letter
 
 from flattentool.exceptions import DataErrorWarning
+from flattentool.i18n import _
 from flattentool.lib import isint, parse_sheet_configuration
 from flattentool.ODSReader import ODSReader
 
@@ -42,9 +43,9 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC")):
             return Decimal(value)
         except (TypeError, ValueError, InvalidOperation):
             warn(
-                'Non-numeric value "{}" found in number column, returning as string instead.'.format(
-                    value
-                ),
+                _(
+                    'Non-numeric value "{}" found in number column, returning as string instead.'
+                ).format(value),
                 DataErrorWarning,
             )
             return str(value)
@@ -53,9 +54,9 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC")):
             return int(value)
         except (TypeError, ValueError):
             warn(
-                'Non-integer value "{}" found in integer column, returning as string instead.'.format(
-                    value
-                ),
+                _(
+                    'Non-integer value "{}" found in integer column, returning as string instead.'
+                ).format(value),
                 DataErrorWarning,
             )
             return str(value)
@@ -67,9 +68,9 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC")):
             return False
         else:
             warn(
-                'Unrecognised value for boolean: "{}", returning as string instead'.format(
-                    value
-                ),
+                _(
+                    'Unrecognised value for boolean: "{}", returning as string instead'
+                ).format(value),
                 DataErrorWarning,
             )
             return str(value)
@@ -85,9 +86,9 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC")):
                     return [Decimal(x) for x in value.split(";")]
             except (TypeError, ValueError, InvalidOperation):
                 warn(
-                    'Non-numeric value "{}" found in number array column, returning as string array instead.'.format(
-                        value
-                    ),
+                    _(
+                        'Non-numeric value "{}" found in number array column, returning as string array instead).'
+                    ).format(value),
                     DataErrorWarning,
                 )
         if "," in value:
@@ -138,9 +139,9 @@ def merge(base, mergee, debug_info=None):
                 if not isinstance(base[key], TemporaryDict):
                     warnings_for_ignored_columns(
                         v,
-                        "because it treats {} as an array, but another column does not".format(
-                            key
-                        ),
+                        _(
+                            "because it treats {} as an array, but another column does not"
+                        ).format(key),
                     )
                     continue
                 for temporarydict_key, temporarydict_value in value.items():
@@ -151,9 +152,9 @@ def merge(base, mergee, debug_info=None):
                             debug_info,
                         )
                     else:
-                        assert (
-                            temporarydict_key not in base[key]
-                        ), "Overwriting cell {} by mistake".format(temporarydict_value)
+                        assert temporarydict_key not in base[key], _(
+                            "Overwriting cell {} by mistake"
+                        ).format(temporarydict_value)
                         base[key][temporarydict_key] = temporarydict_value
                 for temporarydict_value in value.items_no_keyfield:
                     base[key].items_no_keyfield.append(temporarydict_value)
@@ -163,9 +164,9 @@ def merge(base, mergee, debug_info=None):
                 else:
                     warnings_for_ignored_columns(
                         v,
-                        "because it treats {} as an object, but another column does not".format(
-                            key
-                        ),
+                        _(
+                            "because it treats {} as an object, but another column does not"
+                        ).format(key),
                     )
             else:
                 if not isinstance(base[key], Cell):
@@ -182,7 +183,7 @@ def merge(base, mergee, debug_info=None):
                             + id_info
                         )
                     warnings_for_ignored_columns(
-                        v, "because another column treats it as an array or object"
+                        v, _("because another column treats it as an array or object")
                     )
                     continue
                 base_value = base[key].cell_value
@@ -200,7 +201,9 @@ def merge(base, mergee, debug_info=None):
                             + id_info
                         )
                     warn(
-                        'You may have a duplicate Identifier: We couldn\'t merge these rows with the {}: field "{}" in sheet "{}": one cell has the value: "{}", the other cell has the value: "{}"'.format(
+                        _(
+                            'You may have a duplicate Identifier: We couldn\'t merge these rows with the {}: field "{}" in sheet "{}": one cell has the value: "{}", the other cell has the value: "{}"'
+                        ).format(
                             id_info,
                             key,
                             debug_info.get("sheet_name"),
@@ -332,8 +335,10 @@ class SpreadsheetInput(object):
                         if len(ignoring) >= 3:
                             warn(
                                 (
-                                    'Duplicate heading "{}" found, ignoring '
-                                    'the data in columns {} and {} (sheet: "{}").'
+                                    _(
+                                        'Duplicate heading "{}" found, ignoring '
+                                        'the data in columns {} and {} (sheet: "{}").'
+                                    )
                                 ).format(
                                     actual_heading,
                                     ", ".join(
@@ -350,8 +355,10 @@ class SpreadsheetInput(object):
                         elif len(found[actual_heading]) == 3:
                             warn(
                                 (
-                                    'Duplicate heading "{}" found, ignoring '
-                                    'the data in columns {} and {} (sheet: "{}").'
+                                    _(
+                                        'Duplicate heading "{}" found, ignoring '
+                                        'the data in columns {} and {} (sheet: "{}").'
+                                    )
                                 ).format(
                                     actual_heading,
                                     _get_column_letter(ignoring[0] + 1),
@@ -363,8 +370,10 @@ class SpreadsheetInput(object):
                         else:
                             warn(
                                 (
-                                    'Duplicate heading "{}" found, ignoring '
-                                    'the data in column {} (sheet: "{}").'
+                                    _(
+                                        'Duplicate heading "{}" found, ignoring '
+                                        'the data in column {} (sheet: "{}").'
+                                    )
                                 ).format(
                                     actual_heading,
                                     _get_column_letter(ignoring[0] + 1),
@@ -453,7 +462,7 @@ class SpreadsheetInput(object):
             ordered_items = sorted(cell_source_map.items())
             row_source_map = OrderedDict()
             heading_source_map = OrderedDict()
-            for path, _ in ordered_items:
+            for path, _unused in ordered_items:
                 cells = cell_source_map[path]
                 # Prepare row_source_map key
                 key = "/".join(str(x) for x in path[:-1])
@@ -484,9 +493,9 @@ class SpreadsheetInput(object):
                 for path, location in ordered_items
             )
             for key in row_source_map:
-                assert (
-                    key not in ordered_cell_source_map
-                ), "Row/cell collision: {}".format(key)
+                assert key not in ordered_cell_source_map, _(
+                    "Row/cell collision: {}"
+                ).format(key)
                 ordered_cell_source_map[key] = row_source_map[key]
         return result, ordered_cell_source_map, heading_source_map
 
@@ -496,7 +505,7 @@ def extract_list_to_error_path(path, input):
     for i, item in enumerate(input):
         res = extract_dict_to_error_path(path + [i], item)
         for p in res:
-            assert p not in output, "Already have key {}".format(p)
+            assert p not in output, _("Already have key {}").format(p)
             output[p] = res[p]
     return output
 
@@ -507,27 +516,25 @@ def extract_dict_to_error_path(path, input):
         if isinstance(input[k], list):
             res = extract_list_to_error_path(path + [k], input[k])
             for p in res:
-                assert p not in output, "Already have key {}".format(p)
+                assert p not in output, _("Already have key {}").format(p)
                 output[p] = res[p]
         elif isinstance(input[k], dict):
             res = extract_dict_to_error_path(path + [k], input[k])
             for p in res:
-                assert p not in output, "Already have key {}".format(p)
+                assert p not in output, _("Already have key {}").format(p)
                 output[p] = res[p]
         elif isinstance(input[k], Cell):
             p = tuple(path + [k])
-            assert p not in output, "Already have key {}".format(p)
+            assert p not in output, _("Already have key {}").format(p)
             output[p] = [input[k].cell_location]
             for sub_cell in input[k].sub_cells:
-                assert (
-                    sub_cell.cell_value == input[k].cell_value
-                ), "Two sub-cells have different values: {}, {}".format(
-                    input[k].cell_value, sub_cell.cell_value
-                )
+                assert sub_cell.cell_value == input[k].cell_value, _(
+                    "Two sub-cells have different values: {}, {}"
+                ).format(input[k].cell_value, sub_cell.cell_value)
                 output[p].append(sub_cell.cell_location)
         else:
             raise Exception(
-                "Unexpected result type in the JSON cell tree: {}".format(input[k])
+                _("Unexpected result type in the JSON cell tree: {}").format(input[k])
             )
     return output
 
@@ -550,7 +557,7 @@ def extract_dict_to_value(input):
             output[k] = input[k].cell_value
         else:
             raise Exception(
-                "Unexpected result type in the JSON cell tree: {}".format(input[k])
+                _("Unexpected result type in the JSON cell tree: {}").format(input[k])
             )
     return output
 
@@ -647,7 +654,7 @@ class XLSXInput(SpreadsheetInput):
         except BadZipFile as e:  # noqa
             # TODO when we have python3 only add 'from e' to show exception chain
             raise BadXLSXZipFile(
-                "The supplied file has extension .xlsx but isn't an XLSX file."
+                _("The supplied file has extension .xlsx but isn't an XLSX file.")
             )
 
         self.sheet_names_map = OrderedDict(
@@ -918,9 +925,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             if isint(path_item):
                 if num == 0:
                     warn(
-                        'Column "{}" has been ignored because it is a number.'.format(
-                            path
-                        ),
+                        _(
+                            'Column "{}" has been ignored because it is a number.'
+                        ).format(path),
                         DataErrorWarning,
                     )
                 continue
@@ -946,9 +953,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             if isint(next_path_item):
                 if current_type and current_type != "array":
                     raise ValueError(
-                        "There is an array at '{}' when the schema says there should be a '{}'".format(
-                            path_till_now, current_type
-                        )
+                        _(
+                            "There is an array at '{}' when the schema says there should be a '{}'"
+                        ).format(path_till_now, current_type)
                     )
                 list_index = int(next_path_item)
                 current_type = "array"
@@ -960,9 +967,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     current_path[path_item] = list_as_dict
                 elif type(list_as_dict) is not ListAsDict:
                     warn(
-                        "Column {} has been ignored, because it treats {} as an array, but another column does not.".format(
-                            path, path_till_now
-                        ),
+                        _(
+                            "Column {} has been ignored, because it treats {} as an array, but another column does not."
+                        ).format(path, path_till_now),
                         DataErrorWarning,
                     )
                     break
@@ -984,9 +991,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     current_path[path_item] = new_path
                 elif type(new_path) is ListAsDict or not hasattr(new_path, "items"):
                     warn(
-                        "Column {} has been ignored, because it treats {} as an object, but another column does not.".format(
-                            path, path_till_now
-                        ),
+                        _(
+                            "Column {} has been ignored, because it treats {} as an object, but another column does not."
+                        ).format(path, path_till_now),
                         DataErrorWarning,
                     )
                     break
@@ -998,9 +1005,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 and next_path_item
             ):
                 raise ValueError(
-                    "There is an object or list at '{}' but it should be an {}".format(
-                        path_till_now, current_type
-                    )
+                    _(
+                        "There is an object or list at '{}' but it should be an {}"
+                    ).format(path_till_now, current_type)
                 )
 
             ## Other Types
@@ -1012,9 +1019,9 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 #   ^
                 # xml can have an object/array that also has a text value
                 warn(
-                    "Column {} has been ignored, because another column treats it as an array or object".format(
-                        path_till_now
-                    ),
+                    _(
+                        "Column {} has been ignored, because another column treats it as an array or object"
+                    ).format(path_till_now),
                     DataErrorWarning,
                 )
                 continue

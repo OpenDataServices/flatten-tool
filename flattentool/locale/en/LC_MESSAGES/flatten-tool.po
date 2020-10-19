@@ -1,0 +1,232 @@
+# Translations template for flattentool.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the flattentool
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: flattentool 0.14.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-10-16 08:52+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: flattentool/input.py:49
+msgid ""
+"Non-numeric value \"{}\" found in number column, returning as string "
+"instead."
+msgstr ""
+
+#: flattentool/input.py:60
+msgid ""
+"Non-integer value \"{}\" found in integer column, returning as string "
+"instead."
+msgstr ""
+
+#: flattentool/input.py:74
+msgid "Unrecognised value for boolean: \"{}\", returning as string instead"
+msgstr ""
+
+#: flattentool/input.py:92
+msgid ""
+"Non-numeric value \"{}\" found in number array column, returning as "
+"string array instead)."
+msgstr ""
+
+#: flattentool/input.py:145
+msgid "because it treats {} as an array, but another column does not"
+msgstr ""
+
+#: flattentool/input.py:158
+msgid "Overwriting cell {} by mistake"
+msgstr ""
+
+#: flattentool/input.py:170
+msgid "because it treats {} as an object, but another column does not"
+msgstr ""
+
+#: flattentool/input.py:189
+msgid "because another column treats it as an array or object"
+msgstr ""
+
+#: flattentool/input.py:207
+msgid ""
+"You may have a duplicate Identifier: We couldn't merge these rows with "
+"the {}: field \"{}\" in sheet \"{}\": one cell has the value: \"{}\", the"
+" other cell has the value: \"{}\""
+msgstr ""
+
+#: flattentool/input.py:341 flattentool/input.py:361
+msgid ""
+"Duplicate heading \"{}\" found, ignoring the data in columns {} and {} "
+"(sheet: \"{}\")."
+msgstr ""
+
+#: flattentool/input.py:376
+msgid ""
+"Duplicate heading \"{}\" found, ignoring the data in column {} (sheet: "
+"\"{}\")."
+msgstr ""
+
+#: flattentool/input.py:499
+msgid "Row/cell collision: {}"
+msgstr ""
+
+#: flattentool/input.py:511 flattentool/input.py:522 flattentool/input.py:527
+#: flattentool/input.py:531
+msgid "Already have key {}"
+msgstr ""
+
+#: flattentool/input.py:534
+msgid "Two sub-cells have different values: {}, {}"
+msgstr ""
+
+#: flattentool/input.py:540 flattentool/input.py:563
+msgid "Unexpected result type in the JSON cell tree: {}"
+msgstr ""
+
+#: flattentool/input.py:660
+msgid "The supplied file has extension .xlsx but isn't an XLSX file."
+msgstr ""
+
+#: flattentool/input.py:931
+msgid "Column \"{}\" has been ignored because it is a number."
+msgstr ""
+
+#: flattentool/input.py:959
+msgid "There is an array at '{}' when the schema says there should be a '{}'"
+msgstr ""
+
+#: flattentool/input.py:973
+msgid ""
+"Column {} has been ignored, because it treats {} as an array, but another"
+" column does not."
+msgstr ""
+
+#: flattentool/input.py:997
+msgid ""
+"Column {} has been ignored, because it treats {} as an object, but "
+"another column does not."
+msgstr ""
+
+#: flattentool/input.py:1011
+msgid "There is an object or list at '{}' but it should be an {}"
+msgstr ""
+
+#: flattentool/input.py:1025
+msgid ""
+"Column {} has been ignored, because another column treats it as an array "
+"or object"
+msgstr ""
+
+#: flattentool/json_input.py:154
+msgid "Using rollUp values from schema, ignoring direct input."
+msgstr ""
+
+#: flattentool/json_input.py:167
+msgid ""
+"No fields to rollup found (pass json path directly, as a list in a file, "
+"or via a schema)"
+msgstr ""
+
+#: flattentool/json_input.py:175
+msgid ""
+"Invalid value passed for rollup (pass json path directly, as a list in a "
+"file, or via a schema)"
+msgstr ""
+
+#: flattentool/json_input.py:193
+msgid "Etiher json_filename or root_json_dict must be supplied"
+msgstr ""
+
+#: flattentool/json_input.py:198
+msgid "Only one of json_file or root_json_dict should be supplied"
+msgstr ""
+
+#: flattentool/json_input.py:236
+msgid ""
+"You wanted to preserve the following fields which are not present in the "
+"supplied schema: {}"
+msgstr ""
+
+#: flattentool/json_input.py:274
+msgid ""
+"You wanted to preserve the following fields which are not present in the "
+"input data: {}"
+msgstr ""
+
+#: flattentool/json_input.py:380
+msgid ""
+"Warning: No schema was provided so column headings are JSON keys, not "
+"titles."
+msgstr ""
+
+#: flattentool/json_input.py:397
+msgid "Rolled up values must be basic types"
+msgstr ""
+
+#: flattentool/json_input.py:474 flattentool/json_input.py:485
+msgid ""
+"More than one value supplied for \"{}\". Could not provide rollup, so "
+"adding a warning to the relevant cell(s) in the spreadsheet."
+msgstr ""
+
+#: flattentool/json_input.py:480 flattentool/json_input.py:491
+msgid ""
+"WARNING: More than one value supplied, consult the relevant sub-sheet for"
+" the data."
+msgstr ""
+
+#: flattentool/json_input.py:522
+msgid "Unsupported type {}"
+msgstr ""
+
+#: flattentool/output.py:71 flattentool/output.py:147
+msgid ""
+"Character(s) in '{}' are not allowed in a spreadsheet cell. Those "
+"character(s) will be removed"
+msgstr ""
+
+#: flattentool/schema.py:145
+msgid "One of schema_filename or root_schema_dict must be supplied"
+msgstr ""
+
+#: flattentool/schema.py:149
+msgid "Only one of schema_filename or root_schema_dict should be supplied"
+msgstr ""
+
+#: flattentool/schema.py:192
+msgid "Field {} does not have a title, skipping."
+msgstr ""
+
+#: flattentool/schema.py:344
+msgid "Field {}{}/0/{} is missing a title, skipping."
+msgstr ""
+
+#: flattentool/schema.py:350
+msgid "Field {}{} does not have a title, skipping it and all its children."
+msgstr ""
+
+#: flattentool/schema.py:390
+msgid ""
+"Unknown type_set: {}, did you forget to explicity set the \"type\" key on"
+" \"items\"?"
+msgstr ""
+
+#: flattentool/schema.py:423
+msgid ""
+"Unrecognised types {} for property \"{}\" with context \"{}\",so this "
+"property has been ignored."
+msgstr ""
+
+#: flattentool/schema.py:431
+msgid "Skipping field \"{}\", because it has no properties."
+msgstr ""
+

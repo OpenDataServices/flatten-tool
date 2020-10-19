@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.15.0] - 2020-10-19
+
+### Added
+
+- Add Spanish translation for all strings that could appear in the CoVE web UI https://github.com/OpenDataServices/flatten-tool/pull/362
+
 ## [0.14.0] - 2020-09-29
 
 ### Fixed
