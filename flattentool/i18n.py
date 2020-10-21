@@ -28,7 +28,11 @@ try:
 
 
 except ImportError:
-    # If there's no Django, call gettext.translation without a languages array,
-    # and it will pick one based on the environment variables.
-    t = gettext.translation(domain, locale_dir)
-    _ = t.gettext
+    try:
+        # If there's no Django, call gettext.translation without a languages array,
+        # and it will pick one based on the environment variables.
+        t = gettext.translation(domain, locale_dir)
+        _ = t.gettext
+    except FileNotFoundError:
+        # If .mo files don't exist, pass a fake gettext function instead
+        _ = lambda x: x
