@@ -1,0 +1,24 @@
+name: Lint
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+        architecture: x64
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements_dev.txt') }}-${{ matrix.python-version }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - run: pip install --upgrade -r requirements_dev.txt
+    - run: pip install black==19.10b0
+    - run: black --check *.py */
+    - run: isort --check-only *.py */
+    - run: flake8
