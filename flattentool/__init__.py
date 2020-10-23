@@ -29,7 +29,7 @@ def create_template(
     """
     Creates template file(s) from given inputs
     This function is built to deal with commandline input and arguments
-    but to also be called from elswhere in future
+    but to also be called from elsewhere in future
 
     """
 

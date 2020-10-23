@@ -32,7 +32,7 @@ def test_path_search():
         )
         is goal_dict
     )
-    # Top is always assumed to be an arary
+    # Top is always assumed to be an array
     assert (
         path_search(
             {"a1": {"b1": {"c1": goal_dict}}},

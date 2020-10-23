@@ -1,6 +1,6 @@
 """
 
-This file contains code that takes an instace of a JSON file as input (not a
+This file contains code that takes an instance of a JSON file as input (not a
 JSON schema, for that see schema.py).
 
 """
@@ -94,7 +94,7 @@ def list_dict_consistency(xml_dict):
 
 class JSONParser(object):
     # Named for consistency with schema.SchemaParser, but not sure it's the most appropriate name.
-    # Similarily with methods like parse_json_dict
+    # Similarly with methods like parse_json_dict
 
     def __init__(
         self,
@@ -186,7 +186,7 @@ class JSONParser(object):
 
         if json_filename is None and root_json_dict is None:
             raise ValueError(
-                _("Etiher json_filename or root_json_dict must be supplied")
+                _("Either json_filename or root_json_dict must be supplied")
             )
 
         if json_filename is not None and root_json_dict is not None:
@@ -250,7 +250,7 @@ class JSONParser(object):
         for json_dict in root_json_list:
             if json_dict is None:
                 # This is particularly useful for IATI XML, in order to not
-                # fallover on empty activity, e.g. <iati-activity/>
+                # fall over on empty activity, e.g. <iati-activity/>
                 continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
 
@@ -361,7 +361,7 @@ class JSONParser(object):
                 if all(type(x) in BASIC_TYPES for x in value):
                     # Check for an array of BASIC types
                     # TODO Make this check the schema
-                    # TODO Error if the any of the values contain the seperator
+                    # TODO Error if the any of the values contain the separator
                     # TODO Support doubly nested arrays
                     flattened_dict[sheet_key(sheet, parent_name + key)] = ";".join(
                         map(str, value)

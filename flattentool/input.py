@@ -471,7 +471,7 @@ class SpreadsheetInput(object):
                 if not key in row_source_map:
                     row_source_map[key] = []
                 if with_heading_source_map:
-                    # Prepeare header_source_map key
+                    # Prepare header_source_map key
                     header_path_parts = []
                     for x in path:
                         try:
@@ -859,7 +859,7 @@ class ODSInput(SpreadsheetInput):
                 for row in worksheet[configuration_line:]
                 if len(row) > skip_rows
             ]
-            longest_horizonal_row = max(
+            longest_horizontal_row = max(
                 len(row) for row in worksheet[configuration_line:]
             )
             remaining_rows = [
@@ -868,7 +868,7 @@ class ODSInput(SpreadsheetInput):
                     for row in worksheet[configuration_line:]
                     if row
                 ]
-                for i in range(1, longest_horizonal_row)
+                for i in range(1, longest_horizontal_row)
             ]
         else:
             header_row = worksheet[skip_rows + configuration_line]
@@ -948,7 +948,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             except IndexError:
                 next_path_item = ""
 
-            # Quick solution to avoid casting of date as datetinme in spreadsheet > xml
+            # Quick solution to avoid casting of date as datetime in spreadsheet > xml
             if xml:
                 if type(cell.cell_value) == datetime.datetime and not next_path_item:
                     if "datetime" not in str(path):
@@ -1147,7 +1147,7 @@ class TemporaryDict(UserDict):
 
 
 def temporarydicts_to_lists(nested_dict):
-    """ Recrusively transforms TemporaryDicts to lists inplace. """
+    """ Recursively transforms TemporaryDicts to lists inplace. """
     for key, value in nested_dict.items():
         if isinstance(value, Cell):
             continue

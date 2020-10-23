@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Tests of SpreadsheetInput class from input.py, and its chidlren.
+Tests of SpreadsheetInput class from input.py, and its children.
 Tests of unflatten method are in test_input_SpreadsheetInput_unflatten.py
 """
 from __future__ import unicode_literals
@@ -253,7 +253,7 @@ class TestSuccessfulInput(object):
         assert list(odsinput.sub_sheet_names) == ["Sheet1"]
 
     def test_xlsx_input_formula(self):
-        """ When a forumla is present, we should use the value, rather than the
+        """ When a formula is present, we should use the value, rather than the
         formula itself. """
 
         xlsxinput = XLSXInput(input_name="flattentool/tests/fixtures/xlsx/formula.xlsx")
@@ -287,7 +287,7 @@ class TestSuccessfulInput(object):
         assert False, "No Exception Raised"
 
     def test_ods_input_formula(self):
-        """ When a forumla is present, we should use the value, rather than the
+        """ When a formula is present, we should use the value, rather than the
         formula itself. """
 
         odsinput = ODSInput(input_name="flattentool/tests/fixtures/ods/formula.ods")
@@ -378,7 +378,7 @@ def test_convert_type(recwarn):
     # If not type is specified, ints are kept as ints...
     assert convert_type("", 3) == 3
 
-    # ... but all other ojbects are converted to strings
+    # ... but all other objects are converted to strings
     class NotAString(object):
         def __str__(self):
             return "string representation"
