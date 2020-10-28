@@ -752,7 +752,11 @@ class XLSXInput(SpreadsheetInput):
                 if not header:
                     # None means that the cell will be ignored
                     value = None
-                elif sheet_configuration.get("hashcomments") and header.startswith("#"):
+                elif (
+                    sheet_configuration.get("hashcomments")
+                    and isinstance(header, str)
+                    and header.startswith("#")
+                ):
                     # None means that the cell will be ignored
                     value = None
                 output_row[header] = value
@@ -945,7 +949,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             # Quick solution to avoid casting of date as datetinme in spreadsheet > xml
             if xml:
                 if type(cell.cell_value) == datetime.datetime and not next_path_item:
-                    if "datetime" not in path:
+                    if "datetime" not in str(path):
                         current_type = "date"
 
             ## Array

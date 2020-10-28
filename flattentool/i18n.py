@@ -26,6 +26,7 @@ try:
             if lang not in translations:
                 lang = "en"
             return translations[lang].gettext(text)
+
     except FileNotFoundError:
         # If .mo files don't exist, pass a fake gettext function instead
         _ = lambda x: x
