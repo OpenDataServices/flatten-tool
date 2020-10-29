@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.15.2] - 2020-10-29
+
 ### Fixed
 
 - Don't fail if compiled translation files (.mo) don't exist, and Django isn't installed
