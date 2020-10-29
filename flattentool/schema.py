@@ -237,7 +237,10 @@ class SchemaParser(object):
 
                 property_type_set = get_property_type_set(property_schema_dict)
 
-                title = property_schema_dict.get("title")
+                if hasattr(property_schema_dict, "__reference__") and "title" in property_schema_dict.__reference__:
+                    title = property_schema_dict.__reference__["title"]
+                else:
+                    title = property_schema_dict.get("title")
                 if title:
                     title_lookup[title] = TitleLookup()
                     title_lookup[title].property_name = property_name
