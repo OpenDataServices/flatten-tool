@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- use-titles: Use $ref'erring title if available https://github.com/OpenDataServices/flatten-tool/pull/368 
+
 ## [0.15.2] - 2020-10-29
 
 ### Fixed
