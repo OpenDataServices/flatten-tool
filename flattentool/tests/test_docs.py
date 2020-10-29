@@ -133,7 +133,7 @@ def test_example_in_doc(root, filename):
 
 
 def test_expected_number_of_examples_in_docs_data():
-    assert len(examples_in_docs_data) == 56
+    assert len(examples_in_docs_data) == 57
 
 
 def _simplify_warnings(lines):

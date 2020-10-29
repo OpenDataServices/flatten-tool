@@ -32,7 +32,7 @@ from .test_input_SpreadsheetInput_unflatten_mulitplesheets import (
 @pytest.mark.parametrize("root_id,root_id_kwargs", ROOT_ID_PARAMS)
 @pytest.mark.parametrize(
     "comment,expected_output_list,input_list,warning_messages,reversible",
-    [x for x in testdata if x[4]],
+    [x[:5] for x in testdata if x[4]],
 )
 def test_flatten(
     use_titles,

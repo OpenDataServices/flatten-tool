@@ -1,0 +1,19 @@
+{
+    "cafe": [
+        {
+            "name": "Healthy Cafe",
+            "tags": [
+                "health",
+                "low-cost",
+                "locally sourced food",
+                "take-out"
+            ]
+        },
+        {
+            "name": "Vegetarian Cafe",
+            "tags": [
+                "veggie"
+            ]
+        }
+    ]
+}

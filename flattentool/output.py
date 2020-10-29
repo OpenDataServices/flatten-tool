@@ -15,6 +15,7 @@ from odf.opendocument import OpenDocumentSpreadsheet
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 
 from flattentool.exceptions import DataErrorWarning
+from flattentool.i18n import _
 
 
 class SpreadsheetOutput(object):
@@ -64,9 +65,9 @@ class XLSXOutput(SpreadsheetOutput):
                     new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
                     if new_value != value:
                         warn(
-                            "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
-                                value
-                            ),
+                            _(
+                                "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed"
+                            ).format(value),
                             DataErrorWarning,
                         )
                     value = new_value
@@ -140,9 +141,9 @@ class ODSOutput(SpreadsheetOutput):
                     new_value = ILLEGAL_CHARACTERS_RE.sub("", value)
                     if new_value != value:
                         warn(
-                            "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed".format(
-                                value
-                            ),
+                            _(
+                                "Character(s) in '{}' are not allowed in a spreadsheet cell. Those character(s) will be removed"
+                            ).format(value),
                             DataErrorWarning,
                         )
                     value = new_value

@@ -6,6 +6,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.15.1] - 2020-10-21
+
+### Fixed
+
+- Don't fail if compiled translation files (.mo) don't exist
+
+## [0.15.0] - 2020-10-19
+
+### Added
+
+- Add Spanish translation for all strings that could appear in the CoVE web UI https://github.com/OpenDataServices/flatten-tool/pull/362
+
+## [0.14.0] - 2020-09-29
+
+### Fixed
+
+- Fix use of titles for sheet names, to avoid KeyError when a field is missing from the schema
+
+### Changed
+
+- Include sheet name with duplicate heading warnings.
+
+## [0.13.0] - 2020-09-09
+
+### Changed
+
+- When `--use-titles` is specified, also use the titles for sheet names (ie. Excel tabs and CSV filenames)
+
+## [0.12.0] - 2020-08-25
+
+### Added
+
+- Add support for `"format": "date"` in a JSON schema
 
 ### Changed
 

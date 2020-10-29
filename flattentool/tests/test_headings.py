@@ -14,7 +14,7 @@ test_heading_warning_data = [
             # Check we use the later values
             [1, 2],
         ],
-        ['Duplicate heading "a" found, ignoring the data in column A.'],
+        ['Duplicate heading "a" found, ignoring the data in column A (sheet: "main").'],
         ([OrderedDict([("a", 2)])], None, None),
     ),
     (
@@ -24,9 +24,9 @@ test_heading_warning_data = [
             [1,],
         ],
         [
-            'Duplicate heading "b" found, ignoring the data in column B.',
-            'Duplicate heading "c" found, ignoring the data in columns C and E.',
-            'Duplicate heading "d" found, ignoring the data in columns G, H and I.',
+            'Duplicate heading "b" found, ignoring the data in column B (sheet: "main").',
+            'Duplicate heading "c" found, ignoring the data in columns C and E (sheet: "main").',
+            'Duplicate heading "d" found, ignoring the data in columns G, H and I (sheet: "main").',
         ],
         ([OrderedDict([("a", 1)])], None, None),
     ),

@@ -522,8 +522,8 @@ def test_use_titles(recwarn, use_titles):
     assert len(recwarn) == 0
     if use_titles:
         assert set(parser.main_sheet) == set(["CTitle"])
-        assert set(parser.sub_sheets) == set(["Atest"])
-        assert list(parser.sub_sheets["Atest"]) == ["ATitle:BTitle"]
+        assert set(parser.sub_sheets) == set(["ATitle"])
+        assert list(parser.sub_sheets["ATitle"]) == ["ATitle:BTitle"]
 
     # Array title missing
     parser = SchemaParser(
@@ -617,8 +617,8 @@ def test_use_titles3(recwarn, use_titles):
     parser.parse()
     if use_titles:
         assert set(parser.main_sheet) == set(["CTitle"])
-        assert set(parser.sub_sheets) == set(["Atest"])
-        assert list(parser.sub_sheets["Atest"]) == []
+        assert set(parser.sub_sheets) == set(["ATitle"])
+        assert list(parser.sub_sheets["ATitle"]) == []
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
         assert "Field Atest/0/Btest/Ctest is missing a title" in str(w.message)
@@ -681,8 +681,8 @@ def test_use_titles2(recwarn, use_titles):
     parser.parse()
     if use_titles:
         assert set(parser.main_sheet) == set([])
-        assert set(parser.sub_sheets) == set(["Atest"])
-        assert list(parser.sub_sheets["Atest"]) == ["ATitle:BTitle"]
+        assert set(parser.sub_sheets) == set(["ATitle"])
+        assert list(parser.sub_sheets["ATitle"]) == ["ATitle:BTitle"]
         assert len(recwarn) == 1
         w = recwarn.pop(UserWarning)
         assert "Field Ctest does not have a title" in str(w.message)
@@ -710,8 +710,8 @@ def test_use_titles5(recwarn):
     )
     parser.parse()
     assert set(parser.main_sheet) == set(["CTitle"])
-    assert set(parser.sub_sheets) == set(["Atest"])
-    assert list(parser.sub_sheets["Atest"]) == []
+    assert set(parser.sub_sheets) == set(["ATitle"])
+    assert list(parser.sub_sheets["ATitle"]) == []
     w = recwarn.pop(UserWarning)
     assert "Field Atest/0/Btest is missing a title" in str(w.message)
 
@@ -739,8 +739,8 @@ def test_titles_rollup():
     )
     parser.parse()
     assert set(parser.main_sheet) == set(["ATitle:BTitle"])
-    assert set(parser.sub_sheets) == set(["Atest"])
-    assert set(parser.sub_sheets["Atest"]) == set(["ATitle:BTitle", "ATitle:CTitle"])
+    assert set(parser.sub_sheets) == set(["ATitle"])
+    assert set(parser.sub_sheets["ATitle"]) == set(["ATitle:BTitle", "ATitle:CTitle"])
 
 
 def test_schema_from_uri(httpserver):

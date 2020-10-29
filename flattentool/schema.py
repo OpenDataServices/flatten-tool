@@ -10,12 +10,15 @@ from warnings import warn
 
 import jsonref
 
+from flattentool.i18n import _
 from flattentool.sheet import Sheet
 
 if sys.version_info[:2] > (3, 0):
     import pathlib
 else:
-    import urlparse, urllib
+    import urllib
+
+    import urlparse
 
 
 def get_property_type_set(property_schema_dict):
@@ -26,9 +29,13 @@ def get_property_type_set(property_schema_dict):
         return set(property_type)
 
 
-def make_sub_sheet_name(parent_path, property_name, truncation_length=3):
+def make_sub_sheet_name(
+    parent_path, property_name, truncation_length=3, path_separator="/"
+):
     return (
-        "_".join(x[:truncation_length] for x in parent_path.split("/") if x != "0")
+        "_".join(
+            x[:truncation_length] for x in parent_path.split(path_separator) if x != "0"
+        )
         + property_name
     )[:31]
 
@@ -124,6 +131,7 @@ class SchemaParser(object):
         self.rollup = set()
         self.root_id = root_id
         self.use_titles = use_titles
+        self.sub_sheet_titles = {}
         self.truncation_length = truncation_length
         self.title_lookup = TitleLookup()
         self.flattened = {}
@@ -131,11 +139,11 @@ class SchemaParser(object):
 
         if root_schema_dict is None and schema_filename is None:
             raise ValueError(
-                "One of schema_filename or root_schema_dict must be supplied"
+                _("One of schema_filename or root_schema_dict must be supplied")
             )
         if root_schema_dict is not None and schema_filename is not None:
             raise ValueError(
-                "Only one of schema_filename or root_schema_dict should be supplied"
+                _("Only one of schema_filename or root_schema_dict should be supplied")
             )
         if schema_filename:
             if schema_filename.startswith("http"):
@@ -178,7 +186,7 @@ class SchemaParser(object):
         for field, title in fields:
             if self.use_titles:
                 if not title:
-                    warn("Field {} does not have a title, skipping.".format(field))
+                    warn(_("Field {} does not have a title, skipping.").format(field))
                 else:
                     self.main_sheet.append(title)
                     self.main_sheet.titles[field] = title
@@ -289,11 +297,22 @@ class SchemaParser(object):
                         if title:
                             title_lookup[title].property_name = property_name
 
-                        sub_sheet_name = make_sub_sheet_name(
-                            parent_path,
-                            property_name,
-                            truncation_length=self.truncation_length,
-                        )
+                        if self.use_titles and parent_title is not None:
+                            sub_sheet_name = make_sub_sheet_name(
+                                parent_title,
+                                title or property_name,
+                                truncation_length=self.truncation_length,
+                                path_separator=":",
+                            )
+                            self.sub_sheet_titles[
+                                (parent_path, property_name,)
+                            ] = sub_sheet_name
+                        else:
+                            sub_sheet_name = make_sub_sheet_name(
+                                parent_path,
+                                property_name,
+                                truncation_length=self.truncation_length,
+                            )
                         # self.sub_sheet_mapping[parent_name+'/'+property_name] = sub_sheet_name
 
                         if sub_sheet_name not in self.sub_sheets:
@@ -322,15 +341,15 @@ class SchemaParser(object):
                             if self.use_titles:
                                 if not child_title or parent_title is None:
                                     warn(
-                                        "Field {}{}/0/{} is missing a title, skipping.".format(
-                                            parent_path, property_name, field
-                                        )
+                                        _(
+                                            "Field {}{}/0/{} is missing a title, skipping."
+                                        ).format(parent_path, property_name, field)
                                     )
                                 elif not title:
                                     warn(
-                                        "Field {}{} does not have a title, skipping it and all its children.".format(
-                                            parent_path, property_name
-                                        )
+                                        _(
+                                            "Field {}{} does not have a title, skipping it and all its children."
+                                        ).format(parent_path, property_name)
                                     )
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
@@ -368,14 +387,21 @@ class SchemaParser(object):
 
                     else:
                         raise ValueError(
-                            'Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'.format(
-                                type_set
-                            )
+                            _(
+                                'Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'
+                            ).format(type_set)
                         )
                 elif "string" in property_type_set or not property_type_set:
-                    self.flattened[
-                        parent_path.replace("/0/", "/") + property_name
-                    ] = "string"
+                    # We only check for date here, because its the only format
+                    # for which we need to specially transform the input
+                    if property_schema_dict.get("format") == "date":
+                        self.flattened[
+                            parent_path.replace("/0/", "/") + property_name
+                        ] = "date"
+                    else:
+                        self.flattened[
+                            parent_path.replace("/0/", "/") + property_name
+                        ] = "string"
                     yield property_name, title
                 elif "number" in property_type_set:
                     self.flattened[
@@ -394,13 +420,15 @@ class SchemaParser(object):
                     yield property_name, title
                 else:
                     warn(
-                        'Unrecognised types {} for property "{}" with context "{}",'
-                        "so this property has been ignored.".format(
-                            repr(property_type_set), property_name, parent_path
-                        )
+                        _(
+                            'Unrecognised types {} for property "{}" with context "{}",'
+                            "so this property has been ignored."
+                        ).format(repr(property_type_set), property_name, parent_path)
                     )
 
         else:
             warn(
-                'Skipping field "{}", because it has no properties.'.format(parent_path)
+                _('Skipping field "{}", because it has no properties.').format(
+                    parent_path
+                )
             )
