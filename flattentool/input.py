@@ -413,9 +413,11 @@ class SpreadsheetInput(object):
                     )
 
                 def inthere(unflattened, id_name):
-                    if self.xml:
+                    if self.xml and not isinstance(unflattened.get(self.id_name), Cell):
+                        # For an XML tag
                         return unflattened[id_name]["text()"].cell_value
                     else:
+                        # For a JSON, or an XML attribute
                         return unflattened[id_name].cell_value
 
                 if (
@@ -423,7 +425,7 @@ class SpreadsheetInput(object):
                     and inthere(unflattened, self.id_name)
                     in main_sheet_by_ocid[root_id_or_none]
                 ):
-                    if self.xml:
+                    if self.xml and not isinstance(unflattened.get(self.id_name), Cell):
                         unflattened_id = unflattened.get(self.id_name)[
                             "text()"
                         ].cell_value
@@ -1120,7 +1122,11 @@ class TemporaryDict(UserDict):
     def append(self, item):
         if self.keyfield in item:
             if self.xml:
-                if isinstance(item[self.keyfield]["text()"], Cell):
+                if isinstance(item[self.keyfield], Cell):
+                    # For an XML attribute
+                    key = item[self.keyfield].cell_value
+                elif isinstance(item[self.keyfield]["text()"], Cell):
+                    # For an XML tag
                     key = item[self.keyfield]["text()"].cell_value
                 else:
                     key = item[self.keyfield]["text()"]

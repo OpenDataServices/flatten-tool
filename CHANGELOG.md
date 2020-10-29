@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Don't fail if compiled translation files (.mo) don't exist, and Django isn't installed
 - Fix some incorrect assumptions about types
+- Allow XML IDs to be attributes
 
 ## [0.15.1] - 2020-10-21
 
