@@ -413,9 +413,11 @@ class SpreadsheetInput(object):
                     )
 
                 def inthere(unflattened, id_name):
-                    if self.xml:
+                    if self.xml and not isinstance(unflattened.get(self.id_name), Cell):
+                        # For an XML tag
                         return unflattened[id_name]["text()"].cell_value
                     else:
+                        # For a JSON, or an XML attribute
                         return unflattened[id_name].cell_value
 
                 if (
@@ -423,7 +425,7 @@ class SpreadsheetInput(object):
                     and inthere(unflattened, self.id_name)
                     in main_sheet_by_ocid[root_id_or_none]
                 ):
-                    if self.xml:
+                    if self.xml and not isinstance(unflattened.get(self.id_name), Cell):
                         unflattened_id = unflattened.get(self.id_name)[
                             "text()"
                         ].cell_value
@@ -752,7 +754,11 @@ class XLSXInput(SpreadsheetInput):
                 if not header:
                     # None means that the cell will be ignored
                     value = None
-                elif sheet_configuration.get("hashcomments") and header.startswith("#"):
+                elif (
+                    sheet_configuration.get("hashcomments")
+                    and isinstance(header, str)
+                    and header.startswith("#")
+                ):
                     # None means that the cell will be ignored
                     value = None
                 output_row[header] = value
@@ -945,7 +951,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
             # Quick solution to avoid casting of date as datetinme in spreadsheet > xml
             if xml:
                 if type(cell.cell_value) == datetime.datetime and not next_path_item:
-                    if "datetime" not in path:
+                    if "datetime" not in str(path):
                         current_type = "date"
 
             ## Array
@@ -1116,7 +1122,11 @@ class TemporaryDict(UserDict):
     def append(self, item):
         if self.keyfield in item:
             if self.xml:
-                if isinstance(item[self.keyfield]["text()"], Cell):
+                if isinstance(item[self.keyfield], Cell):
+                    # For an XML attribute
+                    key = item[self.keyfield].cell_value
+                elif isinstance(item[self.keyfield]["text()"], Cell):
+                    # For an XML tag
                     key = item[self.keyfield]["text()"].cell_value
                 else:
                     key = item[self.keyfield]["text()"]
