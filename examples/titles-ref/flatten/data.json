@@ -1,0 +1,14 @@
+{
+  "weather": [
+    {
+      "id": "monday",
+      "rain": "tons and tons",
+      "thunder": "none"
+    },
+    {
+      "id": "tuesday",
+      "rain": "dry as a bone",
+      "thunder": "loud as fireworks night"
+    }
+  ]
+}

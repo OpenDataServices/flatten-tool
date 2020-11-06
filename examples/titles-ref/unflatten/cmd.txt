@@ -1,0 +1,1 @@
+$ flatten-tool unflatten -f csv --root-list-path=weather --convert-titles --schema=examples/titles-ref/schema.json examples/titles-ref/unflatten/data
