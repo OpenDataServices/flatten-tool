@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "Value": {
+            "type": "string",
+            "title": "A lowly string"
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Identifier"
+        },
+        "rain": {
+            "$ref": "#/definitions/Value",
+            "title": "Was it soggy?"
+        },
+        "thunder": {
+            "$ref": "#/definitions/Value",
+            "title": "Was it noisy?"
+        }
+    }
+}

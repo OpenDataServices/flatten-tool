@@ -1,0 +1,1 @@
+$ flatten-tool flatten --root-list-path=weather --main-sheet-name=weather --use-titles --schema=examples/titles-ref/schema.json examples/titles-ref/flatten/data.json -f csv -o examples/titles-ref/flatten/actual
