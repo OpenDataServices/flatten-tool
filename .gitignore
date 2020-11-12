@@ -54,4 +54,8 @@ examples/receipt/source-map/actual
 examples/receipt/source-map/actual.*
 examples/bods/unflatten/actual
 examples/bods/unflatten/actual.*
+examples/titles-ref/flatten/actual
+examples/titles-ref/flatten/actual.*
+examples/titles-ref/unflatten/actual
+examples/titles-ref/unflatten/actual.*
 .~lock*
