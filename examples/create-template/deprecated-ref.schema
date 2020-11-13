@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "Pet": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "Pet name"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Identifier"
+        },
+        "name": {
+            "type": "string",
+            "title": "Name"
+        },
+        "pet": {
+            "type": "string",
+            "title": "Pet",
+            "$ref": "#/definitions/Pet",
+            "deprecated": {
+                "description": "So yeah, H.R. told us that asking people in job interviews if they have pets is super illegal. Better stop that."
+            }
+        }
+    }
+}

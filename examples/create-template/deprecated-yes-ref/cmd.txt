@@ -1,0 +1,1 @@
+$ flatten-tool create-template  --use-titles --main-sheet-name=interviewee --schema=examples/create-template/deprecated-ref.schema -f csv -o examples/create-template/deprecated-yes-ref/actual

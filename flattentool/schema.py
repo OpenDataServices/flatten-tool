@@ -243,6 +243,13 @@ class SchemaParser(object):
                 ):
                     continue
 
+                if (
+                    self.exclude_deprecated_fields
+                    and hasattr(property_schema_dict, "__reference__")
+                    and property_schema_dict.__reference__.get("deprecated")
+                ):
+                    continue
+
                 property_type_set = get_property_type_set(property_schema_dict)
 
                 if (
