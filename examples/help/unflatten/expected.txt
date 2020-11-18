@@ -67,7 +67,7 @@ optional arguments:
   --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
                         Path to one or more XML schemas (used for sorting)
   --default-configuration DEFAULT_CONFIGURATION
-                        Comma seperated list of default parsing commands for
+                        Comma separated list of default parsing commands for
                         all sheets. Only for XLSX not CSV
   --root-is-list        The root element is a list. --root-list-path and meta
                         data will be ignored.
