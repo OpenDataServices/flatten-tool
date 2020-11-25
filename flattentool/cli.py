@@ -269,7 +269,7 @@ def create_parser():
     )
     parser_unflatten.add_argument(
         "--default-configuration",
-        help="Comma seperated list of default parsing commands for all sheets. Only for XLSX not CSV",
+        help="Comma separated list of default parsing commands for all sheets. Only for XLSX not CSV",
     )
     parser_unflatten.add_argument(
         "--root-is-list",

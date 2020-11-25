@@ -40,7 +40,7 @@ def inject_root_id(root_id, d):
 
 
 UNICODE_TEST_STRING = "éαГ😼𝒞人"
-# ROOT_ID will be replace by the appropirate root_id name in the test (e.g. ocid)
+# ROOT_ID will be replace by the appropriate root_id name in the test (e.g. ocid)
 
 testdata = [
     (

@@ -66,7 +66,7 @@ def test_unflatten(tmpdir):
     Perform a full CSV unflattening, and check the output is what we expect.
 
     Notable things we are checking for:
-        Ordering is preseved - both the order of columns and rows
+        Ordering is preserved - both the order of columns and rows
     """
     input_dir = tmpdir.ensure("release_input", dir=True)
     input_dir.join("main.csv").write(

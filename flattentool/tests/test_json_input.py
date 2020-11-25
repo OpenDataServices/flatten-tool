@@ -46,7 +46,7 @@ def test_jsonparser_bad_json_utf8():
 
 def test_jsonparser_arguments_exceptions(tmpdir):
     """
-    Test that JSONParser throws a ValueError if it recievs too many or too few arguments.
+    Test that JSONParser throws a ValueError if it receives too many or too few arguments.
 
     """
     test_json = tmpdir.join("test.json")

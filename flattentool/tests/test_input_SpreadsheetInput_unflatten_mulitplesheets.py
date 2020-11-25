@@ -41,7 +41,7 @@ testdata_multiplesheets = [
         {
             "custom_main": [{"ROOT_ID": 1, "id": 2, "testB/id": 3, "testB/testC": 4,}],
             "tes_subField": [
-                # It used to be neccesary to supply testA/id in this
+                # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
                 {"ROOT_ID": 1, "id": 2, "testB/id": 3, "testB/subField/0/testD": 5,}
             ],
@@ -61,7 +61,7 @@ testdata_multiplesheets = [
         {
             "custom_main": [{"ROOT_ID": 1, "id": 2, "testB/id": 3, "testB/testC": 4,}],
             "sub": [
-                # It used to be neccesary to supply testA/id in this
+                # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
                 {"ROOT_ID": 1, "id": 2, "testB/subField/0/testD": 5,}
             ],
@@ -355,7 +355,7 @@ testdata_multiplesheets_titles = [
                 }
             ],
             "B t_Sub title": [
-                # It used to be neccesary to supply testA/id in this
+                # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
                 {
                     "ROOT_ID": 1,
@@ -387,7 +387,7 @@ testdata_multiplesheets_titles = [
                 }
             ],
             "sub": [
-                # It used to be neccesary to supply testA/id in this
+                # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
                 {"ROOT_ID": 1, "Identifier": 2, "B title:Sub title:E title": 5,}
             ],

@@ -398,7 +398,7 @@ class SchemaParser(object):
                     else:
                         raise ValueError(
                             _(
-                                'Unknown type_set: {}, did you forget to explicity set the "type" key on "items"?'
+                                'Unknown type_set: {}, did you forget to explicitly set the "type" key on "items"?'
                             ).format(type_set)
                         )
                 elif "string" in property_type_set or not property_type_set:

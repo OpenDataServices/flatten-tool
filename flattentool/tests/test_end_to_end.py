@@ -3,7 +3,7 @@ The tests in these functions are the minimal cases necessary to give you a good
 understanding of the expected behaviour of flattentool.
 
 These tests aren't concerned with the loading and saving of the data or schema,
-they are concenred with what flattentool does with those data and schema.
+they are concerned with what flattentool does with those data and schema.
 
 It is worth being aware that the syntax for specifying column headings is
 modelled closely on the `path` that is returned in any errors from the Python
@@ -21,15 +21,15 @@ There are two modes of operating:
 Throughout these tests there are a few things we do to make sure we're testing
 properly:
 
-* The titles are named differently from the propery names (by adding " Title"
+* The titles are named differently from the property names (by adding " Title"
   to the name)
 
 * We put differing spacing and capitalisation in the headings from what is used
-  in titles to make sure that it is the headings that come trhough into the
+  in titles to make sure that it is the headings that come through into the
   source maps, and not the schema titles
 
 * When addresses are used as lists, the array type in the schema must have a
-  title ("Address Title"), the title of the individual adresses ("Address Item
+  title ("Address Title"), the title of the individual addresses ("Address Item
   Item") doesn't matter
 
 To resolve the $ref entries in the schema, the whole schema is passed through
