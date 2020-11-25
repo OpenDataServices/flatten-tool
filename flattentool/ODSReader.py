@@ -17,6 +17,7 @@
 
 import re
 from collections import OrderedDict
+from datetime import datetime
 
 import odf.opendocument
 from odf.table import Table, TableCell, TableRow
@@ -90,6 +91,8 @@ class ODSReader:
                                 r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$", date_value
                             ):
                                 date_value += "Z"
+                            elif re.match(r"^\d{4}-\d\d-\d\d$", date_value):
+                                datetime.strptime(date_value, "%Y-%m-%d").isoformat()
                             arrCells[count] = date_value
                         else:
                             arrCells[count] = str(cell)
