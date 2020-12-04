@@ -22,3 +22,9 @@ jobs:
     - run: black --check *.py */
     - run: isort --check-only *.py */
     - run: flake8
+    - run: pip install scspell3k
+    - run: scspell --set-dictionary=scspell_dict.txt
+    - run: scspell *.py
+    - run: scspell docs/*.py
+    - run: scspell flattentool/*.py
+    - run: scspell flattentool/tests/*.py
