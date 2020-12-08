@@ -211,8 +211,8 @@ class TestSuccessfulInput(object):
             {
                 "colInt": 1,
                 "colFloat": 1.2,
-                "colDate": "2020-03-05",
-                "colDateTime": "2020-02-07T16:41:00Z",
+                "colDate": datetime.datetime(2020, 3, 5),
+                "colDateTime": datetime.datetime(2020, 2, 7, 16, 41),
             }
         ]
         assert type(list(odsinput.get_sheet_lines("main"))[0]["colInt"]) == int
