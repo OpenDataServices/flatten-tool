@@ -33,6 +33,7 @@ def test_xml_basic_example():
     parser.parse()
     assert list(parser.main_sheet) == [
         "iati-identifier",
+        "@last-updated-datetime",
         "reporting-org/@ref",
         "reporting-org/@type",
         "reporting-org/narrative",
@@ -46,6 +47,7 @@ def test_xml_basic_example():
     ]
     assert parser.main_sheet.lines == [
         {
+            "@last-updated-datetime": "2011-10-01T00:00:00+00:00",
             "activity-date/@type": "1",
             "reporting-org/narrative": "Organisation name",
             "participating-org/@ref": "AA-AAA-123456789",
@@ -59,6 +61,7 @@ def test_xml_basic_example():
             "activity-status/@code": "2",
         },
         {
+            "@last-updated-datetime": "2016-01-01T00:00:00+00:00",
             "activity-date/@type": "2",
             "reporting-org/narrative": "Organisation name",
             "participating-org/@ref": "AA-AAA-123456789",
