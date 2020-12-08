@@ -66,15 +66,24 @@ def test_360_fields_case_insensitive(tmpdir):
     assert output_json_grants == output_json_space_case
 
 
-@pytest.mark.parametrize("dirname", ["examples/iati", "examples/iati_multilang"])
-def test_unflatten_xml(tmpdir, dirname):
+@pytest.mark.parametrize(
+    "dirname,input_format",
+    [
+        ("examples/iati", "csv"),
+        ("examples/iati", "ods"),
+        ("examples/iati", "xlsx"),
+        ("examples/iati_multilang", "csv"),
+    ],
+)
+def test_unflatten_xml(tmpdir, dirname, input_format):
     schema_path = "examples/iati"
     schemas = ["iati-activities-schema.xsd", "iati-common.xsd"]
     schema_filepaths = ["{}/{}".format(schema_path, schema) for schema in schemas]
     unflatten(
-        input_name=dirname,
+        input_name=dirname
+        + (".{}".format(input_format) if input_format != "csv" else ""),
         output_name=tmpdir.join("output.xml").strpath,
-        input_format="csv",
+        input_format=input_format,
         root_list_path="iati-activity",
         id_name="iati-identifier",
         xml=True,
