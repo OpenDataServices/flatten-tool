@@ -22,7 +22,6 @@ import backports.datetime_fromisoformat
 import odf.opendocument
 from odf.table import Table, TableCell, TableRow
 
-
 # Backport for datetime.fromisoformat, which is new in Python 3.7
 backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
 
@@ -79,10 +78,16 @@ class ODSReader:
                             )
                         )
                         if value_type == "float":
+                            value = cell.attributes.get(
+                                (
+                                    "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+                                    "value",
+                                )
+                            )
                             if "." in str(cell):
-                                arrCells[count] = float(str(cell))
+                                arrCells[count] = float(value)
                             else:
-                                arrCells[count] = int(str(cell))
+                                arrCells[count] = int(value)
                         elif value_type == "date":
                             date_value = cell.attributes.get(
                                 (
