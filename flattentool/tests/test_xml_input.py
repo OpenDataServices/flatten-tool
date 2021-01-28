@@ -15,9 +15,8 @@ def test_xml_empty():
         xml=True,
         id_name="iati-identifier",
     )
-    parser.parse()
     assert list(parser.main_sheet) == []
-    assert parser.main_sheet.lines == []
+    assert list(parser.main_sheet.lines) == []
     assert parser.sub_sheets == {}
 
 
@@ -30,7 +29,6 @@ def test_xml_basic_example():
         xml=True,
         id_name="iati-identifier",
     )
-    parser.parse()
     assert list(parser.main_sheet) == [
         "iati-identifier",
         "@last-updated-datetime",
@@ -45,7 +43,7 @@ def test_xml_basic_example():
         "activity-date/@iso-date",
         "activity-date/@type",
     ]
-    assert parser.main_sheet.lines == [
+    assert list(parser.main_sheet.lines) == [
         {
             "@last-updated-datetime": "2011-10-01T00:00:00+00:00",
             "activity-date/@type": "1",
@@ -83,7 +81,7 @@ def test_xml_basic_example():
         "transaction/0/value/@value-date",
         "transaction/0/value",
     ]
-    assert parser.sub_sheets["transaction"].lines == [
+    assert list(parser.sub_sheets["transaction"].lines) == [
         {
             "transaction/0/value/@value-date": "2012-01-01",
             "iati-identifier": "AA-AAA-123456789-ABC123",
@@ -118,7 +116,7 @@ def test_xml_basic_example():
         "recipient-country/0/@code",
         "recipient-country/0/@percentage",
     ]
-    assert parser.sub_sheets["recipient-country"].lines == [
+    assert list(parser.sub_sheets["recipient-country"].lines) == [
         {
             "iati-identifier": "AA-AAA-123456789-ABC123",
             "recipient-country/0/@code": "AF",
@@ -151,9 +149,8 @@ def test_varyin_transaction_count():
         xml=True,
         id_name="iati-identifier",
     )
-    parser.parse()
     assert list(parser.main_sheet) == ["iati-identifier"]
-    assert parser.main_sheet.lines == [
+    assert list(parser.main_sheet.lines) == [
         {"iati-identifier": "AA-AAA-123456789-ABC123"},
         {"iati-identifier": "AA-AAA-123456789-ABC124"},
         {"iati-identifier": "AA-AAA-123456789-ABC125"},
@@ -165,7 +162,7 @@ def test_varyin_transaction_count():
         "transaction/0/value/@value-date",
         "transaction/0/value",
     ]
-    assert parser.sub_sheets["transaction"].lines == [
+    assert list(parser.sub_sheets["transaction"].lines) == [
         {
             "iati-identifier": "AA-AAA-123456789-ABC123",
             "transaction/0/value/@value-date": "2012-01-01",
@@ -254,16 +251,15 @@ def test_list_dict_consistency():
 
 
 def test_xml_whitespace():
-    parser = JSONParser(
-        json_filename="flattentool/tests/fixtures/narrative_whitespace.xml",
-        root_list_path="iati-activity",
-        schema_parser=None,
-        root_id="",
-        xml=True,
-        id_name="iati-identifier",
-    )
-
     try:
-        parser.parse()
+        parser = JSONParser(
+            json_filename="flattentool/tests/fixtures/narrative_whitespace.xml",
+            root_list_path="iati-activity",
+            schema_parser=None,
+            root_id="",
+            xml=True,
+            id_name="iati-identifier",
+        )
+        assert parser
     except TypeError as e:
         raise e

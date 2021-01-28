@@ -7,18 +7,24 @@ JSON schema, for that see schema.py).
 
 import codecs
 import copy
-import json
 import os
+import tempfile
+import uuid
 from collections import OrderedDict
 from decimal import Decimal
 from warnings import warn
 
+import BTrees.OOBTree
+import ijson
+import transaction
 import xmltodict
+import zc.zlibstorage
+import ZODB.FileStorage
 
 from flattentool.i18n import _
 from flattentool.input import path_search
 from flattentool.schema import make_sub_sheet_name
-from flattentool.sheet import Sheet
+from flattentool.sheet import PersistentSheet
 
 BASIC_TYPES = [str, bool, int, Decimal, type(None)]
 
@@ -112,9 +118,26 @@ class JSONParser(object):
         remove_empty_schema_columns=False,
         rollup=False,
         truncation_length=3,
+        persist=False,
     ):
+        if persist:
+            self.zodb_db_location = (
+                tempfile.gettempdir() + "/flattentool-" + str(uuid.uuid4())
+            )
+            zodb_storage = zc.zlibstorage.ZlibStorage(
+                ZODB.FileStorage.FileStorage(self.zodb_db_location)
+            )
+            self.db = ZODB.DB(zodb_storage)
+        else:
+            # If None, in memory storage is used.
+            self.db = ZODB.DB(None)
+
+        self.connection = self.db.open()
+        root = self.connection.root
+        root.sheet_store = BTrees.OOBTree.BTree()
+
         self.sub_sheets = {}
-        self.main_sheet = Sheet()
+        self.main_sheet = PersistentSheet(connection=self.connection, name="")
         self.root_list_path = root_list_path
         self.root_id = root_id
         self.use_titles = use_titles
@@ -125,9 +148,17 @@ class JSONParser(object):
         self.filter_value = filter_value
         self.remove_empty_schema_columns = remove_empty_schema_columns
         self.seen_paths = set()
+        self.persist = persist
 
         if schema_parser:
-            self.main_sheet = copy.deepcopy(schema_parser.main_sheet)
+            self.main_sheet = PersistentSheet.from_sheet(
+                schema_parser.main_sheet, self.connection
+            )
+            for sheet_name, sheet in list(self.sub_sheets.items()):
+                self.sub_sheets[sheet_name] = PersistentSheet.from_sheet(
+                    sheet, self.connection
+                )
+
             self.sub_sheets = copy.deepcopy(schema_parser.sub_sheets)
             if remove_empty_schema_columns:
                 # Don't use columns from the schema parser
@@ -194,18 +225,13 @@ class JSONParser(object):
                 _("Only one of json_file or root_json_dict should be supplied")
             )
 
-        if json_filename:
-            with codecs.open(json_filename, encoding="utf-8") as json_file:
-                try:
-                    self.root_json_dict = json.load(
-                        json_file, object_pairs_hook=OrderedDict, parse_float=Decimal
-                    )
-                except UnicodeError as err:
-                    raise BadlyFormedJSONErrorUTF8(*err.args)
-                except ValueError as err:
-                    raise BadlyFormedJSONError(*err.args)
-        else:
-            self.root_json_dict = root_json_dict
+        if not json_filename:
+            if self.root_list_path is None:
+                self.root_json_list = root_json_dict
+            else:
+                self.root_json_list = path_search(
+                    root_json_dict, self.root_list_path.split("/")
+                )
 
         if preserve_fields:
             # Extract fields to be preserved from input file (one path per line)
@@ -240,19 +266,37 @@ class JSONParser(object):
             self.preserve_fields = None
             self.preserve_fields_input = None
 
+        if json_filename:
+            if self.root_list_path is None:
+                path = "item"
+            else:
+                path = root_list_path.replace("/", ".") + ".item"
+
+            json_file = codecs.open(json_filename, encoding="utf-8")
+
+            self.root_json_list = ijson.items(json_file, path, map_type=OrderedDict)
+
+        try:
+            self.parse()
+        except ijson.common.IncompleteJSONError as err:
+            raise BadlyFormedJSONError(*err.args)
+        except UnicodeDecodeError as err:
+            raise BadlyFormedJSONErrorUTF8(*err.args)
+        finally:
+            if json_filename:
+                json_file.close()
+
     def parse(self):
-        if self.root_list_path is None:
-            root_json_list = self.root_json_dict
-        else:
-            root_json_list = path_search(
-                self.root_json_dict, self.root_list_path.split("/")
-            )
-        for json_dict in root_json_list:
+        for num, json_dict in enumerate(self.root_json_list):
             if json_dict is None:
                 # This is particularly useful for IATI XML, in order to not
                 # fall over on empty activity, e.g. <iati-activity/>
                 continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
+            if num % 2000 == 0 and num != 0:
+                transaction.commit()
+
+        transaction.commit()
 
         if self.remove_empty_schema_columns:
             # Remove sheets with no lines of data
@@ -501,7 +545,9 @@ class JSONParser(object):
                             parent_name, key, truncation_length=self.truncation_length
                         )
                     if sub_sheet_name not in self.sub_sheets:
-                        self.sub_sheets[sub_sheet_name] = Sheet(name=sub_sheet_name)
+                        self.sub_sheets[sub_sheet_name] = PersistentSheet(
+                            name=sub_sheet_name, connection=self.connection
+                        )
 
                     for json_dict in value:
                         if json_dict is None:
@@ -518,4 +564,16 @@ class JSONParser(object):
                 raise ValueError(_("Unsupported type {}").format(type(value)))
 
         if top:
-            sheet.lines.append(flattened_dict)
+            sheet.append_line(flattened_dict)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if self.persist:
+            self.connection.close()
+            self.db.close()
+            os.remove(self.zodb_db_location)
+            os.remove(self.zodb_db_location + ".lock")
+            os.remove(self.zodb_db_location + ".index")
+            os.remove(self.zodb_db_location + ".tmp")
