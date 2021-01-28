@@ -80,7 +80,6 @@ def test_flatten(
         schema_parser=schema_parser,
         **extra_kwargs
     )
-    parser.parse()
 
     expected_output_list = [
         inject_root_id(root_id, expected_output_dict)
@@ -188,7 +187,6 @@ def test_flatten_multiplesheets(
         schema_parser=schema_parser,
         **extra_kwargs
     )
-    parser.parse()
 
     expected_output_dict = OrderedDict(
         [
@@ -197,11 +195,11 @@ def test_flatten_multiplesheets(
         ]
     )
     output = {
-        sheet_name: sheet.lines
+        sheet_name: list(sheet.lines)
         for sheet_name, sheet in parser.sub_sheets.items()
-        if sheet.lines
+        if list(sheet.lines)
     }
-    output["custom_main"] = parser.main_sheet.lines
+    output["custom_main"] = list(parser.main_sheet.lines)
     assert output == expected_output_dict
 
 

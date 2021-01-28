@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+- flattening: Uses much less memory by storing data in a embedded ZODB database, using ijson and using write only mode in pyopenxl.
 - use-titles: Use $ref'erring title if available https://github.com/OpenDataServices/flatten-tool/pull/368 
 - create-template --no-deprecated-fields: Did not work if deprecated element at same level as a $ref https://github.com/OpenDataServices/flatten-tool/issues/185#issuecomment-719587348
 

@@ -35,6 +35,9 @@ install_requires = [
     "xmltodict",
     "lxml",
     "odfpy",
+    "zodb",
+    "zc.zlibstorage",
+    "ijson",
 ]
 
 setup(
