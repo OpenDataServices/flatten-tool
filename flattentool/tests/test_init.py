@@ -660,10 +660,8 @@ def test_unflatten(tmpdir):
             ]
         ]
     }"""
-    assert lines_strip_whitespace(
-        tmpdir.join("cell_source_map.json").read()
-    ) == lines_strip_whitespace(expected)
     data = json.loads(expected)
+    assert json.loads(tmpdir.join("cell_source_map.json").read()) == data
     cells, rows = original_cell_and_row_locations(data)
     # Make sure every cell in the original appeared in the cell source map exactly once
     assert cells == [
@@ -855,10 +853,8 @@ def test_unflatten(tmpdir):
             ]
         ]
     }"""
-    assert lines_strip_whitespace(
-        tmpdir.join("heading_source_map.json").read()
-    ) == lines_strip_whitespace(expected_headings)
     heading_data = json.loads(expected_headings)
+    assert json.loads(tmpdir.join("heading_source_map.json").read()) == heading_data
     headings = original_headings(heading_data)
     # Make sure every heading in the original appeared in the heading source map exactly once
     assert headings == [
@@ -997,7 +993,9 @@ def test_unflatten_empty(tmpdir):
         tmpdir.join("release.json").read()
     ) == lines_strip_whitespace(
         """{
-        "main": []
+        "main": [
+
+    ]
     }"""
     )
 

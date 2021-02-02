@@ -8,14 +8,19 @@ from __future__ import print_function, unicode_literals
 import datetime
 import os
 from collections import OrderedDict, UserDict
+import uuid
 from csv import DictReader
 from csv import reader as csvreader
 from decimal import Decimal, InvalidOperation
 from warnings import warn
 
+import BTrees
 import openpyxl
 import pytz
+import transaction
+import ZODB
 from openpyxl.utils.cell import _get_column_letter
+
 
 from flattentool.exceptions import DataErrorWarning
 from flattentool.i18n import _
@@ -258,6 +263,7 @@ class SpreadsheetInput(object):
         xml=False,
         base_configuration={},
         use_configuration=True,
+        persist=False
     ):
         self.input_name = input_name
         self.root_list_path = root_list_path
@@ -275,6 +281,8 @@ class SpreadsheetInput(object):
         self.base_configuration = base_configuration or {}
         self.sheet_configuration = {}
         self.use_configuration = use_configuration
+        self.persist = persist
+        self.actual_headings = {}
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -306,13 +314,20 @@ class SpreadsheetInput(object):
     def read_sheets(self):
         raise NotImplementedError
 
-    def do_unflatten(self):
+    def do_unflatten(self, sheet_lines=None):
         main_sheet_by_ocid = OrderedDict()
-        sheets = list(self.get_sub_sheets_lines())
+        if sheet_lines:
+            sheets = sheet_lines.items()
+        else:
+            sheets = list(self.get_sub_sheets_lines())
         for i, sheet in enumerate(sheets):
             sheet_name, lines = sheet
             try:
-                actual_headings = self.get_sheet_headings(sheet_name)
+                # cache headings
+                actual_headings = self.actual_headings.get(sheet_name)
+                if not actual_headings:
+                    actual_headings = self.get_sheet_headings(sheet_name)
+                    self.actual_headings[sheet_name] = actual_headings
                 # If sheet is empty or too many lines have been skipped
                 if not actual_headings:
                     continue
@@ -384,7 +399,15 @@ class SpreadsheetInput(object):
             except NotImplementedError:
                 # The ListInput type used in the tests doesn't support getting headings.
                 actual_headings = None
-            for j, line in enumerate(lines):
+
+
+            if not sheet_lines:
+                lines_generator = enumerate(lines)
+            else:
+                #when sheet lines are supplied then get sheet row numbers out of dictionary
+                lines_generator = lines.items()
+
+            for j, line in lines_generator:
                 if all(x is None or x == "" for x in line.values()):
                     # if all(x == '' for x in line.values()):
                     continue
@@ -452,14 +475,68 @@ class SpreadsheetInput(object):
         result = extract_list_to_value(result)
         return result
 
-    def fancy_unflatten(self, with_cell_source_map, with_heading_source_map):
-        cell_tree = self.do_unflatten()
+    def unflatten_with_storage(self, with_cell_source_map, with_heading_source_map, db=None):
+
+        if not db:
+            # If None, in memory storage is used.
+            db = ZODB.DB(None)
+
+        self.connection = db.open()
+        root = self.connection.root
+
+        # Each top level object is assigned an id. This way we preseve ordering as much as possible
+        root.object_store = BTrees.OOBTree.BTree()
+
+        # this matches the top-level id field to its index value.
+        root.object_index = BTrees.OIBTree.BTree()
+
+        index = 0
+
+        for sheet, rows in self.get_sub_sheets_lines():
+            for row_numbar, row in enumerate(rows):
+
+                ##uuid to stop clash with any key for objects with no id
+                top_level_id = row.get(self.id_name, str(uuid.uuid4()))
+
+                current_index = root.object_index.get(top_level_id)
+
+                if current_index is None:
+                    current_index = index 
+                    root.object_index[top_level_id] = current_index
+                    index += 1
+
+                root.object_store[(current_index, sheet, row_numbar)] = row
+
+                if row_numbar != 0 and row_numbar % 4000 == 0:
+                    transaction.commit()
+                    self.connection.cacheMinimize()
+
+            transaction.commit()
+
+        last_index = 0
+        sheet_lines = {}
+        for key, row in root.object_store.items():
+            current_index, sheet, row_numbar = key
+            if current_index != last_index and sheet_lines:
+                yield self.fancy_unflatten(with_cell_source_map, with_cell_source_map, sheet_lines, last_index)
+                if last_index % 4000 == 0:
+                    self.connection.cacheMinimize()
+                last_index = current_index
+                sheet_lines = {}
+            if sheet not in sheet_lines:
+                sheet_lines[sheet] = {}
+            sheet_lines[sheet][row_numbar] = row
+
+        yield self.fancy_unflatten(with_cell_source_map, with_cell_source_map, sheet_lines, last_index)
+
+    def fancy_unflatten(self, with_cell_source_map, with_heading_source_map, sheet_lines=None, index=None):
+        cell_tree = self.do_unflatten(sheet_lines=sheet_lines)
         result = extract_list_to_value(cell_tree)
         ordered_cell_source_map = None
         heading_source_map = None
         if with_cell_source_map or with_heading_source_map:
             cell_source_map = extract_list_to_error_path(
-                [] if self.root_is_list else [self.root_list_path], cell_tree
+                [] if self.root_is_list else [self.root_list_path], cell_tree, index=index
             )
             ordered_items = sorted(cell_source_map.items())
             row_source_map = OrderedDict()
@@ -502,10 +579,12 @@ class SpreadsheetInput(object):
         return result, ordered_cell_source_map, heading_source_map
 
 
-def extract_list_to_error_path(path, input):
+def extract_list_to_error_path(path, input, index=None):
     output = {}
+    if index:
+        assert len(input) <= 1
     for i, item in enumerate(input):
-        res = extract_dict_to_error_path(path + [i], item)
+        res = extract_dict_to_error_path(path + [index or i], item)
         for p in res:
             assert p not in output, _("Already have key {}").format(p)
             output[p] = res[p]
@@ -652,7 +731,7 @@ class BadXLSXZipFile(BadZipFile):
 class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         try:
-            self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
+            self.workbook = openpyxl.load_workbook(self.input_name, data_only=True, read_only=True)
         except BadZipFile as e:  # noqa
             # TODO when we have python3 only add 'from e' to show exception chain
             raise BadXLSXZipFile(

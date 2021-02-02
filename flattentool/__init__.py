@@ -1,8 +1,15 @@
 import codecs
 import json
+import os
 import sys
+import tempfile
+import uuid
 from collections import OrderedDict
 from decimal import Decimal
+
+import jsonstreams
+import zc.zlibstorage
+import ZODB.FileStorage
 
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.json_input import JSONParser
@@ -179,7 +186,83 @@ def decimal_default(o):
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
+# This is to just to make ensure_ascii and default are correct for streaming library
+class CustomJSONEncoder(json.JSONEncoder):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        # overwrie these no matter the input to __init__
+        self.ensure_ascii = False
+        self.default=decimal_default
+
+
 def unflatten(
+    input_name,
+    output_name=None,
+    cell_source_map=None,
+    root_is_list=False,
+    xml=False,
+    **kw
+):
+
+    zodb_db_location = (
+        tempfile.gettempdir() + "/flattentool-" + str(uuid.uuid4())
+    )
+    zodb_storage = zc.zlibstorage.ZlibStorage(
+        ZODB.FileStorage.FileStorage(zodb_db_location)
+    )
+    db = ZODB.DB(zodb_storage)
+
+
+
+    json_stream_args = {"indent": 4,
+                        "encoder": CustomJSONEncoder,
+                        "close_fd": True}
+
+    cell_source_map_stream = None
+    output_stream = None
+
+    if not xml:
+        if root_is_list:
+            json_stream_args['jtype'] = jsonstreams.Type.array
+        else:
+            json_stream_args['jtype'] = jsonstreams.Type.object
+
+        if output_name:
+            json_stream_args['fd'] = codecs.open(output_name, "w", encoding="utf-8")
+        else:
+            json_stream_args['fd'] = sys.stdout
+
+        output_stream = jsonstreams.Stream(**json_stream_args)
+
+    if cell_source_map:
+        cell_source_map_file = codecs.open(cell_source_map, "w", encoding="utf-8")
+        cell_source_map_stream = jsonstreams.Stream(jsonstreams.Type.object, filename=cell_source_map, indent=4, close_fd=True)
+
+    try:
+        _unflatten(
+            input_name,
+            output_name=output_name,
+            root_is_list=root_is_list,
+            xml=xml,
+            cell_source_map=cell_source_map,
+            output_stream=output_stream,
+            cell_source_map_stream=cell_source_map_stream,
+            db=db,
+            **kw
+        )
+    finally:
+        if output_stream:
+            output_stream.close()
+        if cell_source_map_stream:
+            cell_source_map_stream.close()
+        db.close()
+        os.remove(zodb_db_location)
+        os.remove(zodb_db_location + ".lock")
+        os.remove(zodb_db_location + ".index")
+        os.remove(zodb_db_location + ".tmp")
+
+
+def _unflatten(
     input_name,
     base_json=None,
     input_format=None,
@@ -205,6 +288,9 @@ def unflatten(
     disable_local_refs=False,
     xml_comment=None,
     truncation_length=3,
+    output_stream=None,
+    cell_source_map_stream=None,
+    db=None,
     **_
 ):
     """
@@ -218,13 +304,11 @@ def unflatten(
     if metatab_name and base_json:
         raise Exception("Not allowed to use base_json with metatab")
 
-    if root_is_list:
-        base = None
-    elif base_json:
+    if not root_is_list and base_json:
         with open(base_json) as fp:
             base = json.load(fp, object_pairs_hook=OrderedDict)
-    else:
-        base = OrderedDict()
+            for key, value in base.items():
+                output_stream.write(key, value)
 
     base_configuration = parse_sheet_configuration(
         [item.strip() for item in default_configuration.split(",")]
@@ -264,7 +348,9 @@ def unflatten(
         )
         for key, value in (cell_source_map_data_meta or {}).items():
             ## strip off meta/0/ from start of source map as actually data is at top level
-            cell_source_map_data[key[7:]] = value
+            if cell_source_map_stream:
+                cell_source_map_stream.write(key[7:], value)
+
         for key, value in (heading_source_map_data_meta or {}).items():
             ## strip off meta/ from start of source map as actually data is at top level
             heading_source_map_data[key[5:]] = value
@@ -275,7 +361,8 @@ def unflatten(
         )
 
         if result:
-            base.update(result[0])
+            for key, value in result[0].items():
+                output_stream.write(key, value)
 
     if root_list_path is None:
         root_list_path = base_configuration.get("RootListPath", "main")
@@ -295,7 +382,7 @@ def unflatten(
             vertical_orientation=vertical_orientation,
             id_name=id_name,
             xml=xml,
-            base_configuration=base_configuration,
+            base_configuration=base_configuration
         )
         if schema:
             parser = SchemaParser(
@@ -309,22 +396,52 @@ def unflatten(
             spreadsheet_input.parser = parser
         spreadsheet_input.encoding = encoding
         spreadsheet_input.read_sheets()
-        (
-            result,
-            cell_source_map_data_main,
-            heading_source_map_data_main,
-        ) = spreadsheet_input.fancy_unflatten(
-            with_cell_source_map=cell_source_map,
-            with_heading_source_map=heading_source_map,
-        )
-        cell_source_map_data.update(cell_source_map_data_main or {})
-        heading_source_map_data.update(heading_source_map_data_main or {})
-        if root_is_list:
-            base = list(result)
+
+        result = []
+
+        if not root_is_list and not xml:
+            list_stream = output_stream.subarray(root_list_path)
         else:
-            base[root_list_path] = list(result)
+            list_stream = output_stream
+
+        for (
+                single_result,
+                cell_source_map_data_main,
+                heading_source_map_data_main,
+            ) in spreadsheet_input.unflatten_with_storage(
+                with_cell_source_map=cell_source_map,
+                with_heading_source_map=heading_source_map,
+                db=db
+            ):
+
+            if cell_source_map_stream and cell_source_map_data_main:
+                for key, value in cell_source_map_data_main.items():
+                    cell_source_map_stream.write(key, value)
+
+            if xml:
+                result.extend(single_result)
+            else:
+                for item in single_result:
+                    list_stream.write(item)
+
+            for key, value in (heading_source_map_data_main or {}).items():
+                if key in heading_source_map_data:
+                    for item in heading_source_map_data_main[key]:
+                        if item not in heading_source_map_data[key]:
+                            heading_source_map_data[key].append(item)
+                else:
+                    heading_source_map_data[key] = heading_source_map_data_main[key]
+
+        if not root_is_list and not xml:
+            list_stream.close()
 
     if xml:
+        if root_is_list:
+            base = result
+        else:
+            base = {}
+            base[root_list_path] = result
+
         xml_root_tag = base_configuration.get("XMLRootTag", "iati-activities")
         xml_output = toxml(
             base,
@@ -338,25 +455,7 @@ def unflatten(
         else:
             with codecs.open(output_name, "wb") as fp:
                 fp.write(xml_output)
-    else:
-        if output_name is None:
-            print(
-                json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False)
-            )
-        else:
-            with codecs.open(output_name, "w", encoding="utf-8") as fp:
-                json.dump(
-                    base, fp, indent=4, default=decimal_default, ensure_ascii=False
-                )
-    if cell_source_map:
-        with codecs.open(cell_source_map, "w", encoding="utf-8") as fp:
-            json.dump(
-                cell_source_map_data,
-                fp,
-                indent=4,
-                default=decimal_default,
-                ensure_ascii=False,
-            )
+
     if heading_source_map:
         with codecs.open(heading_source_map, "w", encoding="utf-8") as fp:
             json.dump(
