@@ -212,55 +212,60 @@ def unflatten(
     )
     db = ZODB.DB(zodb_storage)
 
-
-
-    json_stream_args = {"indent": 4,
-                        "encoder": CustomJSONEncoder,
-                        "close_fd": True}
-
-    cell_source_map_stream = None
-    output_stream = None
-
-    if not xml:
-        if root_is_list:
-            json_stream_args['jtype'] = jsonstreams.Type.array
-        else:
-            json_stream_args['jtype'] = jsonstreams.Type.object
-
-        if output_name:
-            json_stream_args['fd'] = codecs.open(output_name, "w", encoding="utf-8")
-        else:
-            json_stream_args['fd'] = sys.stdout
-
-        output_stream = jsonstreams.Stream(**json_stream_args)
-
-    if cell_source_map:
-        cell_source_map_file = codecs.open(cell_source_map, "w", encoding="utf-8")
-        cell_source_map_stream = jsonstreams.Stream(jsonstreams.Type.object, filename=cell_source_map, indent=4, close_fd=True)
-
     try:
-        _unflatten(
-            input_name,
-            output_name=output_name,
-            root_is_list=root_is_list,
-            xml=xml,
-            cell_source_map=cell_source_map,
-            output_stream=output_stream,
-            cell_source_map_stream=cell_source_map_stream,
-            db=db,
-            **kw
-        )
+        json_stream_args = {"indent": 4,
+                            "encoder": CustomJSONEncoder}
+
+        cell_source_map_stream = None
+        output_stream = None
+
+        if not xml:
+            if root_is_list:
+                json_stream_args['jtype'] = jsonstreams.Type.array
+            else:
+                json_stream_args['jtype'] = jsonstreams.Type.object
+
+            if output_name:
+                json_stream_args['fd'] = codecs.open(output_name, "w", encoding="utf-8")
+            else:
+                json_stream_args['fd'] = sys.stdout
+
+            output_stream = jsonstreams.Stream(**json_stream_args)
+
+        if cell_source_map:
+            cell_source_map_file = codecs.open(cell_source_map, "w", encoding="utf-8")
+            cell_source_map_stream = jsonstreams.Stream(jsonstreams.Type.object, filename=cell_source_map, indent=4, close_fd=True)
+
+        try:
+            _unflatten(
+                input_name,
+                output_name=output_name,
+                root_is_list=root_is_list,
+                xml=xml,
+                cell_source_map=cell_source_map,
+                output_stream=output_stream,
+                cell_source_map_stream=cell_source_map_stream,
+                db=db,
+                **kw
+            )
+        finally:
+            try:
+                if output_stream:
+                    output_stream.close()
+                if cell_source_map_stream:
+                    cell_source_map_stream.close()
+            finally:
+                if output_stream:
+                    json_stream_args['fd'].close()
+                if cell_source_map_stream:
+                    cell_source_map_file.close()
+
     finally:
-        if output_stream:
-            output_stream.close()
-        if cell_source_map_stream:
-            cell_source_map_stream.close()
         db.close()
         os.remove(zodb_db_location)
         os.remove(zodb_db_location + ".lock")
         os.remove(zodb_db_location + ".index")
         os.remove(zodb_db_location + ".tmp")
-
 
 def _unflatten(
     input_name,

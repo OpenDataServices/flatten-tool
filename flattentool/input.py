@@ -16,6 +16,7 @@ from warnings import warn
 
 import BTrees
 import openpyxl
+import persistent.list
 import pytz
 import transaction
 import ZODB
@@ -405,7 +406,7 @@ class SpreadsheetInput(object):
                 lines_generator = enumerate(lines)
             else:
                 #when sheet lines are supplied then get sheet row numbers out of dictionary
-                lines_generator = lines.items()
+                lines_generator = sorted(list(lines.items()))
 
             for j, line in lines_generator:
                 if all(x is None or x == "" for x in line.values()):
@@ -484,8 +485,8 @@ class SpreadsheetInput(object):
         self.connection = db.open()
         root = self.connection.root
 
-        # Each top level object is assigned an id. This way we preseve ordering as much as possible
-        root.object_store = BTrees.OOBTree.BTree()
+        # Each top level object is assigned an integer. This way we preseve ordering as much as possible
+        root.object_store = BTrees.IOBTree.BTree()
 
         # this matches the top-level id field to its index value.
         root.object_index = BTrees.OIBTree.BTree()
@@ -493,6 +494,7 @@ class SpreadsheetInput(object):
         index = 0
 
         for sheet, rows in self.get_sub_sheets_lines():
+            print(sheet)
             for row_numbar, row in enumerate(rows):
 
                 ##uuid to stop clash with any key for objects with no id
@@ -503,31 +505,29 @@ class SpreadsheetInput(object):
                 if current_index is None:
                     current_index = index 
                     root.object_index[top_level_id] = current_index
+                    root.object_store[current_index] = persistent.list.PersistentList()
                     index += 1
 
-                root.object_store[(current_index, sheet, row_numbar)] = row
+                root.object_store[current_index].append((sheet, row_numbar, row))
 
-                if row_numbar != 0 and row_numbar % 4000 == 0:
+                if row_numbar != 0 and row_numbar % 1000 == 0:
                     transaction.commit()
                     self.connection.cacheMinimize()
 
             transaction.commit()
 
-        last_index = 0
-        sheet_lines = {}
-        for key, row in root.object_store.items():
-            current_index, sheet, row_numbar = key
-            if current_index != last_index and sheet_lines:
-                yield self.fancy_unflatten(with_cell_source_map, with_cell_source_map, sheet_lines, last_index)
-                if last_index % 4000 == 0:
-                    self.connection.cacheMinimize()
-                last_index = current_index
-                sheet_lines = {}
-            if sheet not in sheet_lines:
-                sheet_lines[sheet] = {}
-            sheet_lines[sheet][row_numbar] = row
+        self.connection.cacheMinimize()
 
-        yield self.fancy_unflatten(with_cell_source_map, with_cell_source_map, sheet_lines, last_index)
+        for current_index, row_list in root.object_store.items():
+            sheet_lines = {}
+            for sheet, row_numbar, row in row_list:
+                if sheet not in sheet_lines:
+                    sheet_lines[sheet] = {}
+                sheet_lines[sheet][row_numbar] = row
+            yield self.fancy_unflatten(with_cell_source_map, with_cell_source_map, sheet_lines, current_index)
+
+            self.connection.cacheMinimize()
+
 
     def fancy_unflatten(self, with_cell_source_map, with_heading_source_map, sheet_lines=None, index=None):
         cell_tree = self.do_unflatten(sheet_lines=sheet_lines)
@@ -731,7 +731,12 @@ class BadXLSXZipFile(BadZipFile):
 class XLSXInput(SpreadsheetInput):
     def read_sheets(self):
         try:
-            self.workbook = openpyxl.load_workbook(self.input_name, data_only=True, read_only=True)
+            if self.vertical_orientation:
+                # read_only mode only works when reading rows not columns
+                self.workbook = openpyxl.load_workbook(self.input_name, data_only=True)
+            else:
+                self.workbook = openpyxl.load_workbook(self.input_name, data_only=True, read_only=True)
+
         except BadZipFile as e:  # noqa
             # TODO when we have python3 only add 'from e' to show exception chain
             raise BadXLSXZipFile(
