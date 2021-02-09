@@ -38,6 +38,7 @@ install_requires = [
     "zodb",
     "zc.zlibstorage",
     "ijson",
+    "jsonstreams",
 ]
 
 setup(

@@ -151,7 +151,7 @@ def _simplify_line(line):
 def _strip(output):
     # Don't worry about any extra blank lines at the end either
     outstr = str(output, "utf8").rstrip("\n")
-    return "\n".join(line.rstrip(" ") for line in outstr.split("\n"))
+    return "\n".join(line.strip() for line in outstr.split("\n"))
 
 
 # Useful for a coverage check - see developer docs for how to run the check
