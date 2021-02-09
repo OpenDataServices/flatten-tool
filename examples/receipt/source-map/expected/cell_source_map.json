@@ -1,374 +1,374 @@
 {
     "cafe/0/id": [
-        [
-            "1_cafes",
-            "A",
-            2,
-            "id"
-        ],
-        [
-            "2_tables",
-            "A",
-            2,
-            "id"
-        ],
-        [
-            "2_tables",
-            "A",
-            3,
-            "id"
-        ],
-        [
-            "2_tables",
-            "A",
-            4,
-            "id"
-        ],
-        [
-            "3_dishes",
-            "A",
-            2,
-            "id"
-        ],
-        [
-            "3_dishes",
-            "A",
-            3,
-            "id"
-        ],
-        [
-            "3_dishes",
-            "A",
-            4,
-            "id"
-        ]
+    [
+        "1_cafes",
+        "A",
+        2,
+        "id"
     ],
-    "cafe/0/name": [
-        [
-            "1_cafes",
-            "B",
-            2,
-            "name"
-        ]
+    [
+        "2_tables",
+        "A",
+        2,
+        "id"
     ],
-    "cafe/0/table/0/dish/0/cost": [
-        [
-            "3_dishes",
-            "D",
-            2,
-            "table/0/dish/0/cost"
-        ]
+    [
+        "2_tables",
+        "A",
+        3,
+        "id"
     ],
-    "cafe/0/table/0/dish/0/name": [
-        [
-            "3_dishes",
-            "C",
-            2,
-            "table/0/dish/0/name"
-        ]
+    [
+        "2_tables",
+        "A",
+        4,
+        "id"
     ],
-    "cafe/0/table/0/dish/1/cost": [
-        [
-            "3_dishes",
-            "D",
-            3,
-            "table/0/dish/0/cost"
-        ]
+    [
+        "3_dishes",
+        "A",
+        2,
+        "id"
     ],
-    "cafe/0/table/0/dish/1/name": [
-        [
-            "3_dishes",
-            "C",
-            3,
-            "table/0/dish/0/name"
-        ]
+    [
+        "3_dishes",
+        "A",
+        3,
+        "id"
     ],
-    "cafe/0/table/0/id": [
-        [
-            "2_tables",
-            "B",
-            2,
-            "table/0/id"
-        ],
-        [
-            "3_dishes",
-            "B",
-            2,
-            "table/0/id"
-        ],
-        [
-            "3_dishes",
-            "B",
-            3,
-            "table/0/id"
-        ]
-    ],
-    "cafe/0/table/0/number": [
-        [
-            "2_tables",
-            "C",
-            2,
-            "table/0/number"
-        ]
-    ],
-    "cafe/0/table/1/id": [
-        [
-            "2_tables",
-            "B",
-            3,
-            "table/0/id"
-        ]
-    ],
-    "cafe/0/table/1/number": [
-        [
-            "2_tables",
-            "C",
-            3,
-            "table/0/number"
-        ]
-    ],
-    "cafe/0/table/2/dish/0/cost": [
-        [
-            "3_dishes",
-            "D",
-            4,
-            "table/0/dish/0/cost"
-        ]
-    ],
-    "cafe/0/table/2/dish/0/name": [
-        [
-            "3_dishes",
-            "C",
-            4,
-            "table/0/dish/0/name"
-        ]
-    ],
-    "cafe/0/table/2/id": [
-        [
-            "2_tables",
-            "B",
-            4,
-            "table/0/id"
-        ],
-        [
-            "3_dishes",
-            "B",
-            4,
-            "table/0/id"
-        ]
-    ],
-    "cafe/0/table/2/number": [
-        [
-            "2_tables",
-            "C",
-            4,
-            "table/0/number"
-        ]
-    ],
-    "cafe/1/id": [
-        [
-            "1_cafes",
-            "A",
-            3,
-            "id"
-        ],
-        [
-            "2_tables",
-            "A",
-            5,
-            "id"
-        ],
-        [
-            "2_tables",
-            "A",
-            6,
-            "id"
-        ],
-        [
-            "3_dishes",
-            "A",
-            5,
-            "id"
-        ]
-    ],
-    "cafe/1/name": [
-        [
-            "1_cafes",
-            "B",
-            3,
-            "name"
-        ]
-    ],
-    "cafe/1/table/0/dish/0/cost": [
-        [
-            "3_dishes",
-            "D",
-            5,
-            "table/0/dish/0/cost"
-        ]
-    ],
-    "cafe/1/table/0/dish/0/name": [
-        [
-            "3_dishes",
-            "C",
-            5,
-            "table/0/dish/0/name"
-        ]
-    ],
-    "cafe/1/table/0/id": [
-        [
-            "2_tables",
-            "B",
-            5,
-            "table/0/id"
-        ],
-        [
-            "3_dishes",
-            "B",
-            5,
-            "table/0/id"
-        ]
-    ],
-    "cafe/1/table/0/number": [
-        [
-            "2_tables",
-            "C",
-            5,
-            "table/0/number"
-        ]
-    ],
-    "cafe/1/table/1/id": [
-        [
-            "2_tables",
-            "B",
-            6,
-            "table/0/id"
-        ]
-    ],
-    "cafe/1/table/1/number": [
-        [
-            "2_tables",
-            "C",
-            6,
-            "table/0/number"
-        ]
-    ],
-    "cafe/0": [
-        [
-            "1_cafes",
-            2
-        ],
-        [
-            "2_tables",
-            2
-        ],
-        [
-            "2_tables",
-            3
-        ],
-        [
-            "2_tables",
-            4
-        ],
-        [
-            "3_dishes",
-            2
-        ],
-        [
-            "3_dishes",
-            3
-        ],
-        [
-            "3_dishes",
-            4
-        ]
-    ],
-    "cafe/0/table/0/dish/0": [
-        [
-            "3_dishes",
-            2
-        ]
-    ],
-    "cafe/0/table/0/dish/1": [
-        [
-            "3_dishes",
-            3
-        ]
-    ],
-    "cafe/0/table/0": [
-        [
-            "2_tables",
-            2
-        ],
-        [
-            "3_dishes",
-            2
-        ],
-        [
-            "3_dishes",
-            3
-        ]
-    ],
-    "cafe/0/table/1": [
-        [
-            "2_tables",
-            3
-        ]
-    ],
-    "cafe/0/table/2/dish/0": [
-        [
-            "3_dishes",
-            4
-        ]
-    ],
-    "cafe/0/table/2": [
-        [
-            "2_tables",
-            4
-        ],
-        [
-            "3_dishes",
-            4
-        ]
-    ],
-    "cafe/1": [
-        [
-            "1_cafes",
-            3
-        ],
-        [
-            "2_tables",
-            5
-        ],
-        [
-            "2_tables",
-            6
-        ],
-        [
-            "3_dishes",
-            5
-        ]
-    ],
-    "cafe/1/table/0/dish/0": [
-        [
-            "3_dishes",
-            5
-        ]
-    ],
-    "cafe/1/table/0": [
-        [
-            "2_tables",
-            5
-        ],
-        [
-            "3_dishes",
-            5
-        ]
-    ],
-    "cafe/1/table/1": [
-        [
-            "2_tables",
-            6
-        ]
+    [
+        "3_dishes",
+        "A",
+        4,
+        "id"
     ]
+],
+    "cafe/0/name": [
+    [
+        "1_cafes",
+        "B",
+        2,
+        "name"
+    ]
+],
+    "cafe/0/table/0/dish/0/cost": [
+    [
+        "3_dishes",
+        "D",
+        2,
+        "table/0/dish/0/cost"
+    ]
+],
+    "cafe/0/table/0/dish/0/name": [
+    [
+        "3_dishes",
+        "C",
+        2,
+        "table/0/dish/0/name"
+    ]
+],
+    "cafe/0/table/0/dish/1/cost": [
+    [
+        "3_dishes",
+        "D",
+        3,
+        "table/0/dish/0/cost"
+    ]
+],
+    "cafe/0/table/0/dish/1/name": [
+    [
+        "3_dishes",
+        "C",
+        3,
+        "table/0/dish/0/name"
+    ]
+],
+    "cafe/0/table/0/id": [
+    [
+        "2_tables",
+        "B",
+        2,
+        "table/0/id"
+    ],
+    [
+        "3_dishes",
+        "B",
+        2,
+        "table/0/id"
+    ],
+    [
+        "3_dishes",
+        "B",
+        3,
+        "table/0/id"
+    ]
+],
+    "cafe/0/table/0/number": [
+    [
+        "2_tables",
+        "C",
+        2,
+        "table/0/number"
+    ]
+],
+    "cafe/0/table/1/id": [
+    [
+        "2_tables",
+        "B",
+        3,
+        "table/0/id"
+    ]
+],
+    "cafe/0/table/1/number": [
+    [
+        "2_tables",
+        "C",
+        3,
+        "table/0/number"
+    ]
+],
+    "cafe/0/table/2/dish/0/cost": [
+    [
+        "3_dishes",
+        "D",
+        4,
+        "table/0/dish/0/cost"
+    ]
+],
+    "cafe/0/table/2/dish/0/name": [
+    [
+        "3_dishes",
+        "C",
+        4,
+        "table/0/dish/0/name"
+    ]
+],
+    "cafe/0/table/2/id": [
+    [
+        "2_tables",
+        "B",
+        4,
+        "table/0/id"
+    ],
+    [
+        "3_dishes",
+        "B",
+        4,
+        "table/0/id"
+    ]
+],
+    "cafe/0/table/2/number": [
+    [
+        "2_tables",
+        "C",
+        4,
+        "table/0/number"
+    ]
+],
+    "cafe/0": [
+    [
+        "1_cafes",
+        2
+    ],
+    [
+        "2_tables",
+        2
+    ],
+    [
+        "2_tables",
+        3
+    ],
+    [
+        "2_tables",
+        4
+    ],
+    [
+        "3_dishes",
+        2
+    ],
+    [
+        "3_dishes",
+        3
+    ],
+    [
+        "3_dishes",
+        4
+    ]
+],
+    "cafe/0/table/0/dish/0": [
+    [
+        "3_dishes",
+        2
+    ]
+],
+    "cafe/0/table/0/dish/1": [
+    [
+        "3_dishes",
+        3
+    ]
+],
+    "cafe/0/table/0": [
+    [
+        "2_tables",
+        2
+    ],
+    [
+        "3_dishes",
+        2
+    ],
+    [
+        "3_dishes",
+        3
+    ]
+],
+    "cafe/0/table/1": [
+    [
+        "2_tables",
+        3
+    ]
+],
+    "cafe/0/table/2/dish/0": [
+    [
+        "3_dishes",
+        4
+    ]
+],
+    "cafe/0/table/2": [
+    [
+        "2_tables",
+        4
+    ],
+    [
+        "3_dishes",
+        4
+    ]
+],
+    "cafe/1/id": [
+    [
+        "1_cafes",
+        "A",
+        3,
+        "id"
+    ],
+    [
+        "2_tables",
+        "A",
+        5,
+        "id"
+    ],
+    [
+        "2_tables",
+        "A",
+        6,
+        "id"
+    ],
+    [
+        "3_dishes",
+        "A",
+        5,
+        "id"
+    ]
+],
+    "cafe/1/name": [
+    [
+        "1_cafes",
+        "B",
+        3,
+        "name"
+    ]
+],
+    "cafe/1/table/0/dish/0/cost": [
+    [
+        "3_dishes",
+        "D",
+        5,
+        "table/0/dish/0/cost"
+    ]
+],
+    "cafe/1/table/0/dish/0/name": [
+    [
+        "3_dishes",
+        "C",
+        5,
+        "table/0/dish/0/name"
+    ]
+],
+    "cafe/1/table/0/id": [
+    [
+        "2_tables",
+        "B",
+        5,
+        "table/0/id"
+    ],
+    [
+        "3_dishes",
+        "B",
+        5,
+        "table/0/id"
+    ]
+],
+    "cafe/1/table/0/number": [
+    [
+        "2_tables",
+        "C",
+        5,
+        "table/0/number"
+    ]
+],
+    "cafe/1/table/1/id": [
+    [
+        "2_tables",
+        "B",
+        6,
+        "table/0/id"
+    ]
+],
+    "cafe/1/table/1/number": [
+    [
+        "2_tables",
+        "C",
+        6,
+        "table/0/number"
+    ]
+],
+    "cafe/1": [
+    [
+        "1_cafes",
+        3
+    ],
+    [
+        "2_tables",
+        5
+    ],
+    [
+        "2_tables",
+        6
+    ],
+    [
+        "3_dishes",
+        5
+    ]
+],
+    "cafe/1/table/0/dish/0": [
+    [
+        "3_dishes",
+        5
+    ]
+],
+    "cafe/1/table/0": [
+    [
+        "2_tables",
+        5
+    ],
+    [
+        "3_dishes",
+        5
+    ]
+],
+    "cafe/1/table/1": [
+    [
+        "2_tables",
+        6
+    ]
+]
 }

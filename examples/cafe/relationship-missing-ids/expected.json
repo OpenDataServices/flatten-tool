@@ -17,16 +17,16 @@
             ]
         },
         {
+            "name": "Vegetarian Cafe",
+            "address": "42 Town Road, Bristol"
+        },
+        {
             "id": "CAFE-VEG",
             "table": [
                 {
                     "number": "16"
                 }
             ]
-        },
-        {
-            "name": "Vegetarian Cafe",
-            "address": "42 Town Road, Bristol"
         },
         {
             "table": [
