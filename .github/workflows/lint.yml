@@ -22,3 +22,9 @@ jobs:
     - run: black --check *.py */
     - run: isort --check-only *.py */
     - run: flake8
+    - name: Create British Directory
+      run: "sudo apt-get install -y wbritish && echo \"NATURAL: \" > base-dictionary.txt && cat /usr/share/dict/british-english >> base-dictionary.txt"
+    - name: Spell check setup.py
+      run: scspell --base-dict base-dictionary.txt   --override-dictionary dictionary.txt --report-only  *.py
+    - name: Spell check flattentool Python
+      run: find flattentool -name \*.py -type f  -exec scspell --base-dict base-dictionary.txt   --override-dictionary dictionary.txt --report-only {} \+

@@ -9,3 +9,4 @@ sphinx_rtd_theme
 isort
 flake8
 transifex-client
+scspell3k
