@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.15.3] - 2020-02-23
+
 - use-titles: Use $ref'erring title if available https://github.com/OpenDataServices/flatten-tool/pull/368 
 - create-template --no-deprecated-fields: Did not work if deprecated element at same level as a $ref https://github.com/OpenDataServices/flatten-tool/issues/185#issuecomment-719587348
 
