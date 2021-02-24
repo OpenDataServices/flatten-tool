@@ -22,6 +22,6 @@ jobs:
           ${{ runner.os }}-pip-
     - run: pip install --upgrade -r requirements_dev.txt
     - run: py.test --cov .
-   #- env:
-   #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-   #  run: coveralls
+    - env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: coveralls --service=github
