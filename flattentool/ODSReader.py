@@ -15,11 +15,15 @@
 # Thanks to grt for the fixes
 # https://github.com/marcoconti83/read-ods-with-odfpy
 
-import re
 from collections import OrderedDict
+from datetime import datetime
 
+import backports.datetime_fromisoformat
 import odf.opendocument
 from odf.table import Table, TableCell, TableRow
+
+# Backport for datetime.fromisoformat, which is new in Python 3.7
+backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
 
 
 # http://stackoverflow.com/a/4544699/1846474
@@ -74,10 +78,16 @@ class ODSReader:
                             )
                         )
                         if value_type == "float":
+                            value = cell.attributes.get(
+                                (
+                                    "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+                                    "value",
+                                )
+                            )
                             if "." in str(cell):
-                                arrCells[count] = float(str(cell))
+                                arrCells[count] = float(value)
                             else:
-                                arrCells[count] = int(str(cell))
+                                arrCells[count] = int(value)
                         elif value_type == "date":
                             date_value = cell.attributes.get(
                                 (
@@ -85,12 +95,12 @@ class ODSReader:
                                     "date-value",
                                 )
                             )
-                            # Add UTC timezone to naive datetime strings
-                            if re.match(
-                                r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$", date_value
-                            ):
-                                date_value += "Z"
-                            arrCells[count] = date_value
+                            # fromisoformat assumes microseconds appear as 3 or
+                            # 6 digits, whereas ods drops trailing 0s, so can
+                            # have 1-6 digits, so pad some extra 0s
+                            if "." in date_value:
+                                date_value = date_value.ljust(26, "0")
+                            arrCells[count] = datetime.fromisoformat(date_value)
                         else:
                             arrCells[count] = str(cell)
                     count += 1

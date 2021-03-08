@@ -193,13 +193,18 @@ class TestSuccessfulInput(object):
         assert list(xlsxinput.get_sheet_lines("main")) == [
             {
                 "colInt": 1,
-                "colFloat": 1.2,
+                "colFloat": 1000.2,
+                "colFloatComma": 1000.2,
                 "colDate": datetime.datetime(2020, 3, 5),
                 "colDateTime": datetime.datetime(2020, 2, 7, 16, 41, 0, 1),
+                None: None,
             }
         ]
         assert type(list(xlsxinput.get_sheet_lines("main"))[0]["colInt"]) == int
         assert type(list(xlsxinput.get_sheet_lines("main"))[0]["colFloat"]) == float
+        assert (
+            type(list(xlsxinput.get_sheet_lines("main"))[0]["colFloatComma"]) == float
+        )
         assert xlsxinput.sub_sheet_names == ["main"]
 
     def test_ods_input_types(self):
@@ -210,13 +215,14 @@ class TestSuccessfulInput(object):
         assert list(odsinput.get_sheet_lines("main")) == [
             {
                 "colInt": 1,
-                "colFloat": 1.2,
-                "colDate": "2020-03-05",
-                "colDateTime": "2020-02-07T16:41:00Z",
+                "colFloat": 1000.2,
+                "colFloatComma": 1000.2,
+                "colDate": datetime.datetime(2020, 3, 5),
+                "colDateTime": datetime.datetime(2020, 2, 7, 16, 41),
             }
         ]
         assert type(list(odsinput.get_sheet_lines("main"))[0]["colInt"]) == int
-        assert type(list(odsinput.get_sheet_lines("main"))[0]["colFloat"]) == float
+        assert type(list(odsinput.get_sheet_lines("main"))[0]["colFloatComma"]) == float
         assert list(odsinput.sub_sheet_names) == ["main"]
 
     def test_xlsx_input_integer2(self):
