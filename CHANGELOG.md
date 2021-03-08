@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-- Fix parsing number formatting from .ods files https://github.com/OpenDataServices/flatten-tool/pull/373
+- Fix parsing date and number formatting from .ods files https://github.com/OpenDataServices/flatten-tool/pull/373
 
 ## [0.15.3] - 2020-02-23
 
