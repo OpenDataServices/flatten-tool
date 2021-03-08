@@ -35,6 +35,7 @@ install_requires = [
     "xmltodict",
     "lxml",
     "odfpy",
+    "backports-datetime-fromisoformat",
 ]
 
 setup(
