@@ -50,6 +50,7 @@ class SpreadsheetOutput(object):
 
 class XLSXOutput(SpreadsheetOutput):
     def open(self):
+        # write only means that the output will be streamed
         self.workbook = openpyxl.Workbook(write_only=True)
 
     def write_sheet(self, sheet_name, sheet):

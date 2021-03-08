@@ -51,11 +51,16 @@ class PersistentSheet(Sheet):
         super().__init__(columns=columns, root_id=root_id, name=name)
         self.connection = connection
         self.index = 0
+        # Integer key and object value btree.  Store sequential index in order to preserve input order.
         connection.root.sheet_store[self.name] = BTrees.IOBTree.BTree()
 
     @property
     def lines(self):
+        # btrees iterate in key order.
         for key, value in self.connection.root.sheet_store[self.name].items():
+            # 5000 chosen by trial and error.  The written row
+            # data is removed from memory as is no loner needed.
+            # All new sheets clear out previous sheets data from memory.
             if key % 5000 == 0:
                 self.connection.cacheMinimize()
             yield value

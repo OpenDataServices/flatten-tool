@@ -121,9 +121,11 @@ class JSONParser(object):
         persist=False,
     ):
         if persist:
+            # Use temp directories in OS agnostic way
             self.zodb_db_location = (
                 tempfile.gettempdir() + "/flattentool-" + str(uuid.uuid4())
             )
+            # zlibstorage lowers disk usage by a lot at very small performance cost
             zodb_storage = zc.zlibstorage.ZlibStorage(
                 ZODB.FileStorage.FileStorage(self.zodb_db_location)
             )
@@ -133,7 +135,10 @@ class JSONParser(object):
             self.db = ZODB.DB(None)
 
         self.connection = self.db.open()
+
+        # ZODB root, only objects attached here will be persisted
         root = self.connection.root
+        # OOBTree means a btree with keys and values are objects (including strings)
         root.sheet_store = BTrees.OOBTree.BTree()
 
         self.sub_sheets = {}
@@ -151,6 +156,8 @@ class JSONParser(object):
         self.persist = persist
 
         if schema_parser:
+            # schema parser does not make sheets that are persistent,
+            # so use from_sheets which deep copies everything in it.
             self.main_sheet = PersistentSheet.from_sheet(
                 schema_parser.main_sheet, self.connection
             )
@@ -293,9 +300,13 @@ class JSONParser(object):
                 # fall over on empty activity, e.g. <iati-activity/>
                 continue
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
+            # only persist every 2000 objects. peristing more often slows down storing.
+            # 2000 top level objects normally not too much to store in memory.
             if num % 2000 == 0 and num != 0:
                 transaction.commit()
 
+        # This commit could be removed which would mean that upto 2000 objects
+        # could be stored in memory without anything being persisted.
         transaction.commit()
 
         if self.remove_empty_schema_columns:

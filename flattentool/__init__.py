@@ -112,6 +112,7 @@ def flatten(
     else:
         schema_parser = None
 
+    # context manager to clean up ZODB database when it exits
     with JSONParser(
         json_filename=input_name,
         root_list_path=None if root_is_list else root_list_path,
