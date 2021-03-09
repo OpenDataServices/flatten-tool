@@ -36,6 +36,9 @@ install_requires = [
     "lxml",
     "odfpy",
     "backports-datetime-fromisoformat",
+    "zodb",
+    "zc.zlibstorage",
+    "ijson",
 ]
 
 setup(

@@ -112,7 +112,8 @@ def flatten(
     else:
         schema_parser = None
 
-    parser = JSONParser(
+    # context manager to clean up ZODB database when it exits
+    with JSONParser(
         json_filename=input_name,
         root_list_path=None if root_is_list else root_list_path,
         schema_parser=schema_parser,
@@ -126,33 +127,33 @@ def flatten(
         preserve_fields=preserve_fields,
         remove_empty_schema_columns=remove_empty_schema_columns,
         truncation_length=truncation_length,
-    )
-    parser.parse()
+        persist=True,
+    ) as parser:
 
-    def spreadsheet_output(spreadsheet_output_class, name):
-        spreadsheet_output = spreadsheet_output_class(
-            parser=parser,
-            main_sheet_name=main_sheet_name,
-            output_name=name,
-            sheet_prefix=sheet_prefix,
-        )
-        spreadsheet_output.write_sheets()
-
-    if output_format == "all":
-        if not output_name:
-            output_name = "flattened"
-        for format_name, spreadsheet_output_class in OUTPUT_FORMATS.items():
-            spreadsheet_output(
-                spreadsheet_output_class, output_name + FORMATS_SUFFIX[format_name]
+        def spreadsheet_output(spreadsheet_output_class, name):
+            spreadsheet_output = spreadsheet_output_class(
+                parser=parser,
+                main_sheet_name=main_sheet_name,
+                output_name=name,
+                sheet_prefix=sheet_prefix,
             )
+            spreadsheet_output.write_sheets()
 
-    elif output_format in OUTPUT_FORMATS.keys():  # in dictionary of allowed formats
-        if not output_name:
-            output_name = "flattened" + FORMATS_SUFFIX[output_format]
-        spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
+        if output_format == "all":
+            if not output_name:
+                output_name = "flattened"
+            for format_name, spreadsheet_output_class in OUTPUT_FORMATS.items():
+                spreadsheet_output(
+                    spreadsheet_output_class, output_name + FORMATS_SUFFIX[format_name]
+                )
 
-    else:
-        raise Exception("The requested format is not available")
+        elif output_format in OUTPUT_FORMATS.keys():  # in dictionary of allowed formats
+            if not output_name:
+                output_name = "flattened" + FORMATS_SUFFIX[output_format]
+            spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
+
+        else:
+            raise Exception("The requested format is not available")
 
 
 # From http://bugs.python.org/issue16535

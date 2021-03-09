@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import sys
 
 import openpyxl
 import pytest
@@ -41,7 +42,10 @@ def test_blank_sheets(tmpdir):
     wb = openpyxl.load_workbook(tmpdir.join("release.xlsx").strpath)
     assert wb.sheetnames == ["release"]
     rows = list(wb["release"].rows)
-    assert len(rows) == 0
+    # openpyxl fixed this bug but earler versions of python are stuck with it.
+    # remove when we no longer support 3.5
+    if sys.version_info >= (3, 6, 0):
+        assert len(rows) == 0
 
     # Check CSV is Empty
     assert tmpdir.join("release").listdir() == [
@@ -102,7 +106,7 @@ def test_empty_lines(tmpdir):
     subsheet = Sheet(root_id="ocid")
     subsheet.add_field("c")
     parser = MockParser(["a", "d"], {"b": subsheet})
-    parser.main_sheet.lines = []
+    parser.main_sheet._lines = []
     for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
@@ -147,8 +151,8 @@ def test_populated_lines(tmpdir):
     subsheet = Sheet(root_id="ocid")
     subsheet.add_field("c")
     parser = MockParser(["a"], {})
-    parser.main_sheet.lines = [{"a": "cell1"}, {"a": "cell2"}]
-    subsheet.lines = [{"c": "cell3"}, {"c": "cell4"}]
+    parser.main_sheet._lines = [{"a": "cell1"}, {"a": "cell2"}]
+    subsheet._lines = [{"c": "cell3"}, {"c": "cell4"}]
     parser.sub_sheets["b"] = subsheet
     for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
@@ -206,7 +210,7 @@ def test_populated_lines(tmpdir):
 
 def test_utf8(tmpdir):
     parser = MockParser(["é"], {})
-    parser.main_sheet.lines = [{"é": "éαГ😼𝒞人"}, {"é": "cell2"}]
+    parser.main_sheet._lines = [{"é": "éαГ😼𝒞人"}, {"é": "cell2"}]
     for format_name, spreadsheet_output_class in output.FORMATS.items():
         spreadsheet_output = spreadsheet_output_class(
             parser=parser,
