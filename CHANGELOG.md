@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Reduce memory footprint of flattening https://github.com/OpenDataServices/flatten-tool/pull/376
+
 ## [0.15.4] - 2021-03-08
 
 ### Fixed
