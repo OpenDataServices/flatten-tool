@@ -84,7 +84,7 @@ class ODSReader:
                                     "value",
                                 )
                             )
-                            if "." in str(cell):
+                            if "." in str(value):
                                 arrCells[count] = float(value)
                             else:
                                 arrCells[count] = int(value)

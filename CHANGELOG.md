@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix another number formatting .ods bug https://github.com/OpenDataServices/flatten-tool/pull/383
+
 ### Changed
 
 - Reduce memory footprint of flattening https://github.com/OpenDataServices/flatten-tool/pull/376

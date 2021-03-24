@@ -196,7 +196,9 @@ class TestSuccessfulInput(object):
                 "colFloat": 1000.2,
                 "colFloatComma": 1000.2,
                 "colDate": datetime.datetime(2020, 3, 5),
-                "colDateTime": datetime.datetime(2020, 2, 7, 16, 41, 0, 1),
+                "colDateTime": datetime.datetime(
+                    2020, 2, 7, 16, 41, 0, 1 if sys.version_info < (3, 6) else 0
+                ),
                 None: None,
             }
         ]
