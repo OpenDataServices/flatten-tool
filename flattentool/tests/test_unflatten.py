@@ -135,3 +135,27 @@ def test_unflatten_org_xml_xlsx(tmpdir, input_format):
         open("flattentool/tests/fixtures/iati-org.xml").read()
         == tmpdir.join("output.xml").read()
     )
+
+
+@pytest.mark.parametrize("input_format", ["xlsx", "ods"])
+def test_unflatten_empty_column_header(tmpdir, input_format):
+    unflatten(
+        input_name="flattentool/tests/fixtures/{}/empty_column_header.{}".format(
+            input_format, input_format
+        ),
+        output_name=tmpdir.join("output.json").strpath,
+        input_format=input_format,
+    )
+    assert (
+        tmpdir.join("output.json").read()
+        == """{
+    "main": [
+        {
+            "colA": "cell1"
+        },
+        {
+            "colA": "cell3"
+        }
+    ]
+}"""
+    )

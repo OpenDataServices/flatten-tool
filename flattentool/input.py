@@ -882,7 +882,10 @@ class ODSInput(SpreadsheetInput):
             output_row = OrderedDict()
             for i, x in enumerate(row):
 
-                header = coli_to_header[i]
+                try:
+                    header = coli_to_header[i]
+                except KeyError:
+                    continue
                 value = x
                 if not header:
                     # None means that the cell will be ignored

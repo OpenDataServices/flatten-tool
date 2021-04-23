@@ -312,6 +312,32 @@ class TestSuccessfulInput(object):
             OrderedDict([("colC", 4), ("colD", 12)]),
         ]
 
+    def test_xlsx_empty_column_header(self):
+        xlsxinput = XLSXInput(
+            input_name="flattentool/tests/fixtures/xlsx/empty_column_header.xlsx"
+        )
+
+        xlsxinput.read_sheets()
+
+        assert list(xlsxinput.sub_sheet_names) == ["main"]
+        assert list(xlsxinput.get_sheet_lines("main")) == [
+            {"colA": "cell1", None: None},
+            {"colA": "cell3", None: None},
+        ]
+
+    def test_ods_empty_column_header(self):
+        odsinput = ODSInput(
+            input_name="flattentool/tests/fixtures/ods/empty_column_header.ods"
+        )
+
+        odsinput.read_sheets()
+
+        assert list(odsinput.sub_sheet_names) == ["main"]
+        assert list(odsinput.get_sheet_lines("main")) == [
+            {"colA": "cell1"},
+            {"colA": "cell3"},
+        ]
+
 
 class TestInputFailure(object):
     def test_csv_no_directory(self):
