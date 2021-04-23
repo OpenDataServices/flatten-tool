@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- We no longer support Python 3.5
+
 ### Fixed
 
 - Don't fail when an .ods column header is empty https://github.com/OpenDataServices/flatten-tool/issues/378

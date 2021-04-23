@@ -18,7 +18,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     - run: pip install --upgrade -r requirements_dev.txt
-    - run: pip install black==19.10b0
     - run: black --check *.py */
     - run: isort --check-only *.py */
     - run: flake8
