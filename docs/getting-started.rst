@@ -4,7 +4,7 @@ Getting Started
 Prerequisites
 -------------
 
-You will need Python 3.5 or later, including the venv module.
+You will need Python 3.6 or later, including the venv module.
 
 Generally the venv module should come with your default Python install, but not on Ubuntu.  On Ubuntu run:
 
@@ -41,9 +41,7 @@ will print help information specific to that sub-command.
 Python Version Support
 ----------------------
 
-This code supports Python 3.5 (and later).
+This code supports Python 3.6 (and later).
 
-Python 3.4 (and earlier Python 3 versions) is not supported, because one of the dependencies (openpyxl) does not
-support it.
-
-Python 2 is not supported because it is now end of life.
+Python 3.5 and earlier (including Python 2) are not supported, because they are
+end of life, and some of the dependencies do not support them.
