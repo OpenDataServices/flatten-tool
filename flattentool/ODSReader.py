@@ -23,7 +23,10 @@ import odf.opendocument
 from odf.table import Table, TableCell, TableRow
 
 # Backport for datetime.fromisoformat, which is new in Python 3.7
-backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
+try:
+    _ = datetime.fromisoformat
+except AttributeError:
+    backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
 
 
 # http://stackoverflow.com/a/4544699/1846474
