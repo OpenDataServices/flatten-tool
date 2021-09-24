@@ -987,6 +987,12 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     new_path = OrderedDict()
                     list_as_dict[list_index] = new_path
                 current_path = new_path
+                if not next_path_item:
+                    dewarning = DataErrorWarning(_(
+                            "Column {} has been ignored, because the schema says it should be an array, but it isn't."
+                        ).format(path_till_now))
+                    dewarning.path_till_now = path_till_now
+                    warn(dewarning)
                 if not xml or num < len(path_list) - 2:
                     # In xml "arrays" can have text values, if they're the final element
                     # This corresponds to a tag with text, but also possibly attributes
@@ -1007,6 +1013,12 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                     )
                     break
                 current_path = new_path
+                if not next_path_item:
+                    dewarning = DataErrorWarning(_(
+                            "Column {} has been ignored, because the schema says it should be an object, but it isn't."
+                        ).format(path_till_now))
+                    dewarning.path_till_now = path_till_now
+                    warn(dewarning)
                 continue
             if (
                 current_type
