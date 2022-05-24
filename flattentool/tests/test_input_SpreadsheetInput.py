@@ -261,8 +261,8 @@ class TestSuccessfulInput(object):
         assert list(odsinput.sub_sheet_names) == ["Sheet1"]
 
     def test_xlsx_input_formula(self):
-        """ When a formula is present, we should use the value, rather than the
-        formula itself. """
+        """When a formula is present, we should use the value, rather than the
+        formula itself."""
 
         xlsxinput = XLSXInput(input_name="flattentool/tests/fixtures/xlsx/formula.xlsx")
 
@@ -279,7 +279,7 @@ class TestSuccessfulInput(object):
         ]
 
     def test_bad_xlsx(self):
-        """ XLSX file that is not a XLSX"""
+        """XLSX file that is not a XLSX"""
 
         xlsxinput = XLSXInput(input_name="flattentool/tests/fixtures/xlsx/file.xlsx")
 
@@ -295,8 +295,8 @@ class TestSuccessfulInput(object):
         assert False, "No Exception Raised"
 
     def test_ods_input_formula(self):
-        """ When a formula is present, we should use the value, rather than the
-        formula itself. """
+        """When a formula is present, we should use the value, rather than the
+        formula itself."""
 
         odsinput = ODSInput(input_name="flattentool/tests/fixtures/ods/formula.ods")
 

@@ -23,14 +23,38 @@ testdata_multiplesheets = [
     (
         "Basic sub sheet",
         {
-            "custom_main": [{"ROOT_ID": 1, "id": 2,}, {"ROOT_ID": 1, "id": 3,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                },
+                {
+                    "ROOT_ID": 1,
+                    "id": 3,
+                },
+            ],
             "testArr": [
-                {"ROOT_ID": 1, "id": 2, "testArr/0/testC": "3",},
-                {"ROOT_ID": 1, "id": 2, "testArr/0/testC": "4",},
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testArr/0/testC": "3",
+                },
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testArr/0/testC": "4",
+                },
             ],
         },
         [
-            {"ROOT_ID": 1, "id": 2, "testArr": [{"testC": "3"}, {"testC": "4"},]},
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testArr": [
+                    {"testC": "3"},
+                    {"testC": "4"},
+                ],
+            },
             {"ROOT_ID": 1, "id": 3},
         ],
         [],
@@ -39,11 +63,23 @@ testdata_multiplesheets = [
     (
         "Nested sub sheet (with id)",
         {
-            "custom_main": [{"ROOT_ID": 1, "id": 2, "testB/id": 3, "testB/testC": 4,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testB/id": 3,
+                    "testB/testC": 4,
+                }
+            ],
             "tes_subField": [
                 # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
-                {"ROOT_ID": 1, "id": 2, "testB/id": 3, "testB/subField/0/testD": 5,}
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testB/id": 3,
+                    "testB/subField/0/testD": 5,
+                }
             ],
         },
         [
@@ -59,11 +95,22 @@ testdata_multiplesheets = [
     (
         "Nested sub sheet (without id)",
         {
-            "custom_main": [{"ROOT_ID": 1, "id": 2, "testB/id": 3, "testB/testC": 4,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testB/id": 3,
+                    "testB/testC": 4,
+                }
+            ],
             "sub": [
                 # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
-                {"ROOT_ID": 1, "id": 2, "testB/subField/0/testD": 5,}
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testB/subField/0/testD": 5,
+                }
             ],
         },
         [
@@ -83,8 +130,18 @@ testdata_multiplesheets = [
                 (
                     "custom_main",
                     [
-                        OrderedDict([("ROOT_ID", 1), ("id", 2),]),
-                        OrderedDict([("ROOT_ID", 1), ("id", 6),]),
+                        OrderedDict(
+                            [
+                                ("ROOT_ID", 1),
+                                ("id", 2),
+                            ]
+                        ),
+                        OrderedDict(
+                            [
+                                ("ROOT_ID", 1),
+                                ("id", 6),
+                            ]
+                        ),
                     ],
                 ),
                 (
@@ -127,9 +184,19 @@ testdata_multiplesheets = [
     (
         "Nested id",
         {
-            "custom_main": [{"ROOT_ID": 1, "id": 2,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                }
+            ],
             "subField": [
-                {"ROOT_ID": 1, "id": 2, "subField/0/id": 3, "subField/0/testA/id": 4,}
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "subField/0/id": 3,
+                    "subField/0/testA/id": 4,
+                }
             ],
         },
         [{"ROOT_ID": 1, "id": 2, "subField": [{"id": 3, "testA": {"id": 4}}]}],
@@ -139,10 +206,25 @@ testdata_multiplesheets = [
     (
         "Missing columns",
         {
-            "custom_main": [{"ROOT_ID": 1, "id": 2,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                }
+            ],
             "sub": [
-                {"ROOT_ID": 1, "id": "", "subField/0/id": 3, "subField/0/testA": 4,},
-                {"ROOT_ID": 1, "id": 2, "subField/0/id": 3, "subField/0/testA": 5,},
+                {
+                    "ROOT_ID": 1,
+                    "id": "",
+                    "subField/0/id": 3,
+                    "subField/0/testA": 4,
+                },
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "subField/0/id": 3,
+                    "subField/0/testA": 5,
+                },
             ],
         },
         [
@@ -156,7 +238,15 @@ testdata_multiplesheets = [
         "Unmatched id",
         OrderedDict(
             [
-                ("custom_main", [{"ROOT_ID": 1, "id": 2,}]),
+                (
+                    "custom_main",
+                    [
+                        {
+                            "ROOT_ID": 1,
+                            "id": 2,
+                        }
+                    ],
+                ),
                 (
                     "sub",
                     [
@@ -194,11 +284,25 @@ testdata_multiplesheets = [
                     "testArr/0/id": "4",
                     "testArr/0/testB": "5",
                 },
-                {"ROOT_ID": 6, "id": 7, "testC": 8, "testArr/0/testB": "9",},
+                {
+                    "ROOT_ID": 6,
+                    "id": 7,
+                    "testC": 8,
+                    "testArr/0/testB": "9",
+                },
             ],
             "testArr": [
-                {"ROOT_ID": 1, "id": 2, "testArr/0/id": "4", "testArr/0/testB": "5",},
-                {"ROOT_ID": 6, "id": 7, "testArr/0/testB": "9",},
+                {
+                    "ROOT_ID": 1,
+                    "id": 2,
+                    "testArr/0/id": "4",
+                    "testArr/0/testB": "5",
+                },
+                {
+                    "ROOT_ID": 6,
+                    "id": 7,
+                    "testArr/0/testB": "9",
+                },
             ],
         },
         [
@@ -319,23 +423,48 @@ testdata_multiplesheets_titles = [
         "Basic sub sheet",
         {
             "custom_main": [
-                {"ROOT_ID": 1, "Identifier": 2,},
-                {"ROOT_ID": 1, "Identifier": 3,},
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                },
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 3,
+                },
             ],
             "Arr title": [
-                {"ROOT_ID": 1, "Identifier": 2, "Arr title:C title": "3",},
-                {"ROOT_ID": 1, "Identifier": 2, "Arr title:C title": "4",},
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                    "Arr title:C title": "3",
+                },
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                    "Arr title:C title": "4",
+                },
             ],
             "arr_not_in_schema": [
-                {"ROOT_ID": 1, "Identifier": 2, "arr_not_in_schema/0/testD": "5",},
-                {"ROOT_ID": 1, "Identifier": 2, "arr_not_in_schema/0/testD": "6",},
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                    "arr_not_in_schema/0/testD": "5",
+                },
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                    "arr_not_in_schema/0/testD": "6",
+                },
             ],
         },
         [
             {
                 "ROOT_ID": 1,
                 "id": 2,
-                "testArr": [{"testC": "3"}, {"testC": "4"},],
+                "testArr": [
+                    {"testC": "3"},
+                    {"testC": "4"},
+                ],
                 "arr_not_in_schema": [{"testD": "5"}, {"testD": "6"}],
             },
             {"ROOT_ID": 1, "id": 3},
@@ -389,7 +518,11 @@ testdata_multiplesheets_titles = [
             "sub": [
                 # It used to be necessary to supply testA/id in this
                 # situation, but now it's optional
-                {"ROOT_ID": 1, "Identifier": 2, "B title:Sub title:E title": 5,}
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                    "B title:Sub title:E title": 5,
+                }
             ],
         },
         [
@@ -409,8 +542,18 @@ testdata_multiplesheets_titles = [
                 (
                     "custom_main",
                     [
-                        OrderedDict([("ROOT_ID", 1), ("Identifier", 2),]),
-                        OrderedDict([("ROOT_ID", 1), ("Identifier", 6),]),
+                        OrderedDict(
+                            [
+                                ("ROOT_ID", 1),
+                                ("Identifier", 2),
+                            ]
+                        ),
+                        OrderedDict(
+                            [
+                                ("ROOT_ID", 1),
+                                ("Identifier", 6),
+                            ]
+                        ),
                     ],
                 ),
                 (
@@ -456,7 +599,12 @@ testdata_multiplesheets_titles = [
     (
         "Nested id",
         {
-            "custom_main": [{"ROOT_ID": 1, "Identifier": 2,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                }
+            ],
             "Arr title": [
                 {
                     "ROOT_ID": 1,
@@ -473,7 +621,12 @@ testdata_multiplesheets_titles = [
     (
         "Missing columns",
         {
-            "custom_main": [{"ROOT_ID": 1, "Identifier": 2,}],
+            "custom_main": [
+                {
+                    "ROOT_ID": 1,
+                    "Identifier": 2,
+                }
+            ],
             "sub": [
                 {
                     "ROOT_ID": 1,
@@ -500,7 +653,15 @@ testdata_multiplesheets_titles = [
         "Unmatched id",
         OrderedDict(
             [
-                ("custom_main", [{"ROOT_ID": 1, "Identifier": 2,}]),
+                (
+                    "custom_main",
+                    [
+                        {
+                            "ROOT_ID": 1,
+                            "Identifier": 2,
+                        }
+                    ],
+                ),
                 (
                     "sub",
                     [
@@ -538,7 +699,12 @@ testdata_multiplesheets_titles = [
                     "Arr title:Identifier": 4,
                     "Arr title:B title": 5,
                 },
-                {"ROOT_ID": 6, "Identifier": 7, "A title": 8, "Arr title:B title": 9,},
+                {
+                    "ROOT_ID": 6,
+                    "Identifier": 7,
+                    "A title": 8,
+                    "Arr title:B title": 9,
+                },
             ],
             "testArr": [
                 {
@@ -547,7 +713,11 @@ testdata_multiplesheets_titles = [
                     "Arr title:Identifier": 4,
                     "Arr title:B title": 5,
                 },
-                {"ROOT_ID": 6, "Identifier": 7, "Arr title:B title": 9,},
+                {
+                    "ROOT_ID": 6,
+                    "Identifier": 7,
+                    "Arr title:B title": 9,
+                },
             ],
         },
         [
@@ -619,7 +789,12 @@ testdata_multiplesheets_titles = [
         {
             "custom_main": [],
             "subsheet": [
-                {"ROOT_ID": "", "Identifier": "", "A title": "", "U title": "",}
+                {
+                    "ROOT_ID": "",
+                    "Identifier": "",
+                    "A title": "",
+                    "U title": "",
+                }
             ],
         },
         [],

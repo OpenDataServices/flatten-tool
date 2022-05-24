@@ -1150,7 +1150,7 @@ class TemporaryDict(UserDict):
 
 
 def temporarydicts_to_lists(nested_dict):
-    """ Recursively transforms TemporaryDicts to lists inplace. """
+    """Recursively transforms TemporaryDicts to lists inplace."""
     for key, value in nested_dict.items():
         if isinstance(value, Cell):
             continue

@@ -53,7 +53,10 @@ setup(
     description="Tools for generating CSV and other flat versions of the structured data",
     install_requires=install_requires,
     extras_require={"HTTP": ["requests"]},
-    cmdclass={"install": InstallWithCompile, "develop": DevelopWithCompile,},
+    cmdclass={
+        "install": InstallWithCompile,
+        "develop": DevelopWithCompile,
+    },
     package_data={"flattentool": ["locale/*/*/*.mo", "locale/*/*/*.po"]},
     setup_requires=["babel"],
 )

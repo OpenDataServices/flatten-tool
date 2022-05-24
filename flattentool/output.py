@@ -105,7 +105,7 @@ class ODSOutput(SpreadsheetOutput):
         self.workbook = OpenDocumentSpreadsheet()
 
     def _make_cell(self, value):
-        """ Util for creating an ods cell """
+        """Util for creating an ods cell"""
 
         if value:
             try:

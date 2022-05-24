@@ -232,7 +232,9 @@ def test_utf8(tmpdir):
 
     # Check CSV
     assert set(tmpdir.join("release").listdir()) == set(
-        [tmpdir.join("release").join("release.csv"),]
+        [
+            tmpdir.join("release").join("release.csv"),
+        ]
     )
     release_csv_text = tmpdir.join("release", "release.csv").read_text(encoding="utf-8")
     assert release_csv_text.strip("\r\n").replace("\r", "") == "é\néαГ😼𝒞人\ncell2"

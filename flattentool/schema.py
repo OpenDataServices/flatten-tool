@@ -315,7 +315,10 @@ class SchemaParser(object):
                                 path_separator=":",
                             )
                             self.sub_sheet_titles[
-                                (parent_path, property_name,)
+                                (
+                                    parent_path,
+                                    property_name,
+                                )
                             ] = sub_sheet_name
                         else:
                             sub_sheet_name = make_sub_sheet_name(
