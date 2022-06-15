@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Handle extensions in the schema xsd correctly when sorting https://github.com/OpenDataServices/cove/issues/1366
+
 ## [0.17.1] - 2021-07-21
 
 ### Fixed
