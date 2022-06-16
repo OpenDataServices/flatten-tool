@@ -87,12 +87,12 @@ def dicts_to_list_of_dicts(lists_of_dicts_paths_set, xml_dict, path=()):
 
 def list_dict_consistency(xml_dict):
     """
-        For use with XML files opened with xmltodict.
+    For use with XML files opened with xmltodict.
 
-        If there is only one tag, xmltodict produces a dict. If there are
-        multiple, xmltodict produces a list of dicts. This functions replaces
-        dicts with lists of dicts, if there exists a list of dicts for the same
-        path elsewhere in the file.
+    If there is only one tag, xmltodict produces a dict. If there are
+    multiple, xmltodict produces a list of dicts. This functions replaces
+    dicts with lists of dicts, if there exists a list of dicts for the same
+    path elsewhere in the file.
     """
     lists_of_dicts_paths_set = set(lists_of_dicts_paths(xml_dict))
     dicts_to_list_of_dicts(lists_of_dicts_paths_set, xml_dict)
@@ -214,7 +214,9 @@ class JSONParser(object):
         if self.xml:
             with codecs.open(json_filename, "rb") as xml_file:
                 top_dict = xmltodict.parse(
-                    xml_file, force_list=(root_list_path,), force_cdata=True,
+                    xml_file,
+                    force_list=(root_list_path,),
+                    force_cdata=True,
                 )
                 # AFAICT, this should be true for *all* XML files
                 assert len(top_dict) == 1
@@ -468,13 +470,19 @@ class JSONParser(object):
                                             self.use_titles
                                             and parent_name + key in self.rollup
                                             and self.schema_parser.sub_sheet_titles.get(
-                                                (parent_name, key,)
+                                                (
+                                                    parent_name,
+                                                    key,
+                                                )
                                             )
                                             in self.schema_parser.sub_sheets
                                         ):
                                             relevant_subsheet = self.schema_parser.sub_sheets.get(
                                                 self.schema_parser.sub_sheet_titles.get(
-                                                    (parent_name, key,)
+                                                    (
+                                                        parent_name,
+                                                        key,
+                                                    )
                                                 )
                                             )
                                             if relevant_subsheet is not None:
@@ -546,10 +554,17 @@ class JSONParser(object):
                     if (
                         self.use_titles
                         and self.schema_parser
-                        and (parent_name, key,) in self.schema_parser.sub_sheet_titles
+                        and (
+                            parent_name,
+                            key,
+                        )
+                        in self.schema_parser.sub_sheet_titles
                     ):
                         sub_sheet_name = self.schema_parser.sub_sheet_titles[
-                            (parent_name, key,)
+                            (
+                                parent_name,
+                                key,
+                            )
                         ]
                     else:
                         sub_sheet_name = make_sub_sheet_name(

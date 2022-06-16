@@ -727,8 +727,14 @@ def test_titles_rollup():
                     "items": {
                         "type": "object",
                         "properties": {
-                            "Btest": {"type": "string", "title": "BTitle",},
-                            "Ctest": {"type": "string", "title": "CTitle",},
+                            "Btest": {
+                                "type": "string",
+                                "title": "BTitle",
+                            },
+                            "Ctest": {
+                                "type": "string",
+                                "title": "CTitle",
+                            },
                         },
                     },
                 },

@@ -21,7 +21,9 @@ test_heading_warning_data = [
         ["a", "b", "c", "b", "c", "c", "d", "d", "d", "d"],
         [
             # Check for warnings even with empty cells
-            [1,],
+            [
+                1,
+            ],
         ],
         [
             'Duplicate heading "b" found, ignoring the data in column B (sheet: "main").',
@@ -39,7 +41,13 @@ test_heading_warning_data = [
 def test_duplicate_headings_give_warning(
     headings, rows, expected_warnings, expected_result
 ):
-    sheets = [{"name": "main", "headings": headings, "rows": rows,}]
+    sheets = [
+        {
+            "name": "main",
+            "headings": headings,
+            "rows": rows,
+        }
+    ]
     with pytest.warns(DataErrorWarning) as type_warnings:
         result = run(sheets)
     # Check that only one warning was raised
@@ -91,7 +99,11 @@ def run(sheets, schema=None, source_maps=False):
         parser.parse()
         spreadsheet_input.parser = parser
     else:
-        spreadsheet_input = HeadingListInput(input_sheets, input_headings, root_id="",)
+        spreadsheet_input = HeadingListInput(
+            input_sheets,
+            input_headings,
+            root_id="",
+        )
     spreadsheet_input.read_sheets()
     if source_maps:
         (

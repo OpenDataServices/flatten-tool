@@ -88,8 +88,18 @@ def test_parse_empty_json_dict():
 def test_parse_basic_json_dict():
     parser = JSONParser(
         root_json_dict=[
-            OrderedDict([("a", "b"), ("c", "d"),]),
-            OrderedDict([("a", "e"), ("c", "f"),]),
+            OrderedDict(
+                [
+                    ("a", "b"),
+                    ("c", "d"),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("a", "e"),
+                    ("c", "f"),
+                ]
+            ),
         ]
     )
     assert list(parser.main_sheet) == ["a", "c"]
@@ -102,7 +112,14 @@ def test_parse_basic_json_dict():
 
 def test_parse_nested_dict_json_dict():
     parser = JSONParser(
-        root_json_dict=[OrderedDict([("a", "b"), ("c", OrderedDict([("d", "e")])),])]
+        root_json_dict=[
+            OrderedDict(
+                [
+                    ("a", "b"),
+                    ("c", OrderedDict([("d", "e")])),
+                ]
+            )
+        ]
     )
     assert list(parser.main_sheet) == ["a", "c/d"]
     assert list(parser.main_sheet.lines) == [{"a": "b", "c/d": "e"}]
@@ -111,7 +128,14 @@ def test_parse_nested_dict_json_dict():
 
 def test_parse_nested_list_json_dict():
     parser = JSONParser(
-        root_json_dict=[OrderedDict([("a", "b"), ("c", [OrderedDict([("d", "e")])]),])]
+        root_json_dict=[
+            OrderedDict(
+                [
+                    ("a", "b"),
+                    ("c", [OrderedDict([("d", "e")])]),
+                ]
+            )
+        ]
     )
     assert list(parser.main_sheet) == ["a"]
     assert list(parser.main_sheet.lines) == [{"a": "b"}]
@@ -130,7 +154,16 @@ def test_parse_array():
 
 def test_root_list_path():
     parser = JSONParser(
-        root_json_dict={"custom_key": [OrderedDict([("a", "b"), ("c", "d"),])]},
+        root_json_dict={
+            "custom_key": [
+                OrderedDict(
+                    [
+                        ("a", "b"),
+                        ("c", "d"),
+                    ]
+                )
+            ]
+        },
         root_list_path="custom_key",
     )
     assert list(parser.main_sheet) == ["a", "c"]
@@ -208,7 +241,12 @@ class TestParseIDs(object):
             root_id="ocid",
         )
         assert list(parser.main_sheet) == ["ocid", "id"]
-        assert list(parser.main_sheet.lines) == [{"ocid": 1, "id": 2,}]
+        assert list(parser.main_sheet.lines) == [
+            {
+                "ocid": 1,
+                "id": 2,
+            }
+        ]
         assert listify(parser.sub_sheets) == {
             "testnest": [
                 "ocid",
@@ -314,7 +352,12 @@ class TestParseUsingSchema(object):
         schema_parser.parse()
         parser = JSONParser(
             root_json_dict=[
-                OrderedDict([("a", "b"), ("c", [OrderedDict([("d", "e")])]),])
+                OrderedDict(
+                    [
+                        ("a", "b"),
+                        ("c", [OrderedDict([("d", "e")])]),
+                    ]
+                )
             ],
             schema_parser=schema_parser,
             remove_empty_schema_columns=remove_empty_schema_columns,
@@ -344,7 +387,14 @@ class TestParseUsingSchema(object):
         schema_parser = SchemaParser(schema_filename=test_schema.strpath)
         schema_parser.parse()
         parser = JSONParser(
-            root_json_dict=[OrderedDict([("c", ["d"]),])], schema_parser=schema_parser,
+            root_json_dict=[
+                OrderedDict(
+                    [
+                        ("c", ["d"]),
+                    ]
+                )
+            ],
+            schema_parser=schema_parser,
         )
         assert list(parser.main_sheet) == ["c"]
         assert list(parser.main_sheet.lines) == [{"c": "d"}]
@@ -374,7 +424,9 @@ class TestParseUsingSchema(object):
         parser = JSONParser(
             root_json_dict=[
                 OrderedDict(
-                    [("testA", [OrderedDict([("testB", "1"), ("testC", "2")])]),]
+                    [
+                        ("testA", [OrderedDict([("testB", "1"), ("testC", "2")])]),
+                    ]
                 )
             ],
             schema_parser=schema_parser,
@@ -580,7 +632,12 @@ class TestParseIDsCustomRootID(object):
             root_id="custom",
         )
         assert list(parser.main_sheet) == ["custom", "id"]
-        assert list(parser.main_sheet.lines) == [{"custom": 1, "id": 2,}]
+        assert list(parser.main_sheet.lines) == [
+            {
+                "custom": 1,
+                "id": 2,
+            }
+        ]
         assert listify(parser.sub_sheets) == {
             "testnest": [
                 "custom",
@@ -716,13 +773,22 @@ class TestParseIDsNoRootID(object):
             root_id="",
         )
         assert list(parser.main_sheet) == ["id"]
-        assert list(parser.main_sheet.lines) == [{"id": 2,}]
+        assert list(parser.main_sheet.lines) == [
+            {
+                "id": 2,
+            }
+        ]
         assert listify(parser.sub_sheets) == {
             "testnest": ["id", "testnest/0/id", "testnest/0/a", "testnest/0/f/g"],
             "tes_c": ["id", "testnest/0/id", "testnest/0/c/0/d"],
         }
         assert list(parser.sub_sheets["testnest"].lines) == [
-            {"id": 2, "testnest/0/id": 3, "testnest/0/a": "b", "testnest/0/f/g": "h",},
+            {
+                "id": 2,
+                "testnest/0/id": 3,
+                "testnest/0/a": "b",
+                "testnest/0/f/g": "h",
+            },
         ]
         assert list(parser.sub_sheets["tes_c"].lines) == [
             {"id": 2, "testnest/0/id": 3, "testnest/0/c/0/d": "e"},

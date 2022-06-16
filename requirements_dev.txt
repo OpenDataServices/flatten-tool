@@ -8,5 +8,5 @@ sphinx
 sphinx_rtd_theme
 isort
 flake8
-black==19.10b0
+black==22.3.0
 transifex-client

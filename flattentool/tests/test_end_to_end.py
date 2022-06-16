@@ -182,7 +182,15 @@ def test_merging_cols():
     * Columns with the same name result in the first being overwritten and
       not appearing in the cell source map
     """
-    sheets = [{"name": "main", "headings": ["int", "int"], "rows": [[1, 2],]}]
+    sheets = [
+        {
+            "name": "main",
+            "headings": ["int", "int"],
+            "rows": [
+                [1, 2],
+            ],
+        }
+    ]
     # XXX We don't correctly get a list of lists here, just [OrderedDict([(u'int', 2)])]
     expected_result = [[OrderedDict([("int", 2)])]]
     # XXX Fails to keep the source map to cell B2 because the value is lost early on in
@@ -193,7 +201,11 @@ def test_merging_cols():
             ("main/0", [("main", 2)]),
         ]
     )
-    expected_heading_source_map = OrderedDict([("main/int", [("main", "int")]),])
+    expected_heading_source_map = OrderedDict(
+        [
+            ("main/int", [("main", "int")]),
+        ]
+    )
     expected = (expected_result, expected_cell_source_map, expected_heading_source_map)
     assert expected == run(sheets, source_maps=True)
 
@@ -206,7 +218,9 @@ test_dict_data_sheets = [
     {
         "name": "main",
         "headings": ["name", "address/house"],
-        "rows": [["James", "15"],],
+        "rows": [
+            ["James", "15"],
+        ],
     },
 ]
 
@@ -243,7 +257,9 @@ test_dict_data = [
             "definitions": {
                 "Address": {
                     "type": "object",
-                    "properties": {"house": {"type": "string"},},
+                    "properties": {
+                        "house": {"type": "string"},
+                    },
                 }
             },
             "type": "object",
@@ -266,7 +282,9 @@ test_dict_data = [
                 "Address": {
                     "type": "object",
                     "title": "Address Title",
-                    "properties": {"house": {"type": "string"},},
+                    "properties": {
+                        "house": {"type": "string"},
+                    },
                 }
             },
             "type": "object",
@@ -285,7 +303,9 @@ test_dict_data = [
             {
                 "name": "main",
                 "headings": [" NAmE TiTLe ", " ADDresS TiTLe : HOusE TiTLe "],
-                "rows": [["James", "15"],],
+                "rows": [
+                    ["James", "15"],
+                ],
             },
         ],
         {
@@ -296,13 +316,19 @@ test_dict_data = [
                     "type": "object",
                     "title": "Address Title",
                     "properties": {
-                        "house": {"type": "string", "title": "House Title",},
+                        "house": {
+                            "type": "string",
+                            "title": "House Title",
+                        },
                     },
                 }
             },
             "type": "object",
             "properties": {
-                "name": {"type": "string", "title": "Name Title",},
+                "name": {
+                    "type": "string",
+                    "title": "Name Title",
+                },
                 "address": {"$ref": "#/definitions/Address"},
             },
         },
@@ -352,14 +378,30 @@ def test_dict(
 
 
 test_list_of_dicts_data_result = [
-    OrderedDict([("name", "James"), ("address", [OrderedDict([("house", "15"),])])])
+    OrderedDict(
+        [
+            ("name", "James"),
+            (
+                "address",
+                [
+                    OrderedDict(
+                        [
+                            ("house", "15"),
+                        ]
+                    )
+                ],
+            ),
+        ]
+    )
 ]
 
 test_list_of_dicts_data_sheets = [
     {
         "name": "main",
         "headings": ["name", "address/0/house"],
-        "rows": [["James", "15"],],
+        "rows": [
+            ["James", "15"],
+        ],
     },
 ]
 
@@ -387,13 +429,23 @@ test_list_of_dicts_data_schema_with_titles = {
         "Address": {
             "type": "object",
             "title": "Address Item Title",
-            "properties": {"house": {"type": "string", "title": "House Title",},},
+            "properties": {
+                "house": {
+                    "type": "string",
+                    "title": "House Title",
+                },
+            },
         },
     },
     "properties": {
-        "name": {"type": "string", "title": "Name Title",},
+        "name": {
+            "type": "string",
+            "title": "Name Title",
+        },
         "address": {
-            "items": {"$ref": "#/definitions/Address",},
+            "items": {
+                "$ref": "#/definitions/Address",
+            },
             "type": "array",
             "title": "Address Title",
         },
@@ -419,13 +471,21 @@ test_list_of_dicts_data = [
                 "Address": {
                     "type": "object",
                     "title": "Address Item Title",
-                    "properties": {"house": {"type": "string",},},
+                    "properties": {
+                        "house": {
+                            "type": "string",
+                        },
+                    },
                 },
             },
             "properties": {
-                "name": {"type": "string",},
+                "name": {
+                    "type": "string",
+                },
                 "address": {
-                    "items": {"$ref": "#/definitions/Address",},
+                    "items": {
+                        "$ref": "#/definitions/Address",
+                    },
                     "type": "array",
                 },
             },
@@ -448,7 +508,9 @@ test_list_of_dicts_data = [
             {
                 "name": "main",
                 "headings": [" NAmE TiTLe ", " ADDresS TiTLe : 0 : HOusE TiTLe "],
-                "rows": [["James", "15"],],
+                "rows": [
+                    ["James", "15"],
+                ],
             },
         ],
         test_list_of_dicts_data_schema_with_titles,
@@ -498,7 +560,17 @@ test_list_of_dicts_with_ids_data_result = [
         [
             ("id", "person1"),
             ("name", "James"),
-            ("address", [OrderedDict([("id", "address1"), ("house", "15"),])]),
+            (
+                "address",
+                [
+                    OrderedDict(
+                        [
+                            ("id", "address1"),
+                            ("house", "15"),
+                        ]
+                    )
+                ],
+            ),
         ]
     )
 ]
@@ -507,7 +579,9 @@ test_list_of_dicts_with_ids_data_sheets = [
     {
         "name": "main",
         "headings": ["id", "name", "address/0/id", "address/0/house"],
-        "rows": [["person1", "James", "address1", "15"],],
+        "rows": [
+            ["person1", "James", "address1", "15"],
+        ],
     },
 ]
 
@@ -540,16 +614,30 @@ test_list_of_dicts_with_ids_data_schema_with_titles = {
             "type": "object",
             "title": "Address Item Title",
             "properties": {
-                "house": {"type": "string", "title": "House Title",},
-                "id": {"type": "string", "title": "Identifier",},
+                "house": {
+                    "type": "string",
+                    "title": "House Title",
+                },
+                "id": {
+                    "type": "string",
+                    "title": "Identifier",
+                },
             },
         },
     },
     "properties": {
-        "id": {"type": "string", "title": "Identifier",},
-        "name": {"type": "string", "title": "Name Title",},
+        "id": {
+            "type": "string",
+            "title": "Identifier",
+        },
+        "name": {
+            "type": "string",
+            "title": "Name Title",
+        },
         "address": {
-            "items": {"$ref": "#/definitions/Address",},
+            "items": {
+                "$ref": "#/definitions/Address",
+            },
             "type": "array",
             "title": "Address Title",
         },
@@ -575,16 +663,26 @@ test_list_of_dicts_with_ids_data = [
                 "Address": {
                     "type": "object",
                     "properties": {
-                        "house": {"type": "string",},
-                        "id": {"type": "string",},
+                        "house": {
+                            "type": "string",
+                        },
+                        "id": {
+                            "type": "string",
+                        },
                     },
                 },
             },
             "properties": {
-                "id": {"type": "string",},
-                "name": {"type": "string",},
+                "id": {
+                    "type": "string",
+                },
+                "name": {
+                    "type": "string",
+                },
                 "address": {
-                    "items": {"$ref": "#/definitions/Address",},
+                    "items": {
+                        "$ref": "#/definitions/Address",
+                    },
                     "type": "array",
                 },
             },
@@ -612,7 +710,9 @@ test_list_of_dicts_with_ids_data = [
                     " ADDresS TiTLe : 0 : IDENtifiER ",
                     " ADDresS TiTLe : 0 : HOusE TiTLe ",
                 ],
-                "rows": [["person1", "James", "address1", "15"],],
+                "rows": [
+                    ["person1", "James", "address1", "15"],
+                ],
             },
         ],
         test_list_of_dicts_with_ids_data_schema_with_titles,
@@ -671,7 +771,10 @@ test_arrangement_data_sheets = (
             {
                 "name": "main",
                 "headings": ["id", "name"],
-                "rows": [["PERSON-james", "James"], ["PERSON-bob", "Bob"],],
+                "rows": [
+                    ["PERSON-james", "James"],
+                    ["PERSON-bob", "Bob"],
+                ],
             },
             {
                 "name": "addresses",
@@ -917,7 +1020,12 @@ test_arrangement_data_sheets = (
             ],
             {"main:2": 2, "main:3": 2, "main:5": 2, "main:4": 2},
         ),
-        ["main:address/0/house", "main:address/0/town", "main:id", "main:name",],
+        [
+            "main:address/0/house",
+            "main:address/0/town",
+            "main:id",
+            "main:name",
+        ],
     ),
 )
 
@@ -947,8 +1055,18 @@ def test_arrangement(
                 (
                     "address",
                     [
-                        OrderedDict([("house", "1"), ("town", "London"),]),
-                        OrderedDict([("house", "2"), ("town", "Birmingham"),]),
+                        OrderedDict(
+                            [
+                                ("house", "1"),
+                                ("town", "London"),
+                            ]
+                        ),
+                        OrderedDict(
+                            [
+                                ("house", "2"),
+                                ("town", "Birmingham"),
+                            ]
+                        ),
                     ],
                 ),
             ]
@@ -960,8 +1078,18 @@ def test_arrangement(
                 (
                     "address",
                     [
-                        OrderedDict([("house", "3"), ("town", "Leeds"),]),
-                        OrderedDict([("house", "4"), ("town", "Manchester"),]),
+                        OrderedDict(
+                            [
+                                ("house", "3"),
+                                ("town", "Leeds"),
+                            ]
+                        ),
+                        OrderedDict(
+                            [
+                                ("house", "4"),
+                                ("town", "Manchester"),
+                            ]
+                        ),
                     ],
                 ),
             ]
@@ -1027,7 +1155,11 @@ def run(sheets, schema=None, source_maps=False):
         parser.parse()
         spreadsheet_input.parser = parser
     else:
-        spreadsheet_input = HeadingListInput(input_sheets, input_headings, root_id="",)
+        spreadsheet_input = HeadingListInput(
+            input_sheets,
+            input_headings,
+            root_id="",
+        )
     spreadsheet_input.read_sheets()
     if source_maps:
         (

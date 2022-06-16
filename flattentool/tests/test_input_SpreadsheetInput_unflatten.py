@@ -88,7 +88,14 @@ testdata = [
     ),
     (
         "Nested",
-        [{"ROOT_ID": "1", "id": 2, "testO/testB": 3, "testO/testC": 4,}],
+        [
+            {
+                "ROOT_ID": "1",
+                "id": 2,
+                "testO/testB": 3,
+                "testO/testC": 4,
+            }
+        ],
         [{"ROOT_ID": "1", "id": 2, "testO": {"testB": 3, "testC": 4}}],
         [],
         True,
@@ -105,15 +112,32 @@ testdata = [
     (
         "Single item array",
         [{"ROOT_ID": "1", "id": 2, "testL/0/id": 3, "testL/0/testB": 4}],
-        [{"ROOT_ID": "1", "id": 2, "testL": [{"id": 3, "testB": 4}],}],
+        [
+            {
+                "ROOT_ID": "1",
+                "id": 2,
+                "testL": [{"id": 3, "testB": 4}],
+            }
+        ],
         [],
         False,
         True,
     ),
     (
         "Single item array without parent ID",
-        [{"ROOT_ID": "1", "testL/0/id": "2", "testL/0/testB": "3",}],
-        [{"ROOT_ID": "1", "testL": [{"id": "2", "testB": "3"}],}],
+        [
+            {
+                "ROOT_ID": "1",
+                "testL/0/id": "2",
+                "testL/0/testB": "3",
+            }
+        ],
+        [
+            {
+                "ROOT_ID": "1",
+                "testL": [{"id": "2", "testB": "3"}],
+            }
+        ],
         [],
         False,
         True,
@@ -160,10 +184,23 @@ testdata = [
         "Mismatch of object/array for field not in schema",
         [
             OrderedDict(
-                [("ROOT_ID", 1), ("id", 2), ("newtest/a", 3), ("newtest/0/a", 4),]
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/a", 3),
+                    ("newtest/0/a", 4),
+                ]
             )
         ],
-        [{"ROOT_ID": 1, "id": 2, "newtest": {"a": 3,}}],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "newtest": {
+                    "a": 3,
+                },
+            }
+        ],
         [
             "Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not."
         ],
@@ -176,7 +213,12 @@ testdata = [
         "Mismatch of array/object for field not in schema",
         [
             OrderedDict(
-                [("ROOT_ID", 1), ("id", 2), ("newtest/0/a", 4), ("newtest/a", 3),]
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/0/a", 4),
+                    ("newtest/a", 3),
+                ]
             )
         ],
         [{"ROOT_ID": 1, "id": 2, "newtest": [{"a": 4}]}],
@@ -190,7 +232,16 @@ testdata = [
     # Now one of the columns is ignored
     (
         "str / array mixing",
-        [OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest", 3), ("newtest/0/a", 4),])],
+        [
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest", 3),
+                    ("newtest/0/a", 4),
+                ]
+            )
+        ],
         [{"ROOT_ID": 1, "id": 2, "newtest": 3}],
         [
             "Column newtest/0/a has been ignored, because it treats newtest as an array, but another column does not."
@@ -200,7 +251,16 @@ testdata = [
     ),
     (
         "str / object mixing",
-        [OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest", 3), ("newtest/a", 4),])],
+        [
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest", 3),
+                    ("newtest/a", 4),
+                ]
+            )
+        ],
         [{"ROOT_ID": 1, "id": 2, "newtest": 3}],
         [
             "Column newtest/a has been ignored, because it treats newtest as an object, but another column does not."
@@ -229,7 +289,16 @@ testdata = [
     ),
     (
         "object / str mixing",
-        [OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest/a", 3), ("newtest", 4),])],
+        [
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/a", 3),
+                    ("newtest", 4),
+                ]
+            )
+        ],
         [{"ROOT_ID": 1, "id": 2, "newtest": {"a": 3}}],
         [
             "Column newtest has been ignored, because another column treats it as an array or object"
@@ -240,10 +309,32 @@ testdata = [
     (
         "Mismatch of object/array for field not in schema (multiline)",
         [
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("nest/newtest/a", 3),]),
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("nest/newtest/0/a", 4),]),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("nest/newtest/a", 3),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("nest/newtest/0/a", 4),
+                ]
+            ),
         ],
-        [{"ROOT_ID": 1, "id": 2, "nest": {"newtest": {"a": 3,}}}],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "nest": {
+                    "newtest": {
+                        "a": 3,
+                    }
+                },
+            }
+        ],
         [
             "Column nest/newtest/0/a has been ignored, because it treats newtest as an array, but another column does not"
         ],
@@ -255,8 +346,20 @@ testdata = [
     (
         "Mismatch of array/object for field not in schema (multiline)",
         [
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest/0/a", 4),]),
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest/a", 3),]),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/0/a", 4),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/a", 3),
+                ]
+            ),
         ],
         [{"ROOT_ID": 1, "id": 2, "newtest": [{"a": 4}]}],
         [
@@ -270,7 +373,13 @@ testdata = [
     (
         "str / array mixing multiline",
         [
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("nest/newtest", 3),]),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("nest/newtest", 3),
+                ]
+            ),
             OrderedDict(
                 [
                     ("ROOT_ID", 1),
@@ -292,8 +401,20 @@ testdata = [
         "array / str mixing multiline",
         # same as above, but with rows switched
         [
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("nest/newtest/0/a", 4),]),
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("nest/newtest", 3),]),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("nest/newtest/0/a", 4),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("nest/newtest", 3),
+                ]
+            ),
         ],
         [{"ROOT_ID": 1, "id": 2, "nest": {"newtest": [{"a": 4}]}}],
         [
@@ -306,9 +427,20 @@ testdata = [
     (
         "str / object mixing multiline",
         [
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest", 3),]),
             OrderedDict(
-                [("ROOT_ID", 1), ("id", 2), ("newtest/a", 4), ("newtest/b", 5),]
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest", 3),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/a", 4),
+                    ("newtest/b", 5),
+                ]
             ),
         ],
         [{"ROOT_ID": 1, "id": 2, "newtest": 3}],
@@ -322,8 +454,20 @@ testdata = [
     (
         "object / str mixing multiline",
         [
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest/a", 4),]),
-            OrderedDict([("ROOT_ID", 1), ("id", 2), ("newtest", 3),]),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest/a", 4),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("ROOT_ID", 1),
+                    ("id", 2),
+                    ("newtest", 3),
+                ]
+            ),
         ],
         [{"ROOT_ID": 1, "id": 2, "newtest": {"a": 4}}],
         [
@@ -338,7 +482,14 @@ testdata = [
     # (Cove will do this automatically).
     (
         "Root ID is missing",
-        [OrderedDict([("id", 2), ("testA", 3),])],
+        [
+            OrderedDict(
+                [
+                    ("id", 2),
+                    ("testA", 3),
+                ]
+            )
+        ],
         [{"id": 2, "testA": 3}],
         [],
         False,
@@ -360,7 +511,13 @@ testdata = [
                 ]
             )
         ],
-        [{"2.2": "B", "2.3": "C", "False": "D",}],
+        [
+            {
+                "2.2": "B",
+                "2.3": "C",
+                "False": "D",
+            }
+        ],
         [
             'Column "1" has been ignored because it is a number.',
             'Column "2" has been ignored because it is a number.',
@@ -377,8 +534,20 @@ testdata = [
 testdata_pointer = [
     (
         "Single item array without json numbering",
-        [{"ROOT_ID": "1", "testR/id": "2", "testR/testB": "3", "testR/testX": "3",}],
-        [{"ROOT_ID": "1", "testR": [{"id": "2", "testB": "3", "testX": "3"}],}],
+        [
+            {
+                "ROOT_ID": "1",
+                "testR/id": "2",
+                "testR/testB": "3",
+                "testR/testX": "3",
+            }
+        ],
+        [
+            {
+                "ROOT_ID": "1",
+                "testR": [{"id": "2", "testB": "3", "testX": "3"}],
+            }
+        ],
         [],
     ),
     (
@@ -415,25 +584,49 @@ testdata_pointer = [
 def create_schema(root_id):
     schema = {
         "properties": {
-            "id": {"title": "Identifier", "type": "integer",},
-            "testA": {"title": "A title", "type": "integer",},
-            "testDateTime": {"type": "string", "format": "date-time",},
+            "id": {
+                "title": "Identifier",
+                "type": "integer",
+            },
+            "testA": {
+                "title": "A title",
+                "type": "integer",
+            },
+            "testDateTime": {
+                "type": "string",
+                "format": "date-time",
+            },
             "testDate": {"type": "string", "format": "date"},
             "testB": {
                 "title": "B title",
                 "type": "object",
                 "properties": {
-                    "id": {"title": "Identifier", "type": "integer",},
-                    "testC": {"title": "C title", "type": "integer",},
-                    "testD": {"title": "D title", "type": "integer",},
+                    "id": {
+                        "title": "Identifier",
+                        "type": "integer",
+                    },
+                    "testC": {
+                        "title": "C title",
+                        "type": "integer",
+                    },
+                    "testD": {
+                        "title": "D title",
+                        "type": "integer",
+                    },
                     "subField": {
                         "title": "Sub title",
                         "type": "array",
                         "items": {
                             "type": "object",
                             "properties": {
-                                "id": {"title": "Identifier", "type": "integer",},
-                                "testE": {"title": "E title", "type": "integer",},
+                                "id": {
+                                    "title": "Identifier",
+                                    "type": "integer",
+                                },
+                                "testE": {
+                                    "title": "E title",
+                                    "type": "integer",
+                                },
                             },
                         },
                     },
@@ -445,17 +638,32 @@ def create_schema(root_id):
                 "items": {
                     "type": "object",
                     "properties": {
-                        "id": {"title": "Identifier", "type": "string",},
-                        "testB": {"title": "B title", "type": "string",},
-                        "testC": {"title": "C title", "type": "string",},
+                        "id": {
+                            "title": "Identifier",
+                            "type": "string",
+                        },
+                        "testB": {
+                            "title": "B title",
+                            "type": "string",
+                        },
+                        "testC": {
+                            "title": "C title",
+                            "type": "string",
+                        },
                         "testNest": {
                             "title": "Nest title",
                             "type": "array",
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "id": {"title": "Identifier", "type": "string",},
-                                    "testD": {"title": "D title", "type": "string",},
+                                    "id": {
+                                        "title": "Identifier",
+                                        "type": "string",
+                                    },
+                                    "testD": {
+                                        "title": "D title",
+                                        "type": "string",
+                                    },
                                 },
                             },
                         },
@@ -463,8 +671,14 @@ def create_schema(root_id):
                             "title": "NestObj title",
                             "type": "object",
                             "properties": {
-                                "id": {"title": "Identifier", "type": "string",},
-                                "testD": {"title": "D title", "type": "string",},
+                                "id": {
+                                    "title": "Identifier",
+                                    "type": "string",
+                                },
+                                "testD": {
+                                    "title": "D title",
+                                    "type": "string",
+                                },
                             },
                         },
                     },
@@ -484,8 +698,14 @@ def create_schema(root_id):
                             # integer does not work, as testB:integer is not
                             # in the rollUp
                         },
-                        "testB": {"title": "B title", "type": "string",},
-                        "testC": {"title": "C title", "type": "string",},
+                        "testB": {
+                            "title": "B title",
+                            "type": "string",
+                        },
+                        "testC": {
+                            "title": "C title",
+                            "type": "string",
+                        },
                         "testSA": {
                             "title": "SA title",
                             "type": "array",
@@ -494,7 +714,10 @@ def create_schema(root_id):
                     },
                 },
             },
-            "testU": {"title": UNICODE_TEST_STRING, "type": "string",},
+            "testU": {
+                "title": UNICODE_TEST_STRING,
+                "type": "string",
+            },
             "testSA": {
                 "title": "SA title",
                 "type": "array",
@@ -579,14 +802,25 @@ testdata_titles = [
                 "R title:B title": 4,
             }
         ],
-        [{"ROOT_ID": 1, "id": 2, "testR": [{"id": "3", "testB": "4"}],}],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testR": [{"id": "3", "testB": "4"}],
+            }
+        ],
         [],
         False,
     ),
     (
         "Single item array without parent ID",
         [{"ROOT_ID_TITLE": "1", "R title:Identifier": "2", "R title:B title": "3"}],
-        [{"ROOT_ID": "1", "testR": [{"id": "2", "testB": "3"}],}],
+        [
+            {
+                "ROOT_ID": "1",
+                "testR": [{"id": "2", "testB": "3"}],
+            }
+        ],
         [],
         False,
     ),
@@ -603,7 +837,13 @@ testdata_titles = [
                 "R title:C title": 4,
             }
         ],
-        [{"ROOT_ID": 1, "id": 2, "testR": [{"id": "3", "testC": "4"}],}],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testR": [{"id": "3", "testC": "4"}],
+            }
+        ],
         [],
         False,
     ),
@@ -617,7 +857,13 @@ testdata_titles = [
                 "R title:Not in schema": 4,
             }
         ],
-        [{"ROOT_ID": 1, "id": 2, "testR": [{"testC": "3", "Not in schema": 4}],}],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testR": [{"testC": "3", "Not in schema": 4}],
+            }
+        ],
         [],
         False,
     ),
@@ -685,29 +931,85 @@ testdata_titles = [
     ),
     (
         "Test arrays of strings (1 item)",
-        [{"ROOT_ID_TITLE": 1, "Identifier": 2, "SA title": "a",}],
-        [{"ROOT_ID": 1, "id": 2, "testSA": ["a"],}],
+        [
+            {
+                "ROOT_ID_TITLE": 1,
+                "Identifier": 2,
+                "SA title": "a",
+            }
+        ],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testSA": ["a"],
+            }
+        ],
         [],
         True,
     ),
     (
         "Test arrays of strings (2 items)",
-        [{"ROOT_ID_TITLE": 1, "Identifier": 2, "SA title": "a;b",}],
-        [{"ROOT_ID": 1, "id": 2, "testSA": ["a", "b"],}],
+        [
+            {
+                "ROOT_ID_TITLE": 1,
+                "Identifier": 2,
+                "SA title": "a;b",
+            }
+        ],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testSA": ["a", "b"],
+            }
+        ],
         [],
         True,
     ),
     (
         "Test arrays of strings within an object array (1 item)",
-        [{"ROOT_ID_TITLE": 1, "Identifier": 2, "R title:SA title": "a",}],
-        [{"ROOT_ID": 1, "id": 2, "testR": [{"testSA": ["a"],}]}],
+        [
+            {
+                "ROOT_ID_TITLE": 1,
+                "Identifier": 2,
+                "R title:SA title": "a",
+            }
+        ],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testR": [
+                    {
+                        "testSA": ["a"],
+                    }
+                ],
+            }
+        ],
         [],
         False,
     ),
     (
         "Test arrays of strings within an object array (2 items)",
-        [{"ROOT_ID_TITLE": 1, "Identifier": 2, "R title:SA title": "a;b",}],
-        [{"ROOT_ID": 1, "id": 2, "testR": [{"testSA": ["a", "b"],}]}],
+        [
+            {
+                "ROOT_ID_TITLE": 1,
+                "Identifier": 2,
+                "R title:SA title": "a;b",
+            }
+        ],
+        [
+            {
+                "ROOT_ID": 1,
+                "id": 2,
+                "testR": [
+                    {
+                        "testSA": ["a", "b"],
+                    }
+                ],
+            }
+        ],
         [],
         False,
     ),
