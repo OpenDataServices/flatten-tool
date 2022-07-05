@@ -74,6 +74,23 @@ class XMLSchemaWalker(object):
                 return schema_element
         return schema_element
 
+    def handle_complexType(self, complexType):
+        type_elements = []
+        if complexType is not None:
+            extension = complexType.find(
+                "xsd:complexContent/xsd:extension", namespaces=namespaces
+            )
+            if extension:
+                base = extension.attrib.get("base")
+                complexType = self.get_schema_element("complexType", base)
+                type_elements = self.handle_complexType(complexType)
+            else:
+                type_elements = []
+            type_elements += complexType.findall(
+                "xsd:choice/xsd:element", namespaces=namespaces
+            ) + complexType.findall("xsd:sequence/xsd:element", namespaces=namespaces)
+        return type_elements
+
     def element_loop(self, element, path):
         """
         Return information about the children of the supplied element.
@@ -82,12 +99,7 @@ class XMLSchemaWalker(object):
         type_elements = []
         if "type" in a:
             complexType = self.get_schema_element("complexType", a["type"])
-            if complexType is not None:
-                type_elements = complexType.findall(
-                    "xsd:choice/xsd:element", namespaces=namespaces
-                ) + complexType.findall(
-                    "xsd:sequence/xsd:element", namespaces=namespaces
-                )
+            type_elements += self.handle_complexType(complexType)
 
         children = (
             element.findall(

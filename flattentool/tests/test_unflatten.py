@@ -120,7 +120,14 @@ def test_unflatten_xml_comment(tmpdir, dirname):
 
 
 @pytest.mark.parametrize("input_format", ["xlsx", "ods"])
-def test_unflatten_org_xml_xlsx(tmpdir, input_format):
+def test_unflatten_org_xml_minimal(tmpdir, input_format):
+    schema_path = "examples/iati"
+    schemas = [
+        "iati-activities-schema.xsd",
+        "iati-organisations-schema.xsd",
+        "iati-common.xsd",
+    ]
+    schema_filepaths = ["{}/{}".format(schema_path, schema) for schema in schemas]
     unflatten(
         input_name="flattentool/tests/fixtures/{}/iati-org.{}".format(
             input_format, input_format
@@ -130,9 +137,36 @@ def test_unflatten_org_xml_xlsx(tmpdir, input_format):
         id_name="organisation-identifier",
         xml=True,
         metatab_name="Meta",
+        xml_schemas=schema_filepaths,
     )
     assert (
         open("flattentool/tests/fixtures/iati-org.xml").read()
+        == tmpdir.join("output.xml").read()
+    )
+
+
+@pytest.mark.parametrize("input_format", ["xlsx"])
+def test_unflatten_org_xml_with_documents(tmpdir, input_format):
+    schema_path = "examples/iati"
+    schemas = [
+        "iati-activities-schema.xsd",
+        "iati-organisations-schema.xsd",
+        "iati-common.xsd",
+    ]
+    schema_filepaths = ["{}/{}".format(schema_path, schema) for schema in schemas]
+    unflatten(
+        input_name="flattentool/tests/fixtures/{}/IATI CoVE #organisation #broken-docs #template #public #demo.{}".format(
+            input_format, input_format
+        ),
+        output_name=tmpdir.join("output.xml").strpath,
+        input_format=input_format,
+        id_name="organisation-identifier",
+        xml=True,
+        metatab_name="Meta",
+        xml_schemas=schema_filepaths,
+    )
+    assert (
+        open("flattentool/tests/fixtures/iati-org-with-documents.xml").read()
         == tmpdir.join("output.xml").read()
     )
 
