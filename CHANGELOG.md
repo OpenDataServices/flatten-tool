@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+## [0.18.0] - 2022-09-26
+
 - Add support for flattening an array of arrays https://github.com/OpenDataServices/flatten-tool/issues/398
 
 ## [0.17.2] - 2022-06-15
