@@ -152,6 +152,17 @@ def test_parse_array():
     assert parser.sub_sheets == {}
 
 
+def test_parse_array_of_arrays():
+    parser = JSONParser(
+        root_json_dict=[
+            OrderedDict([("testarray", [["item", "anotheritem", 42], ["a", "b", 1]])])
+        ]
+    )
+    assert list(parser.main_sheet) == ["testarray"]
+    assert list(parser.main_sheet.lines) == [{"testarray": "item,anotheritem,42;a,b,1"}]
+    assert parser.sub_sheets == {}
+
+
 def test_root_list_path():
     parser = JSONParser(
         root_json_dict={

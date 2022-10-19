@@ -35,7 +35,8 @@
             ],
             "Grant type": "Large Awards",
             "Full name of applicant": "Miss Jane Roe",
-            "awardDate": "24/07/2014"
+            "awardDate": "24/07/2014",
+            "test_array_of_arrays": [["a", "r"], ["s", "t", "n"], ["e"]]
         },
         {
             "recipientOrganization": [

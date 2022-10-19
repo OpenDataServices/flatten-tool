@@ -623,6 +623,13 @@
       "description": "A web link pointing to the source of this data. This may be an original 360Giving data file, a file from which the data was converted, or an organisation website.",
       "weight": 25,
       "title": "Data Source"
+    },
+    "test_array_of_arrays": {
+        "type": "array",
+        "items": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
     }
   }
 }

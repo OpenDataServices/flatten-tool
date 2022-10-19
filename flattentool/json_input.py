@@ -419,9 +419,19 @@ class JSONParser(object):
                     # Check for an array of BASIC types
                     # TODO Make this check the schema
                     # TODO Error if the any of the values contain the separator
-                    # TODO Support doubly nested arrays
                     flattened_dict[sheet_key(sheet, parent_name + key)] = ";".join(
                         map(str, value)
+                    )
+                # Arrays of arrays
+                elif all(
+                    l not in BASIC_TYPES
+                    and not hasattr(l, "items")
+                    and hasattr(l, "__iter__")
+                    and all(type(x) in BASIC_TYPES for x in l)
+                    for l in value
+                ):
+                    flattened_dict[sheet_key(sheet, parent_name + key)] = ";".join(
+                        map(lambda l: ",".join(map(str, l)), value)
                     )
                 else:
                     if (
