@@ -28,7 +28,7 @@ class DevelopWithCompile(develop):
 
 
 install_requires = [
-    "jsonref",
+    "jsonref<1",
     "schema",
     "openpyxl>=2.6,!=3.0.2",
     "pytz",
@@ -43,7 +43,7 @@ install_requires = [
 
 setup(
     name="flattentool",
-    version="0.18.0",
+    version="0.18.1",
     author="Open Data Services",
     author_email="code@opendataservices.coop",
     packages=["flattentool"],
