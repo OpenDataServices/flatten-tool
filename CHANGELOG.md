@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
+### Fixed
+
+- Lock to a version of jsonref<1 to avoid breaking changes in 1.0.0
 
 ## [0.18.0] - 2022-09-26
 
