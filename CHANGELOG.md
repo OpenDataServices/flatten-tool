@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Make work with multiple versions of jsonref
+
 ## [0.18.1] - 2022-10-28
 
 ### Fixed
