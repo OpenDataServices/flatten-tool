@@ -97,17 +97,16 @@ class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(Exception):
     pass
 
 
-class JsonLoaderLocalRefsDisabled(jsonref.JsonLoader):
-    def __call__(self, uri, **kwargs):
-        if self.is_ref_local(uri):
-            raise JsonLoaderLocalRefUsedWhenLocalRefsDisabled(
-                "Local Ref Used When Local Refs Disabled: " + uri
-            )
-        else:
-            return super(JsonLoaderLocalRefsDisabled, self).__call__(uri, **kwargs)
+def jsonloader_local_refs_disabled(uri, **kwargs):
+    if is_ref_local(uri):
+        raise JsonLoaderLocalRefUsedWhenLocalRefsDisabled(
+            "Local Ref Used When Local Refs Disabled: " + uri
+        )
+    return jsonref.jsonloader(uri, **kwargs)
 
-    def is_ref_local(self, uri):
-        return uri[:7].lower() != "http://" and uri[:8].lower() != "https://"
+
+def is_ref_local(uri):
+    return uri[:7].lower() != "http://" and uri[:8].lower() != "https://"
 
 
 class SchemaParser(object):
@@ -159,7 +158,7 @@ class SchemaParser(object):
                         self.root_schema_dict = jsonref.load(
                             schema_file,
                             object_pairs_hook=OrderedDict,
-                            loader=JsonLoaderLocalRefsDisabled(),
+                            loader=jsonloader_local_refs_disabled,
                         )
                 else:
                     if sys.version_info[:2] > (3, 0):
