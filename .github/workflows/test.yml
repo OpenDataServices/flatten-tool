@@ -7,6 +7,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.6', '3.7', '3.8', '3.9']
+        jsonref-version: ["==0.3", ">1"]
     steps:
     - uses: actions/checkout@v2
     - name: Setup python
@@ -21,6 +22,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     - run: pip install --upgrade -r requirements_dev.txt
+    - run: pip install 'jsonref${{ matrix.jsonref-version }}'
     - run: py.test --cov .
     - env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
