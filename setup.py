@@ -28,7 +28,7 @@ class DevelopWithCompile(develop):
 
 
 install_requires = [
-    "jsonref<1",
+    "jsonref",
     "schema",
     "openpyxl>=2.6,!=3.0.2",
     "pytz",

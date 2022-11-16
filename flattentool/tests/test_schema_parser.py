@@ -2,11 +2,7 @@ from collections import OrderedDict
 
 import pytest
 
-from flattentool.schema import (
-    JsonLoaderLocalRefsDisabled,
-    SchemaParser,
-    get_property_type_set,
-)
+from flattentool.schema import SchemaParser, get_property_type_set, is_ref_local
 from flattentool.sheet import Sheet
 
 type_string = {"type": "string"}
@@ -767,7 +763,7 @@ test_json_loader_local_refs_disabled_is_ref_local_data_returns_true = [
     "data", test_json_loader_local_refs_disabled_is_ref_local_data_returns_true
 )
 def test_json_loader_local_refs_disabled_is_ref_local_true(data):
-    assert True == JsonLoaderLocalRefsDisabled().is_ref_local(data)
+    assert True == is_ref_local(data)
 
 
 test_json_loader_local_refs_disabled_is_ref_local_data_returns_false = [
@@ -784,4 +780,4 @@ test_json_loader_local_refs_disabled_is_ref_local_data_returns_false = [
     "data", test_json_loader_local_refs_disabled_is_ref_local_data_returns_false
 )
 def test_json_loader_local_refs_disabled_is_ref_local_true(data):  # noqa
-    assert False == JsonLoaderLocalRefsDisabled().is_ref_local(data)
+    assert False == is_ref_local(data)
