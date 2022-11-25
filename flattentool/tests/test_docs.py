@@ -15,7 +15,10 @@ def _get_examples_in_docs_data():
     examples_in_docs_data = []
     for root, dirs, files in os.walk("examples"):
         for filename in files:
-            if root == "examples/help/unflatten" and sys.version_info[:2] < (3, 9):
+            if root.startswith("examples/help/") and sys.version_info[:2] != (3, 8):
+                # Different versions of python produce differently formatted help output.
+                # We only test in one version, Python 3.8.
+                # (Same as we lint code with, so dev's can have one virtual env)
                 continue
             if "cmd.txt" in filename:
                 examples_in_docs_data.append((root, filename))
@@ -135,8 +138,9 @@ def test_example_in_doc(root, filename):
 def test_expected_number_of_examples_in_docs_data():
     expected = 61
     # See _get_examples_in_docs_data()
-    if sys.version_info[:2] < (3, 9):
-        expected -= 1
+    if sys.version_info[:2] != (3, 8):
+        expected -= 3
+        # number of help tests
     assert len(examples_in_docs_data) == expected
 
 

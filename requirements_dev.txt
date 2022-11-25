@@ -1,6 +1,6 @@
 -e .[HTTP]
 urllib3>=1.24.2
-pytest<5
+pytest
 pytest-cov
 coveralls
 pytest-localserver
