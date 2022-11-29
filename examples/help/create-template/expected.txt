@@ -4,6 +4,7 @@ usage: flatten-tool create-template [-h] -s SCHEMA [-f {csv,ods,xlsx,all}]
                                     [--disable-local-refs]
                                     [--no-deprecated-fields]
                                     [--truncation-length TRUNCATION_LENGTH]
+                                    [--line-terminator LINE_TERMINATOR]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -32,3 +33,6 @@ optional arguments:
   --truncation-length TRUNCATION_LENGTH
                         The length of components of sub-sheet names (default
                         3).
+  --line-terminator LINE_TERMINATOR
+                        The line terminator to use when writing CSV files:
+                        CRLF or LF
