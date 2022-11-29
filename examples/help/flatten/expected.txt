@@ -9,6 +9,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,ods,xlsx,all}] [--xml]
                             [--preserve-fields PRESERVE_FIELDS]
                             [--disable-local-refs]
                             [--remove-empty-schema-columns]
+                            [--line-terminator LINE_TERMINATOR]
                             input_name
 
 positional arguments:
@@ -61,3 +62,6 @@ optional arguments:
   --remove-empty-schema-columns
                         When using flatten with a schema, remove columns and
                         sheets from the output that contain no data.
+  --line-terminator LINE_TERMINATOR
+                        The line terminator to use when writing CSV files:
+                        CRLF or LF

@@ -96,6 +96,10 @@ def create_parser():
         default=3,
         help="The length of components of sub-sheet names (default 3).",
     )
+    parser_create_template.add_argument(
+        "--line-terminator",
+        help="The line terminator to use when writing CSV files: CRLF or LF",
+    )
 
     parser_flatten = subparsers.add_parser("flatten", help="Flatten a JSON file")
     parser_flatten.add_argument("input_name", help="Name of the input JSON file.")
@@ -177,7 +181,10 @@ def create_parser():
         action="store_true",
         help="When using flatten with a schema, remove columns and sheets from the output that contain no data.",
     )
-
+    parser_flatten.add_argument(
+        "--line-terminator",
+        help="The line terminator to use when writing CSV files: CRLF or LF",
+    )
     parser_unflatten = subparsers.add_parser(
         "unflatten", help="Unflatten a spreadsheet"
     )
