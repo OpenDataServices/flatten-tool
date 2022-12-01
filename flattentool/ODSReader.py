@@ -18,7 +18,6 @@
 from collections import OrderedDict
 from datetime import datetime
 
-import backports.datetime_fromisoformat
 import odf.opendocument
 from odf.table import Table, TableCell, TableRow
 
@@ -26,6 +25,8 @@ from odf.table import Table, TableCell, TableRow
 try:
     _ = datetime.fromisoformat
 except AttributeError:
+    import backports.datetime_fromisoformat
+
     backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
 
 
