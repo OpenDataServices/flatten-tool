@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Import backports-datetime-fromisoformat only if needed, to fix PyPy 3.7 support
+
 ## [0.20.0] - 2022-12-07
 
 ### Changed
