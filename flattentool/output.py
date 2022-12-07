@@ -22,12 +22,18 @@ class SpreadsheetOutput(object):
     # output_name is given a default here, partly to help with tests,
     # but should have been defined by the time we get here.
     def __init__(
-        self, parser, main_sheet_name="main", output_name="unflattened", sheet_prefix=""
+        self,
+        parser,
+        main_sheet_name="main",
+        output_name="unflattened",
+        sheet_prefix="",
+        line_terminator="\r\n",
     ):
         self.parser = parser
         self.main_sheet_name = main_sheet_name
         self.output_name = output_name
         self.sheet_prefix = sheet_prefix
+        self.line_terminator = line_terminator
 
     def open(self):
         pass
@@ -94,7 +100,9 @@ class CSVOutput(SpreadsheetOutput):
             newline="",
             encoding="utf-8",
         ) as csv_file:
-            dictwriter = csv.DictWriter(csv_file, sheet_header)
+            dictwriter = csv.DictWriter(
+                csv_file, sheet_header, lineterminator=self.line_terminator
+            )
             dictwriter.writeheader()
             for sheet_line in sheet.lines:
                 dictwriter.writerow(sheet_line)
@@ -163,3 +171,5 @@ FORMATS_SUFFIX = {
     "ods": ".ods",
     "csv": "",  # This is the suffix for the directory
 }
+
+LINE_TERMINATORS = {"LF": "\n", "CRLF": "\r\n"}

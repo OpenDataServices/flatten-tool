@@ -50,6 +50,8 @@ examples/flatten/rollup/direct/actual
 examples/flatten/rollup/direct/actual.*
 examples/flatten/rollup/file/actual
 examples/flatten/rollup/file/actual.*
+examples/flatten/line-terminator/actual
+examples/flatten/line-terminator/actual.*
 examples/receipt/source-map/actual
 examples/receipt/source-map/actual.*
 examples/bods/unflatten/actual
