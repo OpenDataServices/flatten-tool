@@ -8,7 +8,7 @@ from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.json_input import JSONParser
 from flattentool.lib import parse_sheet_configuration
 from flattentool.output import FORMATS as OUTPUT_FORMATS
-from flattentool.output import FORMATS_SUFFIX
+from flattentool.output import FORMATS_SUFFIX, LINE_TERMINATORS
 from flattentool.schema import SchemaParser
 from flattentool.xml_output import toxml
 
@@ -24,7 +24,8 @@ def create_template(
     disable_local_refs=False,
     truncation_length=3,
     no_deprecated_fields=False,
-    **_
+    line_terminator="CRLF",
+    **_,
 ):
     """
     Creates template file(s) from given inputs
@@ -32,6 +33,9 @@ def create_template(
     but to also be called from elsewhere in future
 
     """
+
+    if line_terminator not in LINE_TERMINATORS.keys():
+        raise Exception(f"{line_terminator} is not a valid line terminator")
 
     parser = SchemaParser(
         schema_filename=schema,
@@ -46,7 +50,10 @@ def create_template(
 
     def spreadsheet_output(spreadsheet_output_class, name):
         spreadsheet_output = spreadsheet_output_class(
-            parser=parser, main_sheet_name=main_sheet_name, output_name=name
+            parser=parser,
+            main_sheet_name=main_sheet_name,
+            output_name=name,
+            line_terminator=LINE_TERMINATORS[line_terminator],
         )
         spreadsheet_output.write_sheets()
 
@@ -87,7 +94,8 @@ def flatten(
     disable_local_refs=False,
     remove_empty_schema_columns=False,
     truncation_length=3,
-    **_
+    line_terminator="CRLF",
+    **_,
 ):
     """
     Flatten a nested structure (JSON) to a flat structure (spreadsheet - csv or xlsx).
@@ -98,6 +106,9 @@ def flatten(
         filter_field is not None and filter_value is None
     ):
         raise Exception("You must use filter_field and filter_value together")
+
+    if line_terminator not in LINE_TERMINATORS.keys():
+        raise Exception(f"{line_terminator} is not a valid line terminator")
 
     if schema:
         schema_parser = SchemaParser(
@@ -136,6 +147,7 @@ def flatten(
                 main_sheet_name=main_sheet_name,
                 output_name=name,
                 sheet_prefix=sheet_prefix,
+                line_terminator=LINE_TERMINATORS[line_terminator],
             )
             spreadsheet_output.write_sheets()
 
@@ -206,7 +218,7 @@ def unflatten(
     disable_local_refs=False,
     xml_comment=None,
     truncation_length=3,
-    **_
+    **_,
 ):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).

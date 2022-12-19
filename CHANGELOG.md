@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Import backports-datetime-fromisoformat only if needed, to fix PyPy 3.7 support
 
+## [0.20.0] - 2022-12-07
+
+### Changed
+
+- Add `--line-terminator` option to `flatten` and `create-template`
+
 ## [0.19.0] - 2022-11-16
 
 ### Fixed
