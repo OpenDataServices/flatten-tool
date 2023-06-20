@@ -139,8 +139,8 @@ def test_parse_nested_list_json_dict():
     )
     assert list(parser.main_sheet) == ["a"]
     assert list(parser.main_sheet.lines) == [{"a": "b"}]
-    listify(parser.sub_sheets) == {"c": ["d"]}
-    parser.sub_sheets["c"].lines == [{"d": "e"}]
+    assert listify(parser.sub_sheets) == {"c": ["c/0/d"]}
+    assert list(parser.sub_sheets["c"].lines) == [{"c/0/d": "e"}]
 
 
 def test_parse_array():
@@ -211,7 +211,7 @@ class TestParseIDs(object):
         assert list(parser.main_sheet.lines) == [
             {"ocid": 1, "id": 2, "a": "b", "f/g": "h"}
         ]
-        listify(parser.sub_sheets) == {"c": ["ocid", "id", "c/0/id", "c/0/d"]}
+        assert listify(parser.sub_sheets) == {"c": ["ocid", "id", "c/0/id", "c/0/d"]}
         assert list(parser.sub_sheets["c"].lines) == [
             {"ocid": 1, "id": 2, "c/0/id": 3, "c/0/d": "e"},
             {"ocid": 1, "id": 2, "c/0/id": 3, "c/0/d": "e2"},
