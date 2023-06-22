@@ -122,6 +122,7 @@ class SchemaParser(object):
         disable_local_refs=False,
         truncation_length=3,
         exclude_deprecated_fields=False,
+        convert_flags={},
     ):
         self.sub_sheets = {}
         self.main_sheet = Sheet()
@@ -135,6 +136,7 @@ class SchemaParser(object):
         self.title_lookup = TitleLookup()
         self.flattened = {}
         self.exclude_deprecated_fields = exclude_deprecated_fields
+        self.convert_flags = convert_flags
 
         if root_schema_dict is None and schema_filename is None:
             raise ValueError(
@@ -223,6 +225,12 @@ class SchemaParser(object):
                         yield (field, child_title)
 
         elif "properties" in schema_dict:
+            if (
+                self.convert_flags.get("wkt")
+                and "type" in schema_dict["properties"]
+                and "coordinates" in schema_dict["properties"]
+            ):
+                self.flattened[parent_path.replace("/0/", "/").strip("/")] = "geojson"
             if "id" in schema_dict["properties"]:
                 if self.use_titles:
                     id_fields = parent_id_fields + [

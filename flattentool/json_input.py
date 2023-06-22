@@ -16,6 +16,7 @@ from warnings import warn
 
 import BTrees.OOBTree
 import ijson
+import shapely.geometry
 import transaction
 import xmltodict
 import zc.zlibstorage
@@ -119,6 +120,7 @@ class JSONParser(object):
         rollup=False,
         truncation_length=3,
         persist=False,
+        convert_flags={},
     ):
         if persist:
             # Use temp directories in OS agnostic way
@@ -154,6 +156,7 @@ class JSONParser(object):
         self.remove_empty_schema_columns = remove_empty_schema_columns
         self.seen_paths = set()
         self.persist = persist
+        self.convert_flags = convert_flags
 
         if schema_parser:
             # schema parser does not make sheets that are persistent,
@@ -354,6 +357,21 @@ class JSONParser(object):
         else:
             sheet_key = sheet_key_field
 
+        skip_type_and_coordinates = False
+        if (
+            self.convert_flags.get("wkt")
+            and "type" in json_dict
+            and "coordinates" in json_dict
+        ):
+            _sheet_key = sheet_key(sheet, parent_name.strip("/"))
+            try:
+                geom = shapely.geometry.shape(json_dict)
+            except (shapely.errors.GeometryTypeError, TypeError, ValueError) as e:
+                warn(_("Invalid GeoJSON: {parser_msg}").format(parser_msg=repr(e)))
+                return
+            flattened_dict[_sheet_key] = geom.wkt
+            skip_type_and_coordinates = True
+
         parent_id_fields = copy.copy(parent_id_fields) or OrderedDict()
         if flattened_dict is None:
             flattened_dict = {}
@@ -384,6 +402,9 @@ class JSONParser(object):
             ]
 
         for key, value in json_dict.items():
+
+            if skip_type_and_coordinates and key in ["type", "coordinates"]:
+                continue
 
             # Keep a unique list of all the JSON paths in the data that have been seen.
             parent_path = parent_name.replace("/0", "")

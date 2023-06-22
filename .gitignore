@@ -60,4 +60,6 @@ examples/titles-ref/flatten/actual
 examples/titles-ref/flatten/actual.*
 examples/titles-ref/unflatten/actual
 examples/titles-ref/unflatten/actual.*
+examples/wkt/*/actual
+examples/wkt/*/actual.*
 .~lock*

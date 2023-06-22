@@ -95,6 +95,7 @@ def flatten(
     remove_empty_schema_columns=False,
     truncation_length=3,
     line_terminator="CRLF",
+    convert_wkt=False,
     **_,
 ):
     """
@@ -109,6 +110,8 @@ def flatten(
 
     if line_terminator not in LINE_TERMINATORS.keys():
         raise Exception(f"{line_terminator} is not a valid line terminator")
+
+    convert_flags = {"wkt": convert_wkt}
 
     if schema:
         schema_parser = SchemaParser(
@@ -139,6 +142,7 @@ def flatten(
         remove_empty_schema_columns=remove_empty_schema_columns,
         truncation_length=truncation_length,
         persist=True,
+        convert_flags=convert_flags,
     ) as parser:
 
         def spreadsheet_output(spreadsheet_output_class, name):
@@ -218,18 +222,22 @@ def unflatten(
     disable_local_refs=False,
     xml_comment=None,
     truncation_length=3,
+    convert_wkt=False,
     **_,
 ):
     """
     Unflatten a flat structure (spreadsheet - csv or xlsx) into a nested structure (JSON).
 
     """
+
     if input_format is None:
         raise Exception("You must specify an input format (may autodetect in future")
     elif input_format not in INPUT_FORMATS:
         raise Exception("The requested format is not available")
     if metatab_name and base_json:
         raise Exception("Not allowed to use base_json with metatab")
+
+    convert_flags = {"wkt": convert_wkt}
 
     if root_is_list:
         base = None
@@ -258,6 +266,7 @@ def unflatten(
             id_name=id_name,
             xml=xml,
             use_configuration=False,
+            convert_flags=convert_flags,
         )
         if metatab_schema:
             parser = SchemaParser(
@@ -309,6 +318,7 @@ def unflatten(
             id_name=id_name,
             xml=xml,
             base_configuration=base_configuration,
+            convert_flags=convert_flags,
         )
         if schema:
             parser = SchemaParser(
@@ -317,6 +327,7 @@ def unflatten(
                 root_id=root_id,
                 disable_local_refs=disable_local_refs,
                 truncation_length=truncation_length,
+                convert_flags=convert_flags,
             )
             parser.parse()
             spreadsheet_input.parser = parser

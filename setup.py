@@ -39,6 +39,8 @@ install_requires = [
     "zodb",
     "zc.zlibstorage",
     "ijson",
+    "shapely",
+    "geojson",
 ]
 
 setup(

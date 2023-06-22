@@ -1,0 +1,11 @@
+{
+    "properties": {
+        "geo": {
+            "type": "object",
+            "properties": {
+                "type": {},
+                "coordinates": {}
+            }
+        }
+    }
+}

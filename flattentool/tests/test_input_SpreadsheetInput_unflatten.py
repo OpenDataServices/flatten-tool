@@ -527,6 +527,72 @@ testdata = [
         False,
         True,
     ),
+    (
+        "WKT->geojson conversion",
+        [
+            {
+                "apoint": "POINT (53.486434 -2.239353)",
+                "alinestring": "LINESTRING (-0.173 5.626, -0.178 5.807, -0.112 5.971, -0.211 5.963, -0.321 6.17, -0.488 6.29, -0.56 6.421, -0.752 6.533, -0.867 6.607, -1.101 6.585, -1.304 6.623, -1.461 6.727, -1.628 6.713)",
+            }
+        ],
+        [
+            {
+                "apoint": {
+                    "type": "Point",
+                    "coordinates": [53.486434, -2.239353],
+                },
+                "alinestring": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [-0.173, 5.626],
+                        [-0.178, 5.807],
+                        [-0.112, 5.971],
+                        [-0.211, 5.963],
+                        [-0.321, 6.170],
+                        [-0.488, 6.290],
+                        [-0.560, 6.421],
+                        [-0.752, 6.533],
+                        [-0.867, 6.607],
+                        [-1.101, 6.585],
+                        [-1.304, 6.623],
+                        [-1.461, 6.727],
+                        [-1.628, 6.713],
+                    ],
+                },
+            }
+        ],
+        [],
+        True,
+        False,
+    ),
+    (
+        "Invalid WKT",
+        [
+            {
+                "apoint": "test",
+                "alinestring": "(",
+            },
+            {
+                "apoint": "POINT(",
+                "alinestring": "LINESTRING()",
+            },
+            {
+                "apoint": "POINT(1)",
+                "alinestring": "LINESTRING(1 2 3 4)",
+            },
+        ],
+        [{}, {}, {}],
+        [
+            "An invalid WKT string was supplied \"test\", the message from the parser was: ParseException: Unknown type: 'TEST'",
+            "An invalid WKT string was supplied \"(\", the message from the parser was: ParseException: Unknown type: '('",
+            'An invalid WKT string was supplied "POINT(", the message from the parser was: ParseException: Expected number but encountered end of stream',
+            "An invalid WKT string was supplied \"LINESTRING()\", the message from the parser was: ParseException: Expected number but encountered ')'",
+            "An invalid WKT string was supplied \"POINT(1)\", the message from the parser was: ParseException: Expected number but encountered ')'",
+            'An invalid WKT string was supplied "LINESTRING(1 2 3 4)", the message from the parser was: IllegalArgumentException: point array must contain 0 or >1 elements\n',
+        ],
+        False,
+        False,
+    ),
 ]
 
 # Test cases that require our schema aware JSON pointer logic, so must be run
@@ -722,6 +788,20 @@ def create_schema(root_id):
                 "title": "SA title",
                 "type": "array",
                 "items": {"type": "string"},
+            },
+            "apoint": {
+                "type": "object",
+                "properties": {
+                    "type": {},
+                    "coordinates": {},
+                },
+            },
+            "alinestring": {
+                "type": "object",
+                "properties": {
+                    "type": {},
+                    "coordinates": {},
+                },
             },
         }
     }
@@ -1054,7 +1134,9 @@ def test_unflatten(
 
     warnings.simplefilter("always")
 
-    extra_kwargs = {"convert_titles": convert_titles}
+    convert_flags = {"wkt": "WKT" in comment}
+
+    extra_kwargs = {"convert_titles": convert_titles, "convert_flags": convert_flags}
     extra_kwargs.update(root_id_kwargs)
     spreadsheet_input = ListInput(
         sheets={
@@ -1070,6 +1152,7 @@ def test_unflatten(
         root_schema_dict=create_schema(root_id) if use_schema else {"properties": {}},
         root_id=root_id,
         rollup=True,
+        convert_flags=convert_flags,
     )
     parser.parse()
     spreadsheet_input.parser = parser
