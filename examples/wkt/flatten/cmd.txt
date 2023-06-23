@@ -1,0 +1,1 @@
+$ flatten-tool flatten -f=csv examples/wkt/flatten/data.json -o examples/wkt/flatten/actual --convert-wkt

@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.21.0] - 2023-06-23
+
+### Added
+
+- WKT <-> geojson conversion for flattening and unflattening, behind an optional flag https://github.com/OpenDataServices/flatten-tool/issues/419
+
+### Removed
+
+- We no longer support Python 3.6
+
 ## [0.20.1] - 2023-01-11
 
 ### Fixed

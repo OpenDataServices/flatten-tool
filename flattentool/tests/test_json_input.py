@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 import os
+import sys
 from collections import OrderedDict
+from decimal import Decimal
 
 import pytest
 
@@ -139,8 +141,8 @@ def test_parse_nested_list_json_dict():
     )
     assert list(parser.main_sheet) == ["a"]
     assert list(parser.main_sheet.lines) == [{"a": "b"}]
-    listify(parser.sub_sheets) == {"c": ["d"]}
-    parser.sub_sheets["c"].lines == [{"d": "e"}]
+    assert listify(parser.sub_sheets) == {"c": ["c/0/d"]}
+    assert list(parser.sub_sheets["c"].lines) == [{"c/0/d": "e"}]
 
 
 def test_parse_array():
@@ -211,7 +213,7 @@ class TestParseIDs(object):
         assert list(parser.main_sheet.lines) == [
             {"ocid": 1, "id": 2, "a": "b", "f/g": "h"}
         ]
-        listify(parser.sub_sheets) == {"c": ["ocid", "id", "c/0/id", "c/0/d"]}
+        assert listify(parser.sub_sheets) == {"c": ["ocid", "id", "c/0/id", "c/0/d"]}
         assert list(parser.sub_sheets["c"].lines) == [
             {"ocid": 1, "id": 2, "c/0/id": 3, "c/0/d": "e"},
             {"ocid": 1, "id": 2, "c/0/id": 3, "c/0/d": "e2"},
@@ -848,3 +850,195 @@ class TestParseIDsNoRootID(object):
             {"id": 2, "testnest/id": 3, "testnest/c/0/d": "e"},
             {"id": 2, "testnest/id": 3, "testnest/c/0/d": "e2"},
         ]
+
+
+def test_parse_geojson():
+    parser = JSONParser(
+        root_json_dict=[
+            {
+                "a": "b",
+                "c": [
+                    {
+                        "d": {
+                            "type": "Point",
+                            "coordinates": [Decimal("53.486434"), Decimal("-2.239353")],
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [Decimal("-0.173"), Decimal("5.626")],
+                                [Decimal("-0.178"), Decimal("5.807")],
+                                [Decimal("-0.112"), Decimal("5.971")],
+                                [Decimal("-0.211"), Decimal("5.963")],
+                                [Decimal("-0.321"), Decimal("6.17")],
+                                [Decimal("-0.488"), Decimal("6.29")],
+                                [Decimal("-0.560"), Decimal("6.421")],
+                                [Decimal("-0.752"), Decimal("6.533")],
+                                [Decimal("-0.867"), Decimal("6.607")],
+                                [Decimal("-1.101"), Decimal("6.585")],
+                                [Decimal("-1.304"), Decimal("6.623")],
+                                [Decimal("-1.461"), Decimal("6.727")],
+                                [Decimal("-1.628"), Decimal("6.713")],
+                            ],
+                        }
+                    },
+                ],
+            }
+        ],
+        convert_flags={"wkt": True},
+    )
+    assert list(parser.main_sheet) == ["a"]
+    assert list(parser.main_sheet.lines) == [{"a": "b"}]
+    assert listify(parser.sub_sheets) == {"c": ["c/0/d"]}
+    assert list(parser.sub_sheets["c"].lines) == [
+        {"c/0/d": "POINT (53.486434 -2.239353)"},
+        {
+            "c/0/d": "LINESTRING (-0.173 5.626, -0.178 5.807, -0.112 5.971, -0.211 5.963, -0.321 6.17, -0.488 6.29, -0.56 6.421, -0.752 6.533, -0.867 6.607, -1.101 6.585, -1.304 6.623, -1.461 6.727, -1.628 6.713)"
+        },
+    ]
+
+
+def test_parse_bad_geojson(recwarn):
+    parser = JSONParser(
+        root_json_dict=[
+            {
+                "a": "b",
+                "c": [
+                    {
+                        "d": {
+                            "type": "test",
+                            "coordinates": [],
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "Point",
+                            "coordinates": [],
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "Point",
+                            "coordinates": "test",
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "Point",
+                            "coordinates": 3,
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "Point",
+                            "coordinates": [Decimal("53.486434")],
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [Decimal("-0.173"), Decimal("5.626")],
+                                [Decimal("-0.178")],
+                                [Decimal("-0.112"), Decimal("5.971")],
+                            ],
+                        }
+                    },
+                ],
+            }
+        ],
+        convert_flags={"wkt": True},
+    )
+    assert list(parser.main_sheet) == ["a"]
+    assert list(parser.main_sheet.lines) == [{"a": "b"}]
+    assert listify(parser.sub_sheets) == {"c": ["c/0/d"]}
+    assert list(parser.sub_sheets["c"].lines) == [
+        {},
+        {"c/0/d": "POINT EMPTY"},
+        {},
+        {},
+        {},
+        {},
+    ]
+    w = recwarn.pop(UserWarning)
+    assert (
+        str(w.message)
+        == "Invalid GeoJSON: GeometryTypeError(\"Unknown geometry type: 'test'\")"
+    )
+    w = recwarn.pop(UserWarning)
+    assert str(w.message) == "Invalid GeoJSON: TypeError('iteration over a 0-d array')"
+    w = recwarn.pop(UserWarning)
+    assert (
+        str(w.message) == "Invalid GeoJSON: TypeError(\"'int' object is not iterable\")"
+    )
+    w = recwarn.pop(UserWarning)
+    # There are different warning messages for Python versions before 3.8. This
+    # is because an old version of numpy is installed (the last compatible with
+    # these versions of Python), which has different messages.
+    if sys.version_info < (3, 8):
+        assert (
+            str(w.message)
+            == "Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray."
+        )
+        w = recwarn.pop(UserWarning)
+        assert (
+            str(w.message)
+            == "Invalid GeoJSON: ValueError('linestrings: Input operand 0 does not have enough dimensions (has 1, gufunc core with signature (i, d)->() requires 2)')"
+        )
+    else:
+        assert (
+            str(w.message)
+            == "Invalid GeoJSON: ValueError('setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (3,) + inhomogeneous part.')"
+        )
+    assert len(recwarn.list) == 0
+
+
+def test_parse_geojson_wkt_off():
+    parser = JSONParser(
+        root_json_dict=[
+            {
+                "a": "b",
+                "c": [
+                    {
+                        "d": {
+                            "type": "Point",
+                            "coordinates": [Decimal("53.486434"), Decimal("-2.239353")],
+                        }
+                    },
+                    {
+                        "d": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [Decimal("-0.173"), Decimal("5.626")],
+                                [Decimal("-0.178"), Decimal("5.807")],
+                                [Decimal("-0.112"), Decimal("5.971")],
+                                [Decimal("-0.211"), Decimal("5.963")],
+                                [Decimal("-0.321"), Decimal("6.17")],
+                                [Decimal("-0.488"), Decimal("6.29")],
+                                [Decimal("-0.560"), Decimal("6.421")],
+                                [Decimal("-0.752"), Decimal("6.533")],
+                                [Decimal("-0.867"), Decimal("6.607")],
+                                [Decimal("-1.101"), Decimal("6.585")],
+                                [Decimal("-1.304"), Decimal("6.623")],
+                                [Decimal("-1.461"), Decimal("6.727")],
+                                [Decimal("-1.628"), Decimal("6.713")],
+                            ],
+                        }
+                    },
+                ],
+            }
+        ],
+        convert_flags={"wkt": False},
+    )
+    assert list(parser.main_sheet) == ["a"]
+    assert list(parser.main_sheet.lines) == [{"a": "b"}]
+    assert listify(parser.sub_sheets) == {"c": ["c/0/d/type", "c/0/d/coordinates"]}
+    assert list(parser.sub_sheets["c"].lines) == [
+        {"c/0/d/type": "Point", "c/0/d/coordinates": "53.486434;-2.239353"},
+        {
+            "c/0/d/type": "LineString",
+            "c/0/d/coordinates": "-0.173,5.626;-0.178,5.807;-0.112,5.971;-0.211,5.963;-0.321,6.17;-0.488,6.29;-0.560,6.421;-0.752,6.533;-0.867,6.607;-1.101,6.585;-1.304,6.623;-1.461,6.727;-1.628,6.713",
+        },
+    ]

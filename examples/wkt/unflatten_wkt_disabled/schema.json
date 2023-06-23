@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "geo": {
+            "type": "object",
+            "properties": {
+                "type": {},
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "geo_string": {
+            "type": "string"
+        }
+    }
+}

@@ -13,8 +13,10 @@ from csv import reader as csvreader
 from decimal import Decimal, InvalidOperation
 from warnings import warn
 
+import geojson
 import openpyxl
 import pytz
+import shapely.wkt
 from openpyxl.utils.cell import _get_column_letter
 
 from flattentool.exceptions import DataErrorWarning
@@ -35,7 +37,7 @@ class Cell:
         self.sub_cells = []
 
 
-def convert_type(type_string, value, timezone=pytz.timezone("UTC")):
+def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flags={}):
     if value == "" or value is None:
         return None
     if type_string == "number":
@@ -103,6 +105,19 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC")):
         if type(value) == datetime.datetime:
             return value.date().isoformat()
         return str(value)
+    elif convert_flags.get("wkt") and type_string == "geojson":
+        try:
+            geom = shapely.wkt.loads(value)
+        except shapely.errors.GEOSException as e:
+            warn(
+                _(
+                    'An invalid WKT string was supplied "{value}", the message from the parser was: {parser_msg}'
+                ).format(value=value, parser_msg=str(e)),
+                DataErrorWarning,
+            )
+            return
+        feature = geojson.Feature(geometry=geom, properties={})
+        return feature.geometry
     elif type_string == "":
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
@@ -258,6 +273,7 @@ class SpreadsheetInput(object):
         xml=False,
         base_configuration={},
         use_configuration=True,
+        convert_flags={},
     ):
         self.input_name = input_name
         self.root_list_path = root_list_path
@@ -275,6 +291,7 @@ class SpreadsheetInput(object):
         self.base_configuration = base_configuration or {}
         self.sheet_configuration = {}
         self.use_configuration = use_configuration
+        self.convert_flags = convert_flags
 
     def get_sub_sheets_lines(self):
         for sub_sheet_name in self.sub_sheet_names:
@@ -405,7 +422,12 @@ class SpreadsheetInput(object):
                             (sheet_name, _get_column_letter(k + 1), j + 2, heading),
                         )
                 unflattened = unflatten_main_with_parser(
-                    self.parser, cells, self.timezone, self.xml, self.id_name
+                    self.parser,
+                    cells,
+                    self.timezone,
+                    self.xml,
+                    self.id_name,
+                    self.convert_flags,
                 )
                 if root_id_or_none not in main_sheet_by_ocid:
                     main_sheet_by_ocid[root_id_or_none] = TemporaryDict(
@@ -922,7 +944,7 @@ def list_as_dicts_to_temporary_dicts(unflattened, id_name, xml):
     return unflattened
 
 
-def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
+def unflatten_main_with_parser(parser, line, timezone, xml, id_name, convert_flags={}):
     unflattened = OrderedDict()
     for path, cell in line.items():
         # Skip blank cells
@@ -1041,9 +1063,11 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name):
                 # However the type of the text value itself should not be "array",
                 # as that would split the text on commas, which we don't want.
                 # https://github.com/OpenDataServices/cove/issues/1030
-                converted_value = convert_type("", value, timezone)
+                converted_value = convert_type("", value, timezone, convert_flags)
             else:
-                converted_value = convert_type(current_type or "", value, timezone)
+                converted_value = convert_type(
+                    current_type or "", value, timezone, convert_flags
+                )
             cell.cell_value = converted_value
             if converted_value is not None and converted_value != "":
                 if xml:

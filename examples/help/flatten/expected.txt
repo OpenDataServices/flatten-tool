@@ -10,6 +10,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,ods,xlsx,all}] [--xml]
                             [--disable-local-refs]
                             [--remove-empty-schema-columns]
                             [--line-terminator LINE_TERMINATOR]
+                            [--convert-wkt]
                             input_name
 
 positional arguments:
@@ -65,3 +66,4 @@ optional arguments:
   --line-terminator LINE_TERMINATOR
                         The line terminator to use when writing CSV files:
                         CRLF or LF
+  --convert-wkt         Enable conversion of geojson to WKT

@@ -39,11 +39,13 @@ install_requires = [
     "zodb",
     "zc.zlibstorage",
     "ijson",
+    "shapely",
+    "geojson",
 ]
 
 setup(
     name="flattentool",
-    version="0.20.1",
+    version="0.21.0",
     author="Open Data Services",
     author_email="code@opendataservices.coop",
     packages=["flattentool"],

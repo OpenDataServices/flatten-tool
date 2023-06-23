@@ -530,5 +530,36 @@ def test_convert_type(recwarn):
         convert_type("", datetime.datetime(2015, 6, 1, 13, 37, 59), timezone)
         == "2015-06-01T13:37:59+01:00"
     )
+    assert len(recwarn) == 0
 
+
+def test_convert_type_geojson(recwarn):
+    assert convert_type(
+        "geojson", "POINT (53.486434 -2.239353)", convert_flags={"wkt": True}
+    ) == {
+        "type": "Point",
+        "coordinates": [53.486434, -2.239353],
+    }
+    assert convert_type(
+        "geojson",
+        "LINESTRING (-0.173 5.626, -0.178 5.807, -0.112 5.971, -0.211 5.963, -0.321 6.17, -0.488 6.29, -0.56 6.421, -0.752 6.533, -0.867 6.607, -1.101 6.585, -1.304 6.623, -1.461 6.727, -1.628 6.713)",
+        convert_flags={"wkt": True},
+    ) == {
+        "type": "LineString",
+        "coordinates": [
+            [-0.173, 5.626],
+            [-0.178, 5.807],
+            [-0.112, 5.971],
+            [-0.211, 5.963],
+            [-0.321, 6.170],
+            [-0.488, 6.290],
+            [-0.560, 6.421],
+            [-0.752, 6.533],
+            [-0.867, 6.607],
+            [-1.101, 6.585],
+            [-1.304, 6.623],
+            [-1.461, 6.727],
+            [-1.628, 6.713],
+        ],
+    }
     assert len(recwarn) == 0

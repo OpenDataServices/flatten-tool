@@ -53,7 +53,9 @@ def test_flatten(
 
     warnings.simplefilter("always")
 
-    extra_kwargs = {"use_titles": use_titles}
+    convert_flags = {"wkt": "WKT" in comment}
+
+    extra_kwargs = {"use_titles": use_titles, "convert_flags": convert_flags}
     extra_kwargs.update(root_id_kwargs)
 
     if use_schema:

@@ -13,7 +13,7 @@ usage: flatten-tool unflatten [-h] -f {csv,ods,xlsx} [--xml]
                               [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
                               [--default-configuration DEFAULT_CONFIGURATION]
                               [--root-is-list] [--disable-local-refs]
-                              [--xml-comment XML_COMMENT]
+                              [--xml-comment XML_COMMENT] [--convert-wkt]
                               input_name
 
 positional arguments:
@@ -75,3 +75,4 @@ optional arguments:
   --disable-local-refs  Disable local refs when parsing JSON Schema.
   --xml-comment XML_COMMENT
                         String comment of what generates the xml file
+  --convert-wkt         Enable conversion of WKT to geojson
