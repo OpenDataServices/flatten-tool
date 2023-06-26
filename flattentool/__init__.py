@@ -25,6 +25,7 @@ def create_template(
     truncation_length=3,
     no_deprecated_fields=False,
     line_terminator="CRLF",
+    convert_wkt=False,
     **_,
 ):
     """
@@ -37,6 +38,8 @@ def create_template(
     if line_terminator not in LINE_TERMINATORS.keys():
         raise Exception(f"{line_terminator} is not a valid line terminator")
 
+    convert_flags = {"wkt": convert_wkt}
+
     parser = SchemaParser(
         schema_filename=schema,
         rollup=rollup,
@@ -45,6 +48,7 @@ def create_template(
         disable_local_refs=disable_local_refs,
         truncation_length=truncation_length,
         exclude_deprecated_fields=no_deprecated_fields,
+        convert_flags=convert_flags,
     )
     parser.parse()
 
@@ -121,6 +125,7 @@ def flatten(
             use_titles=use_titles,
             disable_local_refs=disable_local_refs,
             truncation_length=truncation_length,
+            convert_flags=convert_flags,
         )
         schema_parser.parse()
     else:
@@ -270,7 +275,9 @@ def unflatten(
         )
         if metatab_schema:
             parser = SchemaParser(
-                schema_filename=metatab_schema, disable_local_refs=disable_local_refs
+                schema_filename=metatab_schema,
+                disable_local_refs=disable_local_refs,
+                convert_flags=convert_flags,
             )
             parser.parse()
             spreadsheet_input.parser = parser

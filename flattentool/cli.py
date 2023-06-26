@@ -100,6 +100,11 @@ def create_parser():
         "--line-terminator",
         help="The line terminator to use when writing CSV files: CRLF or LF",
     )
+    parser_create_template.add_argument(
+        "--convert-wkt",
+        action="store_true",
+        help="Enable conversion of WKT to geojson",
+    )
 
     parser_flatten = subparsers.add_parser("flatten", help="Flatten a JSON file")
     parser_flatten.add_argument("input_name", help="Name of the input JSON file.")

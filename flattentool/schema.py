@@ -225,12 +225,6 @@ class SchemaParser(object):
                         yield (field, child_title)
 
         elif "properties" in schema_dict:
-            if (
-                self.convert_flags.get("wkt")
-                and "type" in schema_dict["properties"]
-                and "coordinates" in schema_dict["properties"]
-            ):
-                self.flattened[parent_path.replace("/0/", "/").strip("/")] = "geojson"
             if "id" in schema_dict["properties"]:
                 if self.use_titles:
                     id_fields = parent_id_fields + [
@@ -271,6 +265,16 @@ class SchemaParser(object):
                     title_lookup[title].property_name = property_name
 
                 if "object" in property_type_set:
+                    if (
+                        self.convert_flags.get("wkt")
+                        and "type" in property_schema_dict.get("properties", {})
+                        and "coordinates" in property_schema_dict.get("properties", {})
+                    ):
+                        self.flattened[
+                            parent_path.replace("/0/", "/") + property_name
+                        ] = "geojson"
+                        yield (property_name, title)
+                        continue
                     self.flattened[parent_path + property_name] = "object"
                     for field, child_title in self.parse_schema_dict(
                         parent_path + property_name,

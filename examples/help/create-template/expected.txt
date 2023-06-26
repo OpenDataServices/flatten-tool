@@ -5,6 +5,7 @@ usage: flatten-tool create-template [-h] -s SCHEMA [-f {csv,ods,xlsx,all}]
                                     [--no-deprecated-fields]
                                     [--truncation-length TRUNCATION_LENGTH]
                                     [--line-terminator LINE_TERMINATOR]
+                                    [--convert-wkt]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -36,3 +37,4 @@ optional arguments:
   --line-terminator LINE_TERMINATOR
                         The line terminator to use when writing CSV files:
                         CRLF or LF
+  --convert-wkt         Enable conversion of WKT to geojson

@@ -1,0 +1,1 @@
+$ flatten-tool create-template --convert-wkt --schema examples/wkt/create_template/schema.json -o examples/wkt/create_template/actual
