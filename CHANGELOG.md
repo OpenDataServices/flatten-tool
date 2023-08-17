@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Flatten & Create Template: Previously, CSV filenames were truncated to 31 characters, which is the maximum length of a sheet name in Excel.
+  Now allow CSV filenames of any length and only truncate sheet names when the output format is XLSX or ODS.
+  https://github.com/OpenDataServices/flatten-tool/pull/428
+
+### Fixed
+
+- flatten --sheet-prefix option does not work in ODS files https://github.com/OpenDataServices/flatten-tool/issues/430
+
 ## [0.22.0] - 2023-06-27
 
 ### Added

@@ -62,7 +62,7 @@ class XLSXOutput(SpreadsheetOutput):
     def write_sheet(self, sheet_name, sheet):
         sheet_header = list(sheet)
         worksheet = self.workbook.create_sheet()
-        worksheet.title = self.sheet_prefix + sheet_name
+        worksheet.title = (self.sheet_prefix + sheet_name)[:31]
         worksheet.append(sheet_header)
         for sheet_line in sheet.lines:
             line = []
@@ -131,7 +131,7 @@ class ODSOutput(SpreadsheetOutput):
 
     def write_sheet(self, sheet_name, sheet):
 
-        worksheet = odf.table.Table(name=sheet_name)
+        worksheet = odf.table.Table(name=(self.sheet_prefix + sheet_name)[:31])
         sheet_header = list(sheet)
 
         header_row = odf.table.TableRow()
