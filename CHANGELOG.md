@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.23.0] - 2023-08-30
+
 ### Changed
 
 - Flatten & Create Template: Previously, CSV filenames were truncated to 31 characters, which is the maximum length of a sheet name in Excel.
