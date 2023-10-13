@@ -16,7 +16,13 @@ from warnings import warn
 
 import BTrees.OOBTree
 import ijson
-import shapely.geometry
+
+try:
+    import shapely.wkt
+
+    SHAPELY_LIBRARY_AVAILABLE = True
+except ImportError:
+    SHAPELY_LIBRARY_AVAILABLE = False
 import transaction
 import xmltodict
 import zc.zlibstorage
@@ -363,14 +369,19 @@ class JSONParser(object):
             and "type" in json_dict
             and "coordinates" in json_dict
         ):
-            _sheet_key = sheet_key(sheet, parent_name.strip("/"))
-            try:
-                geom = shapely.geometry.shape(json_dict)
-            except (shapely.errors.GeometryTypeError, TypeError, ValueError) as e:
-                warn(_("Invalid GeoJSON: {parser_msg}").format(parser_msg=repr(e)))
-                return
-            flattened_dict[_sheet_key] = geom.wkt
-            skip_type_and_coordinates = True
+            if SHAPELY_LIBRARY_AVAILABLE:
+                _sheet_key = sheet_key(sheet, parent_name.strip("/"))
+                try:
+                    geom = shapely.geometry.shape(json_dict)
+                except (shapely.errors.GeometryTypeError, TypeError, ValueError) as e:
+                    warn(_("Invalid GeoJSON: {parser_msg}").format(parser_msg=repr(e)))
+                    return
+                flattened_dict[_sheet_key] = geom.wkt
+                skip_type_and_coordinates = True
+            else:
+                warn(
+                    "Install flattentool's optional geo dependencies to use geo features."
+                )
 
         parent_id_fields = copy.copy(parent_id_fields) or OrderedDict()
         if flattened_dict is None:

@@ -8,11 +8,13 @@ from os.path import join
 import pytest
 
 examples_in_docs_data = []
+examples_in_docs_data_geo = []
 
 
 def _get_examples_in_docs_data():
-    global examples_in_docs_data
+    global examples_in_docs_data, examples_in_docs_data_geo
     examples_in_docs_data = []
+    examples_in_docs_data_geo = []
     for root, dirs, files in os.walk("examples"):
         for filename in files:
             if root.startswith("examples/help/") and sys.version_info[:2] != (3, 8):
@@ -21,7 +23,10 @@ def _get_examples_in_docs_data():
                 # (Same as we lint code with, so dev's can have one virtual env)
                 continue
             if "cmd.txt" in filename:
-                examples_in_docs_data.append((root, filename))
+                if root.startswith("examples/wkt"):
+                    examples_in_docs_data_geo.append((root, filename))
+                else:
+                    examples_in_docs_data.append((root, filename))
 
 
 _get_examples_in_docs_data()
@@ -45,6 +50,17 @@ def test_examples_receipt():
 
 @pytest.mark.parametrize("root, filename", examples_in_docs_data)
 def test_example_in_doc(root, filename):
+    _test_example_in_doc_worker(root, filename)
+
+
+@pytest.mark.parametrize("root, filename", examples_in_docs_data_geo)
+@pytest.mark.geo
+def test_example_in_doc_geo(root, filename):
+    _test_example_in_doc_worker(root, filename)
+
+
+@pytest.mark.parametrize("root, filename", examples_in_docs_data)
+def _test_example_in_doc_worker(root, filename):
     if os.path.exists(join(root, "actual")) and os.path.isdir(join(root, "actual")):
         os.rename(join(root, "actual"), join(root, "actual." + str(uuid.uuid4())))
     os.mkdir(join(root, "actual"))
@@ -141,7 +157,7 @@ def test_expected_number_of_examples_in_docs_data():
     if sys.version_info[:2] != (3, 8):
         expected -= 3
         # number of help tests
-    assert len(examples_in_docs_data) == expected
+    assert len(examples_in_docs_data) + len(examples_in_docs_data_geo) == expected
 
 
 def _simplify_warnings(lines):

@@ -533,6 +533,7 @@ def test_convert_type(recwarn):
     assert len(recwarn) == 0
 
 
+@pytest.mark.geo
 def test_convert_type_geojson(recwarn):
     assert convert_type(
         "geojson", "POINT (53.486434 -2.239353)", convert_flags={"wkt": True}

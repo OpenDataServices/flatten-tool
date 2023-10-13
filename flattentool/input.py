@@ -13,10 +13,17 @@ from csv import reader as csvreader
 from decimal import Decimal, InvalidOperation
 from warnings import warn
 
-import geojson
 import openpyxl
 import pytz
-import shapely.wkt
+
+try:
+    import geojson
+    import shapely.wkt
+
+    SHAPELY_AND_GEOJSON_LIBRARIES_AVAILABLE = True
+except ImportError:
+    SHAPELY_AND_GEOJSON_LIBRARIES_AVAILABLE = False
+
 from openpyxl.utils.cell import _get_column_letter
 
 from flattentool.exceptions import DataErrorWarning
@@ -106,18 +113,22 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flag
             return value.date().isoformat()
         return str(value)
     elif convert_flags.get("wkt") and type_string == "geojson":
-        try:
-            geom = shapely.wkt.loads(value)
-        except shapely.errors.GEOSException as e:
-            warn(
-                _(
-                    'An invalid WKT string was supplied "{value}", the message from the parser was: {parser_msg}'
-                ).format(value=value, parser_msg=str(e)),
-                DataErrorWarning,
-            )
-            return
-        feature = geojson.Feature(geometry=geom, properties={})
-        return feature.geometry
+        if SHAPELY_AND_GEOJSON_LIBRARIES_AVAILABLE:
+            try:
+                geom = shapely.wkt.loads(value)
+            except shapely.errors.GEOSException as e:
+                warn(
+                    _(
+                        'An invalid WKT string was supplied "{value}", the message from the parser was: {parser_msg}'
+                    ).format(value=value, parser_msg=str(e)),
+                    DataErrorWarning,
+                )
+                return
+            feature = geojson.Feature(geometry=geom, properties={})
+            return feature.geometry
+        else:
+            warn("Install flattentool's optional geo dependencies to use geo features.")
+            return str(value)
     elif type_string == "":
         if type(value) == datetime.datetime:
             return timezone.localize(value).isoformat()
