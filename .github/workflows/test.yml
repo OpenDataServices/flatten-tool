@@ -15,15 +15,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-    - uses: actions/cache@v1
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements_dev.txt') }}-${{ matrix.python-version }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - run: pip install --upgrade -r requirements_dev.txt
+    - name: Install normal dependencies
+      run: pip install -r requirements_dev.txt
     - run: pip install 'jsonref${{ matrix.jsonref-version }}'
-    - run: py.test --cov .
+    - name: Test with normal dependencies
+      run: py.test -m "not geo" --cov .
+    - name: Install geo dependencies
+      run: pip install -e .[geo]
+    - name: Test with geo dependencies
+      run: py.test -m "geo" --cov --cov-append .
     - env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: coveralls --service=github

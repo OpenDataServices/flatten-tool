@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+markers = [
+    "geo: tests that need extra geo dependencies",
+]

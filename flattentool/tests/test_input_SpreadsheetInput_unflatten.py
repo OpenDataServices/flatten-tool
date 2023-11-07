@@ -527,6 +527,9 @@ testdata = [
         False,
         True,
     ),
+]
+
+testdata_geo = [
     (
         "WKT->geojson conversion",
         [
@@ -1095,6 +1098,7 @@ testdata_titles = [
     ),
 ]
 
+
 ROOT_ID_PARAMS = [
     ("ocid", {}),  # If not root_id kwarg is passed, then a root_id of ocid is assumed
     ("ocid", {"root_id": "ocid"}),
@@ -1113,6 +1117,70 @@ ROOT_ID_PARAMS = [
     testdata,
 )
 def test_unflatten(
+    convert_titles,
+    use_schema,
+    root_id,
+    root_id_kwargs,
+    input_list,
+    expected_output_list,
+    recwarn,
+    comment,
+    warning_messages,
+    reversible,
+    works_without_schema,
+):
+    _test_unflatten_worker(
+        convert_titles,
+        use_schema,
+        root_id,
+        root_id_kwargs,
+        input_list,
+        expected_output_list,
+        recwarn,
+        comment,
+        warning_messages,
+        reversible,
+        works_without_schema,
+    )
+
+
+@pytest.mark.parametrize("convert_titles", [True, False])
+@pytest.mark.parametrize("use_schema", [True, False])
+@pytest.mark.parametrize("root_id,root_id_kwargs", ROOT_ID_PARAMS)
+@pytest.mark.parametrize(
+    "comment,input_list,expected_output_list,warning_messages,reversible,works_without_schema",
+    testdata_geo,
+)
+@pytest.mark.geo
+def test_unflatten_geo(
+    convert_titles,
+    use_schema,
+    root_id,
+    root_id_kwargs,
+    input_list,
+    expected_output_list,
+    recwarn,
+    comment,
+    warning_messages,
+    reversible,
+    works_without_schema,
+):
+    _test_unflatten_worker(
+        convert_titles,
+        use_schema,
+        root_id,
+        root_id_kwargs,
+        input_list,
+        expected_output_list,
+        recwarn,
+        comment,
+        warning_messages,
+        reversible,
+        works_without_schema,
+    )
+
+
+def _test_unflatten_worker(
     convert_titles,
     use_schema,
     root_id,

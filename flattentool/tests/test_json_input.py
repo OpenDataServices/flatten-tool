@@ -852,6 +852,7 @@ class TestParseIDsNoRootID(object):
         ]
 
 
+@pytest.mark.geo
 def test_parse_geojson():
     parser = JSONParser(
         root_json_dict=[
@@ -900,6 +901,7 @@ def test_parse_geojson():
     ]
 
 
+@pytest.mark.geo
 def test_parse_bad_geojson(recwarn):
     parser = JSONParser(
         root_json_dict=[

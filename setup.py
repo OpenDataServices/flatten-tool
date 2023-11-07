@@ -39,8 +39,6 @@ install_requires = [
     "zodb",
     "zc.zlibstorage",
     "ijson",
-    "shapely",
-    "geojson",
 ]
 
 setup(
@@ -54,7 +52,7 @@ setup(
     license="MIT",
     description="Tools for generating CSV and other flat versions of the structured data",
     install_requires=install_requires,
-    extras_require={"HTTP": ["requests"]},
+    extras_require={"HTTP": ["requests"], "geo": ["shapely", "geojson"]},
     cmdclass={
         "install": InstallWithCompile,
         "develop": DevelopWithCompile,

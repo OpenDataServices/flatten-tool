@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- New "geo" optional python dependency and some existing python dependencies moved to it.
+  If you were using this functionality before, you'll need to start installing "geo"  to get same behaviour.
+  https://github.com/OpenDataServices/flatten-tool/issues/424
+  https://github.com/OpenDataServices/flatten-tool/pull/433
+
 ## [0.23.0] - 2023-08-30
 
 ### Changed
