@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.24.0] - 2023-11-15
+
 ### Changed
 
 - New "geo" optional python dependency and some existing python dependencies moved to it.
