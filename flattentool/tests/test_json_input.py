@@ -383,7 +383,7 @@ class TestParseUsingSchema(object):
             assert list(parser.sub_sheets["g"]) == list(["ocid", "g/0/h"])
         else:
             assert list(parser.sub_sheets["c"]) == list(["ocid", "c/0/d"])
-        assert parser.sub_sheets["c"].lines == [{"c/0/d": "e"}]
+        assert list(parser.sub_sheets["c"].lines) == [{"c/0/d": "e"}]
 
     def test_column_matching(self, tmpdir):
         test_schema = tmpdir.join("test.json")
@@ -452,7 +452,7 @@ class TestParseUsingSchema(object):
         assert set(parser.sub_sheets["testA"]) == set(
             ["ocid", "testA/0/testB", "testA/0/testC"]
         )
-        assert parser.sub_sheets["testA"].lines == [
+        assert list(parser.sub_sheets["testA"].lines) == [
             {"testA/0/testB": "1", "testA/0/testC": "2"}
         ]
 
@@ -503,7 +503,7 @@ class TestParseUsingSchema(object):
         assert set(parser.sub_sheets["testA"]) == set(
             ["testA/0/testB", "testA/0/testC"]
         )
-        assert parser.sub_sheets["testA"].lines == [
+        assert list(parser.sub_sheets["testA"].lines) == [
             {"testA/0/testB": "1", "testA/0/testC": "2"},
             {"testA/0/testB": "3", "testA/0/testC": "4"},
         ]
