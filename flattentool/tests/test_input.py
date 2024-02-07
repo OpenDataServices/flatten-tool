@@ -5,7 +5,13 @@ Tests of SpreadsheetInput class and its children are in test_input_SpreadsheetIn
 """
 from __future__ import unicode_literals
 
-from flattentool.input import path_search
+import csv
+import io
+import sys
+
+import pytest
+
+from flattentool.input import NullCharacterFilter, path_search
 
 
 def test_path_search():
@@ -42,3 +48,15 @@ def test_path_search():
         )
         is goal_dict
     )
+
+
+def test_null_character_filter():
+    # https://bugs.python.org/issue27580
+    if sys.version_info < (3, 11):
+        with pytest.raises(Exception):
+            next(csv.reader(io.StringIO("\0")))
+
+    try:
+        next(csv.reader(NullCharacterFilter(io.StringIO("\0"))))
+    except Exception as e:
+        pytest.fail(str(e))

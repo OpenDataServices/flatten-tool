@@ -44,6 +44,21 @@ class Cell:
         self.sub_cells = []
 
 
+# Avoid _csv.Error "line contains NUL" in Python < 3.11.
+class NullCharacterFilter:
+    def __init__(self, file):
+        self.file = file
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        """
+        Remove null characters read from the file.
+        """
+        return next(self.file).replace("\0", "")
+
+
 def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flags={}):
     if value == "" or value is None:
         return None
@@ -615,7 +630,7 @@ class CSVInput(SpreadsheetInput):
         with open(
             os.path.join(self.input_name, sheet_name + ".csv"), encoding=self.encoding
         ) as main_sheet_file:
-            r = csvreader(main_sheet_file)
+            r = csvreader(NullCharacterFilter(main_sheet_file))
             for num, row in enumerate(r):
                 if num == (skip_rows + configuration_line):
                     return row
