@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Ignore null characters in the input CSV file
+  https://github.com/OpenDataServices/flatten-tool/pull/435
+
 ## [0.24.0] - 2023-11-15
 
 ### Changed
