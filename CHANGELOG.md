@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Don't error when there's a datetime in the header https://github.com/OpenDataServices/flatten-tool/issues/438
+
 ## [0.24.1] - 2024-02-09
 
 ### Fixed
