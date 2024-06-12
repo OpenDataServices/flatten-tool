@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.24.2] - 2024-06-12
+
 ### Fixed
 
 - Rename `_get_column_letter` import to `get_colunmn_letter` for compatibility
