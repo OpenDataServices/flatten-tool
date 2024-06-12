@@ -24,7 +24,7 @@ try:
 except ImportError:
     SHAPELY_AND_GEOJSON_LIBRARIES_AVAILABLE = False
 
-from openpyxl.utils.cell import _get_column_letter
+from openpyxl.utils.cell import get_column_letter
 
 from flattentool.exceptions import DataErrorWarning
 from flattentool.i18n import _
@@ -386,11 +386,11 @@ class SpreadsheetInput(object):
                                     actual_heading,
                                     ", ".join(
                                         [
-                                            _get_column_letter(x + 1)
+                                            get_column_letter(x + 1)
                                             for x in ignoring[:-1]
                                         ]
                                     ),
-                                    _get_column_letter(ignoring[-1] + 1),
+                                    get_column_letter(ignoring[-1] + 1),
                                     sheet_name,
                                 ),
                                 DataErrorWarning,
@@ -404,8 +404,8 @@ class SpreadsheetInput(object):
                                     )
                                 ).format(
                                     actual_heading,
-                                    _get_column_letter(ignoring[0] + 1),
-                                    _get_column_letter(ignoring[1] + 1),
+                                    get_column_letter(ignoring[0] + 1),
+                                    get_column_letter(ignoring[1] + 1),
                                     sheet_name,
                                 ),
                                 DataErrorWarning,
@@ -419,7 +419,7 @@ class SpreadsheetInput(object):
                                     )
                                 ).format(
                                     actual_heading,
-                                    _get_column_letter(ignoring[0] + 1),
+                                    get_column_letter(ignoring[0] + 1),
                                     sheet_name,
                                 ),
                                 DataErrorWarning,
@@ -445,7 +445,7 @@ class SpreadsheetInput(object):
                     else:
                         cells[header] = Cell(
                             line[header],
-                            (sheet_name, _get_column_letter(k + 1), j + 2, heading),
+                            (sheet_name, get_column_letter(k + 1), j + 2, heading),
                         )
                 unflattened = unflatten_main_with_parser(
                     self.parser,
@@ -740,7 +740,7 @@ class XLSXInput(SpreadsheetInput):
         if self.vertical_orientation:
             return [
                 cell.value
-                for cell in worksheet[_get_column_letter(skip_rows + 1)][
+                for cell in worksheet[get_column_letter(skip_rows + 1)][
                     configuration_line:
                 ]
             ]
@@ -777,7 +777,7 @@ class XLSXInput(SpreadsheetInput):
 
         worksheet = self.workbook[self.sheet_names_map[sheet_name]]
         if self.vertical_orientation:
-            header_row = worksheet[_get_column_letter(skip_rows + 1)]
+            header_row = worksheet[get_column_letter(skip_rows + 1)]
             remaining_rows = worksheet.iter_cols(min_col=skip_rows + header_rows + 1)
             if configuration_line:
                 header_row = header_row[1:]

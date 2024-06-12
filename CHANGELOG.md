@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Rename `_get_column_letter` import to `get_colunmn_letter` for compatibility
+  with latest openpyxl
+  https://github.com/OpenDataServices/flatten-tool/issues/443
+
 ## [0.24.1] - 2024-02-09
 
 ### Fixed
