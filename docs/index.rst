@@ -6,10 +6,6 @@
 Welcome to Flatten Tool's documentation!
 ========================================
 
-.. caution::
-
-   This documentation is a work in progress.
-
 Flatten Tool is a Python library and command line interface for converting
 single or multi-sheet spreadsheets to a JSON document and back again. In
 Flatten Tool terminology *flattening* is the process of converting a JSON
