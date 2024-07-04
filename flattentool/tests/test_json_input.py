@@ -112,6 +112,27 @@ def test_parse_basic_json_dict():
     assert parser.sub_sheets == {}
 
 
+def test_parse_not_json_dict(recwarn):
+    parser = JSONParser(root_json_dict=[["test"], {"a": "b"}, "test"])
+    assert list(parser.main_sheet) == ["a"]
+    assert list(parser.main_sheet.lines) == [{"a": "b"}]
+    assert parser.sub_sheets == {}
+
+    assert len(recwarn) == 2
+
+    w = recwarn.pop(UserWarning)
+    assert (
+        repr(w.message)
+        == "DataErrorWarning('The value at index 0 is not a JSON object')"
+    )
+
+    w = recwarn.pop(UserWarning)
+    assert (
+        repr(w.message)
+        == "DataErrorWarning('The value at index 2 is not a JSON object')"
+    )
+
+
 def test_parse_nested_dict_json_dict():
     parser = JSONParser(
         root_json_dict=[

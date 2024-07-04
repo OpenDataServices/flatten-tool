@@ -28,6 +28,7 @@ import xmltodict
 import zc.zlibstorage
 import ZODB.FileStorage
 
+from flattentool.exceptions import DataErrorWarning
 from flattentool.i18n import _
 from flattentool.input import path_search
 from flattentool.schema import make_sub_sheet_name
@@ -310,6 +311,14 @@ class JSONParser(object):
                 # This is particularly useful for IATI XML, in order to not
                 # fall over on empty activity, e.g. <iati-activity/>
                 continue
+
+            if not isinstance(json_dict, dict):
+                warn(
+                    _(f"The value at index {num} is not a JSON object"),
+                    DataErrorWarning,
+                )
+                continue
+
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
             # only persist every 2000 objects. peristing more often slows down storing.
             # 2000 top level objects normally not too much to store in memory.

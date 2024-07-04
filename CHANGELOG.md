@@ -6,12 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.25.0] - 2024-07-05
+
 ### Fixed
 
 - Don't error when there's a datetime in the header https://github.com/OpenDataServices/flatten-tool/issues/438
 
 - Ignore null characters in the input CSV file when reading configuration from the header rows
   https://github.com/OpenDataServices/flatten-tool/pull/446
+
+### Changed
+
+- If `json_dict` is not a dict, return a useful error/warning https://github.com/OpenDataServices/flatten-tool/issues/442
 
 ## [0.24.2] - 2024-06-12
 
