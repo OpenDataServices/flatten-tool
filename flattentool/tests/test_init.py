@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 import json
 from decimal import Decimal
 
 import pytest
 
-from flattentool import decimal_default, unflatten
+from flattentool import decimal_datetime_default, unflatten
 
 
 def original_cell_and_row_locations(data):
@@ -51,9 +52,13 @@ def original_headings(heading_data):
     return headings
 
 
-def test_decimal_default():
-    assert json.dumps(Decimal("1.2"), default=decimal_default) == "1.2"
-    assert json.dumps(Decimal("42"), default=decimal_default) == "42"
+def test_decimal_datetime_default():
+    assert json.dumps(Decimal("1.2"), default=decimal_datetime_default) == "1.2"
+    assert json.dumps(Decimal("42"), default=decimal_datetime_default) == "42"
+    assert (
+        json.dumps(datetime.datetime(2024, 1, 1), default=decimal_datetime_default)
+        == '"2024-01-01 00:00:00"'
+    )
 
 
 def lines_strip_whitespace(text):

@@ -1,4 +1,5 @@
 import codecs
+import datetime
 import json
 import sys
 from collections import OrderedDict
@@ -192,12 +193,14 @@ class NumberStr(float):
         return self
 
 
-def decimal_default(o):
+def decimal_datetime_default(o):
     if isinstance(o, Decimal):
         if int(o) == o:
             return int(o)
         else:
             return NumberStr(o)
+    if isinstance(o, datetime.datetime):
+        return str(o)
     raise TypeError(repr(o) + " is not JSON serializable")
 
 
@@ -372,12 +375,18 @@ def unflatten(
     else:
         if output_name is None:
             print(
-                json.dumps(base, indent=4, default=decimal_default, ensure_ascii=False)
+                json.dumps(
+                    base, indent=4, default=decimal_datetime_default, ensure_ascii=False
+                )
             )
         else:
             with codecs.open(output_name, "w", encoding="utf-8") as fp:
                 json.dump(
-                    base, fp, indent=4, default=decimal_default, ensure_ascii=False
+                    base,
+                    fp,
+                    indent=4,
+                    default=decimal_datetime_default,
+                    ensure_ascii=False,
                 )
     if cell_source_map:
         with codecs.open(cell_source_map, "w", encoding="utf-8") as fp:
@@ -385,7 +394,7 @@ def unflatten(
                 cell_source_map_data,
                 fp,
                 indent=4,
-                default=decimal_default,
+                default=decimal_datetime_default,
                 ensure_ascii=False,
             )
     if heading_source_map:
@@ -394,6 +403,6 @@ def unflatten(
                 heading_source_map_data,
                 fp,
                 indent=4,
-                default=decimal_default,
+                default=decimal_datetime_default,
                 ensure_ascii=False,
             )
