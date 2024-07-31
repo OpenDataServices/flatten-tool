@@ -152,7 +152,7 @@ def _test_example_in_doc_worker(root, filename):
 
 
 def test_expected_number_of_examples_in_docs_data():
-    expected = 67
+    expected = 68
     # See _get_examples_in_docs_data()
     if sys.version_info[:2] != (3, 8):
         expected -= 3

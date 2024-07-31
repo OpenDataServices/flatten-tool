@@ -1,0 +1,1 @@
+$ flatten-tool unflatten --xml --id-name iati-identifier --root-list-path iati-activity --xml-schema examples/iati/iati-activities-schema.xsd examples/iati/iati-common.xsd -f csv examples/iati_namespaces
