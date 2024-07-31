@@ -42,7 +42,7 @@ def make_sub_sheet_name(
             x[:truncation_length] for x in parent_path.split(path_separator) if x != "0"
         )
         + property_name
-    )
+    ).replace(":", "-")
 
 
 class TitleLookup(UserDict):
