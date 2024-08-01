@@ -10,7 +10,11 @@ from warnings import warn
 
 import jsonref
 
-from flattentool.exceptions import FlattenToolWarning
+from flattentool.exceptions import (
+    FlattenToolError,
+    FlattenToolValueError,
+    FlattenToolWarning,
+)
 from flattentool.i18n import _
 from flattentool.sheet import Sheet
 
@@ -94,7 +98,7 @@ class TitleLookup(UserDict):
             return key.replace(" ", "").lower() in self.data
 
 
-class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(Exception):
+class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(FlattenToolError):
     pass
 
 
@@ -140,11 +144,11 @@ class SchemaParser(object):
         self.convert_flags = convert_flags
 
         if root_schema_dict is None and schema_filename is None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("One of schema_filename or root_schema_dict must be supplied")
             )
         if root_schema_dict is not None and schema_filename is not None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("Only one of schema_filename or root_schema_dict should be supplied")
             )
         if schema_filename:
@@ -317,7 +321,7 @@ class SchemaParser(object):
                         if "string" in nested_type_set or "number" in nested_type_set:
                             yield property_name, title
                         else:
-                            raise ValueError
+                            raise FlattenToolValueError
                     elif "object" in type_set:
                         if title:
                             title_lookup[title].property_name = property_name
@@ -417,7 +421,7 @@ class SchemaParser(object):
                                 )
 
                     else:
-                        raise ValueError(
+                        raise FlattenToolValueError(
                             _(
                                 'Unknown type_set: {}, did you forget to explicitly set the "type" key on "items"?'
                             ).format(type_set)

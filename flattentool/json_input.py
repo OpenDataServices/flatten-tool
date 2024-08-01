@@ -28,7 +28,12 @@ import xmltodict
 import zc.zlibstorage
 import ZODB.FileStorage
 
-from flattentool.exceptions import DataErrorWarning, FlattenToolWarning
+from flattentool.exceptions import (
+    DataErrorWarning,
+    FlattenToolError,
+    FlattenToolValueError,
+    FlattenToolWarning,
+)
 from flattentool.i18n import _
 from flattentool.input import path_search
 from flattentool.schema import make_sub_sheet_name
@@ -37,7 +42,7 @@ from flattentool.sheet import PersistentSheet
 BASIC_TYPES = [str, bool, int, Decimal, type(None)]
 
 
-class BadlyFormedJSONError(ValueError):
+class BadlyFormedJSONError(FlattenToolError, ValueError):
     pass
 
 
@@ -240,12 +245,12 @@ class JSONParser(object):
             json_filename = None
 
         if json_filename is None and root_json_dict is None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("Either json_filename or root_json_dict must be supplied")
             )
 
         if json_filename is not None and root_json_dict is not None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("Only one of json_file or root_json_dict should be supplied")
             )
 
@@ -509,7 +514,7 @@ class JSONParser(object):
                                     continue
 
                                 if type(v) not in BASIC_TYPES:
-                                    raise ValueError(
+                                    raise FlattenToolValueError(
                                         _("Rolled up values must be basic types")
                                     )
                                 else:
@@ -652,7 +657,9 @@ class JSONParser(object):
                             top_level_of_sub_sheet=True,
                         )
             else:
-                raise ValueError(_("Unsupported type {}").format(type(value)))
+                raise FlattenToolValueError(
+                    _("Unsupported type {}").format(type(value))
+                )
 
         if top:
             sheet.append_line(flattened_dict)

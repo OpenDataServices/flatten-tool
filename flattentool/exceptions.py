@@ -1,3 +1,11 @@
+class FlattenToolError(Exception):
+    pass
+
+
+class FlattenToolValueError(FlattenToolError, ValueError):
+    pass
+
+
 class FlattenToolWarning(UserWarning):
     """
     A warning generated directly by flatten-tool.

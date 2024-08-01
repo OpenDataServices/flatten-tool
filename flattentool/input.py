@@ -26,7 +26,12 @@ except ImportError:
 
 from openpyxl.utils.cell import get_column_letter
 
-from flattentool.exceptions import DataErrorWarning, FlattenToolWarning
+from flattentool.exceptions import (
+    DataErrorWarning,
+    FlattenToolError,
+    FlattenToolValueError,
+    FlattenToolWarning,
+)
 from flattentool.i18n import _
 from flattentool.lib import isint, parse_sheet_configuration
 from flattentool.ODSReader import ODSReader
@@ -154,7 +159,7 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flag
             return int(value)
         return value if type(value) in [int] else str(value)
     else:
-        raise ValueError('Unrecognised type: "{}"'.format(type_string))
+        raise FlattenToolValueError('Unrecognised type: "{}"'.format(type_string))
 
 
 def warnings_for_ignored_columns(v, extra_message):
@@ -170,7 +175,7 @@ def warnings_for_ignored_columns(v, extra_message):
         for x in v.to_list():
             warnings_for_ignored_columns(x, extra_message)
     else:
-        raise ValueError()
+        raise FlattenToolValueError()
 
 
 def merge(base, mergee, debug_info=None):
@@ -589,7 +594,7 @@ def extract_dict_to_error_path(path, input):
                 ).format(input[k].cell_value, sub_cell.cell_value)
                 output[p].append(sub_cell.cell_location)
         else:
-            raise Exception(
+            raise FlattenToolError(
                 _("Unexpected result type in the JSON cell tree: {}").format(input[k])
             )
     return output
@@ -612,7 +617,7 @@ def extract_dict_to_value(input):
         elif isinstance(input[k], Cell):
             output[k] = input[k].cell_value
         else:
-            raise Exception(
+            raise FlattenToolError(
                 _("Unexpected result type in the JSON cell tree: {}").format(input[k])
             )
     return output
@@ -699,7 +704,7 @@ class CSVInput(SpreadsheetInput):
                 yield row
 
 
-class BadXLSXZipFile(BadZipFile):
+class BadXLSXZipFile(BadZipFile, FlattenToolError):
     pass
 
 
@@ -1015,7 +1020,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name, convert_fla
             list_index = -1
             if isint(next_path_item):
                 if current_type and current_type != "array":
-                    raise ValueError(
+                    raise FlattenToolValueError(
                         _(
                             "There is an array at '{}' when the schema says there should be a '{}'"
                         ).format(path_till_now, current_type)
@@ -1067,7 +1072,7 @@ def unflatten_main_with_parser(parser, line, timezone, xml, id_name, convert_fla
                 and current_type not in ["object", "array"]
                 and next_path_item
             ):
-                raise ValueError(
+                raise FlattenToolValueError(
                     _(
                         "There is an object or list at '{}' but it should be an {}"
                     ).format(path_till_now, current_type)
