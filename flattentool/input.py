@@ -26,7 +26,7 @@ except ImportError:
 
 from openpyxl.utils.cell import get_column_letter
 
-from flattentool.exceptions import DataErrorWarning
+from flattentool.exceptions import DataErrorWarning, FlattenToolWarning
 from flattentool.i18n import _
 from flattentool.lib import isint, parse_sheet_configuration
 from flattentool.ODSReader import ODSReader
@@ -142,7 +142,10 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flag
             feature = geojson.Feature(geometry=geom, properties={})
             return feature.geometry
         else:
-            warn("Install flattentool's optional geo dependencies to use geo features.")
+            warn(
+                "Install flattentool's optional geo dependencies to use geo features.",
+                FlattenToolWarning,
+            )
             return str(value)
     elif type_string == "":
         if type(value) == datetime.datetime:
@@ -156,7 +159,10 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flag
 
 def warnings_for_ignored_columns(v, extra_message):
     if isinstance(v, Cell):
-        warn("Column {} has been ignored, {}".format(v.cell_location[3], extra_message))
+        warn(
+            "Column {} has been ignored, {}".format(v.cell_location[3], extra_message),
+            DataErrorWarning,
+        )
     elif isinstance(v, dict):
         for x in v.values():
             warnings_for_ignored_columns(x, extra_message)

@@ -10,6 +10,7 @@ from warnings import warn
 
 import jsonref
 
+from flattentool.exceptions import FlattenToolWarning
 from flattentool.i18n import _
 from flattentool.sheet import Sheet
 
@@ -187,7 +188,10 @@ class SchemaParser(object):
         for field, title in fields:
             if self.use_titles:
                 if not title:
-                    warn(_("Field {} does not have a title, skipping.").format(field))
+                    warn(
+                        _("Field {} does not have a title, skipping.").format(field),
+                        FlattenToolWarning,
+                    )
                 else:
                     self.main_sheet.append(title)
                     self.main_sheet.titles[field] = title
@@ -367,13 +371,15 @@ class SchemaParser(object):
                                     warn(
                                         _(
                                             "Field {}{}/0/{} is missing a title, skipping."
-                                        ).format(parent_path, property_name, field)
+                                        ).format(parent_path, property_name, field),
+                                        FlattenToolWarning,
                                     )
                                 elif not title:
                                     warn(
                                         _(
                                             "Field {}{} does not have a title, skipping it and all its children."
-                                        ).format(parent_path, property_name)
+                                        ).format(parent_path, property_name),
+                                        FlattenToolWarning,
                                     )
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
@@ -406,7 +412,8 @@ class SchemaParser(object):
                                 warn(
                                     "{} in rollUp but not in schema".format(
                                         ", ".join(missedRollUp)
-                                    )
+                                    ),
+                                    FlattenToolWarning,
                                 )
 
                     else:
@@ -447,12 +454,14 @@ class SchemaParser(object):
                         _(
                             'Unrecognised types {} for property "{}" with context "{}",'
                             "so this property has been ignored."
-                        ).format(repr(property_type_set), property_name, parent_path)
+                        ).format(repr(property_type_set), property_name, parent_path),
+                        FlattenToolWarning,
                     )
 
         else:
             warn(
                 _('Skipping field "{}", because it has no properties.').format(
                     parent_path
-                )
+                ),
+                FlattenToolWarning,
             )

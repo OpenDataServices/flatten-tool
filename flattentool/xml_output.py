@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from warnings import warn
 
-from flattentool.exceptions import DataErrorWarning
+from flattentool.exceptions import DataErrorWarning, FlattenToolWarning
 from flattentool.sort_xml import XMLSchemaWalker, sort_element
 
 try:
@@ -17,7 +17,10 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
     USING_LXML = False
-    warn("Using stdlib etree may work, but is not supported. Please install lxml.")
+    warn(
+        "Using stdlib etree may work, but is not supported. Please install lxml.",
+        FlattenToolWarning,
+    )
 
 
 def sort_attributes(data):
