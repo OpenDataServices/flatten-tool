@@ -35,7 +35,7 @@ from flattentool.exceptions import (
     FlattenToolWarning,
 )
 from flattentool.i18n import _
-from flattentool.input import path_search
+from flattentool.input import GEO_DEPENDENCIES_MESSAGE, path_search
 from flattentool.schema import make_sub_sheet_name
 from flattentool.sheet import PersistentSheet
 
@@ -404,7 +404,7 @@ class JSONParser(object):
                 skip_type_and_coordinates = True
             else:
                 warn(
-                    "Install flattentool's optional geo dependencies to use geo features.",
+                    GEO_DEPENDENCIES_MESSAGE,
                     FlattenToolWarning,
                 )
 
