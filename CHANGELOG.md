@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Use custom warnings and exceptions [#450](https://github.com/OpenDataServices/flatten-tool/issues/450) [#451](https://github.com/OpenDataServices/flatten-tool/issues/451)
+
 ## [0.25.0] - 2024-07-05
 
 ### Fixed

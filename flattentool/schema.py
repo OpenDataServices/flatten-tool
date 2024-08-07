@@ -10,6 +10,11 @@ from warnings import warn
 
 import jsonref
 
+from flattentool.exceptions import (
+    FlattenToolError,
+    FlattenToolValueError,
+    FlattenToolWarning,
+)
 from flattentool.i18n import _
 from flattentool.sheet import Sheet
 
@@ -93,7 +98,7 @@ class TitleLookup(UserDict):
             return key.replace(" ", "").lower() in self.data
 
 
-class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(Exception):
+class JsonLoaderLocalRefUsedWhenLocalRefsDisabled(FlattenToolError):
     pass
 
 
@@ -139,11 +144,11 @@ class SchemaParser(object):
         self.convert_flags = convert_flags
 
         if root_schema_dict is None and schema_filename is None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("One of schema_filename or root_schema_dict must be supplied")
             )
         if root_schema_dict is not None and schema_filename is not None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("Only one of schema_filename or root_schema_dict should be supplied")
             )
         if schema_filename:
@@ -187,7 +192,10 @@ class SchemaParser(object):
         for field, title in fields:
             if self.use_titles:
                 if not title:
-                    warn(_("Field {} does not have a title, skipping.").format(field))
+                    warn(
+                        _("Field {} does not have a title, skipping.").format(field),
+                        FlattenToolWarning,
+                    )
                 else:
                     self.main_sheet.append(title)
                     self.main_sheet.titles[field] = title
@@ -313,7 +321,7 @@ class SchemaParser(object):
                         if "string" in nested_type_set or "number" in nested_type_set:
                             yield property_name, title
                         else:
-                            raise ValueError
+                            raise FlattenToolValueError
                     elif "object" in type_set:
                         if title:
                             title_lookup[title].property_name = property_name
@@ -367,13 +375,15 @@ class SchemaParser(object):
                                     warn(
                                         _(
                                             "Field {}{}/0/{} is missing a title, skipping."
-                                        ).format(parent_path, property_name, field)
+                                        ).format(parent_path, property_name, field),
+                                        FlattenToolWarning,
                                     )
                                 elif not title:
                                     warn(
                                         _(
                                             "Field {}{} does not have a title, skipping it and all its children."
-                                        ).format(parent_path, property_name)
+                                        ).format(parent_path, property_name),
+                                        FlattenToolWarning,
                                     )
                                 else:
                                     # This code only works for arrays that are at 0 or 1 layer of nesting
@@ -406,11 +416,12 @@ class SchemaParser(object):
                                 warn(
                                     "{} in rollUp but not in schema".format(
                                         ", ".join(missedRollUp)
-                                    )
+                                    ),
+                                    FlattenToolWarning,
                                 )
 
                     else:
-                        raise ValueError(
+                        raise FlattenToolValueError(
                             _(
                                 'Unknown type_set: {}, did you forget to explicitly set the "type" key on "items"?'
                             ).format(type_set)
@@ -447,12 +458,14 @@ class SchemaParser(object):
                         _(
                             'Unrecognised types {} for property "{}" with context "{}",'
                             "so this property has been ignored."
-                        ).format(repr(property_type_set), property_name, parent_path)
+                        ).format(repr(property_type_set), property_name, parent_path),
+                        FlattenToolWarning,
                     )
 
         else:
             warn(
                 _('Skipping field "{}", because it has no properties.').format(
                     parent_path
-                )
+                ),
+                FlattenToolWarning,
             )

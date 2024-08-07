@@ -28,7 +28,12 @@ import xmltodict
 import zc.zlibstorage
 import ZODB.FileStorage
 
-from flattentool.exceptions import DataErrorWarning
+from flattentool.exceptions import (
+    DataErrorWarning,
+    FlattenToolError,
+    FlattenToolValueError,
+    FlattenToolWarning,
+)
 from flattentool.i18n import _
 from flattentool.input import path_search
 from flattentool.schema import make_sub_sheet_name
@@ -37,7 +42,7 @@ from flattentool.sheet import PersistentSheet
 BASIC_TYPES = [str, bool, int, Decimal, type(None)]
 
 
-class BadlyFormedJSONError(ValueError):
+class BadlyFormedJSONError(FlattenToolError, ValueError):
     pass
 
 
@@ -195,7 +200,10 @@ class JSONParser(object):
                 if isinstance(rollup, (list,)) and (
                     len(rollup) > 1 or (len(rollup) == 1 and rollup[0] is not True)
                 ):
-                    warn(_("Using rollUp values from schema, ignoring direct input."))
+                    warn(
+                        _("Using rollUp values from schema, ignoring direct input."),
+                        FlattenToolWarning,
+                    )
             elif isinstance(rollup, (list,)):
                 if len(rollup) == 1 and os.path.isfile(rollup[0]):
                     # Parse file, one json path per line.
@@ -209,7 +217,8 @@ class JSONParser(object):
                 elif len(rollup) == 1 and rollup[0] is True:
                     warn(
                         _(
-                            "No fields to rollup found (pass json path directly, as a list in a file, or via a schema)"
+                            "No fields to rollup found (pass json path directly, as a list in a file, or via a schema)",
+                            FlattenToolWarning,
                         )
                     )
                 else:
@@ -217,7 +226,8 @@ class JSONParser(object):
             else:
                 warn(
                     _(
-                        "Invalid value passed for rollup (pass json path directly, as a list in a file, or via a schema)"
+                        "Invalid value passed for rollup (pass json path directly, as a list in a file, or via a schema)",
+                        FlattenToolWarning,
                     )
                 )
 
@@ -235,12 +245,12 @@ class JSONParser(object):
             json_filename = None
 
         if json_filename is None and root_json_dict is None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("Either json_filename or root_json_dict must be supplied")
             )
 
         if json_filename is not None and root_json_dict is not None:
-            raise ValueError(
+            raise FlattenToolValueError(
                 _("Only one of json_file or root_json_dict should be supplied")
             )
 
@@ -276,7 +286,8 @@ class JSONParser(object):
                 warn(
                     _(
                         "You wanted to preserve the following fields which are not present in the supplied schema: {}"
-                    ).format(list(input_not_in_schema))
+                    ).format(list(input_not_in_schema)),
+                    FlattenToolWarning,
                 )
             except AttributeError:
                 # no schema
@@ -344,7 +355,8 @@ class JSONParser(object):
                 warn(
                     _(
                         "You wanted to preserve the following fields which are not present in the input data: {}"
-                    ).format(nonexistent_input_paths)
+                    ).format(nonexistent_input_paths),
+                    FlattenToolWarning,
                 )
 
     def parse_json_dict(
@@ -383,13 +395,17 @@ class JSONParser(object):
                 try:
                     geom = shapely.geometry.shape(json_dict)
                 except (shapely.errors.GeometryTypeError, TypeError, ValueError) as e:
-                    warn(_("Invalid GeoJSON: {parser_msg}").format(parser_msg=repr(e)))
+                    warn(
+                        _("Invalid GeoJSON: {parser_msg}").format(parser_msg=repr(e)),
+                        DataErrorWarning,
+                    )
                     return
                 flattened_dict[_sheet_key] = geom.wkt
                 skip_type_and_coordinates = True
             else:
                 warn(
-                    "Install flattentool's optional geo dependencies to use geo features."
+                    "Install flattentool's optional geo dependencies to use geo features.",
+                    FlattenToolWarning,
                 )
 
         parent_id_fields = copy.copy(parent_id_fields) or OrderedDict()
@@ -482,7 +498,8 @@ class JSONParser(object):
                         if self.use_titles and not self.schema_parser:
                             warn(
                                 _(
-                                    "Warning: No schema was provided so column headings are JSON keys, not titles."
+                                    "Warning: No schema was provided so column headings are JSON keys, not titles.",
+                                    FlattenToolWarning,
                                 )
                             )
 
@@ -497,7 +514,7 @@ class JSONParser(object):
                                     continue
 
                                 if type(v) not in BASIC_TYPES:
-                                    raise ValueError(
+                                    raise FlattenToolValueError(
                                         _("Rolled up values must be basic types")
                                     )
                                 else:
@@ -583,7 +600,8 @@ class JSONParser(object):
                                     warn(
                                         _(
                                             'More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'
-                                        ).format(parent_name + key)
+                                        ).format(parent_name + key),
+                                        FlattenToolWarning,
                                     )
                                     flattened_dict[
                                         sheet_key(sheet, parent_name + key + "/0/" + k)
@@ -594,7 +612,8 @@ class JSONParser(object):
                                     warn(
                                         _(
                                             'More than one value supplied for "{}". Could not provide rollup, so adding a warning to the relevant cell(s) in the spreadsheet.'
-                                        ).format(parent_name + key)
+                                        ).format(parent_name + key),
+                                        FlattenToolWarning,
                                     )
                                     flattened_dict[
                                         sheet_key(sheet, parent_name + key + "/0/" + k)
@@ -638,7 +657,9 @@ class JSONParser(object):
                             top_level_of_sub_sheet=True,
                         )
             else:
-                raise ValueError(_("Unsupported type {}").format(type(value)))
+                raise FlattenToolValueError(
+                    _("Unsupported type {}").format(type(value))
+                )
 
         if top:
             sheet.append_line(flattened_dict)
