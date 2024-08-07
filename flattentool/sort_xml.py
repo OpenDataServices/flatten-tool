@@ -27,6 +27,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from collections import OrderedDict
 from warnings import warn
 
+from flattentool.exceptions import FlattenToolWarning
+
 try:
     import lxml.etree as ET
 
@@ -36,7 +38,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-    warn("Using stdlib etree may work, but is not supported. Please install lxml.")
+    warn(
+        "Using stdlib etree may work, but is not supported. Please install lxml.",
+        FlattenToolWarning,
+    )
 
 # Namespaces necessary for opening schema files
 namespaces = {"xsd": "http://www.w3.org/2001/XMLSchema"}

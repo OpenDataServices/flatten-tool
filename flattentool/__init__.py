@@ -5,6 +5,7 @@ import sys
 from collections import OrderedDict
 from decimal import Decimal
 
+from flattentool.exceptions import FlattenToolError
 from flattentool.input import FORMATS as INPUT_FORMATS
 from flattentool.json_input import JSONParser
 from flattentool.lib import parse_sheet_configuration
@@ -37,7 +38,7 @@ def create_template(
     """
 
     if line_terminator not in LINE_TERMINATORS.keys():
-        raise Exception(f"{line_terminator} is not a valid line terminator")
+        raise FlattenToolError(f"{line_terminator} is not a valid line terminator")
 
     convert_flags = {"wkt": convert_wkt}
 
@@ -76,7 +77,7 @@ def create_template(
         spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
 
     else:
-        raise Exception("The requested format is not available")
+        raise FlattenToolError("The requested format is not available")
 
 
 def flatten(
@@ -111,10 +112,10 @@ def flatten(
     if (filter_field is None and filter_value is not None) or (
         filter_field is not None and filter_value is None
     ):
-        raise Exception("You must use filter_field and filter_value together")
+        raise FlattenToolError("You must use filter_field and filter_value together")
 
     if line_terminator not in LINE_TERMINATORS.keys():
-        raise Exception(f"{line_terminator} is not a valid line terminator")
+        raise FlattenToolError(f"{line_terminator} is not a valid line terminator")
 
     convert_flags = {"wkt": convert_wkt}
 
@@ -175,7 +176,7 @@ def flatten(
             spreadsheet_output(OUTPUT_FORMATS[output_format], output_name)
 
         else:
-            raise Exception("The requested format is not available")
+            raise FlattenToolError("The requested format is not available")
 
 
 # From http://bugs.python.org/issue16535
@@ -239,11 +240,13 @@ def unflatten(
     """
 
     if input_format is None:
-        raise Exception("You must specify an input format (may autodetect in future")
+        raise FlattenToolError(
+            "You must specify an input format (may autodetect in future"
+        )
     elif input_format not in INPUT_FORMATS:
-        raise Exception("The requested format is not available")
+        raise FlattenToolError("The requested format is not available")
     if metatab_name and base_json:
-        raise Exception("Not allowed to use base_json with metatab")
+        raise FlattenToolError("Not allowed to use base_json with metatab")
 
     convert_flags = {"wkt": convert_wkt}
 

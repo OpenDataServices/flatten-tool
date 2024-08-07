@@ -1,7 +1,11 @@
 from collections import OrderedDict
 from warnings import warn
 
-from flattentool.exceptions import DataErrorWarning
+from flattentool.exceptions import (
+    DataErrorWarning,
+    FlattenToolError,
+    FlattenToolWarning,
+)
 from flattentool.sort_xml import XMLSchemaWalker, sort_element
 
 try:
@@ -17,7 +21,10 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
     USING_LXML = False
-    warn("Using stdlib etree may work, but is not supported. Please install lxml.")
+    warn(
+        "Using stdlib etree may work, but is not supported. Please install lxml.",
+        FlattenToolWarning,
+    )
 
 
 def sort_attributes(data):
@@ -53,7 +60,7 @@ def child_to_xml(parent_el, tagname, child, toplevel=False, nsmap=None):
         elif tagname == "text()":
             parent_el.text = str(child)
         else:
-            raise ("Everything should end with text() or an attribute!")
+            raise FlattenToolError("Everything should end with text() or an attribute!")
 
 
 def dict_to_xml(data, tagname, toplevel=True, nsmap=None):
