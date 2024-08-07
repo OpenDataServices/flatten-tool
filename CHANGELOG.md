@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Ignore null characters in the input CSV file when getting non-header rows
+
 ### Changed
 
 - Use custom warnings and exceptions [#450](https://github.com/OpenDataServices/flatten-tool/issues/450) [#451](https://github.com/OpenDataServices/flatten-tool/issues/451)
@@ -35,7 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-- Ignore null characters in the input CSV file
+- Ignore null characters in the input CSV file when getting header rows
   https://github.com/OpenDataServices/flatten-tool/pull/435
 
 ## [0.24.0] - 2023-11-15

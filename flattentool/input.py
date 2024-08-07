@@ -699,7 +699,7 @@ class CSVInput(SpreadsheetInput):
         with open(
             os.path.join(self.input_name, sheet_name + ".csv"), encoding=self.encoding
         ) as main_sheet_file:
-            dictreader = DictReader(main_sheet_file)
+            dictreader = DictReader(NullCharacterFilter(main_sheet_file))
             for row in self.generate_rows(dictreader, sheet_name):
                 yield row
 
