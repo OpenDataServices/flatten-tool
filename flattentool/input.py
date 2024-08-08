@@ -42,6 +42,9 @@ except ImportError:
     from zipfile import BadZipfile as BadZipFile
 
 
+GEO_DEPENDENCIES_MESSAGE = "Install flattentool's optional geo dependencies to use geo features, for example pip install flattentool[geo]"
+
+
 class Cell:
     def __init__(self, cell_value, cell_location):
         self.cell_value = cell_value
@@ -148,7 +151,7 @@ def convert_type(type_string, value, timezone=pytz.timezone("UTC"), convert_flag
             return feature.geometry
         else:
             warn(
-                "Install flattentool's optional geo dependencies to use geo features.",
+                GEO_DEPENDENCIES_MESSAGE,
                 FlattenToolWarning,
             )
             return str(value)
