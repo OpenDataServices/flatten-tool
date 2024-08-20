@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Ignore null characters in the input CSV file when getting non-header rows
+- When unflatteneing XML, avoid errors due to namespaces causing colons in sheet names, by replacing them with dashes https://github.com/OpenDataServices/flatten-tool/pull/456
 
 ### Changed
 
