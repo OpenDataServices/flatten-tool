@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Use custom warnings and exceptions [#450](https://github.com/OpenDataServices/flatten-tool/issues/450) [#451](https://github.com/OpenDataServices/flatten-tool/issues/451)
 - Add example pip install command to geo dependencies missing warning [#445](https://github.com/OpenDataServices/flatten-tool/issues/445)
+- When outputting XML, handle namespaces that don't cover the whole file https://github.com/OpenDataServices/flatten-tool/pull/456
 
 ## [0.25.0] - 2024-07-05
 
