@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.26.0] - 2024-08-22
+
 ### Fixed
 
 - Ignore null characters in the input CSV file when getting non-header rows
