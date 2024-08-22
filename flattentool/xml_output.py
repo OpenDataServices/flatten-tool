@@ -35,15 +35,16 @@ def sort_attributes(data):
     return OrderedDict(sorted(attribs) + other)
 
 
-def child_to_xml(parent_el, tagname, child, toplevel=False, nsmap=None):
+def child_to_xml(child_elements, attrib, tagname, child, toplevel=False, nsmap=None):
     if hasattr(child, "items"):
         child_el = dict_to_xml(child, tagname, toplevel=False, nsmap=nsmap)
         if child_el is not None:
-            parent_el.append(child_el)
+            child_elements.append(child_el)
     else:
         if tagname.startswith("@"):
-            if USING_LXML and toplevel and tagname.startswith("@xmlns"):
-                nsmap[tagname[1:].split(":", 1)[1]] = str(child)
+            if USING_LXML and tagname.startswith("@xmlns"):
+                nsname = tagname[1:].split(":", 1)[1]
+                nsmap[nsname] = str(child)
                 return
             try:
                 attr_name = tagname[1:]
@@ -54,41 +55,61 @@ def child_to_xml(parent_el, tagname, child, toplevel=False, nsmap=None):
                         + "}"
                         + attr_name.split(":", 1)[1]
                     )
-                parent_el.attrib[attr_name] = str(child)
+                attrib[attr_name] = str(child)
             except ValueError as e:
                 warn(str(e), DataErrorWarning)
         elif tagname == "text()":
-            parent_el.text = str(child)
+            return str(child)
         else:
             raise FlattenToolError("Everything should end with text() or an attribute!")
+    return None
 
 
 def dict_to_xml(data, tagname, toplevel=True, nsmap=None):
-    if USING_LXML and ":" in tagname and not toplevel:
+    if USING_LXML and ":" in tagname and not tagname.startswith("@xmlns"):
         tagname = (
             "{"
             + nsmap.get(tagname.split(":", 1)[0], "")
             + "}"
             + tagname.split(":", 1)[1]
         )
-    try:
-        if USING_LXML:
-            el = ET.Element(tagname, nsmap=nsmap)
-        else:
-            el = ET.Element(tagname)
-    except ValueError as e:
-        warn(str(e), DataErrorWarning)
-        return
 
     if USING_LXML:
         data = sort_attributes(data)
 
+    # We must create the child elements before their parent elements in order
+    # to have the correct namespace information for the parent
+    child_elements = []
+    attrib = {}
+    text = None
+
     for k, v in data.items():
         if type(v) == list:
             for item in v:
-                child_to_xml(el, k, item, nsmap=nsmap)
+                t = child_to_xml(child_elements, attrib, k, item, nsmap=nsmap)
+                if t:
+                    text = t
         else:
-            child_to_xml(el, k, v, toplevel=toplevel, nsmap=nsmap)
+            t = child_to_xml(
+                child_elements, attrib, k, v, toplevel=toplevel, nsmap=nsmap
+            )
+            if t:
+                text = t
+
+    try:
+        if USING_LXML:
+            el = ET.Element(tagname, attrib=attrib, nsmap=nsmap)
+        else:
+            el = ET.Element(tagname, attrib=attrib)
+    except ValueError as e:
+        warn(str(e), DataErrorWarning)
+        return
+
+    for child_el in child_elements:
+        el.append(child_el)
+    if text:
+        el.text = text
+
     return el
 
 

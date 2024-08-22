@@ -7,7 +7,7 @@ from decimal import Decimal
 
 import pytest
 
-from flattentool import decimal_datetime_default, unflatten
+from flattentool import decimal_datetime_default, flatten, unflatten
 
 
 def original_cell_and_row_locations(data):
@@ -1452,3 +1452,13 @@ def test_commands_id_name(tmpdir, input_format):
         ],
         "some": "data",
     }
+
+
+def test_flatten_xml(tmpdir):
+    flatten(
+        "flattentool/tests/fixtures/iati_namespaces.xml",
+        output_name=tmpdir.join("flattened_xml").strpath,
+        id_name="iati-identifier",
+        root_list_path="iati-activity",
+        xml=True,
+    )

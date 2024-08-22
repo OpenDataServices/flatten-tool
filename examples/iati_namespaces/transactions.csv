@@ -1,0 +1,5 @@
+iati-identifier,transaction/0/transaction-type/@code,transaction/0/transaction-date/@iso-date,transaction/0/value/@value-date,transaction/0/value
+AA-AAA-123456789-ABC123,2,2012-01-01,2012-01-01,10
+AA-AAA-123456789-ABC123,3,2012-03-03,2012-03-03,20
+AA-AAA-123456789-ABC124,2,2013-04-04,2013-04-04,30
+AA-AAA-123456789-ABC124,3,2013-05-05,2013-05-05,40
