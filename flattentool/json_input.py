@@ -302,7 +302,7 @@ class JSONParser(object):
             else:
                 path = root_list_path.replace("/", ".") + ".item"
 
-            json_file = codecs.open(json_filename, encoding="utf-8")
+            json_file = codecs.open(json_filename, "rb")
 
             self.root_json_list = ijson.items(json_file, path, map_type=OrderedDict)
 
