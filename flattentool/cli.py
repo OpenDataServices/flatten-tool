@@ -364,7 +364,7 @@ def main():
         try:
             # Note: Ensures that empty arguments are not passed to the create_template function
             create_template(**kwargs_from_parsed_args(args))
-        except (OSError, IOError) as e:
+        except OSError as e:
             print(str(e))
             return
     elif args.subparser_name == "flatten":
