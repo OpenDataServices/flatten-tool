@@ -42,7 +42,7 @@ def test_blank_sheets(tmpdir):
     wb = openpyxl.load_workbook(tmpdir.join("release.xlsx").strpath)
     assert wb.sheetnames == ["release"]
     rows = list(wb["release"].rows)
-    # openpyxl fixed this bug but earler versions of python are stuck with it.
+    # openpyxl fixed this bug but earlier versions of python are stuck with it.
     # remove when we no longer support 3.5
     if sys.version_info >= (3, 6, 0):
         assert len(rows) == 0
