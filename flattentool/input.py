@@ -731,7 +731,7 @@ class XLSXInput(SpreadsheetInput):
         for sheet in self.exclude_sheets or []:
             self.sheet_names_map.pop(sheet, None)
 
-        sheet_names = list(sheet for sheet in self.sheet_names_map.keys())
+        sheet_names = list(self.sheet_names_map.keys())
         self.sub_sheet_names = sheet_names
         self.configure_sheets()
 
