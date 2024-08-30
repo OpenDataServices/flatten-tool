@@ -174,7 +174,7 @@ msgstr ""
 "como una lista en un archivo o mediante un esquema)"
 
 #: flattentool/json_input.py:193
-msgid "Etiher json_filename or root_json_dict must be supplied"
+msgid "Either json_filename or root_json_dict must be supplied"
 msgstr "Se debe proporcionar el r json_filename o root_json_dict"
 
 #: flattentool/json_input.py:198
@@ -261,7 +261,7 @@ msgstr ""
 
 #: flattentool/schema.py:390
 msgid ""
-"Unknown type_set: {}, did you forget to explicity set the \"type\" key on "
+"Unknown type_set: {}, did you forget to explicitly set the \"type\" key on "
 "\"items\"?"
 msgstr ""
 "Type_set desconocido: {}, ¿olvidó establecer explícitamente la clave "
