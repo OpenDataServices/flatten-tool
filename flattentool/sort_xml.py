@@ -66,6 +66,7 @@ class XMLSchemaWalker(object):
         Return the specified element from the schema.
 
         tag_name -- the name of the tag in the schema, e.g. 'complexType'
+
         name_attribute -- the value of the 'name' attribute in the schema, ie.
                           the name of the element/type etc. being described,
                           e.g. iati-activities
