@@ -47,6 +47,10 @@ class BadlyFormedJSONError(FlattenToolError, ValueError):
 
 
 class BadlyFormedJSONErrorUTF8(BadlyFormedJSONError):
+    """
+    Deprecated. This exception is no longer raised.
+    """
+
     pass
 
 
@@ -310,8 +314,6 @@ class JSONParser(object):
             self.parse()
         except ijson.common.IncompleteJSONError as err:
             raise BadlyFormedJSONError(*err.args)
-        except UnicodeDecodeError as err:
-            raise BadlyFormedJSONErrorUTF8(*err.args)
         finally:
             if json_filename:
                 json_file.close()
