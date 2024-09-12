@@ -8,11 +8,7 @@ from decimal import Decimal
 
 import pytest
 
-from flattentool.json_input import (
-    BadlyFormedJSONError,
-    BadlyFormedJSONErrorUTF8,
-    JSONParser,
-)
+from flattentool.json_input import BadlyFormedJSONError, JSONParser
 from flattentool.schema import SchemaParser
 from flattentool.tests.test_schema_parser import object_in_array_example_properties
 
@@ -35,9 +31,6 @@ def test_jsonparser_bad_json_utf8():
     name = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "fixtures", "bad-utf8.json"
     )
-    # matches against the special error type
-    with pytest.raises(BadlyFormedJSONErrorUTF8):
-        JSONParser(json_filename=name)
     # matches against our base error type
     with pytest.raises(BadlyFormedJSONError):
         JSONParser(json_filename=name)

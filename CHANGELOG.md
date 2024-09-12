@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Avoid deprecation warning from the ijson package.  https://github.com/OpenDataServices/flatten-tool/pull/458
+
 ## [0.26.0] - 2024-08-22
 
 ### Fixed

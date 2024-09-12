@@ -47,6 +47,10 @@ class BadlyFormedJSONError(FlattenToolError, ValueError):
 
 
 class BadlyFormedJSONErrorUTF8(BadlyFormedJSONError):
+    """
+    Deprecated. This exception is no longer raised.
+    """
+
     pass
 
 
@@ -302,7 +306,7 @@ class JSONParser(object):
             else:
                 path = root_list_path.replace("/", ".") + ".item"
 
-            json_file = codecs.open(json_filename, encoding="utf-8")
+            json_file = codecs.open(json_filename, "rb")
 
             self.root_json_list = ijson.items(json_file, path, map_type=OrderedDict)
 
@@ -310,8 +314,6 @@ class JSONParser(object):
             self.parse()
         except ijson.common.IncompleteJSONError as err:
             raise BadlyFormedJSONError(*err.args)
-        except UnicodeDecodeError as err:
-            raise BadlyFormedJSONErrorUTF8(*err.args)
         finally:
             if json_filename:
                 json_file.close()
