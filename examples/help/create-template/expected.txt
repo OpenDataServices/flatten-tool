@@ -7,7 +7,7 @@ usage: flatten-tool create-template [-h] -s SCHEMA [-f {csv,ods,xlsx,all}]
                                     [--line-terminator LINE_TERMINATOR]
                                     [--convert-wkt]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -s SCHEMA, --schema SCHEMA
                         Path to the schema file you want to use to create the

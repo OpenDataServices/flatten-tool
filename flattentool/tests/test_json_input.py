@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import os
-import sys
 from collections import OrderedDict
 from decimal import Decimal
 
@@ -990,24 +989,10 @@ def test_parse_bad_geojson(recwarn):
         str(w.message) == "Invalid GeoJSON: TypeError(\"'int' object is not iterable\")"
     )
     w = recwarn.pop(UserWarning)
-    # There are different warning messages for Python versions before 3.8. This
-    # is because an old version of numpy is installed (the last compatible with
-    # these versions of Python), which has different messages.
-    if sys.version_info < (3, 8):
-        assert (
-            str(w.message)
-            == "Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray."
-        )
-        w = recwarn.pop(UserWarning)
-        assert (
-            str(w.message)
-            == "Invalid GeoJSON: ValueError('linestrings: Input operand 0 does not have enough dimensions (has 1, gufunc core with signature (i, d)->() requires 2)')"
-        )
-    else:
-        assert (
-            str(w.message)
-            == "Invalid GeoJSON: ValueError('setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (3,) + inhomogeneous part.')"
-        )
+    assert (
+        str(w.message)
+        == "Invalid GeoJSON: ValueError('setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (3,) + inhomogeneous part.')"
+    )
     assert len(recwarn.list) == 0
 
 

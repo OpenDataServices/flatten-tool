@@ -16,7 +16,7 @@ usage: flatten-tool flatten [-h] [-s SCHEMA] [-f {csv,ods,xlsx,all}] [--xml]
 positional arguments:
   input_name            Name of the input JSON file.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -s SCHEMA, --schema SCHEMA
                         Path to a relevant schema.

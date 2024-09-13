@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Avoid deprecation warning from the ijson package.  https://github.com/OpenDataServices/flatten-tool/pull/458
 
+### Removed
+
+- We no longer support Python 3.7 - security support has ended
+- We no longer support Python 3.8 - security support ends 31 Oct 2024
+
 ## [0.26.0] - 2024-08-22
 
 ### Fixed
