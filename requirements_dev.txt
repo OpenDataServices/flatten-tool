@@ -5,7 +5,7 @@ pytest-cov
 coveralls
 pytest-localserver
 sphinx
-sphinx_rtd_theme
+odsc-default-sphinx-theme
 isort
 flake8<6
 black==22.3.0
