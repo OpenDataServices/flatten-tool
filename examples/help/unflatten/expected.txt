@@ -10,7 +10,7 @@ usage: flatten-tool unflatten [-h] -f {csv,ods,xlsx} [--xml]
                               [--metatab-schema METATAB_SCHEMA]
                               [--metatab-only]
                               [--metatab-vertical-orientation]
-                              [--xml-schema [XML_SCHEMA [XML_SCHEMA ...]]]
+                              [--xml-schema [XML_SCHEMA ...]]
                               [--default-configuration DEFAULT_CONFIGURATION]
                               [--root-is-list] [--disable-local-refs]
                               [--xml-comment XML_COMMENT] [--convert-wkt]
@@ -19,7 +19,7 @@ usage: flatten-tool unflatten [-h] -f {csv,ods,xlsx} [--xml]
 positional arguments:
   input_name            Name of the input file or directory.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -f {csv,ods,xlsx}, --input-format {csv,ods,xlsx}
                         File format of input file or directory.
@@ -65,7 +65,7 @@ optional arguments:
   --metatab-vertical-orientation
                         Read metatab so that headings are in the first column
                         and data is read vertically. Only for XLSX not CSV
-  --xml-schema [XML_SCHEMA [XML_SCHEMA ...]]
+  --xml-schema [XML_SCHEMA ...]
                         Path to one or more XML schemas (used for sorting)
   --default-configuration DEFAULT_CONFIGURATION
                         Comma separated list of default parsing commands for

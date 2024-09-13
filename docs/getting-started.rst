@@ -41,7 +41,7 @@ will print help information specific to that sub-command.
 Python Version Support
 ----------------------
 
-This code supports Python 3.6 (and later).
+This code supports Python 3.9 (and later).
 
-Python 3.5 and earlier (including Python 2) are not supported, because they are
+Earlier versions (including Python 2) are not supported, because they are
 end of life, and some of the dependencies do not support them.
