@@ -49,7 +49,7 @@
         },
         "assertedBy": {
           "title": "Asserted by",
-          "description": "Who is making this statement? This may be the name of the person or organisation making a self-declaration (in which case, please make sure the name field matches the organisation or person name field), or the name or description of some other party. If this statment has been verified, this may also include the name of the organisation providing verification.",
+          "description": "Who is making this statement? This may be the name of the person or organisation making a self-declaration (in which case, please make sure the name field matches the organisation or person name field), or the name or description of some other party. If this statement has been verified, this may also include the name of the organisation providing verification.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/Agent"
@@ -375,7 +375,7 @@
         },
         "description": {
           "title": "Description",
-          "description": "A free-text description to annotate this statment or field.",
+          "description": "A free-text description to annotate this statement or field.",
           "type": "string"
         },
         "transformedContent": {

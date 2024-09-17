@@ -333,7 +333,7 @@ class JSONParser(object):
                 continue
 
             self.parse_json_dict(json_dict, sheet=self.main_sheet)
-            # only persist every 2000 objects. peristing more often slows down storing.
+            # only persist every 2000 objects. persisting more often slows down storing.
             # 2000 top level objects normally not too much to store in memory.
             if num % 2000 == 0 and num != 0:
                 transaction.commit()
