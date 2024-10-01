@@ -8,5 +8,5 @@ sphinx
 odsc-default-sphinx-theme
 isort
 flake8<6
-black==22.3.0
+black==24.3.0
 transifex-client
