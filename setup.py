@@ -51,6 +51,8 @@ setup(
     url="https://github.com/OpenDataServices/flatten-tool",
     license="MIT",
     description="Tools for generating CSV and other flat versions of the structured data",
+    long_description="",
+    long_description_content_type="text/plain",
     install_requires=install_requires,
     extras_require={"HTTP": ["requests"], "geo": ["shapely", "geojson"]},
     cmdclass={
