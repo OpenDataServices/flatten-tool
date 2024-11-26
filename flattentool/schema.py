@@ -153,12 +153,29 @@ class SchemaParser(object):
             )
         if schema_filename:
             if schema_filename.startswith("http"):
+                import json
+
                 import requests
 
                 r = requests.get(schema_filename)
-                self.root_schema_dict = jsonref.loads(
-                    r.text, object_pairs_hook=OrderedDict
-                )
+
+                try:
+                    r.raise_for_status()
+                except requests.HTTPError:
+                    raise ValueError(
+                        _(
+                            "The URL provided for the schema in schema_filename was not accessible"
+                        )
+                    )
+
+                try:
+                    self.root_schema_dict = jsonref.loads(
+                        r.text, object_pairs_hook=OrderedDict
+                    )
+                except json.JSONDecodeError:
+                    raise ValueError(
+                        _("The schema provided in schema_filename was not valid JSON")
+                    )
             else:
                 if disable_local_refs:
                     with codecs.open(schema_filename, encoding="utf-8") as schema_file:
