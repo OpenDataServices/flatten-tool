@@ -1,8 +1,35 @@
 Flatten Tool for BODS
 +++++++++++++++++++++
 
+BODS 0.4
+========
+
+Flatten tool can be used to flatten and unflatten BODS 0.4 data.
+
+Flatten tool has not yet been updated to handle the BODS 0.4 schema. (For the moment the ``--schema`` option should not be used when handling BODS 0.4 data.) This documentation will be updated when the work is complete.
+
+
+
 flatten and unflatten
+---------------------
+
+This data standard has a list as the root element,
+as opposed to other standards where the root element is a dict with meta data and a list of data.
+When flattening and unflattening, use the ``--root-is-list`` option.
+
+The id element is ``statementId``, so also use the ``--id-name`` option.
+
+.. code-block:: bash
+
+    flatten-tool flatten -f csv --root-is-list --id-name=statementId -o examples/bods-one-flatten examples/bods-one.json
+    flatten-tool unflatten -f csv --root-is-list --id-name=statementId -o examples/bods-one-unflattened.json examples/bods-one-flatten
+
+
+BODS 0.3 and previous
 =====================
+
+flatten and unflatten
+---------------------
 
 This data standard has a list as the root element,
 as opposed to other standards where the root element is a dict with meta data and a list of data.
@@ -17,7 +44,7 @@ The id element is ``statementID``, so also use the ``--id-name`` option.
 
 
 flatten
-=======
+-------
 
 This data standard has three types of statement - ``entityStatement``, ``personStatement`` or ``ownershipOrControlStatement``.
 When using flatten, the spreadsheets produced can become very mixed up.
@@ -64,10 +91,10 @@ If you want to use Excel mode, you'll need to specify 3 separate output files an
     flatten-tool flatten --sheet-prefix=3_ownership_ --filter-field=statementType --filter-value=ownershipOrControlStatement -f xlsx -o example1/part3.xlsx example1.json --root-is-list --id-name=statementID
 
 unflatten
-=========
+---------
 
 Schema
-------
+~~~~~~
 
 As well as the options above, also pass the ``--schema`` option so that types are set correctly. Note the boolean and the integer in the output.
 
@@ -79,7 +106,7 @@ As well as the options above, also pass the ``--schema`` option so that types ar
 
 
 Order is important
-------------------
+~~~~~~~~~~~~~~~~~~
 
 In the BODS schema, statements must appear in a certain order. Each of the ``entityStatements`` or ``personStatements``
 referenced by a particular ``ownershipOrControlStatement`` must appear before that particular statement in the ordered array.
@@ -118,7 +145,7 @@ For instance:
   *  3main-control-own.csv
 
 create-template
-===============
+---------------
 
 You can run this directly on ``bods-package.json``:
 
@@ -205,6 +232,7 @@ The advantages are:
   *  Separate for each type, so it's clear what sheet applies to each type.
   *  Each sheet only has the relevant columns in it, so there is no confusion about whether they apply or not.
   *  The sheets have numbers at the start, so that when ``unflatten`` is used the statements will appear in the right order in the output.
+
 
 
 
