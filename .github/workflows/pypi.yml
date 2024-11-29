@@ -1,0 +1,32 @@
+name: Upload release to PyPI (Test & Live)
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  pypi-publish:
+    name: Upload release to PyPI (Test & Live)
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/flattentool
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - run: pip install --upgrade build
+    - run: python -m build --sdist --wheel
+    - name: Publish package distributions to TEST PyPI
+      if: github.event_name == 'push'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        skip-existing: true
+    - name: Publish package distributions to LIVE PyPI
+      if:  github.event_name == 'release'
+      uses: pypa/gh-action-pypi-publish@release/v1
