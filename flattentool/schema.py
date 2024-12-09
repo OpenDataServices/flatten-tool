@@ -152,7 +152,9 @@ class SchemaParser(object):
                 _("Only one of schema_filename or root_schema_dict should be supplied")
             )
         if schema_filename:
-            if schema_filename.startswith("http"):
+            if isinstance(schema_filename, dict):
+                self.root_schema_dict = schema_filename
+            elif schema_filename.startswith("http"):
                 import requests
 
                 r = requests.get(schema_filename)
