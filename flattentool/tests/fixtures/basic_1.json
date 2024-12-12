@@ -1,0 +1,102 @@
+[
+  {
+    "statementID": "1dc0e987-5c57-4a1c-b3ad-61353b66a9b7",
+    "statementType": "entityStatement",
+    "isComponent": false,
+    "statementDate": "2017-11-18",
+    "entityType": "registeredEntity",
+    "name": "CHRINON LTD",
+    "foundingDate": "2010-11-18",
+    "identifiers": [
+      {
+        "scheme": "GB-COH",
+        "id": "07444723"
+      }
+    ],
+    "publicListing": {
+      "hasPublicListing": true,
+      "companyFilingsURLs": ["http://example.com/"],
+      "securitiesListings": []
+    },
+    "publicationDetails": {
+      "publicationDate": "2018-02-13",
+      "bodsVersion": "0.3",
+      "publisher": {
+        "name": "CHRINON LTD"
+      }
+    }
+  },
+  {
+    "statementID": "019a93f1-e470-42e9-957b-03559861b2e2",
+    "statementType": "personStatement",
+    "isComponent": false,
+    "statementDate": "2017-11-18",
+    "personType": "knownPerson",
+    "nationalities": [
+      {
+        "code": "GB",
+        "name": "United Kingdom of Great Britain and Northern Ireland (the)"
+      }
+    ],
+    "names": [
+      {
+        "type": "individual",
+        "fullName": "Christopher Taggart",
+        "givenName": "Christopher",
+        "familyName": "Taggart"
+      },
+      {
+        "type": "alternative",
+        "fullName": "Chris Taggart"
+      }
+    ],
+    "birthDate": "1964-04",
+    "addresses": [
+      {
+        "type": "service",
+        "address": "Aston House, Cornwall Avenue, London",
+        "country": "GB",
+        "postCode": "N3 1LF"
+      }
+    ],
+    "publicationDetails": {
+      "publicationDate": "2018-02-13",
+      "bodsVersion": "0.3",
+      "publisher": {
+        "name": "CHRINON LTD"
+      }
+    }
+  },
+  {
+    "statementID": "fbfd0547-d0c6-4a00-b559-5c5e91c34f5c",
+    "statementType": "ownershipOrControlStatement",
+    "isComponent": false,
+    "statementDate": "2017-11-18",
+    "subject": {
+      "describedByEntityStatement": "1dc0e987-5c57-4a1c-b3ad-61353b66a9b7"
+    },
+    "interestedParty": {
+      "describedByPersonStatement": "019a93f1-e470-42e9-957b-03559861b2e2"
+    },
+    "interests": [
+      {
+        "type": "shareholding",
+        "directOrIndirect": "direct",
+        "beneficialOwnershipOrControl": true,
+        "startDate": "2016-04-06",
+        "share": {
+          "exact": 100,
+          "minimum": 100,
+          "maximum": 100
+        }
+      }
+    ],
+    "publicationDetails": {
+      "publicationDate": "2018-02-13",
+      "bodsVersion": "0.3",
+      "publisher": {
+        "name": "CHRINON LTD"
+      }
+    }
+  }
+]
