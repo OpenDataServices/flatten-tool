@@ -6,13 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.27.0] - 2024-12-18
+
+### Added
+
+- Allow passing of schema as Python object, and update docs
+
 ### Fixed
 
 - Some typos in docs, comments and examples
 - Put back some translations that were removed
 - Minor python tidyups
 - Avoid deprecation warning from the ijson package.  https://github.com/OpenDataServices/flatten-tool/pull/458
-- Allow passing of schema as Python object, and update docs
 
 ### Removed
 
