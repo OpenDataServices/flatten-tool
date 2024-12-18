@@ -38,6 +38,27 @@ will print general help information.
 
 will print help information specific to that sub-command.
 
+Library
+-------
+
+The package can also be used as a Python library, e.g. to flatten
+data:
+
+.. code-block:: python
+
+    flattentool.flatten(input_filename, ...)
+
+or unflatten data:
+
+.. code-block:: python
+
+    flattentool.unflatten(input_filename, ...)
+
+In addition to the functionality available from the command-line,
+Python calls to the library functions also accept a Python object
+as a schema rather than a filename. This allows schema objects to
+be loaded/constructed by the calling application.
+
 Python Version Support
 ----------------------
 
