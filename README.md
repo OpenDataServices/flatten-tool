@@ -1,4 +1,4 @@
-Flatten-Tool [Beta]
+Flatten-Tool
 ===================
 
 [![Build Status](https://travis-ci.org/OpenDataServices/flatten-tool.svg?branch=master)](https://travis-ci.org/OpenDataServices/flatten-tool)
