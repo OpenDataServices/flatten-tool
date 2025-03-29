@@ -180,12 +180,11 @@ class JSONParser(object):
             self.main_sheet = PersistentSheet.from_sheet(
                 schema_parser.main_sheet, self.connection
             )
-            for sheet_name, sheet in list(self.sub_sheets.items()):
+            for sheet_name, sheet in list(schema_parser.sub_sheets.items()):
                 self.sub_sheets[sheet_name] = PersistentSheet.from_sheet(
                     sheet, self.connection
                 )
 
-            self.sub_sheets = copy.deepcopy(schema_parser.sub_sheets)
             if remove_empty_schema_columns:
                 # Don't use columns from the schema parser
                 # (avoids empty columns)
@@ -345,7 +344,7 @@ class JSONParser(object):
         if self.remove_empty_schema_columns:
             # Remove sheets with no lines of data
             for sheet_name, sheet in list(self.sub_sheets.items()):
-                if not sheet.lines:
+                if not sheet.line_count:
                     del self.sub_sheets[sheet_name]
 
         if self.preserve_fields_input:
