@@ -1,0 +1,19 @@
+FROM python:3.12
+
+RUN addgroup --gid 2000 dev
+RUN adduser --uid 2000 --gid 2000 --gecos "" --disabled-password dev
+
+USER dev:dev
+
+COPY requirements_dev.txt /workspace/
+COPY setup.py /workspace/
+COPY flattentool /workspace/flattentool
+COPY flatten-tool /workspace/
+
+WORKDIR /workspace
+
+RUN pip3 install --user -r /workspace/requirements_dev.txt
+
+RUN /bin/bash -c "echo \"export PATH=\$PATH:/home/dev/.local/bin/\" >> ~/.bashrc"
+
+CMD ["bash"]
