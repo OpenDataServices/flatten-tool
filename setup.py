@@ -61,5 +61,5 @@ setup(
     },
     package_data={"flattentool": ["locale/*/*/*.mo", "locale/*/*/*.po"]},
     setup_requires=["babel"],
-    python_requires=">=3.9.0",
+    python_requires=">=3.10.0",
 )
