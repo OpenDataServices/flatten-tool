@@ -10,7 +10,7 @@ def run_compile_catalog(setuptools_command):
     option_dict = setuptools_command.distribution.get_option_dict("compile_catalog")
     compiler.domain = [option_dict["domain"][1]]
     compiler.directory = option_dict["directory"][1]
-    compiler.use_fuzzy = option_dict["use_fuzzy"][1]
+    compiler.use_fuzzy = option_dict["use-fuzzy"][1]
     compiler.run()
 
 
