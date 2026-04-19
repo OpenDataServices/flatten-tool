@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+-  Catch another type of geographic exception from shapely https://github.com/OpenDataServices/flatten-tool/pull/484
+
 ### Removed
 
 - We no longer support Python 3.9 - security support has ended
