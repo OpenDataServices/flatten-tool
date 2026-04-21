@@ -961,6 +961,14 @@ def test_parse_bad_geojson(recwarn):
                             ],
                         }
                     },
+                    {
+                        "d": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [Decimal("-0.173"), Decimal("5.626")],
+                            ],
+                        }
+                    },
                 ],
             }
         ],
@@ -972,6 +980,7 @@ def test_parse_bad_geojson(recwarn):
     assert list(parser.sub_sheets["c"].lines) == [
         {},
         {"c/0/d": "POINT EMPTY"},
+        {},
         {},
         {},
         {},
@@ -992,6 +1001,11 @@ def test_parse_bad_geojson(recwarn):
     assert (
         str(w.message)
         == "Invalid GeoJSON: ValueError('setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (3,) + inhomogeneous part.')"
+    )
+    w = recwarn.pop(UserWarning)
+    assert (
+        str(w.message)
+        == "Invalid GeoJSON: GEOSException('IllegalArgumentException: point array must contain 0 or >1 elements\\n')"
     )
     assert len(recwarn.list) == 0
 

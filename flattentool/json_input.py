@@ -396,7 +396,12 @@ class JSONParser(object):
                 _sheet_key = sheet_key(sheet, parent_name.strip("/"))
                 try:
                     geom = shapely.geometry.shape(json_dict)
-                except (shapely.errors.GeometryTypeError, TypeError, ValueError) as e:
+                except (
+                    shapely.errors.GeometryTypeError,
+                    shapely.errors.GEOSException,
+                    TypeError,
+                    ValueError,
+                ) as e:
                     warn(
                         _("Invalid GeoJSON: {parser_msg}").format(parser_msg=repr(e)),
                         DataErrorWarning,
