@@ -21,6 +21,10 @@ class Sheet(object):
     def lines(self):
         return self._lines
 
+    @property
+    def line_count(self):
+        return len(self._lines)
+
     def add_field(self, field, id_field=False):
         columns = self.id_columns if id_field else self.columns
         if field not in columns:
@@ -64,6 +68,10 @@ class PersistentSheet(Sheet):
             if key % 5000 == 0:
                 self.connection.cacheMinimize()
             yield value
+
+    @property
+    def line_count(self):
+        return self.index
 
     def append_line(self, flattened_dict):
         self.connection.root.sheet_store[self.name][self.index] = flattened_dict
