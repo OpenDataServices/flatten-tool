@@ -35,7 +35,7 @@ install_requires = [
     "xmltodict",
     "lxml",
     "odfpy",
-    "backports-datetime-fromisoformat;platform_python_implementation!='PyPy'",
+    "backports-datetime-fromisoformat;python_version<'3.11' and platform_python_implementation!='PyPy'",
     "zodb",
     "zc.zlibstorage",
     "ijson",
