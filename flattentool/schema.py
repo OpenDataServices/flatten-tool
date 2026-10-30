@@ -2,7 +2,6 @@
 
 from __future__ import print_function, unicode_literals
 
-import codecs
 import os
 import sys
 from collections import OrderedDict, UserDict
@@ -163,7 +162,7 @@ class SchemaParser(object):
                 )
             else:
                 if disable_local_refs:
-                    with codecs.open(schema_filename, encoding="utf-8") as schema_file:
+                    with open(schema_filename, encoding="utf-8") as schema_file:
                         self.root_schema_dict = jsonref.load(
                             schema_file,
                             object_pairs_hook=OrderedDict,
@@ -179,7 +178,7 @@ class SchemaParser(object):
                             "file:",
                             urllib.pathname2url(os.path.abspath(schema_filename)),
                         )
-                    with codecs.open(schema_filename, encoding="utf-8") as schema_file:
+                    with open(schema_filename, encoding="utf-8") as schema_file:
                         self.root_schema_dict = jsonref.load(
                             schema_file,
                             object_pairs_hook=OrderedDict,
