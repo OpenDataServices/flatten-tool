@@ -1,4 +1,3 @@
-import codecs
 import datetime
 import json
 import sys
@@ -373,7 +372,7 @@ def unflatten(
         if output_name is None:
             sys.stdout.buffer.write(xml_output)
         else:
-            with codecs.open(output_name, "wb") as fp:
+            with open(output_name, "wb") as fp:
                 fp.write(xml_output)
     else:
         if output_name is None:
@@ -383,7 +382,7 @@ def unflatten(
                 )
             )
         else:
-            with codecs.open(output_name, "w", encoding="utf-8") as fp:
+            with open(output_name, "w", encoding="utf-8", newline="") as fp:
                 json.dump(
                     base,
                     fp,
@@ -392,7 +391,7 @@ def unflatten(
                     ensure_ascii=False,
                 )
     if cell_source_map:
-        with codecs.open(cell_source_map, "w", encoding="utf-8") as fp:
+        with open(cell_source_map, "w", encoding="utf-8", newline="") as fp:
             json.dump(
                 cell_source_map_data,
                 fp,
@@ -401,7 +400,7 @@ def unflatten(
                 ensure_ascii=False,
             )
     if heading_source_map:
-        with codecs.open(heading_source_map, "w", encoding="utf-8") as fp:
+        with open(heading_source_map, "w", encoding="utf-8", newline="") as fp:
             json.dump(
                 heading_source_map_data,
                 fp,

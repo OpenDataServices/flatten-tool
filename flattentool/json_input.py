@@ -5,7 +5,6 @@ JSON schema, for that see schema.py).
 
 """
 
-import codecs
 import copy
 import os
 import tempfile
@@ -236,7 +235,7 @@ class JSONParser(object):
                 )
 
         if self.xml:
-            with codecs.open(json_filename, "rb") as xml_file:
+            with open(json_filename, "rb") as xml_file:
                 top_dict = xmltodict.parse(
                     xml_file,
                     force_list=(root_list_path,),
@@ -306,7 +305,7 @@ class JSONParser(object):
             else:
                 path = root_list_path.replace("/", ".") + ".item"
 
-            json_file = codecs.open(json_filename, "rb")
+            json_file = open(json_filename, "rb")
 
             self.root_json_list = ijson.items(json_file, path, map_type=OrderedDict)
 
